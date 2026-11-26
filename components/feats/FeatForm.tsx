@@ -7,12 +7,15 @@ import { FeatBasicsTab } from './FeatBasicsTab';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { useErrorTotals } from '@/lib/hooks/common';
 import { useFeatForm } from '@/lib/hooks/feats';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { FeatData } from '@/types/choices';
+
+const FORM_ID = 'feat-form';
 
 type FeatFormTabId = 'basics' | 'abilities' | 'choices';
 
@@ -96,37 +99,55 @@ export function FeatForm({
     ];
 
     return (
-        <HudFormPage header={{ title: t('form.editTitle'), aside: t('form.editAside') }}>
+        <HudFormPage
+            width="wide"
+            header={{
+                title: t('form.editTitle'),
+                aside: t('form.editAside'),
+                back: {
+                    href: `/campaigns/${campaignId}/dm/feats`,
+                    label: tc('dmSections.feats'),
+                },
+            }}
+            actions={
+                <>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={editor.actions.cancel}
+                    >
+                        {tc('actions.cancel')}
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={
+                            editor.status.isSaving || !editor.abilities.valid
+                        }
+                    >
+                        {editor.status.isSaving
+                            ? tc('actions.saving')
+                            : withAbilityErrors(
+                                  tc('actions.save'),
+                                  editor.abilities.errors,
+                                  ta
+                              )}
+                    </Button>
+                </>
+            }
+            side={
+                <SourceNotes
+                    campaignId={campaignId}
+                    kind="feats"
+                    targetId={id}
+                />
+            }
+        >
             <HudForm
-                id="feat-form"
+                id={FORM_ID}
                 onSubmit={editor.actions.submit}
                 tabs={tabs}
-                actions={
-                    <>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={editor.actions.cancel}
-                        >
-                            {tc('actions.cancel')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={
-                                editor.status.isSaving ||
-                                !editor.abilities.valid
-                            }
-                        >
-                            {editor.status.isSaving
-                                ? tc('actions.saving')
-                                : withAbilityErrors(
-                                      tc('actions.save'),
-                                      editor.abilities.errors,
-                                      ta
-                                  )}
-                        </Button>
-                    </>
-                }
+                tabStyles={{ variant: 'rail' }}
             />
         </HudFormPage>
     );

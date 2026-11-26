@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 
-import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
@@ -29,7 +28,6 @@ export default async function EditClassPage({
                 id="dm.class-map"
                 className="mx-auto mb-3 max-w-5xl"
             />
-            <SourceNotes campaignId={id} kind="classes" targetId={classId} />
             <SystemDmPage
                 campaignId={id}
                 section="classes"

@@ -91,69 +91,74 @@ export function SubclassesEditor({
                 </p>
             </div>
 
-            {data.subclasses.map((subclass) => (
-                <HudSection
-                    key={subclass.id}
-                    title={
-                        <span className="flex items-center gap-2">
-                            <EntityIcon
-                                src={subclass.icon}
-                                name={subclass.name}
-                                size={24}
-                                className="size-6 rounded text-xs"
+            <div className="ds-list-grid">
+                {data.subclasses.map((subclass) => (
+                    <HudSection
+                        key={subclass.id}
+                        panel
+                        title={
+                            <span className="flex items-center gap-2">
+                                <EntityIcon
+                                    src={subclass.icon}
+                                    name={subclass.name}
+                                    size={24}
+                                    className="size-6 rounded text-xs"
+                                />
+                                {subclass.name || t('subclasses.newSubclass')}
+                            </span>
+                        }
+                        action={
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                aria-label={t('subclasses.remove', {
+                                    name: subclass.name,
+                                })}
+                                onClick={() => remove(subclass.id)}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        }
+                    >
+                        <div className="space-y-3">
+                            <ImageUpload
+                                value={subclass.icon ?? ''}
+                                onChange={(icon) =>
+                                    patchSubclass(subclass.id, {
+                                        icon: icon || null,
+                                    })
+                                }
+                                label={t('basics.icon')}
+                                fallbackText={subclass.name}
+                                allowFile={false}
                             />
-                            {subclass.name || t('subclasses.newSubclass')}
-                        </span>
-                    }
-                    action={
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            aria-label={t('subclasses.remove', {
-                                name: subclass.name,
-                            })}
-                            onClick={() => remove(subclass.id)}
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    }
-                >
-                    <div className="space-y-3">
-                        <ImageUpload
-                            value={subclass.icon ?? ''}
-                            onChange={(icon) =>
-                                patchSubclass(subclass.id, {
-                                    icon: icon || null,
-                                })
-                            }
-                            label={t('basics.icon')}
-                            fallbackText={subclass.name}
-                            allowFile={false}
-                        />
-                        <Input
-                            aria-label={t('subclasses.nameLabel')}
-                            value={subclass.name}
-                            required
-                            onChange={(e) =>
-                                patchSubclass(subclass.id, {
-                                    name: e.target.value,
-                                })
-                            }
-                            placeholder={t('subclasses.nameLabel')}
-                        />
-                        <ClassFeaturesEditor
-                            campaignId={campaignId}
-                            value={subclass.features}
-                            onChange={(features) =>
-                                patchSubclass(subclass.id, { features })
-                            }
-                            onValidityChange={(_, n) => report(subclass.id, n)}
-                            classColumns={data.columns ?? []}
-                        />
-                    </div>
-                </HudSection>
-            ))}
+                            <Input
+                                aria-label={t('subclasses.nameLabel')}
+                                value={subclass.name}
+                                required
+                                onChange={(e) =>
+                                    patchSubclass(subclass.id, {
+                                        name: e.target.value,
+                                    })
+                                }
+                                placeholder={t('subclasses.nameLabel')}
+                            />
+                            <ClassFeaturesEditor
+                                campaignId={campaignId}
+                                value={subclass.features}
+                                onChange={(features) =>
+                                    patchSubclass(subclass.id, { features })
+                                }
+                                onValidityChange={(_, n) =>
+                                    report(subclass.id, n)
+                                }
+                                classColumns={data.columns ?? []}
+                            />
+                        </div>
+                    </HudSection>
+                ))}
+            </div>
 
             <Button type="button" variant="outline" size="sm" onClick={add}>
                 <Plus className="h-4 w-4" />

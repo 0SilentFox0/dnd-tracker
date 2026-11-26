@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
 import { ImageUpload } from '@/components/common/fields/ImageUpload';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import {
     HUD_SELECT_TRIGGER_CLASS,
     HudForm,
@@ -20,6 +21,8 @@ import { useBackgroundForm } from '@/lib/hooks/backgrounds';
 import { useFeats } from '@/lib/hooks/feats';
 import { toggleItem } from '@/lib/utils/common/collections';
 import type { BackgroundData } from '@/types/backgrounds';
+
+const FORM_ID = 'background-form';
 
 export function BackgroundForm({
     campaignId,
@@ -44,27 +47,65 @@ export function BackgroundForm({
     const { data: feats = [] } = useFeats(campaignId);
 
     return (
-        <HudFormPage header={{ title: t('form.editTitle'), aside: t('form.editAside') }}>
+        <HudFormPage
+            width="wide"
+            header={{
+                title: t('form.editTitle'),
+                aside: t('form.editAside'),
+                back: {
+                    href: `/campaigns/${campaignId}/dm/backgrounds`,
+                    label: tc('dmSections.backgrounds'),
+                },
+            }}
+            actions={
+                <>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={actions.cancel}
+                    >
+                        {tc('actions.cancel')}
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={invalid || isSaving}
+                    >
+                        {isSaving ? tc('actions.saving') : tc('actions.save')}
+                    </Button>
+                </>
+            }
+            side={
+                <SourceNotes
+                    campaignId={campaignId}
+                    kind="backgrounds"
+                    targetId={background.id}
+                />
+            }
+        >
             <HudForm
-                id="background-form"
+                id={FORM_ID}
                 onSubmit={actions.submit}
+                tabStyles={{ variant: 'rail' }}
                 tabs={[
                     {
                         id: 'basics',
                         label: tc('tabs.basic'),
                         content: (
-                            <div className="space-y-4">
-                                <Label htmlFor="background-name">
-                                    {t('form.name')}
-                                </Label>
-                                <Input
-                                    id="background-name"
-                                    required
-                                    value={data.name}
-                                    onChange={(e) =>
-                                        patch({ name: e.target.value })
-                                    }
-                                />
+                            <div className="ds-fields">
+                                <div className="space-y-2">
+                                    <Label htmlFor="background-name">
+                                        {t('form.name')}
+                                    </Label>
+                                    <Input
+                                        id="background-name"
+                                        required
+                                        value={data.name}
+                                        onChange={(e) =>
+                                            patch({ name: e.target.value })
+                                        }
+                                    />
+                                </div>
                                 <ImageUpload
                                     value={data.icon ?? ''}
                                     onChange={(icon) =>
@@ -74,19 +115,22 @@ export function BackgroundForm({
                                     fallbackText={data.name}
                                     allowFile={false}
                                 />
-                                <Label htmlFor="background-description">
-                                    {t('form.description')}
-                                </Label>
-                                <Textarea
-                                    id="background-description"
-                                    value={data.description ?? ''}
-                                    onChange={(e) =>
-                                        patch({
-                                            description: e.target.value || null,
-                                        })
-                                    }
-                                />
-                                <fieldset className="space-y-2">
+                                <div className="ds-span space-y-2">
+                                    <Label htmlFor="background-description">
+                                        {t('form.description')}
+                                    </Label>
+                                    <Textarea
+                                        id="background-description"
+                                        value={data.description ?? ''}
+                                        onChange={(e) =>
+                                            patch({
+                                                description:
+                                                    e.target.value || null,
+                                            })
+                                        }
+                                    />
+                                </div>
+                                <fieldset className="ds-span space-y-2">
                                     <legend>{t('form.skills')}</legend>
                                     <div className="flex flex-wrap gap-3">
                                         {DND_SKILLS.map((skill) => (
@@ -113,64 +157,73 @@ export function BackgroundForm({
                                         ))}
                                     </div>
                                 </fieldset>
-                                <Label htmlFor="background-tools">
-                                    {t('form.tools')}
-                                </Label>
-                                <Textarea
-                                    id="background-tools"
-                                    value={data.toolProficiencies.join('\n')}
-                                    onChange={(e) =>
-                                        patch({
-                                            toolProficiencies:
-                                                e.target.value.split('\n'),
-                                        })
-                                    }
-                                    onBlur={() =>
-                                        patch({
-                                            toolProficiencies:
-                                                data.toolProficiencies
-                                                    .map((s) => s.trim())
-                                                    .filter(Boolean),
-                                        })
-                                    }
-                                />
-                                <Label htmlFor="background-origin">
-                                    {t('form.origin')}
-                                </Label>
-                                <SelectField
-                                    id="background-origin"
-                                    triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
-                                    value={data.originFeatId ?? ''}
-                                    onValueChange={(originFeatId) =>
-                                        patch({
-                                            originFeatId: originFeatId || null,
-                                        })
-                                    }
-                                    allowNone
-                                    noneLabel={t('form.noOrigin')}
-                                    options={feats
-                                        .filter((f) => f.type === 'origin')
-                                        .map((f) => ({
-                                            value: f.id,
-                                            label: f.name,
-                                        }))}
-                                />
-                                <Label htmlFor="background-equipment">
-                                    {t('form.equipment')}
-                                </Label>
-                                <Textarea
-                                    id="background-equipment"
-                                    value={data.equipmentText ?? ''}
-                                    onChange={(e) =>
-                                        patch({
-                                            equipmentText:
-                                                e.target.value || null,
-                                        })
-                                    }
-                                />
-                                <p className="text-sm text-muted-foreground">
-                                    {t('form.equipmentNote')}
-                                </p>
+                                <div className="space-y-2">
+                                    <Label htmlFor="background-tools">
+                                        {t('form.tools')}
+                                    </Label>
+                                    <Textarea
+                                        id="background-tools"
+                                        value={data.toolProficiencies.join(
+                                            '\n'
+                                        )}
+                                        onChange={(e) =>
+                                            patch({
+                                                toolProficiencies:
+                                                    e.target.value.split('\n'),
+                                            })
+                                        }
+                                        onBlur={() =>
+                                            patch({
+                                                toolProficiencies:
+                                                    data.toolProficiencies
+                                                        .map((s) => s.trim())
+                                                        .filter(Boolean),
+                                            })
+                                        }
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="background-origin">
+                                        {t('form.origin')}
+                                    </Label>
+                                    <SelectField
+                                        id="background-origin"
+                                        triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
+                                        value={data.originFeatId ?? ''}
+                                        onValueChange={(originFeatId) =>
+                                            patch({
+                                                originFeatId:
+                                                    originFeatId || null,
+                                            })
+                                        }
+                                        allowNone
+                                        noneLabel={t('form.noOrigin')}
+                                        options={feats
+                                            .filter((f) => f.type === 'origin')
+                                            .map((f) => ({
+                                                value: f.id,
+                                                label: f.name,
+                                            }))}
+                                    />
+                                </div>
+                                <div className="ds-span space-y-2">
+                                    <Label htmlFor="background-equipment">
+                                        {t('form.equipment')}
+                                    </Label>
+                                    <Textarea
+                                        id="background-equipment"
+                                        value={data.equipmentText ?? ''}
+                                        onChange={(e) =>
+                                            patch({
+                                                equipmentText:
+                                                    e.target.value || null,
+                                            })
+                                        }
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        {t('form.equipmentNote')}
+                                    </p>
+                                </div>
                             </div>
                         ),
                     },
@@ -189,22 +242,6 @@ export function BackgroundForm({
                         ),
                     },
                 ]}
-                actions={
-                    <>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={actions.cancel}
-                        >
-                            {tc('actions.cancel')}
-                        </Button>
-                        <Button type="submit" disabled={invalid || isSaving}>
-                            {isSaving
-                                ? tc('actions.saving')
-                                : tc('actions.save')}
-                        </Button>
-                    </>
-                }
             />
         </HudFormPage>
     );

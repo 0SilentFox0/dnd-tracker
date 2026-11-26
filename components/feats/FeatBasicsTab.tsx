@@ -57,7 +57,7 @@ export function FeatBasicsTab({
     };
 
     return (
-        <div className="space-y-4">
+        <div className="ds-fields">
             <div className="space-y-2">
                 <Label htmlFor="feat-name">{t('form.name')}</Label>
                 <Input
@@ -90,7 +90,7 @@ export function FeatBasicsTab({
                 </div>
             )}
             {advancement && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="ds-fields ds-fields--num ds-span">
                     <div className="space-y-2">
                         <Label htmlFor="feat-xp-cost">{t('form.xpCost')}</Label>
                         <Input
@@ -130,7 +130,7 @@ export function FeatBasicsTab({
                     </div>
                 </div>
             )}
-            <fieldset className="space-y-2">
+            <fieldset className="ds-span space-y-2">
                 <legend className="hud-sc text-sm">
                     {t('form.prerequisites')}
                 </legend>
@@ -202,14 +202,14 @@ export function FeatBasicsTab({
                     }
                 />
             </fieldset>
-            <label className="flex items-center gap-2 text-sm">
+            <label className="ds-span flex items-center gap-2 text-sm">
                 <Checkbox
                     checked={data.repeatable}
                     onCheckedChange={(on) => patch({ repeatable: on === true })}
                 />
                 {t('form.repeatable')}
             </label>
-            <div className="space-y-2">
+            <div className="ds-span space-y-2">
                 <Label htmlFor="feat-description">
                     {t('form.description')}
                 </Label>

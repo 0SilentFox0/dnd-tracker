@@ -10,6 +10,7 @@ import { ClassProgressionMap } from './progression';
 import { SubclassesEditor } from './SubclassesEditor';
 
 import { withAbilityErrors } from '@/components/abilities';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { useClassForm } from '@/lib/hooks/classes';
@@ -17,6 +18,8 @@ import { useErrorTotals } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { buildClassProgression } from '@/lib/utils/characters/classes';
 import type { GameClassData } from '@/types/classes';
+
+const FORM_ID = 'class-form';
 
 type ClassFormTabId = 'map' | 'basics' | 'table' | 'features' | 'subclasses';
 
@@ -61,6 +64,7 @@ export function ClassForm({
     const tabs: HudTab<ClassFormTabId>[] = [
         {
             id: 'map',
+            wide: true,
             label: t('classes.form.tabs.map'),
             content: (
                 <ClassProgressionMap
@@ -85,6 +89,7 @@ export function ClassForm({
         },
         {
             id: 'table',
+            wide: true,
             label: t('classes.form.tabs.table'),
             content: (
                 <ClassColumnsEditor
@@ -126,39 +131,57 @@ export function ClassForm({
     ];
 
     return (
-        <HudFormPage header={{ title: t('classes.form.title'), aside: t('classes.form.aside') }}>
+        <HudFormPage
+            width="wide"
+            header={{
+                title: t('classes.form.title'),
+                aside: t('classes.form.aside'),
+                back: {
+                    href: `/campaigns/${campaignId}/dm/classes`,
+                    label: t('common.dmSections.classes'),
+                },
+            }}
+            actions={
+                <>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={editor.actions.cancel}
+                    >
+                        {t('common.actions.cancel')}
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={
+                            editor.status.isSaving || !editor.abilities.valid
+                        }
+                    >
+                        {editor.status.isSaving
+                            ? t('common.actions.saving')
+                            : withAbilityErrors(
+                                  t('common.actions.save'),
+                                  editor.abilities.errors,
+                                  ta
+                              )}
+                    </Button>
+                </>
+            }
+            side={
+                <SourceNotes
+                    campaignId={campaignId}
+                    kind="classes"
+                    targetId={id}
+                />
+            }
+        >
             <HudForm
-                id="class-form"
+                id={FORM_ID}
                 onSubmit={editor.actions.submit}
                 tabs={tabs}
                 tab={tab}
                 onTabChange={setTab}
-                actions={
-                    <>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={editor.actions.cancel}
-                        >
-                            {t('common.actions.cancel')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={
-                                editor.status.isSaving ||
-                                !editor.abilities.valid
-                            }
-                        >
-                            {editor.status.isSaving
-                                ? t('common.actions.saving')
-                                : withAbilityErrors(
-                                      t('common.actions.save'),
-                                      editor.abilities.errors,
-                                      ta
-                                  )}
-                        </Button>
-                    </>
-                }
+                tabStyles={{ variant: 'rail' }}
             />
         </HudFormPage>
     );

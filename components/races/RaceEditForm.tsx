@@ -2,9 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 
-import { RaceFormFields } from './RaceFormFields';
+import { RACE_FORM_TAB } from './race-form-tabs';
+import { useRaceFormTabs } from './useRaceFormTabs';
 
 import { withAbilityErrors } from '@/components/abilities';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
@@ -14,6 +16,8 @@ import { useTranslator } from '@/lib/i18n/use-translator';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import { getInitialRaceFormData } from '@/lib/utils/races/race-form';
 import type { Race } from '@/types/races';
+
+const FORM_ID = 'race-form';
 
 interface RaceEditFormProps {
     campaignId: string;
@@ -37,66 +41,84 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
         getInitialRaceFormData(race)
     );
 
+    const tabs = useRaceFormTabs({
+        campaignId,
+        form: editor.form,
+        abilityIssues: race.abilityIssues,
+        onAbilitiesValidityChange: editor.abilities.onValidityChange,
+    }).map((tab) =>
+        tab.id === RACE_FORM_TAB.basic && ProfileEditor
+            ? {
+                  ...tab,
+                  content: (
+                      <div className="space-y-6">
+                          {tab.content}
+                          <ProfileEditor
+                              campaignId={campaignId}
+                              raceId={race.id}
+                          />
+                      </div>
+                  ),
+              }
+            : tab
+    );
+
     return (
-        <HudFormPage header={{ title: t('edit.title'), aside: t('edit.aside') }}>
-            <HudForm
-                id="race-form"
-                onSubmit={editor.actions.submit}
-                actions={
-                    <>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={editor.actions.cancel}
-                        >
-                            {tc('actions.cancel')}
-                        </Button>
-                        {editor.status.error != null && (
-                            <p
-                                role="alert"
-                                className="w-full text-sm text-destructive"
-                            >
-                                {errorMessage(
-                                    editor.status.error,
-                                    t('edit.error')
-                                )}
-                            </p>
-                        )}
-                        <Button
-                            type="submit"
-                            disabled={
-                                editor.status.isSaving ||
-                                !editor.abilities.valid
-                            }
-                        >
-                            {editor.status.isSaving
-                                ? tc('actions.saving')
-                                : withAbilityErrors(
-                                      tc('actions.save'),
-                                      editor.abilities.errors,
-                                      ta
-                                  )}
-                        </Button>
-                    </>
-                }
-            >
-                <div className="space-y-6">
-                    <RaceFormFields
-                        campaignId={campaignId}
-                        form={editor.form}
-                        abilityIssues={race.abilityIssues}
-                        onAbilitiesValidityChange={
-                            editor.abilities.onValidityChange
+        <HudFormPage
+            width="wide"
+            header={{
+                title: t('edit.title'),
+                aside: t('edit.aside'),
+                back: {
+                    href: `/campaigns/${campaignId}/dm/races`,
+                    label: tc('dmSections.races'),
+                },
+            }}
+            actions={
+                <>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={editor.actions.cancel}
+                    >
+                        {tc('actions.cancel')}
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={
+                            editor.status.isSaving || !editor.abilities.valid
                         }
-                    />
-                    {ProfileEditor && (
-                        <ProfileEditor
-                            campaignId={campaignId}
-                            raceId={race.id}
-                        />
-                    )}
-                </div>
-            </HudForm>
+                    >
+                        {editor.status.isSaving
+                            ? tc('actions.saving')
+                            : withAbilityErrors(
+                                  tc('actions.save'),
+                                  editor.abilities.errors,
+                                  ta
+                              )}
+                    </Button>
+                </>
+            }
+            side={
+                <SourceNotes
+                    campaignId={campaignId}
+                    kind="races"
+                    targetId={race.id}
+                />
+            }
+        >
+            <HudForm
+                id={FORM_ID}
+                onSubmit={editor.actions.submit}
+                tabs={tabs}
+                tabStyles={{ variant: 'rail' }}
+                error={
+                    editor.status.error != null
+                        ? errorMessage(editor.status.error, t('edit.error'))
+                        : null
+                }
+            />
         </HudFormPage>
     );
 }

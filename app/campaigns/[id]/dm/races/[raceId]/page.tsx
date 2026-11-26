@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 
-import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { RaceEditForm } from '@/components/races/RaceEditForm';
 import { prisma } from '@/lib/db';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
@@ -34,10 +33,5 @@ export default async function EditRacePage({
 
     const race = toRace(raceData, { abilities, abilityIssues });
 
-    return (
-        <>
-            <SourceNotes campaignId={id} kind="races" targetId={raceId} />
-            <RaceEditForm campaignId={id} race={race} />
-        </>
-    );
+    return <RaceEditForm campaignId={id} race={race} />;
 }
