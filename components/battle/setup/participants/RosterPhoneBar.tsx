@@ -30,7 +30,7 @@ export function sideCounts(participants: BattlePreparationParticipant[]) {
     };
 }
 
-function VerdictLabel({ balance }: { balance: BalanceView }) {
+export function VerdictLabel({ balance }: { balance: BalanceView }) {
     const t = useTranslations('battleSetup.balance');
 
     const tDifficulty = useTranslations('battleTerms.encounterDifficulty');

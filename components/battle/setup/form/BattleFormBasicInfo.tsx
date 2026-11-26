@@ -3,7 +3,6 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { HudSection } from '@/components/hud/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SwitchField } from '@/components/ui/switch-field';
@@ -14,38 +13,24 @@ import {
     TURN_TIMER_RANGE,
 } from '@/lib/constants/battle';
 
-interface BattleDetails {
+export interface BattleDetails {
     name: string;
     description: string;
     turnTimerSeconds: number | null;
 }
 
-export function BattleFormBasicInfo({
-    details,
-}: {
-    details: {
-        data: BattleDetails;
-        set: Dispatch<SetStateAction<BattleDetails>>;
-    };
-}) {
+export interface SetupDetails {
+    data: BattleDetails;
+    set: Dispatch<SetStateAction<BattleDetails>>;
+}
+
+export function BattleFormBasicInfo({ details }: { details: SetupDetails }) {
     const t = useTranslations('battleSetup.basic');
 
     const { data, set } = details;
 
     return (
-        <HudSection title={t('title')} className="space-y-4">
-            <div>
-                <Label htmlFor="name">{t('name')}</Label>
-                <Input
-                    id="name"
-                    value={data.name}
-                    onChange={(e) =>
-                        set((prev) => ({ ...prev, name: e.target.value }))
-                    }
-                    required
-                    placeholder={t('namePlaceholder')}
-                />
-            </div>
+        <div className="space-y-4">
             <div>
                 <Label htmlFor="description">{t('description')}</Label>
                 <Textarea
@@ -104,6 +89,6 @@ export function BattleFormBasicInfo({
                     />
                 </div>
             )}
-        </HudSection>
+        </div>
     );
 }

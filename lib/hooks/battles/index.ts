@@ -20,6 +20,10 @@ export {
     useBattleSetupInitial,
 } from './setup/useBattleSetup';
 export {
+    type CatalogTab,
+    useBattleSetupView,
+} from './setup/useBattleSetupView';
+export {
     type GridCalibrationController,
     useGridCalibration,
 } from './setup/useGridCalibration';
