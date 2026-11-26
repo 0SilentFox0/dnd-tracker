@@ -25,7 +25,7 @@ export function ReferenceLayout({
     const isDesktop = useMediaQuery(DESKTOP_QUERY, true);
 
     return (
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[220px_minmax(0,1fr)_440px]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[220px_minmax(0,1fr)_440px]">
             <div className="sticky top-[var(--shell-header-h)] z-10 lg:col-span-2 xl:col-span-1 xl:self-start">
                 {rail}
             </div>

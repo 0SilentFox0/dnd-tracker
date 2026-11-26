@@ -132,4 +132,15 @@ describe('HudFormPage', () => {
             /:not\(:has\(> \.hud-form-side\)\)\) > \.hud-form-actions \{ grid-column: 1 \/ -1/
         );
     });
+
+    it('css gives the wide form a 16px phone gutter and an opaque lg+ actions bar', () => {
+        const css = readFileSync('components/hud/hud.css', 'utf8');
+
+        expect(css).toMatch(
+            /@media \(max-width: 639px\) \{\s*\.hud-form-wide \{ padding-inline: 16px; \}/
+        );
+        expect(css).toMatch(
+            /\.hud-form-wide > \.hud-form-actions \{ grid-row: 1 \/ -1; grid-column: 2;[^}]*backdrop-filter: blur\(6px\)/
+        );
+    });
 });

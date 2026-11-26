@@ -36,6 +36,7 @@ export function RulesSection({
                             type="button"
                             variant="ghost"
                             size="sm"
+                            className="lg:hidden"
                             onClick={() => changes?.reset(mechanic)}
                         >
                             {t('resetSection')}

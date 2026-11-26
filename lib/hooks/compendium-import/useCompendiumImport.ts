@@ -247,6 +247,7 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
         controller.current?.abort();
         media.stop();
         setReading(false);
+        setFailure(null);
         setRoot(null);
         setFile(null);
         setCategories([]);

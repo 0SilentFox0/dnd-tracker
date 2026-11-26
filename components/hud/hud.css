@@ -205,6 +205,11 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
 .hud-form-wide [data-slot="hud-tabs-panels"] { grid-area: main; container-type: inline-size; min-width: 0; }
 .hud-form-wide > .hud-form-body:not(:has(form[data-layout="rail"])) { grid-area: main; display: block; container-type: inline-size; min-width: 0; }
 .hud-form-wide > .hud-form-actions { grid-row: 1 / -1; grid-column: 1; align-self: end; position: sticky; bottom: 0; z-index: 21; }
+@media (max-width: 639px) {
+  .hud-form-wide { padding-inline: 16px; }
+  .hud-form-wide > .hud-form-head > * { padding-inline: 0; }
+  .hud-form-wide > .hud-form-actions { margin-inline: -16px; }
+}
 .hud-form-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .hud-form-page:not(.hud-form-wide) > .hud-form-actions { margin-top: 16px; padding-inline: 16px; padding-bottom: 16px; }
 .hud-form-wide > .hud-form-actions { border-top: 1px solid var(--hud-rule); background: color-mix(in srgb, var(--hud-page, #14100c) 95%, transparent); backdrop-filter: blur(6px); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
@@ -212,7 +217,7 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
   .hud-form-wide { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: none; grid-template-areas: "head actions" "rail side" "notice side" "main side"; }
   .hud-form-wide:not(:has(> .hud-form-side)) { grid-template-areas: "head actions" "rail rail" "notice notice" "main main"; }
   .hud-form-wide > .hud-form-side { display: block; position: sticky; top: calc(var(--shell-header-h, 57px) + 64px); align-self: start; }
-  .hud-form-wide > .hud-form-actions { grid-row: 1 / -1; grid-column: 2; align-self: start; top: var(--shell-header-h, 57px); bottom: auto; border-top: 0; background: transparent; backdrop-filter: none; padding: 0; justify-content: flex-end; }
+  .hud-form-wide > .hud-form-actions { grid-row: 1 / -1; grid-column: 2; align-self: start; top: var(--shell-header-h, 57px); bottom: auto; border-top: 0; background: color-mix(in srgb, var(--hud-page, #14100c) 95%, transparent); backdrop-filter: blur(6px); padding: 8px 0; justify-content: flex-end; }
   .hud-form-wide:has(> .hud-form-actions) { grid-template-rows: none; }
 }
 @media (min-width: 1024px) and (max-width: 1279px) {

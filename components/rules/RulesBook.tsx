@@ -192,7 +192,10 @@ export function RulesBook({
                                         type="button"
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => setSection('system')}
+                                        className="max-lg:hidden"
+                                        onClick={() =>
+                                            setSection(section ?? 'system')
+                                        }
                                     >
                                         {tc('actions.edit')}
                                     </Button>
