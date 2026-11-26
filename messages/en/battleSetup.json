@@ -220,7 +220,18 @@
       "saved": "Map saved to the library.",
       "open": "Open library",
       "failed": "Could not save the map to the library"
-    }
+    },
+    "source": {
+      "label": "Map source",
+      "none": "No map",
+      "own": "Own map",
+      "library": "From library"
+    },
+    "noMap": {
+      "title": "The battle runs without a map",
+      "description": "Participants are shown as a list. Add a map to fight on a grid."
+    },
+    "fullscreen": "Full screen"
   },
   "characters": {
     "title": "Characters",
@@ -345,6 +356,12 @@
       "description": "Terrain and zones of the current map will be reset (weather and motion are kept).",
       "confirm": "Change"
     },
-    "catalog": "Browse maps"
+    "catalog": "Browse maps",
+    "search": "Search maps",
+    "empty": "The library has no maps yet.",
+    "openInEditor": "Open in editor",
+    "preview": "Selected map preview",
+    "selectedMark": "Selected",
+    "clear": "Deselect"
   }
 }
