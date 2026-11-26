@@ -18,7 +18,7 @@ import { REJECT } from '@/lib/utils/battle/store/reject';
 import { assertCanAct } from '@/lib/utils/battle/turn';
 import type { MapDoorToggleData } from '@/types/api';
 import type { BattleParticipant } from '@/types/battle';
-import type { DoorState } from '@/types/battle-grid';
+import type { BattleMapConfig, DoorState } from '@/types/battle-grid';
 
 const sameDoor = (a: DoorState | undefined, b: DoorState | undefined) =>
     !!a && !!b && a.open === b.open && !!a.locked === !!b.locked;
@@ -30,7 +30,8 @@ function reject(message: string): never {
 function playerActor(
     ctx: BattleMutationContext,
     body: MapDoorToggleData,
-    door: DoorState
+    door: DoorState,
+    map: BattleMapConfig
 ): BattleParticipant {
     if (body.locked !== undefined) reject(REJECT.doorDmOnly);
 
@@ -53,7 +54,7 @@ function playerActor(
 
     const { a, b } = parseEdgeKey(body.edge);
 
-    const near = new Set(cellsOf(actor, 'square').map(cellKey));
+    const near = new Set(cellsOf(actor, gridOf(map)).map(cellKey));
 
     if (!near.has(cellKey(a)) && !near.has(cellKey(b)))
         reject(REJECT.doorNotAdjacent);
@@ -107,14 +108,11 @@ export function mapDoorToggleMutation(
     if (!map)
         throw new BattleRuleError('action_rejected', API_ERRORS.BATTLE_NO_MAP);
 
-    // doors are square-grid only (exempt in ratchets/grid-square-only.json)
-    if (gridOf(map) === 'hex') reject(REJECT.doorNotFound);
-
     const door = map.doors?.[body.edge];
 
     if (!door) reject(REJECT.doorNotFound);
 
-    const actor = ctx.isDM ? undefined : playerActor(ctx, body, door);
+    const actor = ctx.isDM ? undefined : playerActor(ctx, body, door, map);
 
     const next = nextDoor(door, body);
 
