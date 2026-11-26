@@ -21,6 +21,7 @@ vi.mock('@/lib/hooks/skills', () => ({
     },
     useCreateSkill: () => ({ mutateAsync: h.create, isPending: false }),
     useUpdateSkill: () => ({ mutateAsync: h.update, isPending: false }),
+    useDeleteSkill: () => ({ mutateOk: vi.fn(), isPending: false }),
 }));
 
 import { useSkillForm } from '@/systems/skilltrees/hooks/useSkillForm';

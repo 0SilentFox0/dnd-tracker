@@ -57,7 +57,7 @@ export function ClassForm({
 
     const { data, set } = editor.form;
 
-    const [tab, setTab] = useState<ClassFormTabId>('map');
+    const [tab, setTab] = useState<ClassFormTabId>('basics');
 
     const progression = useMemo(
         () => buildClassProgression({ id, ...data }),
@@ -69,6 +69,13 @@ export function ClassForm({
     );
 
     const tabs: HudTab<ClassFormTabId>[] = [
+        {
+            id: 'basics',
+            label: t('common.tabs.basic'),
+            content: (
+                <ClassBasicsTab form={editor.form} campaignId={campaignId} />
+            ),
+        },
         {
             id: 'map',
             wide: true,
@@ -85,13 +92,6 @@ export function ClassForm({
                             ),
                     }}
                 />
-            ),
-        },
-        {
-            id: 'basics',
-            label: t('common.tabs.basic'),
-            content: (
-                <ClassBasicsTab form={editor.form} campaignId={campaignId} />
             ),
         },
         {

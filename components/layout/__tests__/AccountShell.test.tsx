@@ -68,4 +68,16 @@ describe('AccountShell', () => {
 
         expect(current?.getAttribute('href')).toBe('/settings/password');
     });
+
+    it('pulls a form page flush so the phone gutter is not doubled', () => {
+        const { container } = render(
+            <AccountShell>
+                <div className="hud-form-page" />
+            </AccountShell>
+        );
+
+        expect(container.querySelector('main')?.className).toContain(
+            'max-sm:[&>.hud-form-page]:-mx-3'
+        );
+    });
 });

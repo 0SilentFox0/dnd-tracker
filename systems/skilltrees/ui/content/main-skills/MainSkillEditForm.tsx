@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { MainSkillFormFields } from './MainSkillFormFields';
 
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
+import { HudFormMenu } from '@/components/hud';
 import { HudForm, HudFormPage } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
@@ -41,6 +42,26 @@ export function MainSkillEditForm({
                     href: `/campaigns/${campaignId}/dm/main-skills`,
                     label: t('skills.mainSkills.page.title'),
                 },
+                menu: (
+                    <HudFormMenu
+                        items={[
+                            {
+                                label: t('common.actions.delete'),
+                                tone: 'danger',
+                                disabled:
+                                    status.isSaving || status.isDeleting,
+                                confirm: {
+                                    title: t(
+                                        'skills.mainSkills.list.deleteConfirm'
+                                    ),
+                                    confirmLabel: t('common.actions.delete'),
+                                    destructive: true,
+                                },
+                                onSelect: () => void actions.remove(),
+                            },
+                        ]}
+                    />
+                ),
             }}
             actions={
                 <>

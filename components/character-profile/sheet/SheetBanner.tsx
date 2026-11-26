@@ -113,8 +113,13 @@ export function SheetBanner({
                                     className="size-full object-cover"
                                 />
                             ) : (
-                                <span className="hud-sc flex size-full items-center justify-center text-5xl text-hud-muted">
+                                <span className="hud-sc flex size-full flex-col items-center justify-center gap-1 px-1 text-5xl text-hud-muted">
                                     {initial(hero.name)}
+                                    {hero.name.trim() && (
+                                        <span className="line-clamp-2 text-center text-xs [overflow-wrap:anywhere] text-hud-ink lg:text-base">
+                                            {hero.name}
+                                        </span>
+                                    )}
                                 </span>
                             )}
                             <span className="absolute inset-x-0 bottom-0 bg-black/70 px-1 py-1.5 text-center text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 max-lg:opacity-100">

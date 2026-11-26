@@ -121,7 +121,7 @@ describe('HudFormPage', () => {
         ).toBeNull();
     });
 
-    it('css gives every wide template a notice row and a bottom bar without side', () => {
+    it('css gives every wide template a notice row and a header bar without side', () => {
         const css = readFileSync('components/hud/hud.css', 'utf8');
 
         const areas = css.match(/grid-template-areas: [^;]+;/g) ?? [];
@@ -129,7 +129,7 @@ describe('HudFormPage', () => {
         expect(areas.length).toBeGreaterThan(0);
         expect(areas.every((a) => a.includes('notice'))).toBe(true);
         expect(css).toMatch(
-            /:not\(:has\(> \.hud-form-side\)\)\) > \.hud-form-actions \{ grid-column: 1 \/ -1/
+            /:not\(:has\(> \.hud-form-side\)\)\) > \.hud-form-actions \{ grid-row: 1; position: static/
         );
     });
 

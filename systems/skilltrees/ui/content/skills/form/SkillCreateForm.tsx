@@ -6,6 +6,7 @@ import { SKILL_FORM_TAB, type SkillFormTabId } from './skill-form-tabs';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
+import { HudFormMenu } from '@/components/hud';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
@@ -42,7 +43,7 @@ export function SkillCreateForm({
         { initialData, initialMainSkills }
     );
 
-    const { isSaving, error, isEdit } = status;
+    const { isSaving, isDeleting, error, isEdit } = status;
 
     const tabs: HudTab<SkillFormTabId>[] = [
         {
@@ -95,6 +96,23 @@ export function SkillCreateForm({
                     href: `/campaigns/${campaignId}/dm/skills`,
                     label: t('common.dmSections.skills'),
                 },
+                menu: isEdit && (
+                    <HudFormMenu
+                        items={[
+                            {
+                                label: t('common.actions.delete'),
+                                tone: 'danger',
+                                disabled: isSaving || isDeleting,
+                                confirm: {
+                                    title: t('skills.card.deleteTitle'),
+                                    confirmLabel: t('common.actions.delete'),
+                                    destructive: true,
+                                },
+                                onSelect: () => void actions.remove(),
+                            },
+                        ]}
+                    />
+                ),
             }}
             actions={
                 <>

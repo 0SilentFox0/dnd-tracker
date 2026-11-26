@@ -37,15 +37,20 @@ describe('ClassForm layout', () => {
     it('marks the map and table tabs wide and the others not', () => {
         render(<ClassForm campaignId="c" gameClass={makeClass({ id: 'f' })} />);
 
-        expect(form().dataset.wideTab).toBe('true');
+        expect(form().dataset.wideTab).toBeUndefined();
+        expect(screen.getAllByRole('tab')[0]).toHaveTextContent(
+            'common.tabs.basic'
+        );
 
         fireEvent.mouseDown(
-            screen.getByRole('tab', { name: 'common.tabs.basic' }),
+            screen.getByRole('tab', { name: 'classes.form.tabs.map' }),
             { button: 0 }
         );
-        fireEvent.click(screen.getByRole('tab', { name: 'common.tabs.basic' }));
+        fireEvent.click(
+            screen.getByRole('tab', { name: 'classes.form.tabs.map' })
+        );
 
-        expect(form().dataset.wideTab).toBeUndefined();
+        expect(form().dataset.wideTab).toBe('true');
 
         fireEvent.mouseDown(
             screen.getByRole('tab', { name: 'classes.form.tabs.table' }),

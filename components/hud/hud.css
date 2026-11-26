@@ -234,9 +234,12 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
 }
 .hud-form-wide:has([data-wide-tab="true"]) > .hud-form-side { display: none; }
 @media (min-width: 1024px) {
-  .hud-form-wide:has(> .hud-form-actions):is(:has([data-wide-tab="true"]), :not(:has(> .hud-form-side))) { grid-template-rows: auto auto auto auto 72px; }
-  .hud-form-wide:is(:has([data-wide-tab="true"]), :not(:has(> .hud-form-side))) > .hud-form-actions { grid-column: 1 / -1; grid-row: 1 / -1; align-self: end; top: auto; bottom: 0; border-top: 1px solid var(--hud-rule); background: color-mix(in srgb, var(--hud-page, #14100c) 95%, transparent); backdrop-filter: blur(6px); padding: 12px 16px; }
+  .hud-form-wide:is(:has([data-wide-tab="true"]), :not(:has(> .hud-form-side))) > .hud-form-actions { grid-row: 1; position: static; }
+  @supports (animation-timeline: scroll()) {
+    .hud-form-wide:has(> .hud-form-side):not(:has([data-wide-tab="true"])) > .hud-form-actions { animation: hud-actions-lift linear both; animation-timeline: scroll(root); animation-range: 0 120px; }
+  }
 }
+@keyframes hud-actions-lift { from { box-shadow: none; } to { box-shadow: 0 8px 12px -10px rgb(0 0 0 / 0.5); } }
 .hud-form-wide:has([data-wide-tab="true"]) [data-slot="hud-tabs-panels"] { grid-column: main-start / -1; }
 
 /* container-driven field grids */
