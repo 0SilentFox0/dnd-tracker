@@ -1,10 +1,12 @@
 // @vitest-environment happy-dom
-import { cleanup, render } from '@testing-library/react';
+import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ArtCanvas } from '../ArtCanvas';
 
+import { FLOOR_MATERIALS } from '@/lib/constants/map-art/materials';
 import { emptyScene } from '@/lib/utils/battle/map-art/scene';
+import { encodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 const paintScene = vi.hoisted(() => vi.fn());
@@ -41,7 +43,15 @@ const art = (scene: ReturnType<typeof emptyScene>, revision: number) => ({
     revision,
 });
 
-const flush = () => new Promise((r) => setTimeout(r, 0));
+const flush = () => act(async () => void (await new Promise((r) => setTimeout(r, 0))));
+
+const floorChunk = () => {
+    const cells = new Uint16Array(256);
+
+    cells[0] = FLOOR_MATERIALS[0].code;
+
+    return encodeTileChunk(cells);
+};
 
 describe('ArtCanvas', () => {
     it('first render paints everything without clip', async () => {
@@ -53,7 +63,7 @@ describe('ArtCanvas', () => {
     });
 
     it('a floor change repaints only dirty chunks with clip', async () => {
-        const a = emptyScene();
+        const a = { ...emptyScene(), floors: { '0:0': floorChunk() } };
 
         const { rerender } = render(<ArtCanvas map={map} art={art(a, 0)} cellPx={20} />);
 
@@ -61,7 +71,11 @@ describe('ArtCanvas', () => {
         paintScene.mockClear();
 
         rerender(
-            <ArtCanvas map={map} art={art({ ...a, floors: { '0:0': 'AA' } }, 1)} cellPx={20} />
+            <ArtCanvas
+                map={map}
+                art={art({ ...a, floors: { ...a.floors, '1:0': floorChunk() } }, 1)}
+                cellPx={20}
+            />
         );
         await flush();
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ArtPreviewState } from '../battle-map-types';
 
@@ -47,17 +47,22 @@ export const ArtCanvas = memo(function ArtCanvas({ map, art, cellPx }: Props) {
 
     const css = mapPixelSize(map, cellPx, grid);
 
+    const textureKey = useMemo(
+        () => [...new Set(artTextureUrls(scene))].sort().join('\n'),
+        [scene]
+    );
+
     useEffect(() => {
         let alive = true;
 
-        void loadArtAssets(artTextureUrls(scene)).then((a) => {
+        void loadArtAssets(textureKey ? textureKey.split('\n') : []).then((a) => {
             if (alive) setAssets(a);
         });
 
         return () => {
             alive = false;
         };
-    }, [scene]);
+    }, [textureKey]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
