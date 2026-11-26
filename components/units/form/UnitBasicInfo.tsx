@@ -52,7 +52,7 @@ export function UnitBasicInfo({
     const tg = useTranslations('gameTerms');
 
     return (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="ds-fields">
             <div>
                 <Label htmlFor="name">{t('name')} *</Label>
                 <Input
@@ -80,7 +80,7 @@ export function UnitBasicInfo({
                 />
             </div>
 
-            <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4 md:col-span-2">
+            <div className="ds-fields ds-fields--num ds-span">
                 {NUMBER_FIELDS.map((field) => (
                     <div key={field.key} className="flex flex-col justify-end">
                         <Label
@@ -114,7 +114,7 @@ export function UnitBasicInfo({
                         />
                     </div>
                 ))}
-                <div className="col-span-2 flex flex-col justify-end">
+                <div className="flex flex-col justify-end">
                     <Label htmlFor="gridSize" className="text-xs leading-tight">
                         {t('gridSize')}
                     </Label>
