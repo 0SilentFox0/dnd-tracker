@@ -85,7 +85,7 @@ export function EditorSidebar({
                                 type="button"
                                 value={p}
                                 title={t(`panels.${p}`)}
-                                className="flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-md border border-hud-rule bg-black/20 px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-hud-accent data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                className="flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-md border border-hud-rule bg-black/20 px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-hud-accent data-[state=active]:bg-hud-panel-2 data-[state=active]:text-hud-ink"
                             >
                                 <Icon
                                     aria-hidden="true"

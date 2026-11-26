@@ -222,6 +222,12 @@
         "outOfBounds": "An art element is outside the map.",
         "badFloor": "Invalid floor data."
       }
+    },
+    "workbench": {
+      "fullscreen": "Full screen",
+      "done": "Done",
+      "toolHint": "Esc to clear",
+      "clearTool": "Clear tool"
     }
   },
   "catalog": {
