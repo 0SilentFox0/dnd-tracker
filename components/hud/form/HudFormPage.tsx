@@ -17,7 +17,7 @@ const ROOT = {
 } as const;
 
 const ACTIONS =
-    'order-last sticky bottom-0 z-20 flex flex-wrap items-center justify-end gap-2 border-t border-hud-rule bg-hud-page/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:sticky lg:top-[var(--shell-header-h,57px)] lg:order-none lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-start lg:border-0 lg:bg-hud-page/80 lg:px-0 lg:py-2 lg:backdrop-blur';
+    'order-last sticky bottom-0 z-20 flex flex-wrap items-center justify-end gap-2 border-t border-hud-rule bg-hud-page/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:static lg:order-none lg:shrink-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-2';
 
 export function HudFormPage({
     title,
@@ -48,42 +48,46 @@ export function HudFormPage({
                 HUD_SURFACE,
                 'hud-form hud-form-page mx-auto flex min-h-dvh w-full flex-col sm:my-4 sm:min-h-0 sm:rounded-[var(--r)] sm:bg-hud-panel sm:p-6 sm:shadow-[var(--hud-sh)]',
                 ROOT[width],
-                actions && 'lg:grid lg:grid-cols-[minmax(0,1fr)_auto]',
                 className
             )}
         >
-            <header
+            <div
                 className={cn(
-                    'flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-0',
-                    actions && 'lg:col-start-1 lg:row-start-1'
+                    'contents',
+                    actions &&
+                        'lg:sticky lg:top-[var(--shell-header-h,57px)] lg:z-20 lg:flex lg:items-center lg:justify-between lg:gap-4 lg:bg-hud-page/80 lg:backdrop-blur'
                 )}
             >
-                <h1 className="hud-sc text-[28px] text-hud-ink">{title}</h1>
-                {aside && (
-                    <span className="text-xs text-hud-muted sm:text-sm sm:text-hud-soft">
-                        {aside}
-                    </span>
-                )}
-                {hasSide && (
-                    <HudFormPreviewButton
-                        label={t('form.preview')}
-                        title={t('form.previewTitle')}
-                    >
-                        {side}
-                    </HudFormPreviewButton>
-                )}
-            </header>
-            <div
-                className={cn('orn', actions && 'lg:col-start-1 lg:row-start-2')}
-                aria-hidden
-            />
+                <header
+                    className={cn(
+                        'flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-0',
+                        actions && 'lg:min-w-0 lg:flex-1'
+                    )}
+                >
+                    <h1 className="hud-sc text-[28px] text-hud-ink">{title}</h1>
+                    {aside && (
+                        <span className="text-xs text-hud-muted sm:text-sm sm:text-hud-soft">
+                            {aside}
+                        </span>
+                    )}
+                    {hasSide && (
+                        <HudFormPreviewButton
+                            label={t('form.preview')}
+                            title={t('form.previewTitle')}
+                        >
+                            {side}
+                        </HudFormPreviewButton>
+                    )}
+                </header>
+                {actions && <div className={ACTIONS}>{actions}</div>}
+            </div>
+            <div className="orn" aria-hidden />
             <HudPortalClassProvider value={HUD_SURFACE}>
                 {wide || actions ? (
                     <div
-                        className={cn(
-                            wide ? 'hud-wide-body' : 'flex flex-1 flex-col',
-                            actions && 'lg:col-start-1 lg:row-start-3'
-                        )}
+                        className={
+                            wide ? 'hud-wide-body' : 'flex flex-1 flex-col'
+                        }
                     >
                         {children}
                         {hasSide && (
@@ -99,7 +103,6 @@ export function HudFormPage({
                     children
                 )}
             </HudPortalClassProvider>
-            {actions && <div className={ACTIONS}>{actions}</div>}
         </div>
     );
 }
