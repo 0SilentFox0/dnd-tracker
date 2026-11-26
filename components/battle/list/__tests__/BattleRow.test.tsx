@@ -59,10 +59,7 @@ describe('BattleRow', () => {
 
     it('omits the pill when the result is unknown', () => {
         render(
-            <BattleRow
-                battle={{ ...battle, result: null }}
-                campaignId="c1"
-            />
+            <BattleRow battle={{ ...battle, result: null }} campaignId="c1" />
         );
 
         expect(screen.queryByText(/card\.result\./)).toBeNull();

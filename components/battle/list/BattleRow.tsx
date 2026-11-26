@@ -65,7 +65,9 @@ export function BattleRow({
                     </span>
                     {battle.result && (
                         <HudPill
-                            tone={battle.result === 'victory' ? 'accent' : 'muted'}
+                            tone={
+                                battle.result === 'victory' ? 'accent' : 'muted'
+                            }
                         >
                             {t(`result.${battle.result}`)}
                         </HudPill>

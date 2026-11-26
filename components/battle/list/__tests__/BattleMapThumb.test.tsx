@@ -37,24 +37,30 @@ describe('BattleMapThumb', () => {
         );
 
         expect(container.querySelector('img')).toBeTruthy();
-        expect(container.querySelector('[style*="background-size"]')).toBeTruthy();
+        expect(
+            container.querySelector('[style*="background-size"]')
+        ).toBeTruthy();
     });
 
     it('hex map draws an svg pattern, row size draws no grid', () => {
-        const hex = { ...map, background: '/battle-maps/a.webp', gridType: 'hex' as const };
+        const hex = {
+            ...map,
+            background: '/battle-maps/a.webp',
+            gridType: 'hex' as const,
+        };
 
         expect(
-            render(<BattleMapThumb map={hex} size="card" />).container.querySelector(
-                'svg pattern'
-            )
+            render(
+                <BattleMapThumb map={hex} size="card" />
+            ).container.querySelector('svg pattern')
         ).toBeTruthy();
 
         cleanup();
 
         expect(
-            render(<BattleMapThumb map={hex} size="row" />).container.querySelector(
-                'svg'
-            )
+            render(
+                <BattleMapThumb map={hex} size="row" />
+            ).container.querySelector('svg')
         ).toBeNull();
     });
 });

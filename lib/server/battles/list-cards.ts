@@ -154,7 +154,9 @@ export async function loadBattleListCards(
     for (const { participants } of parsed)
         for (const p of participants)
             ids[
-                p.type === ParticipantSourceType.CHARACTER ? 'character' : 'unit'
+                p.type === ParticipantSourceType.CHARACTER
+                    ? 'character'
+                    : 'unit'
             ].push(p.id);
 
     const completed = battles

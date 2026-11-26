@@ -26,7 +26,10 @@ export {
 export { useSetupUnitsFilter } from './setup/useSetupUnitsFilter';
 export { type BattleActionOptions, useBattleAction } from './useBattleAction';
 export { useBattleBriefs } from './useBattleBriefs';
-export { useBattleListSections } from './useBattleListSections';
+export {
+    type BattleListFilter,
+    useBattleListSections,
+} from './useBattleListSections';
 export * from './useBattles';
 export { useBattleSummary } from './useBattleSummary';
 export { useDeleteBattleCard } from './useDeleteBattleCard';

@@ -40,7 +40,11 @@ function GridOverlay({ map }: { map: BattleListMap }) {
                         />
                     </pattern>
                 </defs>
-                <rect width="100%" height="100%" fill="url(#battle-thumb-hex)" />
+                <rect
+                    width="100%"
+                    height="100%"
+                    fill="url(#battle-thumb-hex)"
+                />
             </svg>
         );
     }
