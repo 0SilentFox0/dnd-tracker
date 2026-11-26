@@ -54,12 +54,14 @@ export const WallsLayer = memo(function WallsLayer({
     map,
     ghost,
 }: {
-    map: Pick<BattleMapConfig, 'walls' | 'bars' | 'gridType'>;
+    map: Pick<BattleMapConfig, 'walls' | 'bars' | 'gridType' | 'artBaked'>;
     ghost?: ReadonlySet<string>;
 }) {
     const { walls, bars } = map;
 
     const grid = gridOf(map);
+
+    if (map.artBaked) return null;
 
     if (!walls?.length && !bars?.length && !ghost?.size) return null;
 

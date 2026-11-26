@@ -358,18 +358,33 @@ export async function saveMapTx(
     rawInput: BattleMapSaveInput,
     opts: { artBaked?: boolean } = {}
 ): Promise<{ brief: BattleMapBrief; released: Released }> {
-    const input = opts.artBaked
-        ? { ...rawInput, map: { ...rawInput.map, artBaked: true as const } }
-        : rawInput;
-
-    const { header, chunks, headerJson, payloadJson } = payloadOf(input);
-
-    const released: Released = { campaignId: '', urls: [] };
-
     const current = await tx.battleMap.findUniqueOrThrow({
         where: { id: mapId },
         select: { mapVersion: true, header: true, campaignId: true },
     });
+
+    const currentHeader = (current.header ?? {}) as {
+        artBaked?: unknown;
+        background?: unknown;
+    };
+
+    const keepBaked =
+        currentHeader.artBaked === true &&
+        rawInput.map.background === currentHeader.background;
+
+    const { artBaked: _drop, ...mapRest } = rawInput.map;
+
+    const input = {
+        ...rawInput,
+        map:
+            (opts.artBaked ?? keepBaked)
+                ? { ...mapRest, artBaked: true as const }
+                : mapRest,
+    };
+
+    const { header, chunks, headerJson, payloadJson } = payloadOf(input);
+
+    const released: Released = { campaignId: '', urls: [] };
 
     released.campaignId = current.campaignId;
 
@@ -522,12 +537,15 @@ export async function cloneMap(
     map: OwnedBattleMap,
     name?: string
 ): Promise<BattleMapBrief> {
-    const rows = await prisma.battleMapChunk.findMany({
-        where: { mapId: map.id },
-        select: { cx: true, cy: true, tileLayers: true },
-    });
+    const [rows, art] = await Promise.all([
+        prisma.battleMapChunk.findMany({
+            where: { mapId: map.id },
+            select: { cx: true, cy: true, tileLayers: true },
+        }),
+        prisma.battleMapArt.findUnique({ where: { mapId: map.id } }),
+    ]);
 
-    return createMap(
+    const brief = await createMap(
         map.campaignId,
         {
             name: name ?? `${map.name} (copy)`.slice(0, 80),
@@ -537,4 +555,18 @@ export async function cloneMap(
         },
         tileLayersFromRows(rows)
     );
+
+    if (art)
+        await prisma.battleMapArt.create({
+            data: {
+                mapId: brief.id,
+                scene: art.scene as Prisma.InputJsonValue,
+                sceneVersion: 1,
+                bakedUrl: art.bakedUrl,
+                bakedAt: art.bakedUrl ? new Date() : null,
+                bakedSceneVersion: art.bakedUrl ? 1 : null,
+            },
+        });
+
+    return brief;
 }

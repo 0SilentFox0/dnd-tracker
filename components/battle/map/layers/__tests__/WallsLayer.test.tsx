@@ -50,4 +50,18 @@ describe('WallsLayer', () => {
             expect(w.getAttribute('transform')).toContain('rotate(')
         );
     });
+
+    it('draws no walls, bars or ghosts when the map art is baked', () => {
+        const { container } = render(
+            <svg>
+                <WallsLayer
+                    map={{ walls: ['1:1:e'], bars: ['3:3:e'], artBaked: true }}
+                    ghost={new Set(['2:0:s'])}
+                />
+            </svg>
+        );
+
+        expect(container.querySelectorAll('[data-map-wall]')).toHaveLength(0);
+        expect(container.querySelector('[data-map-edges]')).toBeNull();
+    });
 });

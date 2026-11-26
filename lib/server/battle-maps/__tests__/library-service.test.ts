@@ -33,6 +33,8 @@ const db = vi.hoisted(() => {
 
     const scenes: { mapId: string; mapVersion: number | null }[] = [];
 
+    const arts = new Map<string, Record<string, unknown>>();
+
     let seq = 0;
 
     const api = {
@@ -171,6 +173,19 @@ const db = vi.hoisted(() => {
                 }
             ),
         },
+        battleMapArt: {
+            findUnique: vi.fn(
+                async ({ where }: { where: { mapId: string } }) =>
+                    arts.get(where.mapId) ?? null
+            ),
+            create: vi.fn(
+                async ({ data }: { data: { mapId: string } }) => {
+                    arts.set(data.mapId, data);
+
+                    return data;
+                }
+            ),
+        },
         battleScene: {
             findMany: vi.fn(async ({ where }: { where: { mapId: string } }) =>
                 scenes.filter((s) => s.mapId === where.mapId)
@@ -195,7 +210,9 @@ const db = vi.hoisted(() => {
         chunks,
         versions,
         scenes,
+        arts,
         reset: () => {
+            arts.clear();
             maps.clear();
             chunks.length = 0;
             versions.length = 0;
@@ -232,6 +249,7 @@ import {
     getPinnedGeometry,
     listMaps,
     saveMap,
+    saveMapTx,
     withStoredBackground,
 } from '../library-service';
 
@@ -595,5 +613,83 @@ describe('battle map library service', () => {
         );
 
         expect((await save(brief.id, again)).version).toBe(1);
+    });
+
+    describe('artBaked flag', () => {
+        const bakedInput = (background: string | null) =>
+            input({
+                map: { cols: 20, rows: 20, background, opacity: 0.5 },
+            });
+
+        const headerOf = (id: string) =>
+            db.maps.get(id)?.header as { artBaked?: boolean };
+
+        const seedBaked = async () => {
+            const { id } = await createMap('c1', bakedInput('https://cdn.test/a.webp'));
+
+            await db.api.$transaction((tx: unknown) =>
+                saveMapTx(
+                    tx as Parameters<typeof saveMapTx>[0],
+                    id,
+                    {
+                        ...bakedInput('https://cdn.test/a.webp'),
+                        expectedVersion: 1,
+                    },
+                    { artBaked: true }
+                )
+            );
+
+            return id;
+        };
+
+        it('sets the flag when saveMapTx gets artBaked: true', async () => {
+            const id = await seedBaked();
+
+            expect(headerOf(id).artBaked).toBe(true);
+        });
+
+        it('keeps the flag on a plain save with the same background', async () => {
+            const id = await seedBaked();
+
+            await save(id, {
+                ...bakedInput('https://cdn.test/a.webp'),
+                walls: [],
+            });
+
+            expect(headerOf(id).artBaked).toBe(true);
+        });
+
+        it('drops the flag when the background changes', async () => {
+            const id = await seedBaked();
+
+            await save(id, bakedInput('https://cdn.test/b.webp'));
+
+            expect(headerOf(id).artBaked).toBeUndefined();
+        });
+    });
+
+    it('clone copies the art row with scene version 1 and the baked url', async () => {
+        const { id } = await createMap('c1', input());
+
+        db.arts.set(id, {
+            mapId: id,
+            scene: { v: 1 },
+            sceneVersion: 5,
+            bakedUrl: 'https://cdn.test/a.webp',
+            bakedSceneVersion: 5,
+        });
+
+        const source = await getMap(id);
+
+        if (!source) throw new Error('expected source map');
+
+        const copy = await cloneMap(source, undefined);
+
+        expect(db.arts.get(copy.id)).toMatchObject({
+            scene: { v: 1 },
+            sceneVersion: 1,
+            bakedUrl: 'https://cdn.test/a.webp',
+            bakedSceneVersion: 1,
+        });
     });
 });
