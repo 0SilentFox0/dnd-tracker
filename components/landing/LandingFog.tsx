@@ -52,6 +52,7 @@ interface Mode {
     gap: number;
     alpha: number;
     hole: boolean;
+    webgl: boolean;
 }
 
 function afterFirstPaint(run: () => void) {
@@ -100,6 +101,7 @@ export function LandingFog({ variant = 'hero' }: { variant?: Variant }) {
                 gap: compact ? GAP.compact : GAP.wide,
                 alpha: compact ? COMPACT_ALPHA : 1,
                 hole: variant === 'final',
+                webgl: variant === 'hero',
             });
         });
 
@@ -148,7 +150,7 @@ function start(canvas: HTMLCanvasElement, mode: Mode) {
 
     const live = mode.quality === 'live';
 
-    let webgl = mode.quality !== 'flat';
+    let webgl = mode.webgl && mode.quality !== 'flat';
 
     let motion: CloudMotion | null = null;
 
@@ -238,8 +240,14 @@ function start(canvas: HTMLCanvasElement, mode: Mode) {
 
     let h = 0;
 
+    let rect = canvas.getBoundingClientRect();
+
+    const measure = () => {
+        rect = canvas.getBoundingClientRect();
+    };
+
     const resize = () => {
-        const rect = canvas.getBoundingClientRect();
+        measure();
 
         const scale = Math.min(
             PIXEL_SCALE,
@@ -289,6 +297,8 @@ function start(canvas: HTMLCanvasElement, mode: Mode) {
 
         return true;
     };
+
+    let ready = false;
 
     const paint = (now: number, dt: number) => {
         const cloud = shaderFrame(live ? now / 1000 : 0) ?? textureFrame();
@@ -343,7 +353,11 @@ function start(canvas: HTMLCanvasElement, mode: Mode) {
         if (fadeTrail(now, dt)) ctx.drawImage(trail, 0, 0, w, h);
 
         ctx.globalCompositeOperation = 'source-over';
-        canvas.dataset.ready = '';
+
+        if (!ready) {
+            canvas.dataset.ready = '';
+            ready = true;
+        }
     };
 
     if (!live) {
@@ -362,8 +376,10 @@ function start(canvas: HTMLCanvasElement, mode: Mode) {
         unsubscribe = null;
     };
 
-    // off-screen or hidden gives the shared WebGL context back, so the hero and the final fog never hold two
+    // off-screen only stops the ticker: rebuilding the GL context on scroll-back would recompile the shader
     const sync = () => {
+        if (document.hidden) releaseMotion();
+
         if (onScreen && !document.hidden) {
             unsubscribe ??= subscribe(paint, { fps: FPS });
 
@@ -371,7 +387,6 @@ function start(canvas: HTMLCanvasElement, mode: Mode) {
         }
 
         stop();
-        releaseMotion();
     };
 
     const observer = onScreen
@@ -382,8 +397,6 @@ function start(canvas: HTMLCanvasElement, mode: Mode) {
           });
 
     const onMove = (e: PointerEvent) => {
-        const rect = canvas.getBoundingClientRect();
-
         const x = e.clientX - rect.left;
 
         const y = e.clientY - rect.top;
@@ -394,7 +407,10 @@ function start(canvas: HTMLCanvasElement, mode: Mode) {
             return;
         }
 
-        const p = { x: x * TRAIL_SCALE, y: y * TRAIL_SCALE };
+        const p = {
+            x: (x / rect.width) * trail.width,
+            y: (y / rect.height) * trail.height,
+        };
 
         const from = last ?? p;
 
@@ -418,6 +434,7 @@ function start(canvas: HTMLCanvasElement, mode: Mode) {
     observer?.observe(canvas);
     document.addEventListener('visibilitychange', sync);
     window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('scroll', measure, { passive: true });
 
     if (mode.interactive)
         window.addEventListener('pointermove', onMove, { passive: true });
@@ -430,6 +447,7 @@ function start(canvas: HTMLCanvasElement, mode: Mode) {
         observer?.disconnect();
         document.removeEventListener('visibilitychange', sync);
         window.removeEventListener('resize', resize);
+        window.removeEventListener('scroll', measure);
         window.removeEventListener('pointermove', onMove);
     };
 }

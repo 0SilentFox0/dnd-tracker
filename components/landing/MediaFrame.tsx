@@ -52,38 +52,6 @@ interface ScreenProps {
     className?: string;
 }
 
-export function ScreenPlaceholder({
-    alt,
-    ratio,
-    className,
-    children,
-}: {
-    alt: string;
-    ratio?: ShowcaseMedia['ratio'];
-    className?: string;
-    children?: ReactNode;
-}) {
-    return (
-        <div
-            role="img"
-            aria-label={alt}
-            className={cn(
-                'grid place-items-center [background:radial-gradient(ellipse_at_50%_30%,rgba(230,194,90,.14),transparent_65%),#120e0b]',
-                ratio === '9/16' ? 'aspect-[9/16]' : 'aspect-[16/10]',
-                className
-            )}
-        >
-            {children ?? (
-                <span
-                    aria-hidden
-                    className="size-10 rotate-45 rounded-sm border border-hud-line"
-                />
-            )}
-        </div>
-    );
-}
-
-// a missing screenshot degrades to a styled placeholder, never to a broken image
 export function Screen({
     id,
     locale,
@@ -95,15 +63,6 @@ export function Screen({
     const media: ShowcaseMedia = showcaseMedia(locale)[id];
 
     const ratio = media.ratio === '9/16' ? 'aspect-[9/16]' : 'aspect-[16/10]';
-
-    if (!media.image)
-        return (
-            <ScreenPlaceholder
-                alt={alt}
-                ratio={media.ratio}
-                className={className}
-            />
-        );
 
     return (
         <div className={cn('relative', ratio, className)}>

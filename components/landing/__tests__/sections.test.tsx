@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
 import { FEATURE_ITEMS } from '@/components/landing/media';
-import { CombatDemo } from '@/components/landing/sections/CombatDemo';
+import { CombatDemo, SCENES } from '@/components/landing/sections/CombatDemo';
 import { Features } from '@/components/landing/sections/Features';
 import { Replace } from '@/components/landing/sections/Replace';
 import { Systems } from '@/components/landing/sections/Systems';
@@ -31,6 +31,43 @@ describe.each(LOCALES)('new landing sections (%s)', async (locale) => {
         expect(html.demo).toContain(t('combat.demo.spell.name'));
         expect(html.demo).not.toMatch(/warhammer|wfrp/i);
         expect(html.demo).not.toContain('landing.');
+    });
+
+    it('CombatDemo text and scene numbers agree', () => {
+        const scene = SCENES[locale];
+
+        const hit = scene.foes.find((f) => f.key === 'target') ?? scene.foes[0];
+
+        expect(t('combat.demo.log.hit')).toContain(
+            String(hit.hp[0] - hit.hp[1])
+        );
+        expect(scene.foes.map((f) => f.key)).toEqual(
+            expect.arrayContaining(['foeA', 'foeB'])
+        );
+
+        const points = [
+            scene.attacker,
+            scene.caster,
+            scene.target,
+            scene.blast,
+            scene.die,
+            scene.turnChip,
+            scene.rollChip.p,
+            scene.spellChip,
+            scene.save1,
+            scene.save2,
+            ...scene.foes.map((f) => f.p),
+        ];
+
+        for (const p of points) {
+            expect(p.x).toBeGreaterThanOrEqual(0);
+            expect(p.x).toBeLessThanOrEqual(100);
+            expect(p.y).toBeGreaterThanOrEqual(0);
+            expect(p.y).toBeLessThanOrEqual(100);
+        }
+
+        for (const n of [scene.round, scene.round - 1])
+            expect(html.demo).toContain(t('combat.demo.log.round', { n }));
     });
 
     it('Replace renders a table with six rows and no competitor-style fallbacks', () => {

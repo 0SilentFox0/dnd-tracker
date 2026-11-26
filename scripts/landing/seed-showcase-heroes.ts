@@ -1,15 +1,16 @@
 // Adds a party (4 heroes at levels 6-8), SRD spells/artifacts, inventories and portraits to the en-srd demo campaign.
-// Usage: DATABASE_URL=…/landingshots DIRECT_URL=… pnpm exec tsx --tsconfig tsconfig.scripts.json scripts/landing/seed-showcase-heroes.ts
+// Usage: DATABASE_URL=…/landingshots DIRECT_URL=… pnpm exec tsx --tsconfig tsconfig.scripts.json scripts/landing/seed-showcase-heroes.ts [--allow-remote-db]
 import type { Prisma } from '@prisma/client';
 
 import { SRD_RULES } from '../srd/lib/rules-preset';
 
+import './_local-db-guard';
 import '@/lib/utils/rules/systems/registry';
 import iconsJson from '@/data/templates/srd-5.2/icons.json';
 import { prisma } from '@/lib/db';
+import { type Bundle,BUNDLE_TABLES } from '@/lib/server/templates/bundle';
 import { exportCampaign } from '@/lib/server/templates/export-campaign';
 import { importBundle } from '@/lib/server/templates/import-bundle';
-import { BUNDLE_TABLES, type Bundle } from '@/lib/server/templates/bundle';
 import { deriveClassApplication } from '@/lib/utils/characters/classes/application';
 import { toGameClassData } from '@/lib/utils/characters/classes/row';
 import { d20RowData } from '@/scripts/shared/d20-row-data';

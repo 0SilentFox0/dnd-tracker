@@ -175,8 +175,7 @@
       },
       "log": {
         "title": "Combat log",
-        "round3": "Round 3",
-        "round2": "Round 2",
+        "round": "Round {n}",
         "attack": "attack",
         "spell": "spell",
         "hit": "Elowen Thorne → Treant #1: 22 vs AC 16, hit for 12 piercing damage",

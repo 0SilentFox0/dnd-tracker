@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 type Point = { x: number; y: number };
 
 // seconds into the 12 s loop
-const T = {
+export const T = {
     turnA: 0.3,
     die: 1,
     roll: 2.3,
@@ -40,6 +40,7 @@ type FoeSpec = {
 };
 
 type Scene = {
+    round: number;
     sprite: string;
     initiative: { from: number; to: number; y: number };
     attacker: Point;
@@ -60,8 +61,9 @@ type Scene = {
 
 // % of each locale's battle frame (showcaseMedia(locale).combat); retune whenever those screenshots change.
 // Foes flagged bare sit on real tokens (plate and damage only); the others are overlay tokens on empty floor.
-const SCENES: Record<Locale, Scene> = {
+export const SCENES: Record<Locale, Scene> = {
     en: {
+        round: 3,
         sprite: '/landing/en/demo-tokens.webp',
         initiative: { from: 54.4, to: 56.6, y: 3.9 },
         attacker: { x: 16.7, y: 23.6 },
@@ -105,6 +107,7 @@ const SCENES: Record<Locale, Scene> = {
         log: { x: 40.5, y: 73, w: 15.5, h: 24 },
     },
     uk: {
+        round: 9,
         sprite: '/landing/uk/demo-tokens.webp',
         initiative: { from: 51.8, to: 54.2, y: 3.75 },
         attacker: { x: 34.8, y: 62 },
@@ -214,7 +217,10 @@ function Foe({
             </span>
             <span className="ld-demo-dmg">−{h0 - h1}</span>
             {hp.length > 2 && (
-                <span className="ld-demo-dmg" style={vars({ '--t': t2 })}>
+                <span
+                    className="ld-demo-dmg"
+                    style={vars({ '--t': t2, '--t2h': 99 })}
+                >
                     −{h1 - h2}
                 </span>
             )}
@@ -484,7 +490,7 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                             })}
                         >
                             <p className="ld-demo-round">
-                                {t('combat.demo.log.round3')}
+                                {t('combat.demo.log.round', { n: scene.round })}
                             </p>
                             <ol aria-label={t('combat.demo.log.title')}>
                                 <Entry
@@ -507,7 +513,9 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                                     tags={[`${name('target')} −${hitLoss}`]}
                                 />
                                 <li className="ld-demo-round">
-                                    {t('combat.demo.log.round2')}
+                                    {t('combat.demo.log.round', {
+                                        n: scene.round - 1,
+                                    })}
                                 </li>
                                 <Entry
                                     portrait={PORTRAIT.attacker}

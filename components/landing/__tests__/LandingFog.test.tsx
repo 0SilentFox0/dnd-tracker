@@ -139,7 +139,7 @@ describe('LandingFog', () => {
         vi.restoreAllMocks();
     });
 
-    it('flows the shared cloud shader on screen and gives the context back off screen', () => {
+    it('flows the shared cloud shader on screen and keeps the context while off screen', () => {
         mockMedia({});
 
         const { container } = render(<LandingFog />);
@@ -159,7 +159,22 @@ describe('LandingFog', () => {
 
         intersect(false);
         expect(ticker.unsubscribe).toHaveBeenCalled();
-        expect(motion.release).toHaveBeenCalledTimes(1);
+        expect(motion.release).not.toHaveBeenCalled();
+
+        intersect(true);
+        paintFrame();
+        expect(motion.acquire).toHaveBeenCalledTimes(1);
+    });
+
+    it('final variant never touches WebGL', () => {
+        mockMedia({});
+
+        render(<LandingFog variant="final" />);
+        intersect(true);
+        paintFrame();
+
+        expect(motion.acquire).not.toHaveBeenCalled();
+        expect(texture).toHaveBeenCalledTimes(1);
     });
 
     it('falls back to the 2D cloud texture without WebGL2 and cleans up', () => {

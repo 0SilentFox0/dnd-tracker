@@ -19,13 +19,6 @@ describe('showcaseMedia', () => {
         );
     });
 
-    it('combat triptych maps to screen-combat-N', () => {
-        const media = showcaseMedia('uk');
-
-        expect(media.combat1.image).toBe('/landing/uk/screen-combat-1.webp');
-        expect(media.combat3.image).toBe('/landing/uk/screen-combat-3.webp');
-    });
-
     it('only the phone frame is portrait', () => {
         const media = showcaseMedia('en');
 

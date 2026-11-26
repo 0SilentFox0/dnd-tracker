@@ -24,15 +24,12 @@ import {
 import type { Locale } from '@/lib/i18n/config';
 
 export interface ShowcaseMedia {
-    image?: string;
+    image: string;
     ratio?: '16/10' | '9/16';
 }
 
 const SHOT_FILE = {
     combat: 'battle',
-    combat1: 'combat-1',
-    combat2: 'combat-2',
-    combat3: 'combat-3',
     scenario: 'scenario',
     show: 'show',
     world: 'world',

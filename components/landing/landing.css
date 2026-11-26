@@ -77,7 +77,7 @@ body:has([data-landing])::after { display: none; }
 }
 .ld-hero { overflow-x: clip; }
 .ld-below { background: rgba(0, 0, 0, 0.55); }
-.ld-hero-stage { display: flex; align-items: center; min-height: calc(100svh - 8rem); padding: 7rem 0 2rem; }
+.ld-hero-stage { position: relative; z-index: 1; display: flex; align-items: center; min-height: calc(100svh - 8rem); padding: 7rem 0 2rem; }
 .ld-hero-copy { max-width: 58%; }
 .ld-hero-title { font-size: clamp(2.25rem, 0.6rem + 3.3vw, 6rem); line-height: 1.04; text-wrap: balance; }
 @media (min-width: 1024px) {
