@@ -167,7 +167,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                                     className={cn(
                                         'hud-sc truncate leading-none font-bold text-[#f3ead2] [text-shadow:0_1px_3px_#000,0_0_2px_#000]',
                                         compact
-                                            ? 'max-w-10 text-[7px]'
+                                            ? 'max-w-14 text-[11px]'
                                             : 'max-w-20 text-[10px]'
                                     )}
                                 >
@@ -189,7 +189,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                     className={cn(
                         'flex shrink-0 items-center justify-center rounded-full text-[var(--hud-muted)] hover:text-[var(--ink)]',
                         compact ? 'size-5' : 'size-7',
-                        showNext && 'text-[var(--gold)]'
+                        showNext && 'text-hud-accent-fg'
                     )}
                 >
                     <ChevronsRight

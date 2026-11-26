@@ -25,7 +25,7 @@ const FORM_ID = 'sheet-vitals-form';
 type Hp = { current: number; max: number; temp: number };
 
 const BTN =
-    'motion-press inline-flex min-h-11 min-w-fit flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-hud-line bg-hud-raised px-3 text-[15px] font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none disabled:opacity-50';
+    'motion-press inline-flex min-h-11 min-w-fit flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-hud-line bg-hud-raised px-3 text-[15px] font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50';
 
 const LABEL =
     'hud-title flex items-center gap-2 text-base text-hud-muted lg:text-[17px]';
@@ -143,7 +143,7 @@ function HpReadout({
                 aria-label={summary}
                 aria-expanded={open}
                 onClick={onToggle}
-                className="hud-num absolute inset-0 flex items-center gap-1.5 px-4 text-left text-white [text-shadow:0_1px_2px_rgba(0,0,0,.55)] focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none"
+                className="hud-num absolute inset-0 flex items-center gap-1.5 px-4 text-left text-white [text-shadow:0_1px_2px_rgba(0,0,0,.55)] focus-visible:ring-2 focus-visible:outline-none"
             >
                 <span
                     className="motion-flash inline-block text-[27px] leading-none"
@@ -225,7 +225,7 @@ function TempButton({ hp }: { hp: Hp }) {
                 type="button"
                 aria-label={tv('temp')}
                 className={cn(
-                    'motion-press inline-flex min-h-10 min-w-10 cursor-pointer items-center justify-center gap-1 rounded-[4px] border border-hud-line px-2 text-[15px] text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none',
+                    'motion-press inline-flex min-h-10 min-w-10 cursor-pointer items-center justify-center gap-1 rounded-[4px] border border-hud-line px-2 text-[15px] text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:outline-none',
                     !hp.temp && 'ml-auto'
                 )}
                 onClick={() => setTempOpen(true)}

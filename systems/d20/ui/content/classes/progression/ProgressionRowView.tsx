@@ -12,7 +12,7 @@ export interface ProgressionActions {
 
 export const STATE_CLASS: Record<ProgressionRow['state'], string> = {
     reached: '',
-    current: 'ring-1 ring-hud-gold-strong',
+    current: 'ring-1',
     next: '',
     future: 'opacity-50',
     template: '',

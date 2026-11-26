@@ -7,7 +7,7 @@ type ButtonProps = React.ComponentProps<'button'>;
 const TONES = {
     muted: 'text-[var(--hud-muted)] hover:text-[var(--ink)]',
     danger: 'text-hud-danger hover:bg-hud-danger/15',
-    gold: 'text-[var(--gold)]',
+    gold: 'text-hud-accent-fg',
 } as const;
 
 const ICON_SIZES = { sm: 'size-8', md: 'size-10' } as const;
@@ -18,7 +18,7 @@ export const HudButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ref={ref}
             type="button"
             data-slot="hud-button"
-            className={cn('cursor-pointer', className)}
+            className={cn('ds-interactive cursor-pointer', className)}
             {...props}
         />
     )

@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { AdvanceRow } from './AdvanceRow';
+import { AdvanceRow, TILE_GRID_TALENTS } from './AdvanceRow';
 
 import {
     type AdvancementRules,
@@ -42,7 +42,7 @@ export function TalentRows({
         return <p className="text-sm text-hud-muted">{t('noTalents')}</p>;
 
     return (
-        <ul>
+        <ul className={TILE_GRID_TALENTS}>
             {shown.map((feat) => {
                 const rank = talents[feat.id] ?? 0;
 
@@ -82,7 +82,7 @@ export function TalentRows({
             {orphans.map(([id, rank]) => (
                 <li
                     key={id}
-                    className="flex justify-between gap-2 border-b border-hud-line py-1.5 text-sm text-hud-muted last:border-b-0"
+                    className="ds-inset flex justify-between gap-2 rounded-xl p-2 text-sm text-hud-muted"
                 >
                     <span>{t('unknownTalent')}</span>
                     <b className="tabular-nums">{t('rankOnly', { rank })}</b>

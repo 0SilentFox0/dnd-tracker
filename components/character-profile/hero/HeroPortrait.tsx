@@ -35,7 +35,7 @@ export function HeroPortrait({
     const [open, setOpen] = useState(false);
 
     const frame = cn(
-        'relative aspect-square w-full overflow-hidden rounded-2xl border border-hud-rule bg-hud-raised focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none',
+        'relative aspect-square w-full overflow-hidden rounded-2xl border border-hud-rule bg-hud-raised focus-visible:ring-2 focus-visible:outline-none',
         className
     );
 
@@ -44,7 +44,7 @@ export function HeroPortrait({
             <div
                 className={cn(
                     frame,
-                    'hud-sc flex flex-col items-center justify-center gap-1 text-5xl text-hud-gold'
+                    'hud-sc flex flex-col items-center justify-center gap-1 text-5xl text-hud-muted'
                 )}
             >
                 {initials(name)}

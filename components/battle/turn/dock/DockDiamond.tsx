@@ -12,7 +12,7 @@ export function DockDiamond({
     return (
         <span
             data-state={spent ? 'spent' : 'ready'}
-            className="flex min-w-10 flex-col items-center gap-1.5 text-[10px] leading-none text-[#c7f2dc] max-md:min-w-0"
+            className="flex min-w-10 flex-col items-center gap-1.5 text-[10px] leading-none text-[#c7f2dc] max-md:min-w-0 max-md:gap-1 max-md:text-[11px]"
         >
             <span
                 aria-hidden
@@ -23,7 +23,7 @@ export function DockDiamond({
                         : 'border-[#3bd38a] bg-[#167a50]'
                 )}
             />
-            <span className="hud-sc tracking-[.07em] uppercase max-md:sr-only">
+            <span className="hud-sc tracking-[.07em] uppercase">
                 {label}
             </span>
             {spent && <span className="sr-only">{spentLabel}</span>}

@@ -94,7 +94,7 @@ export function AttackWizard({ wizard }: { wizard: AttackWizardModel }) {
                 PICKED_STEPS.has(state.step) && (
                     <div
                         data-attack-picked={view.attackKind}
-                        className="mb-2 flex min-h-8 items-center justify-between gap-2 text-sm text-hud-gold"
+                        className="mb-2 flex min-h-8 items-center justify-between gap-2 text-sm text-hud-ink"
                     >
                         <span className="flex items-center gap-1.5">
                             {view.attackKind === 'ranged' ? (

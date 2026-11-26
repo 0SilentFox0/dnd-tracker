@@ -49,7 +49,7 @@ export function InviteCodeDisplay({
                 aria-label={t('settings.copyCode')}
             >
                 {copied ? (
-                    <Check className={compact ? 'size-3.5 text-hud-gold' : 'h-4 w-4 text-hud-gold'} />
+                    <Check className={compact ? 'size-3.5 text-hud-accent-fg' : 'h-4 w-4 text-hud-accent-fg'} />
                 ) : (
                     <Copy className={compact ? 'size-3.5' : 'h-4 w-4'} />
                 )}

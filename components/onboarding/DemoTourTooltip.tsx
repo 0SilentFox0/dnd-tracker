@@ -23,7 +23,7 @@ export function DemoTourTooltip(props: TooltipRenderProps) {
         <div
             {...tooltipProps}
             data-joyride-step={index}
-            className="w-[min(380px,calc(100vw-32px))] rounded-xl border border-hud-gold/60 bg-hud-panel p-4 text-hud-bone shadow-[0_0_0_1px_var(--color-hud-edge-faint),0_18px_40px_rgba(0,0,0,0.65)] backdrop-blur-sm"
+            className="w-[min(380px,calc(100vw-32px))] rounded-xl border border-hud-line bg-hud-panel p-4 text-hud-bone shadow-[0_0_0_1px_var(--color-hud-edge-faint),0_18px_40px_rgba(0,0,0,0.65)] backdrop-blur-sm"
         >
             <div className="flex items-start gap-2">
                 <div className="min-w-0 flex-1">
@@ -64,7 +64,7 @@ export function DemoTourTooltip(props: TooltipRenderProps) {
                         variant="outline"
                         size="sm"
                         {...backProps}
-                        className="border-hud-gold/50 bg-transparent text-hud-bone hover:bg-hud-gold/10 hover:text-hud-ink"
+                        className="border-hud-line bg-transparent text-hud-bone hover:bg-hud-panel-2 hover:text-hud-ink"
                     />
                 )}
                 <Button type="button" size="sm" {...primaryProps} />

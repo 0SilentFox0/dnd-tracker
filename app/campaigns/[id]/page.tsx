@@ -212,8 +212,8 @@ export default async function CampaignDetailPage({
             </HudPanel>
 
             {isTemplate && (
-                <HudPanel className="flex flex-wrap items-start gap-2 border-hud-gold/60">
-                    <Info className="mt-0.5 size-4 shrink-0 text-hud-gold" />
+                <HudPanel className="flex flex-wrap items-start gap-2 border-hud-line">
+                    <Info className="mt-0.5 size-4 shrink-0 text-hud-muted" />
                     <p className="min-w-0 flex-1 text-sm text-hud-bone">
                         {t('page.templateNotice')}
                     </p>
@@ -242,7 +242,7 @@ export default async function CampaignDetailPage({
                 >
                     {isDemo && (
                         <HudPanel
-                            className="h-full border-hud-gold/60"
+                            className="h-full border-hud-line"
                             data-tour="dashboard.notice"
                         >
                             <p className="text-sm text-hud-bone">
@@ -255,7 +255,7 @@ export default async function CampaignDetailPage({
                     )}
                     {isDM && !isTemplate && !hasDmParty && (
                         <HudPanel data-tour="dashboard.party-empty">
-                            <h2 className="hud-sc mb-2 text-[13px] tracking-[.06em] text-hud-gold">
+                            <h2 className="hud-sc mb-2 text-[13px] tracking-[.06em] text-hud-ink">
                                 {t('party.title')}
                             </h2>
                             <p className="text-sm text-hud-muted">
@@ -263,7 +263,7 @@ export default async function CampaignDetailPage({
                             </p>
                             <Link
                                 href={`/campaigns/${id}/dm/characters`}
-                                className="mt-2 inline-flex min-h-8 items-center text-sm font-medium text-hud-gold underline-offset-4 hover:underline"
+                                className="mt-2 inline-flex min-h-8 items-center text-sm font-medium text-hud-accent-fg underline-offset-4 hover:underline"
                             >
                                 {t('party.all')}
                             </Link>
@@ -321,7 +321,7 @@ export default async function CampaignDetailPage({
                             data-tour="dashboard.members"
                         >
                             <div className="mb-2 flex items-baseline justify-between gap-2">
-                                <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-gold">
+                                <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-ink">
                                     {t('page.members.title')}
                                 </h2>
                                 <span

@@ -55,7 +55,7 @@ export function ActionsPopover({
                 className="hud-glass w-[min(420px,92vw)] p-3"
             >
                 {title && (
-                    <div className="hud-sc text-[15px] tracking-[.08em] text-[var(--gold)]">
+                    <div className="hud-sc text-[15px] tracking-[.08em] text-hud-ink">
                         {title}
                     </div>
                 )}

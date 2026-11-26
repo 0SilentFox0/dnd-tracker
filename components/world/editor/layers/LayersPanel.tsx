@@ -129,7 +129,7 @@ export function LayersPanel({
                                     </span>
                                     {layer.id === activeId && (
                                         <Crosshair
-                                            className="size-4 shrink-0 text-hud-gold"
+                                            className="size-4 shrink-0 text-hud-muted"
                                             aria-label={t('active')}
                                         />
                                     )}

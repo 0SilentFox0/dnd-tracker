@@ -50,7 +50,7 @@ export function PasswordInput({
                         visible ? t('password.hide') : t('password.show')
                     }
                     aria-pressed={visible}
-                    className="absolute inset-y-0 right-0 grid w-10 place-items-center text-hud-muted hover:text-hud-gold"
+                    className="absolute inset-y-0 right-0 grid w-10 place-items-center text-hud-muted hover:text-hud-ink"
                 >
                     {visible ? (
                         <EyeOff className="size-4" />

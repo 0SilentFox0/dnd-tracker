@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
+import '@/components/landing/landing.css';
 import { LocaleSwitcher } from '@/components/common/shell/LocaleSwitcher';
 import { HudPage, HudPanel } from '@/components/hud/page';
 
@@ -26,7 +27,7 @@ export function AuthCard({
     return (
         <HudPage
             width="md"
-            className="flex min-h-[80vh] items-center justify-center"
+            className="auth-legacy flex min-h-[80vh] items-center justify-center"
         >
             <HudPanel className="w-full max-w-sm space-y-4">
                 <div className="flex justify-end">

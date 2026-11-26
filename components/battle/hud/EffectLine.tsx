@@ -17,7 +17,7 @@ import { type DisplayEffect, effectSummary } from '@/lib/utils/battle/view';
 import type { ActiveEffect } from '@/types/battle';
 
 const tone = (e: ActiveEffect) =>
-    e.type === 'buff' ? 'text-hud-gold' : 'text-hud-danger';
+    e.type === 'buff' ? 'text-hud-ink' : 'text-hud-danger';
 
 function EffectChip({
     effect,

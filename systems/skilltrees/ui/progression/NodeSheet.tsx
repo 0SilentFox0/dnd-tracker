@@ -80,7 +80,7 @@ export function NodeSheet({
             {skill ? (
                 <div className="space-y-2 text-sm">
                     {skill.summary.length > 0 && (
-                        <p className="text-hud-gold">
+                        <p className="text-hud-ink">
                             {abilityText.flowsText(skill.summary)}
                         </p>
                     )}

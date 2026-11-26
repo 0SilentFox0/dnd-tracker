@@ -1,10 +1,4 @@
-export type PaletteId =
-    | 'tavern'
-    | 'midnight'
-    | 'forest'
-    | 'parchment'
-    | 'amethyst'
-    | 'frost';
+export type PaletteId = 'tavern' | 'parchment';
 export interface PaletteSettings {
     userId: string;
     palette: PaletteId;

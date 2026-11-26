@@ -160,7 +160,7 @@ function SpellBody({ fx }: { fx: Extract<ActionResultFx, { kind: 'spell' }> }) {
 
     return (
         <>
-            <div className="hud-sc text-lg font-extrabold tracking-[.06em] text-hud-gold-bright">
+            <div className="hud-sc text-lg font-extrabold tracking-[.06em] text-hud-ink">
                 {fx.spellName}
             </div>
             <SystemLines system={fx.system} hit exact />

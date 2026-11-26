@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { CircleCheck, OctagonAlert, TriangleAlert } from 'lucide-react';
 
 import { HudPanel } from '@/components/hud/page';
 import { formatValue } from '@/lib/utils/ops/format';
@@ -13,15 +14,25 @@ const BAR_TONE = {
     crit: 'bg-red-500',
 } as const;
 
+const STATE_ICON = {
+    ok: CircleCheck,
+    warn: TriangleAlert,
+    crit: OctagonAlert,
+} as const;
+
 export function LimitGauge({ row }: { row: OpsLimitRow }) {
     const t = useTranslations('ops.limits');
 
     const percent = row.percent === null ? null : Math.round(row.percent * 100);
 
+    const state = row.status ?? 'ok';
+
+    const Icon = STATE_ICON[state];
+
     return (
         <HudPanel as="div" className="space-y-2">
             <div className="flex items-baseline justify-between gap-2">
-                <span className="text-sm font-medium">
+                <span className="hud-sc text-sm">
                     {t(
                         `names.${row.id.replaceAll('.', '_') as keyof typeof ops.limits.names}`
                     )}
@@ -47,7 +58,7 @@ export function LimitGauge({ row }: { row: OpsLimitRow }) {
                         />
                     </div>
                     <div className="flex items-baseline justify-between gap-2 text-sm">
-                        <span>{t('percent', { percent })}</span>
+                        <span className="hud-num">{t('percent', { percent })}</span>
                         <span className="text-xs text-muted-foreground">
                             {t('used', {
                                 value: formatValue(row.value, row.unit),
@@ -55,6 +66,10 @@ export function LimitGauge({ row }: { row: OpsLimitRow }) {
                             })}
                         </span>
                     </div>
+                    <p className="flex items-center gap-1.5 text-xs font-medium">
+                        <Icon className="size-4" aria-hidden />
+                        <span>{t(`state.${state}`)}</span>
+                    </p>
                     <p className="text-xs text-muted-foreground">
                         {percent >= 100
                             ? t('reached')

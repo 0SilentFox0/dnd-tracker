@@ -69,7 +69,7 @@ export function RestDialog({
                         onClick={() => setKind(k)}
                         className={cn(
                             kind === k &&
-                                'border-hud-gold-strong bg-hud-gold-strong/20'
+                                'border-hud-accent bg-hud-panel-2'
                         )}
                     >
                         {t(k)}

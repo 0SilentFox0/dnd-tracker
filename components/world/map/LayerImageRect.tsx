@@ -120,7 +120,7 @@ export function LayerImageRect({
             data-testid="layer-image-rect"
             role="group"
             aria-label={t('imageFrame', { name: layer.name })}
-            className="pointer-events-auto absolute cursor-move border-2 border-dashed border-[var(--gold)]"
+            className="pointer-events-auto absolute cursor-move border-2 border-dashed border-hud-accent"
             style={{
                 left: `${rect.x * 100}%`,
                 top: `${rect.y * 100}%`,

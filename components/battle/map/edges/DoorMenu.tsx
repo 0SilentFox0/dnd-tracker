@@ -12,7 +12,7 @@ import { UNIT } from '@/lib/utils/battle/grid';
 import type { DoorState } from '@/types/battle-grid';
 
 const BUTTON =
-    'h-8 border-hud-rule bg-black/80 px-2 text-xs text-hud-gold-bright hover:bg-black';
+    'h-8 border-hud-rule bg-black/80 px-2 text-xs text-hud-ink hover:bg-black';
 
 /** DM menu over a door: open/close and lock/unlock; positioned in map pixels, kept upright on a rotated map. */
 export function DoorMenu({

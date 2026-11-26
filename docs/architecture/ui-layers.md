@@ -54,6 +54,19 @@
 
 ESLint `raw-controls/no-raw-control` (`eslint/raw-controls.mjs`) забороняє `<button|input|select|img>` у `components/**`, `app/**`, `systems/**` поза `components/ui` і `components/hud`. Наявні порушення — `ratchets/raw-controls-exempt.json` (файл + кількість; лише скорочується). Перегенерація/перевірка росту: `node scripts/shared/raw-controls-baseline.mjs [--write]`. Таблиця «що коли» для kit — `.claude/rules/components.md`.
 
+## Дизайн-система (DS)
+
+Токени — `app/palettes.css`, утиліти — `components/hud/hud.css`, ключові класи й перехід — `app/globals.css`, `app/motion.css`. Рішення власника — в «Поправці 2026-11-25» у `docs/superpowers/specs/2026-11-25-design-system-migration-design.md`.
+
+- **Поверхні:** `ds-panel` (панель), `ds-inset` (вдавлене поле), `ds-raised` (піднята картка); `HudPanel`, контент оверлеїв і `card` на них же. М'яка тінь `--hud-sh` замість 1px-рамки панелі; контроли (інпути, кнопки) рамку зберігають.
+- **Акцент:** активне/вибране/майстерність/акцентні числа — `text-hud-accent-fg`, `border-hud-accent`, `bg-hud-accent` (текст на ньому — `text-hud-accent-ink`); токени `--hud-accent`, `--hud-accent-fg`, `--hud-accent-ink`. Малинове (`--hud-crimson*`, `--hud-hp*`) — лише HP, шкода, небезпека, деструктивні дії, помилки (`aria-invalid:`), попередження. Основна `Button` — золота (accent), не малинова. Жорстко прошитий crimson для акценту заборонений.
+- **Палітри:** `tavern` — теплий коричневий + золото, картина `vey-strait` під віньєткою (`body::after`), зерно поверх; `parchment` — без картини, акцент темне золото `#7a5a0e`; лендінг і авторизація лишають власні `--ld-gold`. Решта ID палітр мапиться на ці дві (`paletteFor`).
+- **Кути:** контроли `rounded-lg` (8), панелі й оверлеї `rounded-xl` (12), таби/чіпи `rounded-md`, чекбокс 4; сирі `rounded-[Npx]` заборонені.
+- **Hover:** кожен інтерактивний елемент має відгук через `ds-interactive` (вбудований у kit); власний клікабельний елемент додає цей клас. Правила `.hud-surface a[href]` — у `@layer base`, щоб утиліти їх перебивали.
+- **Переходи:** `PageTransition` (`components/layout`) на зміну сторінки, фейд вкладок; `prefers-reduced-motion` вимикає все в `app/motion.css`.
+- **Акаунтна оболонка:** `AccountShell` + `AccountSidebar` (`components/layout`; ≥ md бічне меню, на телефоні смуга чіпів) для `/profile`, `/settings/*`, `/library/sounds`, `/help`; пункти — реєстр `PROFILE_MENU`. Дані сесії — через `AccountSeedProvider` ([platform.md](platform.md#account-pages-session-in-the-first-html)).
+- Нативні checkbox/radio «checked» теж accent; контраст accent-ink на accent і accent-fg на panel-2 перевіряє `lib/theme/__tests__/palette-contrast.test.ts` (парсить реальний `app/palettes.css`).
+
 ## Допущене й відкладене
 
 - Цикли на рівні тек: `characters` ↔ `character-profile` (один домен «персонаж»), (цикл `spells` ↔ `battle/fx` зник: FX у `components/fx`). Файлові цикли — лише з `ratchets/import-cycles-baseline.json` (`pnpm cycles`).

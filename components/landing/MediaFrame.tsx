@@ -70,7 +70,7 @@ export function Screen({
             >
                 <span
                     aria-hidden
-                    className="size-10 rotate-45 rounded-sm border border-hud-gold/40"
+                    className="size-10 rotate-45 rounded-sm border border-hud-line"
                 />
             </div>
         );

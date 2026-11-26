@@ -65,7 +65,7 @@ export function ChildMapList({
                         type="button"
                         onClick={() => onOpen(m.id)}
                         className={cn(
-                            'flex w-full items-center justify-between gap-2 rounded-md border border-hud-rule bg-black/30 px-3 text-left text-sm hover:border-[var(--gold)]',
+                            'flex w-full items-center justify-between gap-2 rounded-md border border-hud-rule bg-black/30 px-3 text-left text-sm hover:border-hud-muted',
                             itemClassName
                         )}
                     >
@@ -140,7 +140,7 @@ export function MarkerIconGrid({
                         'flex items-center justify-center rounded-md border bg-black/40 text-hud-muted hover:text-hud-ink',
                         cellClassName,
                         value === option
-                            ? 'metal-gold metal-fill border-[var(--gold)]'
+                            ? 'metal-gold metal-fill border-hud-accent'
                             : 'border-hud-rule'
                     )}
                 >

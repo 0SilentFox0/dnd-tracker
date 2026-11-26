@@ -5,11 +5,12 @@ import { PROFILE_MENU } from '@/components/layout/profile-menu';
 describe('PROFILE_MENU', () => {
     it('has unique ids in the expected order', () => {
         expect(PROFILE_MENU.map((e) => e.id)).toEqual([
-            'help',
-            'password',
             'preferences',
-            'soundLibrary',
+            'password',
             'aiKeys',
+            'subscription',
+            'soundLibrary',
+            'help',
             'switchAccount',
             'signOut',
         ]);
@@ -23,5 +24,13 @@ describe('PROFILE_MENU', () => {
     it('keeps hrefs absolute', () => {
         for (const e of PROFILE_MENU)
             if ('href' in e) expect(e.href.startsWith('/')).toBe(true);
+    });
+});
+
+describe('subscription entry', () => {
+    it('links to the stub page', () => {
+        expect(PROFILE_MENU.find((e) => e.id === 'subscription')).toMatchObject({
+            href: '/settings/subscription',
+        });
     });
 });

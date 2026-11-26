@@ -32,9 +32,13 @@ export interface UplotChartProps {
 }
 
 function readColors(el: HTMLElement) {
-    const text = getComputedStyle(el).color;
+    const root = getComputedStyle(document.documentElement);
 
-    return { text, grid: `color-mix(in srgb, ${text} 15%, transparent)` };
+    return {
+        text: getComputedStyle(el).color,
+        grid: root.getPropertyValue('--hud-rule').trim(),
+        font: `500 12px ${root.getPropertyValue('--font-num').trim()}`,
+    };
 }
 
 export default function UplotChart({
@@ -62,7 +66,7 @@ export default function UplotChart({
 
         observer.observe(document.documentElement, {
             attributes: true,
-            attributeFilter: ['class', 'data-theme'],
+            attributeFilter: ['class', 'data-theme', 'data-palette'],
         });
 
         return () => observer.disconnect();
@@ -77,10 +81,11 @@ export default function UplotChart({
 
         const names = seriesKey.split('\u0000');
 
-        const { text, grid } = readColors(el);
+        const { text, grid, font } = readColors(el);
 
         const axis = {
             stroke: text,
+            font,
             grid: { stroke: grid, width: 1 },
             ticks: { stroke: grid, width: 1 },
         };

@@ -1,6 +1,7 @@
 import {
     DEFAULT_PALETTE,
     isPalettePath,
+    LEGACY_PALETTES,
     LIGHT_PALETTES,
     PALETTE_IDS,
     paletteFor,
@@ -53,4 +54,4 @@ export function applyPalette(palette: PaletteId | null): void {
 }
 
 // Runs before paint; only validated identifiers enter the DOM. The root stays static.
-export const PALETTE_BOOTSTRAP = `(()=>{try{if(!(${isPalettePath.toString()})(location.pathname))return;const s=JSON.parse(localStorage.getItem(${JSON.stringify(ACTIVE_PALETTE_KEY)})||'null');if(!s||typeof s.userId!=='string'||!${JSON.stringify(PALETTE_IDS)}.includes(s.palette))return;const r=document.documentElement;r.dataset.palette=s.palette;r.classList.toggle('dark',!${JSON.stringify(LIGHT_PALETTES)}.includes(s.palette));}catch{}})();`;
+export const PALETTE_BOOTSTRAP = `(()=>{try{if(!(${isPalettePath.toString()})(location.pathname))return;const s=JSON.parse(localStorage.getItem(${JSON.stringify(ACTIVE_PALETTE_KEY)})||'null');if(!s||typeof s.userId!=='string')return;const m=${JSON.stringify(LEGACY_PALETTES)};const p=${JSON.stringify(PALETTE_IDS)}.includes(s.palette)?s.palette:Object.hasOwn(m,s.palette)?m[s.palette]:null;if(!p)return;const r=document.documentElement;r.dataset.palette=p;r.classList.toggle('dark',!${JSON.stringify(LIGHT_PALETTES)}.includes(p));}catch{}})();`;

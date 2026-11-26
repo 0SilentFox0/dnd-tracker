@@ -7,6 +7,8 @@ export function shouldUseGameShell(
 
     return (
         normalized === '/campaigns' ||
+        /^\/(profile|help|library\/sounds)(\/.*)?$/.test(normalized) ||
+        /^\/settings\/[^/]+$/.test(normalized) ||
         /^\/campaigns\/[^/]+\/(?:dm\/)?world$/.test(normalized) ||
         /^\/campaigns\/[^/]+\/journal$/.test(normalized) ||
         /^\/campaigns\/[^/]+\/character$/.test(normalized) ||

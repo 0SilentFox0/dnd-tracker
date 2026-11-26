@@ -43,7 +43,7 @@ export function Mark({ count }: { count: 0 | 1 | 2 }) {
                     className={cn(
                         'size-2 rotate-45 rounded-[1px] border-[1.5px]',
                         count
-                            ? 'border-hud-gold bg-hud-gold'
+                            ? 'border-hud-accent bg-hud-accent'
                             : 'border-hud-muted'
                     )}
                 />
@@ -85,7 +85,7 @@ export function AbilityCard({
             <b
                 className={cn(
                     'hud-num text-[17px]',
-                    save.proficient ? 'text-hud-gold' : 'text-hud-text'
+                    save.proficient ? 'text-hud-accent-fg' : 'text-hud-text'
                 )}
             >
                 <Signed value={save.bonus} />
@@ -105,7 +105,7 @@ export function AbilityCard({
                 <>
                     <span
                         aria-hidden
-                        className="absolute inset-x-0 top-0 h-[3px] bg-hud-gold"
+                        className="absolute inset-x-0 top-0 h-[3px] bg-hud-accent"
                     />
                     <span className="sr-only">{t('primary')}</span>
                 </>

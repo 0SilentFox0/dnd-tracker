@@ -16,13 +16,13 @@ export function Faq({ t }: { t: Translator }) {
                     // eslint-disable-next-line raw-controls/no-raw-control -- static landing, no client JS
                     <details
                         key={key}
-                        className="landing-reveal group rounded-xl border border-hud-rule bg-hud-panel open:border-hud-gold/50"
+                        className="landing-reveal group rounded-xl border border-hud-rule bg-hud-panel open:border-hud-line"
                     >
                         <summary className="hud-sc flex cursor-pointer list-none items-center justify-between gap-4 p-4 text-lg text-hud-ink [&::-webkit-details-marker]:hidden">
                             {t(`faq.items.${key}.q`)}
                             <ChevronDown
                                 aria-hidden
-                                className="size-5 shrink-0 text-hud-gold transition group-open:rotate-180"
+                                className="size-5 shrink-0 text-[var(--ld-gold)] transition group-open:rotate-180"
                             />
                         </summary>
                         <p className="px-4 pb-4 text-hud-bone">

@@ -30,7 +30,7 @@ export function OpsChartGroup({
         >
             <h3
                 id={`ops-group-${group.id}`}
-                className="text-base font-semibold"
+                className="hud-sc text-base"
             >
                 {t(`groups.${group.id}`)}
             </h3>

@@ -106,7 +106,7 @@ export function SkillCard({
                                 src={skillIcon}
                                 name={skillName}
                                 size={56}
-                                className="hud-sc size-full rounded-[4px] bg-transparent text-lg text-hud-gold"
+                                className="hud-sc size-full rounded-[4px] bg-transparent text-lg text-hud-ink"
                             />
                         </span>
                     )}

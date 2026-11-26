@@ -44,7 +44,7 @@ export function CompendiumMaterials({
                         key={`${block.kind}:${block.index}`}
                         className="rounded-lg border border-hud-rule p-2 text-sm"
                         summary={
-                            <span className="text-hud-gold">
+                            <span className="text-hud-ink">
                                 {t('materials.summary', {
                                     title: block.title,
                                     chosen,
@@ -79,7 +79,7 @@ export function CompendiumMaterials({
                                 key={chapter.path}
                             >
                                 <Checkbox
-                                    className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
+                                    className="mt-0.5 h-4 w-4 shrink-0 accent-hud-accent"
                                     checked={!excluded.includes(chapter.path)}
                                     disabled={busy}
                                     onCheckedChange={(v) =>

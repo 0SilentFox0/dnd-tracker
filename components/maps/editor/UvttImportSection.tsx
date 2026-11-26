@@ -37,7 +37,7 @@ export function UvttImportSection({
             {warnings.length > 0 ? (
                 <ul
                     role="status"
-                    className="space-y-0.5 text-xs text-hud-gold-bright"
+                    className="space-y-0.5 text-xs text-hud-ink"
                 >
                     {warnings.map(({ code, count }) => (
                         <li key={code}>

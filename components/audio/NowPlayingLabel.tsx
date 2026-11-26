@@ -11,7 +11,7 @@ export function NowPlayingLabel({
 }) {
     return (
         <>
-            <Music className="size-4 shrink-0 text-hud-gold" />
+            <Music className="size-4 shrink-0 text-hud-muted" />
             <span className={cn('truncate', className)} title={title}>
                 {title}
             </span>

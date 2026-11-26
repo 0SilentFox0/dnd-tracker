@@ -84,7 +84,7 @@ export const LogEntryCard = memo(function LogEntryCard({
                         <ScrollText className="size-3.5" />
                     </span>
                 )}
-                <span className="absolute -right-1 -bottom-1 flex size-4 items-center justify-center rounded-full bg-hud-surface text-[var(--gold)] ring-1 ring-white/15">
+                <span className="absolute -right-1 -bottom-1 flex size-4 items-center justify-center rounded-full bg-hud-surface text-hud-ink ring-1 ring-white/15">
                     <Icon className="size-2.5" />
                 </span>
             </span>

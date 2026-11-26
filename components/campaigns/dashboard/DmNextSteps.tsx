@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { Database } from 'lucide-react';
 
-import { HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { DM_DASHBOARD_SECTIONS } from '@/lib/constants/campaign-dashboard';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -25,8 +24,11 @@ export function DmNextSteps({
     );
 
     return (
-        <HudPanel className="flex flex-col" data-tour="dashboard.dm-next-steps">
-            <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-gold">
+        <section
+            className="border-hud-rule flex flex-col border-b pb-4"
+            data-tour="dashboard.dm-next-steps"
+        >
+            <h2 className="hud-sc text-hud-ink mb-3 text-[13px] tracking-[.06em]">
                 {t('nextSteps.title')}
             </h2>
             <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-3">
@@ -38,29 +40,31 @@ export function DmNextSteps({
                         className={TILE}
                     >
                         <Link href={href(campaignId)}>
-                            <Icon aria-hidden className="size-7 shrink-0 text-hud-gold" />
+                            <Icon
+                                aria-hidden
+                                className="text-hud-muted size-7 shrink-0"
+                            />
                             <span className="line-clamp-2 text-center text-xs leading-tight">
                                 {t(`sections.${key}.title`)}
                             </span>
                         </Link>
                     </Button>
                 ))}
-                <Button
-                    asChild
-                    variant="outline"
-                    className={TILE}
-                >
+                <Button asChild variant="outline" className={TILE}>
                     <Link
                         href={`/campaigns/${campaignId}/dm/compendium`}
                         aria-label={t('page.compendium.link')}
                     >
-                        <Database aria-hidden className="size-7 shrink-0 text-hud-gold" />
+                        <Database
+                            aria-hidden
+                            className="text-hud-muted size-7 shrink-0"
+                        />
                         <span className="line-clamp-2 text-center text-xs leading-tight">
                             {t('page.compendium.action')}
                         </span>
                     </Link>
                 </Button>
             </div>
-        </HudPanel>
+        </section>
     );
 }

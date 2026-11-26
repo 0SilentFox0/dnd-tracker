@@ -110,7 +110,10 @@
     "connecting": "Connecting",
     "toCampaign": "To campaign",
     "complete": "Complete",
-    "nextTurn": "Next turn"
+    "nextTurn": "Next turn",
+    "nextTurnShort": "Next",
+    "nextTurnHint": "End {name}'s turn and pass to the next",
+    "nextTurnHintNoName": "End the current turn and pass to the next"
   },
   "map": {
     "pathCost": "{metres, number} m · {feet, number} ft",
@@ -450,12 +453,7 @@
     "mode": "Tools mode",
     "modePlay": "Play",
     "modeEdit": "Edit map",
-    "grid": "Grid",
     "mapTools": "Map tools",
-    "gridShape": "Grid shape",
-    "gridSquare": "Square",
-    "gridHex": "Hex",
-    "gridHexSoon": "Hex grid is coming soon",
     "dmPanel": "DM panel",
     "close": "Close"
   },

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -9,14 +9,14 @@ const root = process.cwd();
 const css = readFileSync(path.join(root, 'app/globals.css'), 'utf8');
 
 describe('shared background', () => {
-    it('references one image per size and both exist in public/', () => {
-        const urls = [...css.matchAll(/url\("(\/bg\/[^"]+)"\)/g)].map(
-            (m) => m[1]
+    it('paints the tavern picture only under the tavern palette', () => {
+        expect(css).toMatch(
+            /html\[data-palette="tavern"\] body::after[^}]*url\("\/bg\/vey-strait-2k\.webp"\)/
         );
-
-        expect(urls).toHaveLength(2);
-        for (const url of urls)
-            expect(existsSync(path.join(root, 'public', url)), url).toBe(true);
+        expect(css).toMatch(/\(min-width: 1921px\)/);
+        expect(css).not.toMatch(
+            /parchment[^{]*body::after[^}]*url\("\/bg\//
+        );
     });
 
     it('has no per-screen background rules', () => {

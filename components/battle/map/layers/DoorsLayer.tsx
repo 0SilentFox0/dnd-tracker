@@ -108,7 +108,7 @@ export const DoorsLayer = memo(function DoorsLayer({
                                     y={y - LOCK / 2}
                                     width={LOCK}
                                     height={LOCK}
-                                    color="#ffe08a"
+                                    color="var(--hud-ink)"
                                     fill="rgba(0,0,0,.6)"
                                     strokeWidth={2}
                                 />

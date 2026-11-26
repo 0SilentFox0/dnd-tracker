@@ -32,7 +32,7 @@ function StatButton({
             onClick={onClick}
             className={cn(
                 'motion-press flex min-h-11 min-w-20 flex-col items-center justify-center rounded-[4px] border px-3 text-center hover:bg-hud-raised',
-                pressed ? 'border-hud-gold' : 'border-hud-line'
+                pressed ? 'border-hud-accent' : 'border-hud-line'
             )}
         >
             <span className="text-xs tracking-[.08em] text-hud-muted uppercase">
@@ -72,7 +72,7 @@ export function AttackRow({
             className="motion-rise border-b border-hud-rule py-2.5 first:pt-0 last:border-b-0 last:pb-0"
         >
             <div className="flex flex-wrap items-center gap-3">
-                <Icon aria-hidden className="size-5 shrink-0 text-hud-gold" />
+                <Icon aria-hidden className="size-5 shrink-0 text-hud-accent-fg" />
                 <span className="min-w-0 flex-1 truncate text-base font-medium text-hud-ink">
                     {a.name}
                 </span>
@@ -91,7 +91,7 @@ export function AttackRow({
             </div>
             {open && (
                 <div className="mt-2">
-                    <p className="text-xs text-hud-gold uppercase">
+                    <p className="text-xs text-hud-ink uppercase">
                         {detail[open].title}
                     </p>
                     <Breakdown lines={detail[open].total.lines} />

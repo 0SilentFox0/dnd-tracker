@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { AiProviderCard } from '@/components/ai';
 import { ErrorState, QueryState } from '@/components/common/states';
-import { HudPage, HudPageHeader } from '@/components/hud/page';
+import { HudFormPage, HudSection } from '@/components/hud/form';
 import { AI_PROVIDERS } from '@/lib/constants/ai';
 import { useAiCredentials } from '@/lib/hooks/ai';
 import { useConfirm } from '@/lib/hooks/common';
@@ -22,11 +22,11 @@ export function AiSettingsClient({ configured }: { configured: boolean }) {
         return <ErrorState error={new Error(t('settings.notConfigured'))} />;
 
     return (
-        <HudPage>
-            <HudPageHeader
-                title={t('settings.title')}
-                subtitle={t('settings.subtitle')}
-            />
+        <HudFormPage
+            title={t('settings.title')}
+            aside={t('settings.subtitle')}
+        >
+            <HudSection>
             <QueryState query={ai.query}>
                 {(credentials) => (
                     <div className="grid gap-4 md:grid-cols-3">
@@ -72,6 +72,7 @@ export function AiSettingsClient({ configured }: { configured: boolean }) {
                     </div>
                 )}
             </QueryState>
-        </HudPage>
+            </HudSection>
+        </HudFormPage>
     );
 }

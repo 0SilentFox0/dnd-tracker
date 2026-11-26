@@ -27,7 +27,7 @@ export interface GraphSceneActions {
     onOpen: (node: PositionedNode) => void;
 }
 
-const GOLD = 'var(--color-hud-gold-bright)';
+const GOLD = 'var(--color-hud-accent-fg)';
 
 export function GraphScene({
     graph,

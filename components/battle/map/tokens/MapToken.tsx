@@ -92,7 +92,7 @@ function MapTokenImpl({
                 className={cn(
                     'absolute left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full',
                     passThrough ? 'pointer-events-none' : 'pointer-events-auto',
-                    selected && 'ring-2 ring-[var(--gold)]'
+                    selected && 'ring-2'
                 )}
                 style={{
                     top: `${PORTRAIT_DROP * 100}%`,

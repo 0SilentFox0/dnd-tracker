@@ -53,7 +53,7 @@ describe('SetList', () => {
             )
         ).toBeTruthy();
         expect(screen.getByText(/"name":"Дракон"/).className).toContain(
-            'text-hud-gold-strong'
+            'text-hud-ink'
         );
         expect(
             screen.getByText(`${shown('AC +1')} · ${shown('Сила +2')}`)

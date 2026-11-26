@@ -9,7 +9,6 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
-import { useText } from '@/lib/i18n/use-text';
 import type { ArtifactSetForReference } from '@/types/info-reference';
 
 export function ArtifactSetReferenceCard({
@@ -18,8 +17,6 @@ export function ArtifactSetReferenceCard({
     set: ArtifactSetForReference;
 }) {
     const t = useTranslations('dashboard.reference.card');
-
-    const text = useText();
 
     return (
         <AccordionItem
@@ -53,7 +50,7 @@ export function ArtifactSetReferenceCard({
                 <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
                     {set.description && (
                         <div>
-                            <Label className="hud-sc text-xs text-hud-gold">
+                            <Label className="hud-sc text-xs text-hud-ink">
                                 {t('description')}
                             </Label>
                             <p className="mt-0.5 text-sm">{set.description}</p>
@@ -61,7 +58,7 @@ export function ArtifactSetReferenceCard({
                     )}
                     {set.bonuses.length > 0 && (
                         <div>
-                            <Label className="hud-sc text-xs text-hud-gold">
+                            <Label className="hud-sc text-xs text-hud-ink">
                                 {t('setBonuses')}
                             </Label>
                             <div className="mt-1">

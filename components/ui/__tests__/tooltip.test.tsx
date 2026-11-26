@@ -25,7 +25,7 @@ const tip = (
 );
 
 describe('TooltipContent', () => {
-    it('ignores the HUD portal class: .hud-surface sets an unlayered cream colour that would beat text-background', () => {
+    it('ignores the HUD portal class: .hud-surface sets an unlayered colour that would beat text-hud-ink', () => {
         render(
             <HudPortalClassProvider value="hud-surface">
                 {tip}
@@ -35,13 +35,13 @@ describe('TooltipContent', () => {
         const classes = content()?.className.split(' ') ?? [];
 
         expect(classes).not.toContain('hud-surface');
-        expect(classes).toContain('bg-foreground');
-        expect(classes).toContain('text-background');
+        expect(classes).toContain('bg-hud-panel-2');
+        expect(classes).toContain('text-hud-ink');
     });
 
     it('renders the same classes outside the HUD', () => {
         render(tip);
 
-        expect(content()?.className).toContain('text-background');
+        expect(content()?.className).toContain('text-hud-ink');
     });
 });

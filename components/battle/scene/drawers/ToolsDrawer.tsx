@@ -7,7 +7,6 @@ import { Loader2, Sparkles } from 'lucide-react';
 
 import { BattlePlayerViewToggle } from '../BattlePlayerViewToggle';
 import { BattleDrawer } from './BattleDrawer';
-import { GridShapePicker } from './GridShapePicker';
 import type { DrawerKey } from './rail-items';
 
 import { AudioDock } from '@/components/audio/AudioDock';
@@ -85,8 +84,6 @@ export function ToolsContent({
     } = useBattleScene();
 
     const [mode, setMode] = useState<'play' | 'edit'>('play');
-
-    const [gridOpen, setGridOpen] = useState(false);
 
     const confirm = useConfirm();
 
@@ -203,20 +200,6 @@ export function ToolsContent({
                         <h3 className={SECTION}>{td('mapTools')}</h3>
                         <div ref={slots?.tools} className={MAP_TOOLS_SLOT} />
                     </section>
-                    {isDM && !readOnly && mode === 'edit' && (
-                        <section className="flex flex-col gap-2">
-                            <h3 className={SECTION}>{td('gridShape')}</h3>
-                            <HudButton
-                                type="button"
-                                aria-expanded={gridOpen}
-                                onClick={() => setGridOpen((o) => !o)}
-                                className="h-11 rounded-xl border border-white/20 text-sm text-[var(--ink)]"
-                            >
-                                {td('grid')}
-                            </HudButton>
-                            {gridOpen && <GridShapePicker />}
-                        </section>
-                    )}
                 </>
             )}
             <section className="flex flex-col gap-2">
@@ -231,7 +214,7 @@ export function ToolsContent({
                         aria-pressed={fxOn}
                         className={cn(
                             'size-11 hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent',
-                            fxOn ? 'text-[var(--gold)]' : 'text-hud-muted'
+                            fxOn ? 'text-hud-accent-fg' : 'text-hud-muted'
                         )}
                     >
                         <Sparkles className="size-5" />
@@ -274,7 +257,7 @@ export function ToolsContent({
                         <HudButton
                             type="button"
                             onClick={onComplete}
-                            className="hud-sc h-11 rounded-xl border border-[var(--gold)]/60 text-sm text-[var(--gold)] hover:bg-[var(--gold)]/10"
+                            className="hud-sc h-11 rounded-xl border border-hud-line text-sm text-hud-ink hover:bg-hud-panel-2"
                         >
                             {t('complete')}
                         </HudButton>
@@ -313,7 +296,7 @@ export function ToolsContent({
             )}
             <Link
                 href={`/campaigns/${battle.campaignId}`}
-                className="hud-sc flex h-11 items-center text-sm text-hud-soft hover:text-[var(--gold)]"
+                className="hud-sc flex h-11 items-center text-sm text-hud-soft hover:text-hud-ink"
             >
                 {t('toCampaign')}
             </Link>

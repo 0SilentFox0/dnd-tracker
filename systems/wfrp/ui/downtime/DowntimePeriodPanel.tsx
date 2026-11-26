@@ -122,7 +122,7 @@ export function DowntimePeriodPanel({
                     {t('daysHint', { max: maxDays })}
                 </span>
             </label>
-            <h3 className="hud-sc text-sm text-hud-gold">{t('heroes')}</h3>
+            <h3 className="hud-sc text-sm text-hud-ink">{t('heroes')}</h3>
             <CharacterPickList characters={characters} checked={checked} />
         </UndoableResultDialog>
     );

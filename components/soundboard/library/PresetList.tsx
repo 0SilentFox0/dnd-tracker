@@ -102,7 +102,7 @@ export function PresetList({
                             key={preset.id}
                             className={cn(
                                 'flex items-center gap-1 rounded-md border border-hud-rule px-2 py-1',
-                                preset.id === selectedId && 'bg-hud-gold/15'
+                                preset.id === selectedId && 'bg-hud-panel-2'
                             )}
                         >
                             <HudButton

@@ -27,7 +27,7 @@ export function MoralePanel({ hero, gate }: TurnStartPanelProps) {
                     className={cn(
                         'mt-1 text-sm',
                         morale.kind === 'extra'
-                            ? 'text-hud-gold-bright'
+                            ? 'text-hud-ink'
                             : 'text-hud-bad'
                     )}
                 >

@@ -77,7 +77,7 @@ export function SlideGrid({
                         {slide.kind === 'puzzle' && (
                             <span
                                 aria-label={t('grid.puzzle')}
-                                className="absolute bottom-1 left-1 rounded bg-black/70 p-0.5 text-hud-gold"
+                                className="absolute bottom-1 left-1 rounded bg-black/70 p-0.5 text-hud-ink"
                             >
                                 <Puzzle className="size-3.5" />
                             </span>
@@ -85,7 +85,7 @@ export function SlideGrid({
                         {slide.trackId && (
                             <span
                                 aria-label={t('grid.hasTrack')}
-                                className="absolute top-1 right-1 rounded bg-black/70 p-0.5 text-hud-gold"
+                                className="absolute top-1 right-1 rounded bg-black/70 p-0.5 text-hud-ink"
                             >
                                 <Music className="size-3.5" />
                             </span>

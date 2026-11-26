@@ -100,3 +100,12 @@ body:has([data-landing])::after { display: none; }
 
 /* below-the-fold sections render (and fetch their backgrounds/sprites) only near the viewport */
 .ld-lazy { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+
+/* pre-DS look for landing and auth: local copies of the old tavern values */
+[data-landing], .auth-legacy, .hud-surface.auth-legacy {
+  --hud-ink: #efe5d2; --hud-bone: #e6dccb; --hud-muted: #9b9080; --hud-line: #756b5f; --hud-rule: #746b63;
+  --palette-page: #0b0908; --palette-panel: rgba(17,14,11,.82); --hud-text: #e3d8c6;
+  --ld-gold: #c9b37a; --ld-gold-bright: #ffe08a; --ld-gold-strong: #e6c25a;
+  --font-hud-sc: "Alegreya SC", Georgia, serif; --font-hud-sans: "Alegreya Sans", system-ui, sans-serif;
+}
+[data-landing] .hud-sc, .auth-legacy .hud-sc { letter-spacing: .04em; }

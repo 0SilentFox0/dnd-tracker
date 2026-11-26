@@ -210,7 +210,7 @@
   transform-origin: 50% 100%;
 }
 
-.map-hud-anim .map-hud-fx::before { animation: map-hud-glow 2.4s ease-in-out infinite; }
+.map-hud-anim .map-hud-fx::before { animation: map-hud-pulse 2.4s ease-in-out infinite; }
 .map-hud-anim .map-hud-fx[data-hud-fx="fire"]::before, .map-hud-anim .map-hud-fx[data-hud-fx="storm"]::before { animation: map-hud-flicker 0.9s steps(4) infinite; }
 .map-hud-anim .map-hud-fx:is([data-hud-fx="fire"], [data-hud-fx="holy"], [data-hud-fx="life"])::after { animation: map-hud-rise 1.3s ease-out infinite; }
 .map-hud-anim .map-hud-fx[data-hud-fx="plague"]::after { animation: map-hud-rise 1.9s ease-in-out infinite; }
@@ -221,7 +221,7 @@
 .map-hud-anim .map-hud-fx[data-hud-fx="frost"]::after { animation: map-hud-shimmer 2.2s ease-in-out infinite; }
 .map-hud-anim .map-hud-fx[data-hud-fx="nature"]::after { animation: map-hud-sway 2.8s ease-in-out infinite; }
 
-@keyframes map-hud-glow { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes map-hud-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 @keyframes map-hud-flicker { 0%, 100% { opacity: 0.7; } 35% { opacity: 1; } 65% { opacity: 0.5; } }
 @keyframes map-hud-rise { 0% { opacity: 0; transform: translateY(3px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-7px); } }
 @keyframes map-hud-smoke { 0% { opacity: 0; transform: translateY(2px) scale(0.8); } 35% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(-8px) scale(1.25); } }

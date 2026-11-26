@@ -77,7 +77,7 @@ export function ResponsiveDialog({
 
     const nested = useContext(InsideSheet);
 
-    const hudClass = hud ? `${HUD_SURFACE} hud-form hud-form-page` : undefined;
+    const hudClass = hud ? `${HUD_SURFACE} hud-form` : undefined;
 
     const hudPortal = hud || !!className?.split(/\s+/).includes(HUD_SURFACE);
 
@@ -125,7 +125,7 @@ export function ResponsiveDialog({
             >
                 <Drawer.Portal>
                     {/* the closing overlay and sheet stay mounted for the exit animation; let taps through to the page */}
-                    <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=closed]:pointer-events-none!" />
+                    <Drawer.Overlay className="fixed inset-0 z-50 bg-[rgba(6,5,7,.72)] backdrop-blur-[2px] data-[state=closed]:pointer-events-none!" />
                     <Drawer.Content
                         data-slot="sheet"
                         role={role}
@@ -135,7 +135,7 @@ export function ResponsiveDialog({
                             ? {}
                             : { 'aria-describedby': undefined })}
                         className={cn(
-                            'fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-xl border-t bg-background outline-none data-[state=closed]:pointer-events-none!',
+                            'fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-xl border-t border-hud-line bg-hud-panel shadow-[0_30px_80px_-24px_rgba(0,0,0,.9)] outline-none data-[state=closed]:pointer-events-none!',
                             hudClass,
                             sheetClasses(className)
                         )}
@@ -143,19 +143,19 @@ export function ResponsiveDialog({
                         <div
                             data-slot="sheet-handle"
                             aria-hidden
-                            className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-muted"
+                            className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-hud-line"
                         />
                         <div className="space-y-1 px-4 pt-3 pb-2">
                             <Drawer.Title
                                 className={cn(
-                                    'text-lg leading-tight font-semibold',
+                                    'hud-sc text-[28px] leading-tight font-normal text-hud-ink',
                                     hud && HUD_TITLE
                                 )}
                             >
                                 {title}
                             </Drawer.Title>
                             {description ? (
-                                <Drawer.Description className="text-sm text-muted-foreground">
+                                <Drawer.Description className="text-sm text-hud-muted">
                                     {description}
                                 </Drawer.Description>
                             ) : null}
@@ -169,7 +169,7 @@ export function ResponsiveDialog({
                             <div
                                 data-slot="sheet-footer"
                                 className={cn(
-                                    'flex gap-2 border-t bg-background px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [&>*]:flex-1',
+                                    'flex gap-2 border-t border-hud-line bg-hud-panel px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [&>*]:flex-1',
                                     hud && 'border-hud-rule bg-hud-page/95'
                                 )}
                             >

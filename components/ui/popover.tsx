@@ -27,7 +27,7 @@ function PopoverContent({
                 sideOffset={sideOffset}
                 align={align}
                 className={cn(
-                    'z-50 rounded-md border bg-popover p-2 text-popover-foreground shadow-md outline-hidden',
+                    'z-50 rounded-xl bg-hud-panel shadow-[var(--hud-sh)] p-2 text-hud-ink outline-hidden',
                     hudClass,
                     className
                 )}

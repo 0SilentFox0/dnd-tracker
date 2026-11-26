@@ -20,7 +20,7 @@ export function RollResultView({
                     className={cn(
                         'text-xs font-bold tracking-[.08em] uppercase',
                         accent.tone === 'crit'
-                            ? 'text-hud-gold'
+                            ? 'text-hud-accent-fg'
                             : 'text-hud-danger'
                     )}
                 >
@@ -32,7 +32,7 @@ export function RollResultView({
                     'text-4xl font-bold tabular-nums',
                     accent?.tone === 'fumble'
                         ? 'text-hud-danger'
-                        : 'text-hud-gold-bright'
+                        : 'text-hud-ink'
                 )}
             >
                 {total}

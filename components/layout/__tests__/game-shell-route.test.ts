@@ -41,6 +41,23 @@ describe('shouldUseGameShell', () => {
     });
 });
 
+describe('shouldUseGameShell account pages', () => {
+    it('covers profile, settings sub-pages, help and the sound library', () => {
+        for (const p of [
+            '/profile',
+            '/settings/ai',
+            '/settings/subscription',
+            '/help',
+            '/help/x',
+            '/library/sounds',
+        ])
+            expect(shouldUseGameShell(p)).toBe(true);
+
+        expect(shouldUseGameShell('/library')).toBe(false);
+        expect(shouldUseGameShell('/settings')).toBe(false);
+    });
+});
+
 describe('isFullBleedRoute', () => {
     it('is true only for a single battle screen', () => {
         expect(isFullBleedRoute('/campaigns/c1/battles/b1')).toBe(true);

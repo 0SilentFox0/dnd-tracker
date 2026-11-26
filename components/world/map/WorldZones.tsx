@@ -148,7 +148,7 @@ export function WorldZones({
                         key={m.id}
                         points={asPoints(m.polygon)}
                         fill="none"
-                        stroke="var(--color-hud-gold-bright, #ffe08a)"
+                        stroke="var(--color-hud-accent-fg)"
                         strokeWidth={3}
                         vectorEffect="non-scaling-stroke"
                     />

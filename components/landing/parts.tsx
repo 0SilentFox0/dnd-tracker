@@ -54,7 +54,7 @@ export function SectionTitle({
                     : 'mx-auto max-w-2xl space-y-3 text-center'
             }
         >
-            <p className="hud-sc text-sm tracking-[0.2em] text-hud-gold">
+            <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                 {eyebrow}
             </p>
             <h2 id={id} className="hud-sc text-3xl text-hud-ink sm:text-4xl">
@@ -66,9 +66,9 @@ export function SectionTitle({
                     aria-hidden
                     className="mx-auto flex max-w-xs items-center gap-3 pt-2"
                 >
-                    <span className="h-px flex-1 bg-gradient-to-r from-transparent to-hud-gold/60" />
-                    <span className="size-2 rotate-45 border border-hud-gold" />
-                    <span className="h-px flex-1 bg-gradient-to-l from-transparent to-hud-gold/60" />
+                    <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[color-mix(in_srgb,var(--ld-gold)_60%,transparent)]" />
+                    <span className="size-2 rotate-45 border border-[var(--ld-gold)]" />
+                    <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[color-mix(in_srgb,var(--ld-gold)_60%,transparent)]" />
                 </div>
             )}
         </div>
@@ -82,7 +82,7 @@ export function CheckList({ items }: { items: string[] }) {
                 <li key={p} className="flex gap-2 text-hud-bone">
                     <Check
                         aria-hidden
-                        className="mt-0.5 size-4 shrink-0 text-hud-gold-strong"
+                        className="mt-0.5 size-4 shrink-0 text-hud-ink"
                     />
                     {p}
                 </li>

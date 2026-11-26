@@ -76,7 +76,7 @@ export function BattleMapLibraryPicker({
             ) : null}
             <Link
                 href={`/campaigns/${campaignId}/dm/maps`}
-                className="text-sm text-hud-gold-bright underline"
+                className="text-sm text-hud-ink underline"
             >
                 {t('manage')}
             </Link>

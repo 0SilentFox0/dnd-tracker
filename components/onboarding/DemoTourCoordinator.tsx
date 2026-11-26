@@ -44,7 +44,7 @@ const JOYRIDE = {
 
 const TOUR_STYLES: DemoTourRunnerProps['styles'] = {
     overlay: { backgroundColor: 'rgba(0, 0, 0, 0.78)' },
-    spotlight: { stroke: 'var(--color-hud-gold-strong)', strokeWidth: 2 },
+    spotlight: { stroke: 'var(--color-hud-accent)', strokeWidth: 2 },
 };
 
 type DemoTourContextValue = {
@@ -205,7 +205,7 @@ export function DemoTourCoordinator({
                         skipBeacon: true,
                         spotlightPadding: 8,
                         spotlightRadius: 10,
-                        arrowColor: 'var(--color-hud-gold-strong)',
+                        arrowColor: 'var(--color-hud-accent)',
                         targetWaitTimeout: 3000,
                         overlayClickAction: false,
                         scrollOffset: SCROLL_OFFSET_PX,

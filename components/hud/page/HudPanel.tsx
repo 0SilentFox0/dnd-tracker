@@ -15,10 +15,7 @@ export function HudPanel({
 }) {
     return (
         <Tag
-            className={cn(
-                'rounded-xl border border-hud-rule bg-hud-panel p-3 sm:p-4',
-                className
-            )}
+            className={cn('ds-panel p-4 sm:px-5', className)}
             data-tour={dataTour}
         >
             {children}

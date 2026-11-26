@@ -161,9 +161,9 @@ export function CompendiumDependencies({
             <Disclosure
                 defaultOpen
                 className="text-sm"
-                chevronClassName="text-hud-gold"
+                chevronClassName="text-hud-muted"
                 summary={
-                    <span className="text-hud-gold">
+                    <span className="text-hud-ink">
                         {hiddenCount > 0 && !showAll
                             ? t('dependencies.titleCountOf', {
                                   shown: shown.length,
@@ -229,7 +229,7 @@ export function CompendiumDependencies({
                                             .map(refBlock)}
                                         <label className="flex items-start gap-2">
                                             <Checkbox
-                                                className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
+                                                className="mt-0.5 h-4 w-4 shrink-0 accent-hud-accent"
                                                 checked={
                                                     options.overwriteKeys?.includes(
                                                         row.key

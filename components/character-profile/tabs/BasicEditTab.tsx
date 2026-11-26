@@ -7,7 +7,6 @@ import { useProfile } from '../ProfileContext';
 
 import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
 import { CharacterHpPreview } from '@/components/characters/stats/CharacterHpPreview';
-import { HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
@@ -28,8 +27,6 @@ export function BasicEditTab({
     const { form, options } = editor;
 
     const t = useTranslations('characterProfile.basic');
-
-    const tc = useTranslations('common.tabs');
 
     const { campaignId, sheet } = useProfile();
 
@@ -75,38 +72,36 @@ export function BasicEditTab({
     };
 
     return (
-        <div className="space-y-5">
-            <HudSection panel title={tc('basic')}>
-                <CharacterBasicInfo
-                    basicInfo={form.basicInfo}
-                    campaignMembers={options.members}
-                    races={options.races}
-                    hide={{
-                        progression: ui.hideProgression,
-                        lineage: !def.lineage,
-                        class: !statColumnsOf(def).has('classes'),
-                        alignment: !def.identity.alignments,
-                        archetype: !statColumnsOf(def).has('archetype'),
-                    }}
-                    classMode={classUi ? classMode : undefined}
-                />
-                {classMode.enabled && !classUi && !ui.hideProgression && (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setConverting(true)}
-                    >
-                        {t('toClasses')}
-                    </Button>
-                )}
-            </HudSection>
+        <div className="flex flex-col gap-4">
+            <CharacterBasicInfo
+                basicInfo={form.basicInfo}
+                campaignMembers={options.members}
+                races={options.races}
+                hide={{
+                    progression: ui.hideProgression,
+                    lineage: !def.lineage,
+                    class: !statColumnsOf(def).has('classes'),
+                    alignment: !def.identity.alignments,
+                    archetype: !statColumnsOf(def).has('archetype'),
+                }}
+                classMode={classUi ? classMode : undefined}
+            />
+            {classMode.enabled && !classUi && !ui.hideProgression && (
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setConverting(true)}
+                >
+                    {t('toClasses')}
+                </Button>
+            )}
             <CharacterHpPreview hp={hp} />
-            <div className="flex justify-end border-t border-hud-line pt-4">
+            <div className="ds-panel flex items-center justify-end p-4 sm:p-5">
                 <Button
                     type="button"
                     variant="destructive"
-                    className="h-11 px-6"
+                    className="h-10 px-5"
                     onClick={() => void remove()}
                 >
                     {t('delete')}

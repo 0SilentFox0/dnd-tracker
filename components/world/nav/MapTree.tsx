@@ -64,7 +64,7 @@ export function MapTree({ maps, activeId, onOpen, footer }: MapTreeProps) {
                         className={cn(
                             'truncate rounded px-2 py-1 text-left text-sm hover:bg-white/10',
                             m.id === activeId
-                                ? 'text-hud-gold-bright'
+                                ? 'text-hud-ink'
                                 : 'text-hud-ink'
                         )}
                         style={{

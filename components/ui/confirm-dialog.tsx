@@ -143,7 +143,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                     }
                 >
                     {error ? (
-                        <p role="alert" className="text-sm text-destructive">
+                        <p role="alert" className="text-sm text-hud-crimson-fg">
                             {error}
                         </p>
                     ) : null}

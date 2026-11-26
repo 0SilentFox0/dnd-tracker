@@ -20,7 +20,7 @@ export function PointsHeader({
             </span>
             <span className="flex items-center gap-2 text-sm text-hud-soft">
                 {free > 0 && (
-                    <b className="hud-sc text-hud-gold-bright">
+                    <b className="hud-sc text-hud-ink">
                         {t('points', { count: free })}
                     </b>
                 )}

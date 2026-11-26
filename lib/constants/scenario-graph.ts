@@ -23,7 +23,7 @@ export const GRAPH_TYPE_STYLE: Record<
     { icon: LucideIcon; color: string }
 > = {
     unit: { icon: Skull, color: 'var(--color-hud-danger)' },
-    artifact: { icon: Gem, color: 'var(--color-hud-gold-bright)' },
+    artifact: { icon: Gem, color: '#e6c25a' },
     character: { icon: User, color: 'var(--color-hud-good)' },
     spell: { icon: Sparkles, color: 'var(--color-chart-4)' },
     battle: { icon: Swords, color: 'var(--color-hud-bad)' },

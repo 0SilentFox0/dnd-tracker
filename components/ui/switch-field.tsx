@@ -35,12 +35,12 @@ export function SwitchField({
                 onCheckedChange={onCheckedChange}
                 disabled={disabled}
             />
-            <div className="space-y-0.5">
-                <Label htmlFor={id}>{label}</Label>
+            <div className="flex flex-col gap-1.5">
+                <Label htmlFor={id} className="mb-0">{label}</Label>
                 {description && (
                     <p
                         id={`${id}-desc`}
-                        className="text-xs text-muted-foreground"
+                        className="text-sm text-hud-muted"
                     >
                         {description}
                     </p>

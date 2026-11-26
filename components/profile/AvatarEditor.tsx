@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { UserAvatar } from '@/components/auth/UserAvatar';
@@ -11,7 +12,13 @@ import { useConfirm } from '@/lib/hooks/common';
 import type { SessionUser } from '@/lib/utils/auth/session-user';
 import { isHostedOnProjectStorage } from '@/lib/utils/common/image-url';
 
-export function AvatarEditor({ user }: { user: SessionUser }) {
+export function AvatarEditor({
+    user,
+    children,
+}: {
+    user: SessionUser;
+    children?: ReactNode;
+}) {
     const t = useTranslations('common.profile');
 
     const confirm = useConfirm();
@@ -32,11 +39,17 @@ export function AvatarEditor({ user }: { user: SessionUser }) {
 
     return (
         <div className="flex flex-wrap items-center gap-4">
-            <UserAvatar user={user} className="size-24 text-3xl" sizes="96px" />
+            <div className="ds-inset border border-hud-line p-1.5">
+                <UserAvatar
+                    user={user}
+                    className="hud-sc size-28 rounded-[var(--r)] border-0 text-4xl sm:size-32"
+                    sizes="128px"
+                />
+            </div>
             <div className="min-w-0 flex-1 space-y-2">
                 <div className="min-w-0">
                     {user.name && (
-                        <p className="truncate font-medium text-hud-text">
+                        <p className="hud-sc truncate text-[28px] text-hud-ink">
                             {user.name}
                         </p>
                     )}
@@ -46,6 +59,7 @@ export function AvatarEditor({ user }: { user: SessionUser }) {
                         </p>
                     )}
                 </div>
+                {children}
                 <div className="flex flex-wrap gap-2">
                     <FileButton
                         size="sm"

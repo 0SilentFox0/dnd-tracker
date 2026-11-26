@@ -16,9 +16,9 @@ export function DraftBanner({
     const t = useTranslations('characters.draftBanner');
 
     return (
-        <HudPanel className="mx-3 mt-3 flex flex-col gap-2 border-hud-gold/40 sm:flex-row sm:items-center sm:justify-between">
+        <HudPanel className="mx-3 mt-3 flex flex-col gap-2 border-hud-line sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-                <p className="hud-sc text-hud-gold">{t('pending')}</p>
+                <p className="hud-sc text-hud-ink">{t('pending')}</p>
                 {note && (
                     <p className="mt-1 text-sm text-hud-muted">
                         {t('note', { note })}

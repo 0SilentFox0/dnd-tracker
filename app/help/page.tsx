@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { HudFormPage, HudSection } from '@/components/hud/form';
 import { HelpSettings } from '@/components/onboarding/HelpSettings';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator } from '@/lib/i18n/translator';
@@ -21,16 +21,9 @@ export default async function HelpPage() {
     ]);
 
     return (
-        <HudPage>
-            <HudPageHeader
-                title={ui('ui.helpTitle')}
-                subtitle={ui('ui.helpSubtitle')}
-            />
+        <HudFormPage title={ui('ui.helpTitle')} aside={ui('ui.helpSubtitle')}>
             {GROUPS.map((g) => (
-                <HudPanel key={g.audience}>
-                    <h2 className="hud-sc mb-2 text-hud-gold">
-                        {ui(g.titleKey)}
-                    </h2>
+                <HudSection key={g.audience} title={ui(g.titleKey)}>
                     <ul className="space-y-3">
                         {HELP_ARTICLES.filter(
                             (a) =>
@@ -40,7 +33,7 @@ export default async function HelpPage() {
                             <li key={a.slug}>
                                 <Link
                                     href={`/help/${a.slug}`}
-                                    className="text-hud-ink hover:text-hud-gold-strong hover:underline"
+                                    className="text-hud-ink hover:text-hud-ink hover:underline"
                                 >
                                     {t(`${a.slug}.title`)}
                                 </Link>
@@ -50,14 +43,11 @@ export default async function HelpPage() {
                             </li>
                         ))}
                     </ul>
-                </HudPanel>
+                </HudSection>
             ))}
-            <HudPanel>
-                <h2 className="hud-sc mb-2 text-hud-gold">
-                    {ui('ui.hintsHeading')}
-                </h2>
+            <HudSection title={ui('ui.hintsHeading')}>
                 <HelpSettings />
-            </HudPanel>
-        </HudPage>
+            </HudSection>
+        </HudFormPage>
     );
 }

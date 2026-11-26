@@ -110,7 +110,10 @@
     "connecting": "Підключення",
     "toCampaign": "До кампанії",
     "complete": "Завершити",
-    "nextTurn": "Наступний хід"
+    "nextTurn": "Наступний хід",
+    "nextTurnShort": "Далі",
+    "nextTurnHint": "Завершити хід {name} і передати хід наступному",
+    "nextTurnHintNoName": "Завершити поточний хід і передати хід наступному"
   },
   "map": {
     "pathCost": "{metres, number} м · {feet, number} фт",
@@ -450,12 +453,7 @@
     "mode": "Режим інструментів",
     "modePlay": "Грати",
     "modeEdit": "Редагувати мапу",
-    "grid": "Сітка",
     "mapTools": "Інструменти мапи",
-    "gridShape": "Форма сітки",
-    "gridSquare": "Квадрат",
-    "gridHex": "Гекс",
-    "gridHexSoon": "Гекс-сітка скоро",
     "dmPanel": "DM панель",
     "close": "Закрити"
   },

@@ -29,7 +29,7 @@ export function DmPrepPanel({
 
     return (
         <HudPanel className="flex flex-col" data-tour="dashboard.dm-prep">
-            <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-gold">
+            <h2 className="hud-sc text-hud-ink mb-3 text-[13px] tracking-[.06em]">
                 {t('prep.title')}
             </h2>
             <div className="flex min-h-0 flex-1 flex-col gap-2">
@@ -43,7 +43,10 @@ export function DmPrepPanel({
                     <ul className="max-h-36 space-y-1.5 overflow-y-auto">
                         {data.pendingDrafts > 0 && (
                             <li>
-                                <Link href={`${base}/dm/characters`} className={ROW}>
+                                <Link
+                                    href={`${base}/dm/characters`}
+                                    className={ROW}
+                                >
                                     <span className="truncate">
                                         {t('nextSteps.pending', {
                                             count: data.pendingDrafts,
@@ -54,19 +57,29 @@ export function DmPrepPanel({
                         )}
                         {data.scenarioPages.map((p) => (
                             <li key={p.id}>
-                                <Link href={`${base}/dm/scenario/${p.id}`} className={ROW}>
+                                <Link
+                                    href={`${base}/dm/scenario/${p.id}`}
+                                    className={ROW}
+                                >
                                     <ScrollText
-                                        className="size-4 shrink-0 text-hud-gold"
+                                        className="text-hud-muted size-4 shrink-0"
                                         aria-hidden
                                     />
-                                    <span className="min-w-0 truncate">{p.title}</span>
+                                    <span className="min-w-0 truncate">
+                                        {p.title}
+                                    </span>
                                 </Link>
                             </li>
                         ))}
                         {data.battles.map((b) => (
                             <li key={b.id}>
-                                <Link href={`${base}/battles/${b.id}`} className={ROW}>
-                                    <span className="min-w-0 flex-1 truncate">{b.name}</span>
+                                <Link
+                                    href={`${base}/battles/${b.id}`}
+                                    className={ROW}
+                                >
+                                    <span className="min-w-0 flex-1 truncate">
+                                        {b.name}
+                                    </span>
                                     <HudPill tone="accent">
                                         {t(`battleStatus.${b.status}`)}
                                     </HudPill>
@@ -75,11 +88,13 @@ export function DmPrepPanel({
                         ))}
                     </ul>
                 ) : (
-                    <div className="rounded-lg border border-dashed border-hud-rule bg-hud-page/30 p-3">
-                        <p className="text-sm text-hud-muted">{t('prep.empty')}</p>
+                    <div className="border-hud-rule bg-hud-page/30 rounded-lg border border-dashed p-3">
+                        <p className="text-hud-muted text-sm">
+                            {t('prep.empty')}
+                        </p>
                         <Link
                             href={`${base}/dm/scenario`}
-                            className="mt-2 inline-flex min-h-8 items-center text-sm font-medium text-hud-gold underline-offset-4 hover:underline"
+                            className="text-hud-accent-fg mt-2 inline-flex min-h-8 items-center text-sm font-medium underline-offset-4 hover:underline"
                         >
                             {t('prep.create')}
                         </Link>

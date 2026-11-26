@@ -16,7 +16,7 @@ const AccordionItem = React.forwardRef<
         ref={ref}
         data-slot="accordion-item"
         className={cn(
-            'overflow-hidden rounded-lg border bg-card/75',
+            'overflow-hidden border-b border-hud-rule',
             className
         )}
         {...props}
@@ -34,7 +34,7 @@ const AccordionTrigger = React.forwardRef<
             ref={ref}
             data-slot="accordion-trigger"
             className={cn(
-                'flex flex-1 items-center justify-between p-4 font-medium transition-all hover:bg-accent [&[data-state=open]>svg]:rotate-180',
+                'hud-sc flex flex-1 items-center justify-between p-4 text-hud-ink transition-all hover:bg-hud-panel-2 [&[data-state=open]>svg]:rotate-180',
                 className
             )}
             {...props}
@@ -42,7 +42,7 @@ const AccordionTrigger = React.forwardRef<
             {children}
             <ChevronDown
                 className={cn(
-                    'h-4 w-4 shrink-0 transition-transform duration-200'
+                    'h-4 w-4 shrink-0 text-hud-faint transition-transform duration-200'
                 )}
             />
         </AccordionPrimitive.Trigger>

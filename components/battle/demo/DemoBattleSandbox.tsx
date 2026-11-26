@@ -53,7 +53,7 @@ export function DemoBattleSandbox({ scene }: { scene: BattleScene }) {
                         {scene.description}
                     </p>
                 )}
-                <p className="text-sm text-hud-gold">{t('notice')}</p>
+                <p className="text-sm text-hud-ink">{t('notice')}</p>
             </header>
             <nav aria-label={t('controls')} className="flex flex-wrap gap-2">
                 {modes.map((key) => (

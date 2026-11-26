@@ -20,10 +20,10 @@ export function DockHp() {
             data-slot="dock-hp"
             className="flex min-w-0 flex-col gap-1 max-md:gap-0.5"
         >
-            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#e6dccb] max-md:gap-1 max-md:text-[8px]">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#e6dccb] max-md:gap-1 max-md:text-[11px] max-md:tabular-nums">
                 <Heart
                     aria-hidden
-                    className="size-3 fill-current text-[#e0594e] max-md:size-2"
+                    className="size-3 fill-current text-[#e0594e] max-md:size-2.5"
                 />
                 <HpFigure participant={hero} wounds={hpTerm === 'wounds'} />
             </div>

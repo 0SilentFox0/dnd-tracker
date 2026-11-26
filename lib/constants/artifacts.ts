@@ -21,7 +21,7 @@ export const ARTIFACT_RARITY_COLOR: Partial<Record<string, string>> = {
     [ArtifactRarity.UNCOMMON]: 'border-[#7cbf5a]',
     [ArtifactRarity.RARE]: 'border-[#8fd0e8]',
     [ArtifactRarity.EPIC]: 'border-[#c08ff0]',
-    [ArtifactRarity.LEGENDARY]: 'border-hud-gold-strong',
+    [ArtifactRarity.LEGENDARY]: 'border-[#e6c25a]',
 };
 
 export enum ArtifactSlot {

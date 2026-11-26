@@ -71,7 +71,7 @@ export function JoinCampaignDialog() {
                 onClick={() => handleOpenChange(true)}
                 variant="outline"
                 size="lg"
-                className="border-hud-gold/35 bg-hud-panel text-hud-ink hover:border-hud-gold"
+                className="border-hud-line bg-hud-panel text-hud-ink hover:border-hud-muted"
             >
                 <KeyRound aria-hidden />
                 {t('join.trigger')}
@@ -131,7 +131,7 @@ export function JoinCampaignDialog() {
                     )}
 
                     {success && (
-                        <div className="flex items-center gap-2 rounded-md bg-hud-field p-3 text-sm text-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-gold)]">
+                        <div className="flex items-center gap-2 rounded-md bg-hud-field p-3 text-sm text-hud-ink shadow-[inset_0_0_0_1px_var(--color-hud-accent)]">
                             <CheckCircle2 className="h-4 w-4 shrink-0" />
                             <span>{t('join.success')}</span>
                         </div>

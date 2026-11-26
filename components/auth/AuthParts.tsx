@@ -108,7 +108,7 @@ export function AuthLink({
     return (
         <Link
             href={href}
-            className="text-hud-gold underline-offset-4 hover:text-hud-gold-strong hover:underline"
+            className="text-[var(--ld-gold)] underline-offset-4 hover:text-hud-ink hover:underline"
         >
             {children}
         </Link>
@@ -154,7 +154,7 @@ export function CheckEmailNotice({
             <div className="flex items-start gap-3">
                 <MailCheck
                     aria-hidden
-                    className="mt-0.5 size-5 shrink-0 text-hud-gold"
+                    className="mt-0.5 size-5 shrink-0 text-[var(--ld-gold)]"
                 />
                 <p>{t('checkEmail.sent', { email })}</p>
             </div>

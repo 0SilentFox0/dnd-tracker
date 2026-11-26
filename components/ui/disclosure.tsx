@@ -52,7 +52,10 @@ function Disclosure({
             onValueChange={(v) => onOpenChange?.(v === ITEM)}
             {...control}
         >
-            <AccordionPrimitive.Item value={ITEM} className={className}>
+            <AccordionPrimitive.Item
+                value={ITEM}
+                className={cn('border-b border-hud-rule', className)}
+            >
                 <AccordionPrimitive.Header asChild>
                     <Heading className="m-0 text-[length:inherit] font-[inherit]">
                         <AccordionPrimitive.Trigger
@@ -65,7 +68,7 @@ function Disclosure({
                             {!hideChevron && (
                                 <ChevronRight
                                     className={cn(
-                                        'size-3.5 shrink-0 transition-transform group-data-[state=open]/disclosure:rotate-90',
+                                        'size-3.5 shrink-0 text-hud-faint transition-transform group-data-[state=open]/disclosure:rotate-90',
                                         chevronClassName
                                     )}
                                 />

@@ -49,7 +49,7 @@ export function D100RollBody({
     return (
         <>
             {judged.target && (
-                <div className="mt-2 text-sm text-hud-gold">
+                <div className="mt-2 text-sm text-hud-ink">
                     {t('target', {
                         target: judged.target.target,
                         label: text(judged.target.label),

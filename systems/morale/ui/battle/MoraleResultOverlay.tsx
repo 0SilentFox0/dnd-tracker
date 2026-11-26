@@ -77,7 +77,7 @@ export function MoraleResultOverlay() {
                     onClick={close}
                     className={cn(
                         cta,
-                        'relative border border-hud-gold-strong bg-[#8a6414] text-[#fff3d1]'
+                        'relative border border-hud-accent bg-hud-accent text-hud-accent-ink'
                     )}
                 >
                     {t('toBattle')}

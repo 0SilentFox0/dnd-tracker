@@ -67,7 +67,7 @@ export function HudBlock({
             title={t(collapsed ? 'show' : 'hide', { name })}
             onClick={toggle}
             className={cn(
-                'pointer-events-auto flex h-10 items-center justify-center gap-1 rounded-xl text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
+                'pointer-events-auto flex h-10 items-center justify-center gap-1 rounded-xl text-[var(--ink)] focus-visible:ring-2 focus-visible:outline-none',
                 detachedButton
                     ? `${HUD_GLASS} size-8 rounded-lg ${detachedButton}`
                     : collapsed
@@ -111,7 +111,7 @@ export function HudRestoreButton() {
             aria-label={t('hotkey')}
             title={t('hotkey')}
             onClick={toggleHudAll}
-            className={`${HUD_GLASS} pointer-events-auto absolute right-3 bottom-3 z-50 flex size-8 items-center justify-center rounded-lg text-[var(--ink)] opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none`}
+            className={`${HUD_GLASS} pointer-events-auto absolute right-3 bottom-3 z-50 flex size-8 items-center justify-center rounded-lg text-[var(--ink)] opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:outline-none`}
         >
             <Eye className="size-4" aria-hidden />
         </HudButton>

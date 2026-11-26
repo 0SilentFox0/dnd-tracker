@@ -181,7 +181,7 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                                             <path
                                                 d={`M ${image.width / grid.backgroundCols} 0 V ${image.height / grid.backgroundRows} H 0`}
                                                 fill="none"
-                                                stroke="var(--hud-gold, #f2c14e)"
+                                                stroke="var(--hud-accent)"
                                                 strokeWidth={1}
                                                 vectorEffect="non-scaling-stroke"
                                             />
@@ -196,7 +196,7 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                                 {draft && (
                                     <div
                                         data-testid="calibration-draft"
-                                        className="pointer-events-none absolute border-2 border-hud-gold-bright bg-hud-gold-bright/20"
+                                        className="pointer-events-none absolute border-2 border-hud-accent bg-hud-panel-2"
                                         style={{
                                             left: `${(draft.x / image.width) * 100}%`,
                                             top: `${(draft.y / image.height) * 100}%`,
@@ -218,7 +218,7 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                                 step={0.25}
                                 value={zoom}
                                 onValueChange={(v) => setZoom(v)}
-                                className="w-full accent-[var(--hud-gold,#f2c14e)]"
+                                className="w-full accent-hud-accent"
                             />
                         </div>
                         <div>
@@ -234,7 +234,7 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                                 onValueChange={(v) =>
                                     actions.setPreviewOpacity(v)
                                 }
-                                className="w-full accent-[var(--hud-gold,#f2c14e)]"
+                                className="w-full accent-hud-accent"
                             />
                         </div>
                     </div>

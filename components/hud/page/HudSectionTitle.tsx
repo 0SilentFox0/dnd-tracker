@@ -12,7 +12,7 @@ export function HudSectionTitle({
     return (
         <h2
             className={cn(
-                'hud-sc flex items-center gap-3 text-[13px] tracking-[.12em] text-hud-gold uppercase',
+                'hud-sc flex items-center gap-3 text-[13px] tracking-[.12em] text-hud-ink uppercase',
                 className
             )}
         >

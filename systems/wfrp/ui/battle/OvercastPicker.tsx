@@ -57,7 +57,7 @@ export function OvercastPicker({
             aria-label={t('overcastTitle', { cap })}
             className="mt-2"
         >
-            <div className="text-sm text-hud-gold">
+            <div className="text-sm text-hud-ink">
                 {t('overcastTitle', { cap })}
             </div>
             {OVERCAST_DIMENSIONS.filter((d) => missile || d !== 'damage').map(

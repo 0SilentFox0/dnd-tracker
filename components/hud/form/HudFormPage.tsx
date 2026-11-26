@@ -20,18 +20,19 @@ export function HudFormPage({
         <div
             className={cn(
                 HUD_SURFACE,
-                'hud-form hud-form-page mx-auto flex min-h-dvh w-full max-w-3xl flex-col sm:my-4 sm:min-h-0 sm:rounded-xl',
+                'hud-form hud-form-page mx-auto flex min-h-dvh w-full max-w-3xl flex-col ornate sm:my-4 sm:min-h-0 sm:rounded-[var(--r)] sm:bg-hud-panel sm:p-6 sm:shadow-[var(--hud-sh)]',
                 className
             )}
         >
-            <header className="flex flex-col gap-1 border-b border-hud-bone/15 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                <h1 className="hud-sc text-[17px] text-hud-ink">{title}</h1>
+            <header className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-0">
+                <h1 className="hud-sc text-[28px] text-hud-ink">{title}</h1>
                 {aside && (
                     <span className="text-xs text-hud-muted sm:text-sm sm:text-hud-soft">
                         {aside}
                     </span>
                 )}
             </header>
+            <div className="orn" aria-hidden />
             <HudPortalClassProvider value={HUD_SURFACE}>
                 {children}
             </HudPortalClassProvider>

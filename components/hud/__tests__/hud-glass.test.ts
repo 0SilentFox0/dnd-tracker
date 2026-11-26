@@ -17,9 +17,8 @@ describe('HUD_GLASS', () => {
         expect(css).toContain('backdrop-filter: blur(14px)');
     });
 
-    it('has a light variant for parchment and frost', () => {
-        for (const palette of ['parchment', 'frost']) {
-            expect(css).toContain(`html[data-palette="${palette}"] .${HUD_GLASS}`);
-        }
+    it('has a light variant for parchment', () => {
+        expect(css).toContain(`html[data-palette="parchment"] .${HUD_GLASS}`);
+        expect(css).not.toContain('frost');
     });
 });

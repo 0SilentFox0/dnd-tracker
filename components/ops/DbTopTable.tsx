@@ -9,11 +9,11 @@ export function DbTopTable({ data }: { data: OpsDbTop }) {
 
     return (
         <section aria-labelledby="ops-slow" className="space-y-4">
-            <h2 id="ops-slow" className="text-lg font-semibold">
+            <h2 id="ops-slow" className="hud-sc text-lg">
                 {t('title')}
             </h2>
             <div className="space-y-2">
-                <h3 className="text-sm font-medium">{t('statements')}</h3>
+                <h3 className="hud-sc text-sm">{t('statements')}</h3>
                 {!data.available ? (
                     <p className="text-sm text-muted-foreground">
                         {t('unavailable')}
@@ -23,9 +23,9 @@ export function DbTopTable({ data }: { data: OpsDbTop }) {
                         {t('empty')}
                     </p>
                 ) : (
-                    <div className="overflow-x-auto rounded-lg border">
+                    <div className="overflow-x-auto border-y border-[var(--hud-rule)]">
                         <table className="w-full text-left text-xs">
-                            <thead className="bg-muted/50">
+                            <thead className="border-b border-[var(--hud-line)]">
                                 <tr>
                                     <th className="px-3 py-2">{t('query')}</th>
                                     <th className="px-3 py-2 text-right">
@@ -39,7 +39,7 @@ export function DbTopTable({ data }: { data: OpsDbTop }) {
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y">
+                            <tbody className="divide-y divide-[var(--hud-rule)]">
                                 {data.rows.map((r, i) => (
                                     <tr key={i}>
                                         <td
@@ -48,13 +48,13 @@ export function DbTopTable({ data }: { data: OpsDbTop }) {
                                         >
                                             {r.query}
                                         </td>
-                                        <td className="px-3 py-2 text-right tabular-nums">
+                                        <td className="px-3 py-2 hud-num text-right">
                                             {r.calls}
                                         </td>
-                                        <td className="px-3 py-2 text-right tabular-nums">
+                                        <td className="px-3 py-2 hud-num text-right">
                                             {r.totalMs}
                                         </td>
-                                        <td className="px-3 py-2 text-right tabular-nums">
+                                        <td className="px-3 py-2 hud-num text-right">
                                             {r.meanMs}
                                         </td>
                                     </tr>
@@ -65,7 +65,7 @@ export function DbTopTable({ data }: { data: OpsDbTop }) {
                 )}
             </div>
             <div className="space-y-2">
-                <h3 className="text-sm font-medium">{t('longTx')}</h3>
+                <h3 className="hud-sc text-sm">{t('longTx')}</h3>
                 {data.longTx.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         {t('noLongTx')}

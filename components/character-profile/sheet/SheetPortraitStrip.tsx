@@ -69,7 +69,7 @@ export function SheetXpBar({
                 aria-valuetext={note ? `${value} · ${note}` : value}
                 className="relative h-2.5 overflow-hidden rounded-full bg-(--sheet-track)"
             >
-                <ScaleFill ratio={fill} className="bg-hud-gold" />
+                <ScaleFill ratio={fill} className="bg-hud-accent" />
             </div>
             <div
                 aria-hidden

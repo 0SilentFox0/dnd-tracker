@@ -11,7 +11,7 @@ export function Problem({ t }: { t: Translator }) {
         <section aria-labelledby="pain-title" className="ld-lazy px-4 py-20">
             <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
                 <div className="space-y-5">
-                    <p className="hud-sc text-sm tracking-[0.2em] text-hud-gold">
+                    <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                         {t('problem.eyebrow')}
                     </p>
                     <h2
@@ -34,7 +34,7 @@ export function Problem({ t }: { t: Translator }) {
                             </li>
                         ))}
                     </ul>
-                    <p className="hud-sc flex items-start gap-2 text-xl text-hud-gold-strong">
+                    <p className="hud-sc flex items-start gap-2 text-xl text-hud-ink">
                         <ArrowRight
                             aria-hidden
                             className="mt-1 size-5 shrink-0"
@@ -69,12 +69,12 @@ export function Problem({ t }: { t: Translator }) {
                             );
                         })}
                     </div>
-                    <div className="mt-4 flex items-center gap-3 rounded-xl border border-hud-gold bg-gradient-to-r from-[#2a1d05] via-[#3a2a0c] to-[#2a1d05] px-4 py-3 shadow-[0_0_40px_-8px_rgba(230,194,90,.55)]">
+                    <div className="mt-4 flex items-center gap-3 rounded-xl border border-[var(--ld-gold)] bg-gradient-to-r from-[#2a1d05] via-[#3a2a0c] to-[#2a1d05] px-4 py-3 shadow-[0_0_40px_-8px_rgba(230,194,90,.55)]">
                         <BrandMark />
                         <span className="hud-sc text-hud-ink">
                             {BRAND.name}
                         </span>
-                        <span className="ml-auto text-xs text-hud-gold-bright">
+                        <span className="ml-auto text-xs text-hud-ink">
                             {t('problem.hubTag')}
                         </span>
                     </div>

@@ -57,7 +57,7 @@ export function TokenList() {
                     <Button
                         type="button"
                         variant="ghost"
-                        className="h-9 px-2 text-hud-gold"
+                        className="h-9 px-2 text-hud-ink"
                         onClick={() => setAdding(true)}
                     >
                         {t('add')}

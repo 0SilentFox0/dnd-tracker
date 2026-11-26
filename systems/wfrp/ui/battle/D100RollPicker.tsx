@@ -57,7 +57,7 @@ export function D100RollPicker({
         if (first === undefined)
             return (
                 <>
-                    <div className="mt-3 text-sm text-hud-gold">
+                    <div className="mt-3 text-sm text-hud-ink">
                         {tf('firstRoll')}
                     </div>
                     <D100Input onRoll={setFirst} />
@@ -66,7 +66,7 @@ export function D100RollPicker({
 
         return (
             <>
-                <div className="mt-3 text-sm text-hud-gold">
+                <div className="mt-3 text-sm text-hud-ink">
                     {tf('secondRoll')}
                 </div>
                 <D100Input

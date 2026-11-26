@@ -49,7 +49,7 @@ export function PurseBar({
                                 aria-label={t(`purse.${b.mode}`)}
                                 title={t(`purse.${b.mode}`)}
                                 onClick={() => onMode(b.mode)}
-                                className="rounded border border-hud-line text-hud-ink hover:border-hud-gold-strong"
+                                className="rounded border border-hud-line text-hud-ink hover:border-hud-muted"
                             >
                                 {b.sign}
                             </HudIconButton>

@@ -33,7 +33,7 @@ export function SoundTile({
             className="flex min-w-0 items-center gap-2 rounded-lg border border-hud-rule bg-hud-panel p-2"
             style={sound.color ? { borderColor: sound.color } : undefined}
         >
-            <Icon className="size-5 shrink-0 text-hud-gold" />
+            <Icon className="size-5 shrink-0 text-hud-muted" />
             <span className="min-w-0 flex-1 truncate text-sm text-hud-ink">
                 {label}
             </span>

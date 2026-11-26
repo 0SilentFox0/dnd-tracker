@@ -1,10 +1,12 @@
-import { ProfileShell } from '@/components/profile/ProfileShell';
+import { AccountShell } from '@/components/layout/AccountShell';
 import { LocaleScope } from '@/lib/i18n/locale-scope';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
-        <LocaleScope namespaces={['common', 'validation', 'onboarding']}>
-            <ProfileShell>{children}</ProfileShell>
+        <LocaleScope
+            namespaces={['common', 'gameTerms', 'validation', 'onboarding', 'whatsNew']}
+        >
+            <AccountShell>{children}</AccountShell>
         </LocaleScope>
     );
 }

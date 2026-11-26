@@ -1,39 +1,41 @@
 'use client';
 
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-
 import { LoadingState } from '@/components/common/states';
-import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
-import { AvatarEditor } from '@/components/profile/AvatarEditor';
+import { ProfileAccountActions } from '@/components/profile/ProfileAccountActions';
+import { ProfileCampaigns } from '@/components/profile/ProfileCampaigns';
+import { ProfileHeroCard } from '@/components/profile/ProfileHeroCard';
+import { ProfileHeroes } from '@/components/profile/ProfileHeroes';
+import { ProfileQuickSettings } from '@/components/profile/ProfileQuickSettings';
 import { useSessionUser } from '@/lib/hooks/auth';
+import type { ProfileSummary } from '@/types/profile';
 
-export function ProfileClient({ showOpsLink }: { showOpsLink: boolean }) {
-    const t = useTranslations('common.profile');
+type Profile = { showOpsLink: boolean; summary: ProfileSummary; now: number };
 
+export function ProfileClient({ profile }: { profile: Profile }) {
     const user = useSessionUser();
 
+    const { summary, now } = profile;
+
+    if (!user) return <LoadingState />;
+
     return (
-        <HudPage width="md">
-            <HudPageHeader title={t('title')} subtitle={t('subtitle')} />
-            {!user ? (
-                <LoadingState />
-            ) : (
-                <div className="space-y-4">
-                    <OnboardingHint id="profile.avatar" />
-                    <HudPanel>
-                        <AvatarEditor user={user} />
-                    </HudPanel>
-                    {showOpsLink && (
-                        <HudPanel>
-                            <Link href="/ops" className="underline">
-                                {t('opsLink')}
-                            </Link>
-                        </HudPanel>
-                    )}
+        <div className="space-y-4">
+            <OnboardingHint id="profile.avatar" />
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+                <div className="min-w-0 space-y-4">
+                    <ProfileHeroCard user={user} summary={summary} now={now} />
+                    <ProfileCampaigns
+                        campaigns={summary.recentCampaigns}
+                        now={now}
+                    />
+                    <ProfileHeroes heroes={summary.recentCharacters} />
                 </div>
-            )}
-        </HudPage>
+                <div className="min-w-0 space-y-4">
+                    <ProfileQuickSettings showOpsLink={profile.showOpsLink} />
+                    <ProfileAccountActions />
+                </div>
+            </div>
+        </div>
     );
 }

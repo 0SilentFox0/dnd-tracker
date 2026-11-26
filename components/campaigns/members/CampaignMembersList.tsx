@@ -77,7 +77,7 @@ export function CampaignMembersList({
                     key={member.id}
                     className="flex min-w-0 items-center gap-2 border-b border-hud-raised py-2 last:border-b-0"
                 >
-                    <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-hud-gold/50 bg-hud-raised font-[var(--font-hud-book)] text-sm text-hud-ink">
+                    <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-hud-line bg-hud-raised font-[var(--font-hud-book)] text-sm text-hud-ink">
                         {member.user.avatar ? (
                             <OptimizedImage
                                 src={member.user.avatar}

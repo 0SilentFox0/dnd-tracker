@@ -19,7 +19,7 @@ export function HudSection({
     className?: string;
 }) {
     const body = panel ? (
-        <div className="overflow-hidden rounded-[4px] border border-hud-line bg-hud-panel px-5 py-4 shadow-sm max-sm:px-4">
+        <div className="ds-panel p-4">
             {children}
         </div>
     ) : (
@@ -37,7 +37,7 @@ export function HudSection({
                 </div>
             ) : (
                 <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-gold">
+                    <h2 className="hud-sc text-2xl text-hud-ink">
                         {title}
                     </h2>
                     {action}

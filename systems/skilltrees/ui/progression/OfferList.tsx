@@ -106,7 +106,7 @@ export function OfferList({
                                     <span className="hud-sc block text-base text-hud-ink">
                                         {title}
                                     </span>
-                                    <span className="block text-xs text-hud-gold">
+                                    <span className="block text-xs text-hud-ink">
                                         {tag}
                                     </span>
                                     {skill?.summary[0] && (

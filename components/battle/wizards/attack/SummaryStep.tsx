@@ -34,7 +34,7 @@ export function SummaryStep({
                                 s.side === 'attacker' &&
                                     s.kind === 'percent' &&
                                     s.value > 0 &&
-                                    'text-hud-gold',
+                                    'text-hud-ink',
                                 s.side === 'target' && 'text-hud-danger'
                             )}
                         >
@@ -61,7 +61,7 @@ export function SummaryStep({
                     className="mt-3 border border-white/15 p-2"
                     data-cunning-strike
                 >
-                    <div className="text-sm text-hud-gold">
+                    <div className="text-sm text-hud-ink">
                         {t('cunning', { dice: view.cunning.sneakDice })}
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-2">

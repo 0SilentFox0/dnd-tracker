@@ -1,28 +1,44 @@
 import type { PaletteId } from '@/types/theme';
 
-export const PALETTE_IDS = [
-    'tavern',
-    'midnight',
-    'forest',
-    'parchment',
-    'amethyst',
-    'frost',
-] as const;
+export const PALETTE_IDS = ['tavern', 'parchment'] as const;
 // Enable palettes after WCAG AA contrast checks pass across shared HUD and spellbook surfaces.
 export const PALETTES_ENABLED = true;
 export const DEFAULT_PALETTE: PaletteId = 'tavern';
-export const LIGHT_PALETTES: readonly PaletteId[] = ['parchment', 'frost'];
+export const LIGHT_PALETTES: readonly PaletteId[] = ['parchment'];
 
-export const PALETTE_SWATCHES: Record<
-    PaletteId,
-    readonly [string, string, string]
-> = {
-    tavern: ['#110e0b', '#c9b37a', '#e6dccb'],
-    midnight: ['#0c1424', '#8dbcf4', '#e1eafa'],
-    forest: ['#0d1913', '#9ec89c', '#e1eddf'],
-    parchment: ['#f3ead7', '#795522', '#30271c'],
-    amethyst: ['#191124', '#c5a2e8', '#ede2f7'],
-    frost: ['#edf4fa', '#275f90', '#203448'],
+export const LEGACY_PALETTES: Readonly<Record<string, PaletteId>> = {
+    midnight: 'tavern',
+    forest: 'tavern',
+    amethyst: 'tavern',
+    frost: 'parchment',
+};
+
+export interface PalettePreview {
+    page: string;
+    panel: string;
+    inset: string;
+    accent: string;
+    ink: string;
+    muted: string;
+}
+
+export const PALETTE_PREVIEW: Record<PaletteId, PalettePreview> = {
+    tavern: {
+        page: '#0d0a08',
+        panel: '#1a140f',
+        inset: '#110d0a',
+        accent: '#c9b37a',
+        ink: '#efe5d2',
+        muted: '#9b9080',
+    },
+    parchment: {
+        page: '#e9e1d1',
+        panel: '#f1ebdf',
+        inset: '#dbd0bc',
+        accent: '#7a5a0e',
+        ink: '#1e1711',
+        muted: '#64584b',
+    },
 };
 
 export function isPaletteId(value: unknown): value is PaletteId {
@@ -33,7 +49,13 @@ export function isPaletteId(value: unknown): value is PaletteId {
 }
 
 export function paletteFor(value: unknown): PaletteId {
-    return isPaletteId(value) ? value : DEFAULT_PALETTE;
+    if (isPaletteId(value)) return value;
+
+    return (
+        (typeof value === 'string' && Object.hasOwn(LEGACY_PALETTES, value)
+            ? LEGACY_PALETTES[value]
+            : undefined) ?? DEFAULT_PALETTE
+    );
 }
 
 export function isPalettePath(pathname: string): boolean {

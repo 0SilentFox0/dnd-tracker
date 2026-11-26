@@ -9,7 +9,7 @@ export function Hero({ t }: { t: Translator }) {
         <section className="relative isolate overflow-hidden px-4 pt-28 pb-20 sm:pt-36">
             <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(230,194,90,.2),transparent_55%),radial-gradient(ellipse_at_50%_70%,rgba(200,90,40,.12),transparent_60%),#0b0908]" />
             <div className="mx-auto max-w-3xl space-y-6 text-center">
-                <p className="hud-sc text-sm tracking-[0.2em] text-hud-gold">
+                <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                     {t('hero.eyebrow')}
                 </p>
                 <h1 className="hud-sc text-4xl leading-[1.05] text-hud-ink sm:text-6xl lg:text-7xl">
@@ -27,7 +27,7 @@ export function Hero({ t }: { t: Translator }) {
                     <Link
                         prefetch={false}
                         href="#how"
-                        className="hud-sc inline-flex h-12 items-center rounded-lg border border-hud-line bg-black/40 px-6 text-base text-hud-ink transition hover:border-hud-gold hover:text-hud-gold-strong"
+                        className="hud-sc inline-flex h-12 items-center rounded-lg border border-hud-line bg-black/40 px-6 text-base text-hud-ink transition hover:border-hud-muted hover:text-hud-ink"
                     >
                         {t('hero.secondary')}
                     </Link>

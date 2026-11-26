@@ -103,7 +103,7 @@ function SideSheet({
             )}
         >
             <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-y border-white/15 pr-2 pl-4">
-                <h2 className="hud-sc text-[15px] font-bold tracking-[.1em] text-[var(--gold)]">
+                <h2 className="hud-sc text-[15px] font-bold tracking-[.1em] text-hud-ink">
                     {title}
                 </h2>
                 <HudIconButton

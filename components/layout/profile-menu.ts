@@ -1,5 +1,6 @@
 import {
     CircleHelp,
+    Crown,
     Globe,
     KeyRound,
     LogOut,
@@ -15,6 +16,7 @@ type ProfileMenuId =
     | 'preferences'
     | 'soundLibrary'
     | 'aiKeys'
+    | 'subscription'
     | 'switchAccount'
     | 'signOut';
 
@@ -25,13 +27,6 @@ export type ProfileMenuEntry = {
 } & ({ href: string } | { action: 'switchAccount' | 'signOut' });
 
 export const PROFILE_MENU: readonly ProfileMenuEntry[] = [
-    { id: 'help', icon: CircleHelp, labelKey: 'help', href: '/help' },
-    {
-        id: 'password',
-        icon: KeyRound,
-        labelKey: 'password',
-        href: '/settings/password',
-    },
     {
         id: 'preferences',
         icon: Globe,
@@ -39,12 +34,25 @@ export const PROFILE_MENU: readonly ProfileMenuEntry[] = [
         href: '/settings/preferences',
     },
     {
+        id: 'password',
+        icon: KeyRound,
+        labelKey: 'password',
+        href: '/settings/password',
+    },
+    { id: 'aiKeys', icon: Sparkles, labelKey: 'aiKeys', href: '/settings/ai' },
+    {
+        id: 'subscription',
+        icon: Crown,
+        labelKey: 'subscription',
+        href: '/settings/subscription',
+    },
+    {
         id: 'soundLibrary',
         icon: Volume2,
         labelKey: 'soundLibrary',
         href: '/library/sounds',
     },
-    { id: 'aiKeys', icon: Sparkles, labelKey: 'aiKeys', href: '/settings/ai' },
+    { id: 'help', icon: CircleHelp, labelKey: 'help', href: '/help' },
     {
         id: 'switchAccount',
         icon: UserRoundCog,

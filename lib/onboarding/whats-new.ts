@@ -6,6 +6,7 @@ export const WHATS_NEW_BUNDLED = 15;
 
 const CORE_WHATS_NEW: WhatsNewEntry[] = [
     { id: '2026-11-26-hex-grid', date: '2026-11-26', audience: 'dm' },
+    { id: '2026-11-25-design-system', date: '2026-11-25', audience: 'all' },
     { id: '2026-11-24-game-ui-battle', date: '2026-11-24', audience: 'all' },
     { id: '2026-11-24-character-sheet', date: '2026-11-24', audience: 'all' },
     { id: '2026-11-22-world-map-hud', date: '2026-11-22', audience: 'all' },

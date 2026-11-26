@@ -103,8 +103,9 @@
     "profile": "Profile",
     "help": "Help",
     "password": "Password",
-    "preferences": "Language and time",
+    "preferences": "Appearance & language",
     "soundLibrary": "Sound library",
+    "subscription": "Subscription",
     "aiKeys": "AI keys",
     "switchAccount": "Switch account",
     "signOut": "Sign out",
@@ -113,11 +114,7 @@
       "label": "Color theme",
       "names": {
         "tavern": "Tavern",
-        "midnight": "Midnight",
-        "forest": "Forest",
-        "parchment": "Parchment",
-        "amethyst": "Amethyst",
-        "frost": "Frost"
+        "parchment": "Parchment"
       },
       "errors": {
         "load": "Couldn't load the theme",
@@ -258,8 +255,6 @@
     "imageUploadFailed": "Failed to upload the image: {message}"
   },
   "profile": {
-    "title": "Profile",
-    "subtitle": "Your account and avatar",
     "avatar": {
       "change": "Change photo",
       "remove": "Remove photo",

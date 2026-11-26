@@ -19,13 +19,13 @@ export async function ActiveQuests({
 
     return (
         <HudPanel className="space-y-3">
-            <h2 className="hud-sc text-sm tracking-widest text-hud-gold">
+            <h2 className="hud-sc text-sm tracking-widest text-hud-ink">
                 {t('activeTitle')}{' '}
                 <span className="text-hud-muted">({count})</span>
             </h2>
             {items.map((q) => (
                 <Link
-                    className="block rounded border border-hud-line p-3 text-sm text-hud-ink hover:border-hud-gold"
+                    className="block rounded border border-hud-line p-3 text-sm text-hud-ink hover:border-hud-muted"
                     key={q.id}
                     href={`/campaigns/${campaignId}/journal?quest=${encodeURIComponent(q.id)}`}
                 >
@@ -38,7 +38,7 @@ export async function ActiveQuests({
                 </p>
             )}
             <Link
-                className="inline-flex min-h-10 items-center text-sm text-hud-gold underline"
+                className="inline-flex min-h-10 items-center text-sm text-hud-accent-fg underline"
                 href={`/campaigns/${campaignId}/journal${isDM && !count ? '?create=1' : ''}`}
             >
                 {t(isDM && !count ? 'new' : 'open')}

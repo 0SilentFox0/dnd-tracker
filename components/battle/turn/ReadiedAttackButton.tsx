@@ -15,7 +15,7 @@ import {
 import type { BattleParticipant } from '@/types/battle';
 
 const TARGET_BUTTON =
-    'border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-[var(--gold)]/50 disabled:opacity-40';
+    'border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-hud-muted disabled:opacity-40';
 
 function ReadiedAttackPicker({
     participant,

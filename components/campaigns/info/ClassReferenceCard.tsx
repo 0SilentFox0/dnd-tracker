@@ -22,7 +22,7 @@ function FeatureList({ features }: { features: ClassFeatureForReference[] }) {
         <ul className="mt-1 space-y-2 text-sm">
             {features.map((f, i) => (
                 <li key={i}>
-                    <span className="hud-sc text-hud-gold">
+                    <span className="hud-sc text-hud-ink">
                         {t('levelShort', { level: f.level })}
                     </span>
                     {f.name && (
@@ -97,7 +97,7 @@ export function ClassReferenceCard({
                     </ul>
                     {gameClass.features.length > 0 && (
                         <div>
-                            <Label className="hud-sc text-xs text-hud-gold">
+                            <Label className="hud-sc text-xs text-hud-ink">
                                 {t('featuresByLevel')}
                             </Label>
                             <FeatureList features={gameClass.features} />
@@ -105,7 +105,7 @@ export function ClassReferenceCard({
                     )}
                     {subclasses.map((s) => (
                         <div key={s.id}>
-                            <Label className="hud-sc flex items-center gap-1.5 text-xs text-hud-gold">
+                            <Label className="hud-sc flex items-center gap-1.5 text-xs text-hud-ink">
                                 {s.icon && (
                                     <EntityIcon
                                         src={s.icon}

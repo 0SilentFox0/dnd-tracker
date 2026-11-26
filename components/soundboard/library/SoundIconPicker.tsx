@@ -27,7 +27,7 @@ export function SoundIconPicker({
                         aria-pressed={value === name}
                         className={cn(
                             'flex items-center justify-center rounded-md p-1.5 text-hud-muted hover:text-hud-ink',
-                            value === name && 'bg-hud-gold/20 text-hud-ink'
+                            value === name && 'bg-hud-panel-2 text-hud-ink'
                         )}
                         onClick={() => onChange(name)}
                     >

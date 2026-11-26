@@ -58,7 +58,7 @@ export function screenBackgroundFor(
     return sub ? (DM_SECTIONS[sub] ?? null) : null;
 }
 
-// rendered first in <body>, outside every Suspense boundary; globals.css picks body::before with body:has([data-screen-bg])
+// rendered first in <body>, outside every Suspense boundary; marker only, no CSS reads data-screen-bg
 export function ScreenBackground() {
     const name = screenBackgroundFor(usePathname());
 

@@ -86,7 +86,7 @@ function InitiativeOrderBody({
                         </span>
                         <HudButton
                             type="button"
-                            className="p-1 text-[var(--gold)] disabled:opacity-30"
+                            className="p-1 text-hud-ink disabled:opacity-30"
                             disabled={i === 0}
                             aria-label={t('up', { name: names.get(id) ?? '' })}
                             onClick={() => move(id, i - 1)}
@@ -95,7 +95,7 @@ function InitiativeOrderBody({
                         </HudButton>
                         <HudButton
                             type="button"
-                            className="p-1 text-[var(--gold)] disabled:opacity-30"
+                            className="p-1 text-hud-ink disabled:opacity-30"
                             disabled={i === order.length - 1}
                             aria-label={t('down', {
                                 name: names.get(id) ?? '',

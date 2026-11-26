@@ -55,7 +55,7 @@ export function SheetTabList({
             <TabsList
                 ref={list}
                 onScroll={syncEdge}
-                className="hud-scroll-x relative flex h-auto w-full justify-start gap-0.5 overflow-x-auto rounded-[4px] border border-hud-line bg-hud-panel/70 p-[3px] shadow-sm backdrop-blur-md"
+                className="hud-scroll-x relative flex h-auto w-full justify-start gap-0.5 overflow-x-auto rounded-lg border border-hud-line bg-hud-panel/70 p-[3px] [mask-image:linear-gradient(90deg,transparent,#000_16px,#000_calc(100%-16px),transparent)] md:[mask-image:none]"
             >
                 {tabs.map((tab) => (
                     <TabsTrigger
@@ -64,7 +64,7 @@ export function SheetTabList({
                         data-tab={tab.id}
                         ref={tab.id === value ? activeTab : undefined}
                         className={cn(
-                            'motion-press relative min-h-11 min-w-fit flex-1 shrink-0 gap-2 rounded-[3px] px-3 text-[15px] font-medium text-hud-text hover:bg-hud-raised hover:text-hud-ink data-[state=active]:bg-hud-raised! data-[state=active]:font-bold data-[state=active]:text-hud-ink! data-[state=active]:shadow-[0_1px_2px_rgba(0,0,0,.35),inset_0_1px_0_rgba(255,255,255,.06)] [&_svg]:size-5 [&_svg]:text-hud-muted data-[state=active]:[&_svg]:text-hud-gold',
+                            'motion-press relative min-h-11 min-w-fit flex-1 shrink-0 gap-2 rounded-md px-3 text-[15px] font-medium text-hud-text hover:bg-hud-panel-2/60 hover:text-hud-ink data-[state=active]:bg-hud-panel-2! data-[state=active]:font-bold data-[state=active]:text-hud-ink! data-[state=active]:shadow-[inset_0_1px_0_var(--hud-hi),inset_0_-2px_0_var(--hud-accent)] [&_svg]:size-5 [&_svg]:text-hud-muted data-[state=active]:[&_svg]:text-hud-accent-fg',
                             trigger
                         )}
                     >

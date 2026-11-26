@@ -103,8 +103,9 @@
     "profile": "Профіль",
     "help": "Довідка",
     "password": "Пароль",
-    "preferences": "Мова і час",
+    "preferences": "Вигляд і мова",
     "soundLibrary": "Бібліотека звуків",
+    "subscription": "Підписка",
     "aiKeys": "AI-ключі",
     "switchAccount": "Змінити акаунт",
     "signOut": "Вийти",
@@ -113,11 +114,7 @@
       "label": "Кольорова тема",
       "names": {
         "tavern": "Таверна",
-        "midnight": "Опівніч",
-        "forest": "Ліс",
-        "parchment": "Пергамент",
-        "amethyst": "Аметист",
-        "frost": "Крига"
+        "parchment": "Пергамент"
       },
       "errors": {
         "load": "Не вдалося завантажити тему",
@@ -258,8 +255,6 @@
     "imageUploadFailed": "Не вдалося завантажити картинку: {message}"
   },
   "profile": {
-    "title": "Профіль",
-    "subtitle": "Ваш обліковий запис і аватар",
     "avatar": {
       "change": "Змінити фото",
       "remove": "Видалити фото",

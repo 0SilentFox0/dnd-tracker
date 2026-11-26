@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { LoadingState } from '@/components/common/states';
-import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { HudFormPage, HudSection } from '@/components/hud/form';
 import { AddSoundMenu } from '@/components/soundboard/library/AddSoundMenu';
 import { PresetEditor } from '@/components/soundboard/library/PresetEditor';
 import { PresetList } from '@/components/soundboard/library/PresetList';
@@ -27,22 +27,15 @@ export function SoundLibraryPageClient() {
     const selected = presets.find((p) => p.id === selectedId) ?? presets[0];
 
     return (
-        <HudPage width="md">
-            <HudPageHeader
-                title={t('library.title')}
-                subtitle={t('library.subtitle')}
-            />
+        <HudFormPage title={t('library.title')} aside={t('library.subtitle')}>
             {isLoading ? (
                 <LoadingState />
             ) : (
                 <>
-                    <HudPanel>
-                        <div className="mb-2 flex items-center justify-between gap-2">
-                            <h2 className="hud-sc text-sm text-hud-ink">
-                                {t('library.sounds')}
-                            </h2>
-                            <AddSoundMenu />
-                        </div>
+                    <HudSection
+                        title={t('library.sounds')}
+                        action={<AddSoundMenu />}
+                    >
                         <div className="grid gap-2 sm:grid-cols-2">
                             {sounds.map((sound) => (
                                 <SoundTile
@@ -55,11 +48,8 @@ export function SoundLibraryPageClient() {
                                 />
                             ))}
                         </div>
-                    </HudPanel>
-                    <HudPanel>
-                        <h2 className="hud-sc mb-2 text-sm text-hud-ink">
-                            {t('library.presets')}
-                        </h2>
+                    </HudSection>
+                    <HudSection title={t('library.presets')}>
                         <div className="grid gap-4 md:grid-cols-2">
                             <PresetList
                                 presets={presets}
@@ -73,7 +63,7 @@ export function SoundLibraryPageClient() {
                                 />
                             )}
                         </div>
-                    </HudPanel>
+                    </HudSection>
                 </>
             )}
             <SoundEditDialog
@@ -81,6 +71,6 @@ export function SoundLibraryPageClient() {
                 presets={presets}
                 onClose={() => setEditing(null)}
             />
-        </HudPage>
+        </HudFormPage>
     );
 }

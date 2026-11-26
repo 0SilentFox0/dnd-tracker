@@ -70,7 +70,7 @@ export function CareerTierFields({ index, tier, feats, onChange }: Props) {
 
     return (
         <fieldset className="space-y-3 rounded border border-hud-line p-3">
-            <legend className="hud-sc px-1 text-sm text-hud-gold">
+            <legend className="hud-sc px-1 text-sm text-hud-ink">
                 {t('tier', { n: index + 1 })}
             </legend>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

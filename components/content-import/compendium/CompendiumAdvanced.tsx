@@ -61,9 +61,9 @@ export function CompendiumAdvanced({
     return (
         <Disclosure
             className="rounded-lg border border-hud-rule p-2 text-sm"
-            chevronClassName="text-hud-gold"
+            chevronClassName="text-hud-muted"
             summary={
-                <span className="text-hud-gold">
+                <span className="text-hud-ink">
                     {t('advanced.title')}
                     {advancedActive(options) && (
                         <span className="ml-2 text-hud-good">
@@ -76,7 +76,7 @@ export function CompendiumAdvanced({
             <div className="mt-2 space-y-3">
                 <label className="flex items-start gap-2">
                     <Checkbox
-                        className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-hud-accent"
                         checked={options.allowMixedEdition ?? false}
                         disabled={busy}
                         onCheckedChange={(v) =>
@@ -90,7 +90,7 @@ export function CompendiumAdvanced({
                 </label>
                 <label className="flex items-start gap-2">
                     <Checkbox
-                        className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-hud-accent"
                         checked={!!options.rulesPatch}
                         disabled={busy}
                         onCheckedChange={(v) =>
@@ -111,9 +111,9 @@ export function CompendiumAdvanced({
                     })}
                 </p>
                 <Disclosure
-                    chevronClassName="text-hud-gold"
+                    chevronClassName="text-hud-muted"
                     summary={
-                        <span className="text-hud-gold">
+                        <span className="text-hud-ink">
                             {t('categoriesStep.sources')}
                         </span>
                     }

@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { useAccountSeed } from './useSessionUser';
+
 import { localeApi } from '@/lib/api/locale';
 import { AFTER_SIGN_IN_PATH, RESET_PASSWORD_PATH } from '@/lib/constants/auth';
 import { LOCALE_CHANGE_EVENT } from '@/lib/i18n/config';
@@ -194,11 +196,15 @@ export function useUpdatePassword() {
 
     const { pending, error, run } = useRequestState();
 
-    const [session, setSession] = useState<PasswordSession>('checking');
+    const seed = useAccountSeed();
 
-    const [email, setEmail] = useState<string | null>(null);
+    const [session, setSession] = useState<PasswordSession>(
+        seed ? 'ready' : 'checking'
+    );
 
-    const [hasPassword, setHasPassword] = useState(false);
+    const [email, setEmail] = useState<string | null>(seed?.user.email ?? null);
+
+    const [hasPassword, setHasPassword] = useState(seed?.hasPassword ?? false);
 
     const [done, setDone] = useState(false);
 

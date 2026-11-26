@@ -100,7 +100,7 @@ export function CastTestBody({
 
     return (
         <div className="mt-2">
-            <div className="text-sm text-hud-gold">
+            <div className="text-sm text-hud-ink">
                 {t('line', {
                     cn: cast.cn,
                     target: cast.target,

@@ -203,7 +203,7 @@ export function QuestEditor({
                             </Button>
                         )}
                     </div>
-                    <h3 className="hud-sc text-hud-gold">{t('objectives')}</h3>
+                    <h3 className="hud-sc text-hud-ink">{t('objectives')}</h3>
                     {data.objectives.map((o, index) => (
                         <div
                             key={index}

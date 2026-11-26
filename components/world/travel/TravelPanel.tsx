@@ -151,7 +151,7 @@ export function TravelPanel({
             </div>
 
             {hasActiveSession === false ? (
-                <p className="text-xs text-hud-gold-bright">
+                <p className="text-xs text-hud-ink">
                     {tSessions('hint')}
                 </p>
             ) : null}

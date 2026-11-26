@@ -63,7 +63,7 @@
   bottom: 0;
   height: 3px;
   transform-origin: left center;
-  background: var(--hud-gold);
+  background: var(--hud-accent);
 }
 
 .motion-bar {
@@ -81,13 +81,20 @@
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  box-shadow: 0 0 0 2px var(--hud-gold-strong);
+  box-shadow: 0 0 0 2px var(--hud-accent-fg);
   opacity: 0;
   pointer-events: none;
   animation: motion-ring 2400ms var(--ease-out) 3;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
   .motion-bar { transition: none; }
   .motion-pulse::after { animation: none; }
   .motion-rise,
@@ -101,6 +108,9 @@
   .motion-lift { transition: none; }
   .motion-press:active { transform: none; }
   .motion-lift:hover { transform: none; }
+  .page-transition,
+  [data-slot='tabs-content'],
+  .ds-interactive { animation: none !important; transition: none !important; }
 }
 
 /* Character sheet: scoped zoom for large screens */

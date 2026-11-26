@@ -132,7 +132,7 @@ export function SpellAimPanel({
                                                 {participant.basicInfo.name}
                                             </span>
                                             {ally && (
-                                                <span className="ml-auto text-xs text-hud-gold-bright">
+                                                <span className="ml-auto text-xs text-hud-ink">
                                                     {tw('ally')}
                                                 </span>
                                             )}

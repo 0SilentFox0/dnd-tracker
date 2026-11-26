@@ -131,7 +131,7 @@ export function GoalList() {
                                     )
                                 )
                             }
-                            className="flex size-8 shrink-0 items-center justify-center text-hud-gold disabled:cursor-default"
+                            className="flex size-8 shrink-0 items-center justify-center text-hud-accent-fg disabled:cursor-default"
                         >
                             {g.status === 'done' ? (
                                 <Check className="size-4" />
@@ -164,7 +164,7 @@ export function GoalList() {
                                                 'rounded border px-1.5 text-[10px] tracking-[.06em] uppercase',
                                                 g.kind === GoalKind.SECRET
                                                     ? 'border-hud-danger text-hud-danger'
-                                                    : 'border-hud-gold text-hud-gold'
+                                                    : 'border-hud-line text-hud-ink'
                                             )}
                                         >
                                             {t(g.kind)}
@@ -280,7 +280,7 @@ export function GoalList() {
                     <Button
                         type="button"
                         variant="ghost"
-                        className="mt-1 h-11 gap-1 px-0 text-hud-gold"
+                        className="mt-1 h-11 gap-1 px-0 text-hud-ink"
                         onClick={() =>
                             setDraft({ id: null, title: '', text: '' })
                         }
