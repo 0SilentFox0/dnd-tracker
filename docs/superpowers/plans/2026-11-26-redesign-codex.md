@@ -381,7 +381,7 @@ CompendiumHistory(p: { campaignId: string; wizard: CompendiumImportController })
 - [ ] `pnpm test:run components/common/fields components/content-import` → коміт.
 
 ### T5.2 Каркас майстра, рейка, підсумок, перегляд кроку, крок «Категорії» (A5)
-**Файли:** створити `compendium/layout/{CompendiumWizardLayout,CompendiumStepRail,CompendiumSummary}.tsx`, `compendium/steps/CategoriesStep.tsx` (з `CompendiumCategories` + `CompendiumMaterials` + `CompendiumAdvanced`, які переїжджають у `steps/`), `lib/hooks/compendium-import/{useCompendiumWizardView,usePreviewExpiry}.ts` + барель + тести, `lib/constants/compendium-import.ts` (`COMPENDIUM_PREVIEW_TTL_MS = 15 * 60_000`; `token.ts` імпортує константу), `components/common/shell/StepIndicator.tsx` (+ `onSelect?: (i: number) => void`, `max?: number`; недоступні кроки `aria-disabled`).
+**Файли:** створити `compendium/layout/{CompendiumWizardLayout,CompendiumStepRail,CompendiumSummary}.tsx`, `compendium/steps/CategoriesStep.tsx` (з `CompendiumCategories` + `CompendiumMaterials` + `CompendiumAdvanced`, які переїжджають у `steps/`), `lib/hooks/compendium-import/{useCompendiumWizardView,usePreviewExpiry}.ts` + барель + тести, `lib/constants/compendium-import.ts` (файл існує; додати `COMPENDIUM_PREVIEW_TTL_MS = 15 * 60_000`, `token.ts` імпортує константу), `components/common/shell/StepIndicator.tsx` (+ `onSelect?: (i: number) => void`, `max?: number`; недоступні кроки `aria-disabled`).
 ```ts
 useCompendiumWizardView(state: CompendiumImportController['state']): { step: 0|1|2|3|4; setStep: (s: number) => void; maxStep: number }
 // maxStep = compendiumStep(state) (move fn from CompendiumSteps.tsx); view auto-advances when maxStep grows; setStep clamps to ≤ maxStep
