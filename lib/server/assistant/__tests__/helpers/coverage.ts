@@ -639,6 +639,13 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'planned',
     },
     {
+        route: 'campaigns/[id]/maps/[mapId]/art',
+        methods: ['DELETE', 'GET', 'PUT'],
+        task: 0,
+        adapter: 'battle-map art scene, DM UI only, not assistant-exposed',
+        state: 'planned',
+    },
+    {
         route: 'campaigns/[id]/world/discard-upload',
         methods: ['POST'],
         task: 0,
