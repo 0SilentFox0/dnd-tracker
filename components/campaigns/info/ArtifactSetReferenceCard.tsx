@@ -1,14 +1,14 @@
 import { useTranslations } from 'next-intl';
 import { Gem } from 'lucide-react';
 
-import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
+import { ArtifactSetBlock } from './detail/ArtifactSetBlock';
+
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Label } from '@/components/ui/label';
 import type { ArtifactSetForReference } from '@/types/info-reference';
 
 export function ArtifactSetReferenceCard({
@@ -16,7 +16,7 @@ export function ArtifactSetReferenceCard({
 }: {
     set: ArtifactSetForReference;
 }) {
-    const t = useTranslations('dashboard.reference.card');
+    const t = useTranslations('artifacts.reference');
 
     return (
         <AccordionItem
@@ -47,25 +47,8 @@ export function ArtifactSetReferenceCard({
                 </div>
             </AccordionTrigger>
             <AccordionContent>
-                <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
-                    {set.description && (
-                        <div>
-                            <Label className="hud-sc text-xs text-hud-ink">
-                                {t('description')}
-                            </Label>
-                            <p className="mt-0.5 text-sm">{set.description}</p>
-                        </div>
-                    )}
-                    {set.bonuses.length > 0 && (
-                        <div>
-                            <Label className="hud-sc text-xs text-hud-ink">
-                                {t('setBonuses')}
-                            </Label>
-                            <div className="mt-1">
-                                <AbilityFlowList lines={set.bonuses} />
-                            </div>
-                        </div>
-                    )}
+                <div className="border-t border-hud-line p-3">
+                    <ArtifactSetBlock set={set} />
                 </div>
             </AccordionContent>
         </AccordionItem>

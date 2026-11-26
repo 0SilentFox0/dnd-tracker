@@ -312,26 +312,6 @@
         "title": "Sets"
       }
     },
-    "card": {
-      "levelShort": "lvl {level}",
-      "description": "Description",
-      "effects": "Effects",
-      "mechanics": "Mechanics",
-      "skillDescription": "Description / mechanics",
-      "skillHow": "How it works (bonuses, effects, triggers)",
-      "appearanceSkill": "Appearance description (how it looks in the game)",
-      "appearanceSpell": "Appearance description (how the spell looks)",
-      "appearancePlaceholderSkill": "For example: a bright fire orb flying at the target...",
-      "appearancePlaceholderSpell": "For example: a fireball exploding in bright flames...",
-      "saveAppearance": "Save appearance description",
-      "featuresByLevel": "Features by level",
-      "subclass": "Subclass: {name}",
-      "gear": "gear",
-      "heldBy": "held by {name}",
-      "free": "free",
-      "setItems": "Items: {names}",
-      "setBonuses": "Set bonuses"
-    },
     "mechanics": {
       "branch": "Branch: {name}",
       "abilities": "Abilities: {list}",

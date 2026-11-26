@@ -107,5 +107,10 @@
     "poolNotNumber": "Пул «{label}»: рівень {level} — не число",
     "columnMissing": "Немає колонки «{key}» у таблиці класу",
     "choiceIdRepeated": "Id вибору «{id}» повторюється"
+  },
+  "reference": {
+    "levelShort": "рів. {level}",
+    "featuresByLevel": "Вміння за рівнями",
+    "subclass": "Підклас: {name}"
   }
 }

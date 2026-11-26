@@ -1,5 +1,6 @@
-import { useTranslations } from 'next-intl';
 import { GraduationCap } from 'lucide-react';
+
+import { ClassReferenceDetail } from './detail/ClassReferenceDetail';
 
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import {
@@ -7,58 +8,16 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Label } from '@/components/ui/label';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { classSummaryText } from '@/lib/utils/campaigns/info-reference';
-import type {
-    ClassFeatureForReference,
-    ClassForReference,
-} from '@/types/info-reference';
-
-function FeatureList({ features }: { features: ClassFeatureForReference[] }) {
-    const t = useTranslations('dashboard.reference.card');
-
-    return (
-        <ul className="mt-1 space-y-2 text-sm">
-            {features.map((f, i) => (
-                <li key={i}>
-                    <span className="hud-sc text-hud-ink">
-                        {t('levelShort', { level: f.level })}
-                    </span>
-                    {f.name && (
-                        <span className="ml-2 inline-flex items-center gap-1.5 align-middle font-medium text-hud-ink">
-                            {f.icon && (
-                                <EntityIcon
-                                    src={f.icon}
-                                    name={f.name}
-                                    size={20}
-                                    className="size-5 rounded text-xs"
-                                />
-                            )}
-                            {f.name}
-                        </span>
-                    )}
-                    {f.description && (
-                        <p className="mt-0.5 whitespace-pre-line text-hud-bone">
-                            {f.description}
-                        </p>
-                    )}
-                </li>
-            ))}
-        </ul>
-    );
-}
+import type { ClassForReference } from '@/types/info-reference';
 
 export function ClassReferenceCard({
     gameClass,
 }: {
     gameClass: ClassForReference;
 }) {
-    const t = useTranslations('dashboard.reference.card');
-
     const translate = useTranslator();
-
-    const { subclasses } = gameClass;
 
     const summary = gameClass.summary.map((line) =>
         classSummaryText(translate, line)
@@ -89,36 +48,8 @@ export function ClassReferenceCard({
                 </div>
             </AccordionTrigger>
             <AccordionContent>
-                <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
-                    <ul className="list-inside list-disc space-y-0.5 text-sm">
-                        {summary.map((line) => (
-                            <li key={line}>{line}</li>
-                        ))}
-                    </ul>
-                    {gameClass.features.length > 0 && (
-                        <div>
-                            <Label className="hud-sc text-xs text-hud-ink">
-                                {t('featuresByLevel')}
-                            </Label>
-                            <FeatureList features={gameClass.features} />
-                        </div>
-                    )}
-                    {subclasses.map((s) => (
-                        <div key={s.id}>
-                            <Label className="hud-sc flex items-center gap-1.5 text-xs text-hud-ink">
-                                {s.icon && (
-                                    <EntityIcon
-                                        src={s.icon}
-                                        name={s.name}
-                                        size={20}
-                                        className="size-5 rounded text-xs"
-                                    />
-                                )}
-                                {t('subclass', { name: s.name })}
-                            </Label>
-                            <FeatureList features={s.features} />
-                        </div>
-                    ))}
+                <div className="border-t border-hud-line p-3">
+                    <ClassReferenceDetail item={gameClass} />
                 </div>
             </AccordionContent>
         </AccordionItem>

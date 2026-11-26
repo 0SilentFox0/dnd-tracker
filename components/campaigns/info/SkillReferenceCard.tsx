@@ -1,7 +1,8 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
+
+import { SkillReferenceDetail } from './detail/SkillReferenceDetail';
 
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import {
@@ -9,15 +10,8 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { useUpdateSkillAppearance } from '@/lib/hooks/skills';
 import { useTranslator } from '@/lib/i18n/use-translator';
-import {
-    formatMechanicsSkill,
-    getShortSkillSummary,
-} from '@/lib/utils/campaigns/info-reference';
+import { getShortSkillSummary } from '@/lib/utils/campaigns/info-reference';
 import type { SkillForReference } from '@/types/info-reference';
 
 interface SkillReferenceCardProps {
@@ -31,18 +25,6 @@ export function SkillReferenceCard({
     skill,
     isDM,
 }: SkillReferenceCardProps) {
-    const {
-        draft: { data: appearance, set: setAppearance },
-        status: { isSaving: saving },
-        save,
-    } = useUpdateSkillAppearance(
-        campaignId,
-        skill.id,
-        skill.appearanceDescription ?? ''
-    );
-
-    const t = useTranslations('dashboard.reference.card');
-
     const translate = useTranslator();
 
     const shortSummary = getShortSkillSummary(skill, translate);
@@ -80,67 +62,19 @@ export function SkillReferenceCard({
                             </span>
                         )}
                         <p className="mt-1.5 line-clamp-2 text-xs text-hud-muted">
-                            {appearance.trim() ? appearance : shortSummary}
+                            {skill.appearanceDescription?.trim() ||
+                                shortSummary}
                         </p>
                     </div>
                 </div>
             </AccordionTrigger>
             <AccordionContent>
-                <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
-                    {skill.description && (
-                        <div>
-                            <Label className="hud-sc text-xs text-hud-ink">
-                                {t('skillDescription')}
-                            </Label>
-                            <p className="mt-0.5 text-sm">
-                                {skill.description}
-                            </p>
-                        </div>
-                    )}
-                    <div>
-                        <Label className="hud-sc text-xs text-hud-ink">
-                            {t('skillHow')}
-                        </Label>
-                        <p className="mt-0.5 text-sm">
-                            {formatMechanicsSkill(skill, translate)}
-                        </p>
-                    </div>
-                    <div>
-                        <Label className="hud-sc text-xs text-hud-ink">
-                            {t('appearanceSkill')}
-                        </Label>
-                        {isDM ? (
-                            <div className="mt-1 space-y-2">
-                                <Textarea
-                                    value={appearance}
-                                    onChange={(e) =>
-                                        setAppearance(e.target.value)
-                                    }
-                                    placeholder={t(
-                                        'appearancePlaceholderSkill'
-                                    )}
-                                    rows={3}
-                                    className="min-h-[80px] text-sm"
-                                />
-                                <Button
-                                    size="sm"
-                                    disabled={saving}
-                                    onClick={save}
-                                    className="min-h-9 touch-manipulation"
-                                >
-                                    {saving ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        t('saveAppearance')
-                                    )}
-                                </Button>
-                            </div>
-                        ) : (
-                            <p className="mt-0.5 text-sm">
-                                {skill.appearanceDescription || '—'}
-                            </p>
-                        )}
-                    </div>
+                <div className="border-t border-hud-line p-3">
+                    <SkillReferenceDetail
+                        campaignId={campaignId}
+                        item={skill}
+                        isDM={isDM}
+                    />
                 </div>
             </AccordionContent>
         </AccordionItem>

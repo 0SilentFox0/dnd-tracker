@@ -312,26 +312,6 @@
         "title": "Сети"
       }
     },
-    "card": {
-      "levelShort": "рів. {level}",
-      "description": "Опис",
-      "effects": "Ефекти",
-      "mechanics": "Механіка",
-      "skillDescription": "Опис / механіка",
-      "skillHow": "Як діє (бонуси, ефекти, тригери)",
-      "appearanceSkill": "Опис вигляду (як виглядає в грі)",
-      "appearanceSpell": "Опис вигляду (як виглядає заклинання)",
-      "appearancePlaceholderSkill": "Наприклад: яскрава вогняна сфера, що летить до цілі...",
-      "appearancePlaceholderSpell": "Наприклад: вогняна куля, що вибухає яскравим полум'ям...",
-      "saveAppearance": "Зберегти опис вигляду",
-      "featuresByLevel": "Вміння за рівнями",
-      "subclass": "Підклас: {name}",
-      "gear": "спорядження",
-      "heldBy": "у {name}",
-      "free": "вільний",
-      "setItems": "Предмети: {names}",
-      "setBonuses": "Бонуси сету"
-    },
     "mechanics": {
       "branch": "Гілка: {name}",
       "abilities": "Вміння: {list}",

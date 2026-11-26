@@ -1,14 +1,14 @@
 import { useTranslations } from 'next-intl';
 import { Gem } from 'lucide-react';
 
-import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
+import { ArtifactReferenceDetail } from './detail/ArtifactReferenceDetail';
+
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Label } from '@/components/ui/label';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { ArtifactForReference } from '@/types/info-reference';
 
@@ -17,7 +17,7 @@ export function ArtifactReferenceCard({
 }: {
     artifact: ArtifactForReference;
 }) {
-    const t = useTranslations('dashboard.reference.card');
+    const t = useTranslations('artifacts.reference');
 
     const ta = useTranslator('artifacts');
 
@@ -58,27 +58,8 @@ export function ArtifactReferenceCard({
                 </div>
             </AccordionTrigger>
             <AccordionContent>
-                <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
-                    {artifact.description && (
-                        <div>
-                            <Label className="hud-sc text-xs text-hud-ink">
-                                {t('description')}
-                            </Label>
-                            <p className="mt-0.5 text-sm">
-                                {artifact.description}
-                            </p>
-                        </div>
-                    )}
-                    {artifact.effects.length > 0 && (
-                        <div>
-                            <Label className="hud-sc text-xs text-hud-ink">
-                                {t('effects')}
-                            </Label>
-                            <div className="mt-1">
-                                <AbilityFlowList lines={artifact.effects} />
-                            </div>
-                        </div>
-                    )}
+                <div className="border-t border-hud-line p-3">
+                    <ArtifactReferenceDetail item={artifact} />
                 </div>
             </AccordionContent>
         </AccordionItem>

@@ -317,5 +317,14 @@
       "holySymbol": "Holy symbol",
       "focus": "Material focus"
     }
+  },
+  "reference": {
+    "levelShort": "lvl {level}",
+    "description": "Description",
+    "effects": "Effects",
+    "mechanics": "Mechanics",
+    "appearance": "Appearance description (how the spell looks)",
+    "appearancePlaceholder": "For example: a fireball exploding in bright flames...",
+    "saveAppearance": "Save appearance description"
   }
 }

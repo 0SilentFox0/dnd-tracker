@@ -1,25 +1,18 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
+
+import { SpellReferenceDetail } from './detail/SpellReferenceDetail';
 
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
-import { SpellBattlePreview } from '@/components/spells/preview/SpellBattlePreview';
 import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { useAbilityText } from '@/lib/hooks/abilities';
-import { useUpdateSpellAppearance } from '@/lib/hooks/spells';
 import { useTranslator } from '@/lib/i18n/use-translator';
-import {
-    formatMechanicsSpell,
-    getShortSpellSummary,
-} from '@/lib/utils/campaigns/info-reference';
+import { getShortSpellSummary } from '@/lib/utils/campaigns/info-reference';
 import type { SpellForReference } from '@/types/info-reference';
 
 interface SpellReferenceCardProps {
@@ -33,21 +26,9 @@ export function SpellReferenceCard({
     spell,
     isDM,
 }: SpellReferenceCardProps) {
-    const {
-        draft: { data: appearance, set: setAppearance },
-        status: { isSaving: saving },
-        save,
-    } = useUpdateSpellAppearance(
-        campaignId,
-        spell.id,
-        spell.appearanceDescription ?? ''
-    );
-
-    const t = useTranslations('dashboard.reference.card');
+    const t = useTranslations('spells.reference');
 
     const translate = useTranslator();
-
-    const effects = useAbilityText().lines(spell.effects);
 
     const shortSummary = getShortSpellSummary(spell, translate);
 
@@ -74,91 +55,19 @@ export function SpellReferenceCard({
                             {spell.groupName ? ` · ${spell.groupName}` : ''}
                         </span>
                         <p className="mt-1.5 line-clamp-2 text-xs text-hud-muted">
-                            {appearance.trim() ? appearance : shortSummary}
+                            {spell.appearanceDescription?.trim() ||
+                                shortSummary}
                         </p>
                     </div>
                 </div>
             </AccordionTrigger>
             <AccordionContent>
-                <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
-                    <div>
-                        <Label className="hud-sc text-xs text-hud-ink">
-                            {t('mechanics')}
-                        </Label>
-                        <p className="mt-0.5 text-sm">
-                            {formatMechanicsSpell(spell, translate)}
-                        </p>
-                    </div>
-                    {spell.description && (
-                        <div>
-                            <Label className="hud-sc text-xs text-hud-ink">
-                                {t('description')}
-                            </Label>
-                            <p className="mt-0.5 text-sm">
-                                {spell.description}
-                            </p>
-                        </div>
-                    )}
-                    {spell.effects.length > 0 && (
-                        <div>
-                            <Label className="hud-sc text-xs text-hud-ink">
-                                {t('effects')}
-                            </Label>
-                            <ul className="mt-0.5 list-inside list-disc space-y-0.5 text-sm">
-                                {effects.map((e, i) => (
-                                    <li key={i}>{e}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                    <div>
-                        <Label className="hud-sc text-xs text-hud-ink">
-                            {t('appearanceSpell')}
-                        </Label>
-                        {isDM ? (
-                            <div className="mt-1 space-y-2">
-                                <Textarea
-                                    value={appearance}
-                                    onChange={(e) =>
-                                        setAppearance(e.target.value)
-                                    }
-                                    placeholder={t(
-                                        'appearancePlaceholderSpell'
-                                    )}
-                                    rows={3}
-                                    className="min-h-[80px] text-sm"
-                                />
-                                <Button
-                                    size="sm"
-                                    disabled={saving}
-                                    onClick={save}
-                                    className="min-h-9 touch-manipulation"
-                                >
-                                    {saving ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        t('saveAppearance')
-                                    )}
-                                </Button>
-                            </div>
-                        ) : (
-                            <p className="mt-0.5 text-sm">
-                                {spell.appearanceDescription || '—'}
-                            </p>
-                        )}
-                    </div>
-                    {spell.rules && (
-                        <SpellBattlePreview
-                            spell={{
-                                id: spell.id,
-                                name: spell.name,
-                                level: spell.level,
-                                groupId: null,
-                                fx: spell.fx,
-                                rules: spell.rules,
-                            }}
-                        />
-                    )}
+                <div className="border-t border-hud-line p-3">
+                    <SpellReferenceDetail
+                        campaignId={campaignId}
+                        item={spell}
+                        isDM={isDM}
+                    />
                 </div>
             </AccordionContent>
         </AccordionItem>
