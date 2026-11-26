@@ -148,4 +148,20 @@ describe('RosterPhoneBar', () => {
         );
         expect(set).toHaveBeenCalledWith(true);
     });
+
+    it('docks above the measured form footer, not a fixed offset', () => {
+        render(
+            <RosterPhoneBar
+                participants={participants}
+                balance={balance}
+                roster={{ open: false, set: vi.fn() }}
+            >
+                <div />
+            </RosterPhoneBar>
+        );
+
+        expect(screen.getByTestId('roster-phone-bar').className).toContain(
+            'bottom-[var(--hud-form-footer-h,4.5rem)]'
+        );
+    });
 });

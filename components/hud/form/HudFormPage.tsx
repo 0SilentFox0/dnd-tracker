@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { HudFormPreviewButton } from './HudFormPreviewButton';
@@ -6,6 +6,7 @@ import { HudFormPreviewButton } from './HudFormPreviewButton';
 import '@/components/hud/hud.css';
 import { HUD_SURFACE } from '@/components/hud';
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
+import { useElementSize } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 
 export type HudFormPageWidth = 'narrow' | 'wide' | 'page';
@@ -42,8 +43,17 @@ export function HudFormPage({
 
     const hasSide = wide && side != null;
 
+    const { ref: footerRef, size: footer } = useElementSize<HTMLDivElement>();
+
+    // sticky bars of the page body dock above the real footer height
+    const footerStyle =
+        actions && footer.height > 0
+            ? ({ '--hud-form-footer-h': `${footer.height}px` } as CSSProperties)
+            : undefined;
+
     return (
         <div
+            style={footerStyle}
             className={cn(
                 HUD_SURFACE,
                 'hud-form hud-form-page mx-auto flex min-h-dvh w-full flex-col sm:my-4 sm:min-h-0 sm:rounded-[var(--r)] sm:bg-hud-panel sm:p-6 sm:shadow-[var(--hud-sh)]',
@@ -79,7 +89,11 @@ export function HudFormPage({
                         </HudFormPreviewButton>
                     )}
                 </header>
-                {actions && <div className={ACTIONS}>{actions}</div>}
+                {actions && (
+                    <div ref={footerRef} className={ACTIONS}>
+                        {actions}
+                    </div>
+                )}
             </div>
             <div className="orn" aria-hidden />
             <HudPortalClassProvider value={HUD_SURFACE}>

@@ -35,6 +35,10 @@ import {
     useBattleSetupView,
 } from '@/lib/hooks/battles';
 
+// two submit buttons share one row on phones: zero basis keeps flex-wrap from wrapping them
+const SUBMIT_FIT =
+    'min-w-0 flex-1 basis-0 truncate px-3 sm:flex-none sm:basis-auto';
+
 interface BattleSetupFormProps {
     campaignId: string;
     battleId?: string;
@@ -272,6 +276,7 @@ function BattleSetupLayout({
                             name="intent"
                             value="start"
                             variant="outline"
+                            className={SUBMIT_FIT}
                             disabled={saving}
                         >
                             {t('createAndStart')}
@@ -280,6 +285,7 @@ function BattleSetupLayout({
                     <Button
                         type="submit"
                         form={formId}
+                        className={SUBMIT_FIT}
                         disabled={saving || locked}
                     >
                         {isEdit
