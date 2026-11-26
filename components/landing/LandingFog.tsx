@@ -2,27 +2,57 @@
 
 import { useEffect, useRef } from 'react';
 
+import {
+    type FogQuality,
+    useCoarsePointer,
+    useFogCompact,
+    useFogQuality,
+} from '@/lib/hooks/common';
+import {
+    type CoverBand,
+    coverClouds,
+    type CoverRegion,
+    type ShadeBasis,
+    shaderShadeBasis,
+} from '@/lib/utils/canvas/fog/cloud-cover';
+import {
+    acquireCloudMotion,
+    type CloudMotion,
+} from '@/lib/utils/canvas/fog/cloud-motion';
 import { cloudTexture } from '@/lib/utils/canvas/fog/cloud-texture';
 import { subscribe } from '@/lib/utils/canvas/ticker';
 
-const MAX_PIXELS = 420_000;
+// Same cloud framing and pixel budget as WorldFog's cropped map.
+const CLOUD_ZOOM = 1.28;
 
-const PIXEL_SCALE = { desktop: 0.6, compact: 0.4 };
+const MAX_PIXELS = 580_000;
+
+const PIXEL_SCALE = 0.72;
+
+const GAP = { wide: 0.33, compact: 0.45 };
+
+const COMPACT_ALPHA = 0.86;
 
 const TRAIL_SCALE = 0.25;
 
 const BRUSH_RADIUS = 170;
 
-const REFILL_SECONDS = 0.8;
+const REFILL_SECONDS = 0.7;
 
 // 8-bit alpha never decays to zero by multiplication, so an idle trail is wiped outright
 const TRAIL_RESET_MS = 2600;
 
 const FPS = 30;
 
-const HAZE = 'rgba(96, 106, 130, 0.42)';
+type Variant = 'hero' | 'final';
 
-type Ctx = CanvasRenderingContext2D;
+interface Mode {
+    quality: FogQuality;
+    interactive: boolean;
+    gap: number;
+    alpha: number;
+    hole: boolean;
+}
 
 function afterFirstPaint(run: () => void) {
     let idle = 0;
@@ -47,108 +77,29 @@ function afterFirstPaint(run: () => void) {
     };
 }
 
-type Thin = 'left' | 'center' | null;
-
-function paintFog(
-    ctx: Ctx,
-    cloud: HTMLCanvasElement,
-    w: number,
-    h: number,
-    now: number,
-    thin: Thin
-) {
-    const scale = Math.max(w / cloud.width, h / cloud.height) * 1.28;
-
-    const width = cloud.width * scale;
-
-    const height = cloud.height * scale;
-
-    const left = (w - width) / 2;
-
-    const top = (h - height) / 2;
-
-    const dx = Math.sin(now / 4100) * w * 0.105;
-
-    const dy = Math.cos(now / 5300) * h * 0.105;
-
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.clearRect(0, 0, w, h);
-    // flat haze under the clouds so the gaps between them never show bare map
-    ctx.fillStyle = HAZE;
-    ctx.fillRect(0, 0, w, h);
-    ctx.globalAlpha = 0.95;
-    ctx.drawImage(cloud, left + dx, top + dy, width, height);
-    ctx.globalAlpha = 0.6;
-    ctx.drawImage(cloud, left - dx * 0.7, top - dy * 0.8, width, height);
-    // third layer drifts on the swapped phase so the density never lines up
-    ctx.globalAlpha = 0.45;
-    ctx.drawImage(
-        cloud,
-        left + dy * (w / h) * 0.9,
-        top - dx * (h / w) * 0.9,
-        width,
-        height
-    );
-    ctx.globalAlpha = 1;
-
-    if (!thin) return;
-
-    const hole =
-        thin === 'left'
-            ? ctx.createLinearGradient(0, 0, w, 0)
-            : ctx.createRadialGradient(
-                  w / 2,
-                  h / 2,
-                  0,
-                  w / 2,
-                  h / 2,
-                  Math.max(w, h) * 0.42
-              );
-
-    if (thin === 'left') {
-        // thinner behind the copy so the heading keeps its contrast
-        hole.addColorStop(0, 'rgba(0,0,0,0.78)');
-        hole.addColorStop(0.4, 'rgba(0,0,0,0.6)');
-        hole.addColorStop(0.66, 'rgba(0,0,0,0)');
-    } else {
-        hole.addColorStop(0, 'rgba(0,0,0,0.96)');
-        hole.addColorStop(0.45, 'rgba(0,0,0,0.8)');
-        hole.addColorStop(1, 'rgba(0,0,0,0)');
-    }
-
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = hole;
-    ctx.fillRect(0, 0, w, h);
-}
-
-export function LandingFog({
-    variant = 'hero',
-}: {
-    variant?: 'hero' | 'final';
-}) {
+export function LandingFog({ variant = 'hero' }: { variant?: Variant }) {
     const ref = useRef<HTMLCanvasElement>(null);
+
+    const quality = useFogQuality({ trackHidden: false });
+
+    const compact = useFogCompact();
+
+    const coarse = useCoarsePointer();
 
     useEffect(() => {
         const canvas = ref.current;
 
         if (!canvas) return;
 
-        const media = (q: string) => window.matchMedia(q).matches;
-
-        const reduced = media('(prefers-reduced-motion: reduce)');
-
-        const interactive = !reduced && !media('(pointer: coarse)');
-
-        const compact = media('(max-width: 768px)');
-
         let cleanup: (() => void) | null = null;
 
         const cancelStart = afterFirstPaint(() => {
             cleanup = start(canvas, {
-                reduced,
-                interactive,
-                thin: variant === 'final' ? 'center' : compact ? null : 'left',
-                compact,
+                quality,
+                interactive: quality === 'live' && !coarse,
+                gap: compact ? GAP.compact : GAP.wide,
+                alpha: compact ? COMPACT_ALPHA : 1,
+                hole: variant === 'final',
             });
         });
 
@@ -156,7 +107,7 @@ export function LandingFog({
             cancelStart();
             cleanup?.();
         };
-    }, [variant]);
+    }, [variant, quality, compact, coarse]);
 
     return (
         <div aria-hidden className={`ld-fog-wrap ld-fog-${variant}`}>
@@ -165,20 +116,119 @@ export function LandingFog({
     );
 }
 
-function start(
-    canvas: HTMLCanvasElement,
-    mode: {
-        reduced: boolean;
-        interactive: boolean;
-        compact: boolean;
-        thin: Thin;
-    }
-) {
+function coveredTexture(gap: number) {
+    const source = cloudTexture();
+
+    const canvas = document.createElement('canvas');
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    if (!source || !ctx) return null;
+
+    canvas.width = source.width;
+    canvas.height = source.height;
+    ctx.drawImage(source, 0, 0);
+
+    const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    coverClouds(image, gap, null);
+    ctx.putImageData(image, 0, 0);
+
+    return canvas;
+}
+
+function start(canvas: HTMLCanvasElement, mode: Mode) {
     const ctx = canvas.getContext('2d');
 
-    const cloud = cloudTexture();
+    const work = document.createElement('canvas');
 
-    if (!ctx || !cloud) return null;
+    const workCtx = work.getContext('2d', { willReadFrequently: true });
+
+    if (!ctx || !workCtx) return null;
+
+    const live = mode.quality === 'live';
+
+    let webgl = mode.quality !== 'flat';
+
+    let motion: CloudMotion | null = null;
+
+    let basis: ShadeBasis | null = null;
+
+    let band: CoverBand | null = null;
+
+    let texture: HTMLCanvasElement | null | undefined;
+
+    const releaseMotion = () => {
+        motion?.release();
+        motion = null;
+    };
+
+    const shaderFrame = (seconds: number) => {
+        if (!motion && webgl) {
+            motion = acquireCloudMotion();
+            webgl = !!motion;
+        }
+
+        if (!motion) return null;
+
+        if (!motion.render(seconds)) {
+            releaseMotion();
+            webgl = false;
+
+            return null;
+        }
+
+        const source = motion.canvas;
+
+        if (work.width !== source.width || work.height !== source.height) {
+            work.width = source.width;
+            work.height = source.height;
+            basis = null;
+        }
+
+        basis ??= shaderShadeBasis(work.width, work.height);
+        workCtx.drawImage(source, 0, 0);
+
+        const image = workCtx.getImageData(0, 0, work.width, work.height);
+
+        band = coverClouds(image, mode.gap, basis, band, visible(work));
+        workCtx.putImageData(image, 0, 0);
+
+        return work;
+    };
+
+    const framing = (cloud: HTMLCanvasElement) => {
+        const scale = Math.max(w / cloud.width, h / cloud.height) * CLOUD_ZOOM;
+
+        const width = cloud.width * scale;
+
+        const height = cloud.height * scale;
+
+        return {
+            scale,
+            width,
+            height,
+            left: (w - width) / 2,
+            top: (h - height) / 2,
+        };
+    };
+
+    const visible = (cloud: HTMLCanvasElement): CoverRegion => {
+        const f = framing(cloud);
+
+        return {
+            x: -f.left / f.scale,
+            y: -f.top / f.scale,
+            width: w / f.scale,
+            height: h / f.scale,
+        };
+    };
+
+    const textureFrame = () => {
+        if (texture === undefined) texture = coveredTexture(mode.gap);
+
+        return texture;
+    };
 
     const trail = document.createElement('canvas');
 
@@ -188,15 +238,14 @@ function start(
 
     let h = 0;
 
-    let scale = 1;
-
     const resize = () => {
         const rect = canvas.getBoundingClientRect();
 
-        scale = Math.min(
-            mode.compact ? PIXEL_SCALE.compact : PIXEL_SCALE.desktop,
+        const scale = Math.min(
+            PIXEL_SCALE,
             Math.sqrt(MAX_PIXELS / Math.max(1, rect.width * rect.height))
         );
+
         w = canvas.width = Math.max(1, Math.round(rect.width * scale));
         h = canvas.height = Math.max(1, Math.round(rect.height * scale));
         trail.width = Math.max(1, Math.round(rect.width * TRAIL_SCALE));
@@ -241,47 +290,96 @@ function start(
         return true;
     };
 
-    const draw = (now: number, dt: number) => {
-        paintFog(ctx, cloud, w, h, mode.reduced ? 0 : now, mode.thin);
+    const paint = (now: number, dt: number) => {
+        const cloud = shaderFrame(live ? now / 1000 : 0) ?? textureFrame();
 
-        if (fadeTrail(now, dt)) {
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.drawImage(trail, 0, 0, w, h);
-        }
+        if (!cloud) return;
+
+        const { width, height, left, top } = framing(cloud);
+
+        const drift = live && cloud !== work;
+
+        const dx = drift ? Math.sin(now / 4100) * w * 0.105 : 0;
+
+        const dy = drift ? Math.cos(now / 5300) * h * 0.105 : 0;
 
         ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = mode.alpha;
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(cloud, left + dx, top + dy, width, height);
+
+        if (drift) {
+            ctx.globalAlpha = mode.alpha * 0.35;
+            ctx.drawImage(
+                cloud,
+                left - dx * 0.7,
+                top - dy * 0.8,
+                width,
+                height
+            );
+        }
+
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'destination-out';
+
+        if (mode.hole) {
+            // the closing call to action sits lit inside a ring of cloud
+            const hole = ctx.createRadialGradient(
+                w / 2,
+                h / 2,
+                0,
+                w / 2,
+                h / 2,
+                Math.max(w, h) * 0.42
+            );
+
+            hole.addColorStop(0, 'rgba(0,0,0,0.96)');
+            hole.addColorStop(0.45, 'rgba(0,0,0,0.8)');
+            hole.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = hole;
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        if (fadeTrail(now, dt)) ctx.drawImage(trail, 0, 0, w, h);
+
+        ctx.globalCompositeOperation = 'source-over';
+        canvas.dataset.ready = '';
     };
 
-    draw(0, 0);
-    canvas.dataset.ready = '';
+    if (!live) {
+        paint(0, 0);
+        releaseMotion();
 
-    if (mode.reduced) return () => {};
+        return () => {};
+    }
 
     let unsubscribe: (() => void) | null = null;
 
-    let onScreen = true;
-
-    const running = () => onScreen && !document.hidden;
+    let onScreen = typeof IntersectionObserver === 'undefined';
 
     const stop = () => {
         unsubscribe?.();
         unsubscribe = null;
     };
 
-    const tick = (now: number, dt: number) => {
-        if (!running()) {
-            stop();
+    // off-screen or hidden gives the shared WebGL context back, so the hero and the final fog never hold two
+    const sync = () => {
+        if (onScreen && !document.hidden) {
+            unsubscribe ??= subscribe(paint, { fps: FPS });
 
-            return false;
+            return;
         }
 
-        draw(now, dt);
+        stop();
+        releaseMotion();
     };
 
-    const resume = () => {
-        if (running() && !unsubscribe)
-            unsubscribe = subscribe(tick, { fps: FPS });
-    };
+    const observer = onScreen
+        ? null
+        : new IntersectionObserver((entries) => {
+              onScreen = entries[entries.length - 1]?.isIntersecting ?? true;
+              sync();
+          });
 
     const onMove = (e: PointerEvent) => {
         const rect = canvas.getBoundingClientRect();
@@ -317,28 +415,20 @@ function start(
         lastStamp = performance.now();
     };
 
-    const observer =
-        typeof IntersectionObserver === 'undefined'
-            ? null
-            : new IntersectionObserver((entries) => {
-                  onScreen =
-                      entries[entries.length - 1]?.isIntersecting ?? true;
-                  resume();
-              });
-
     observer?.observe(canvas);
-    document.addEventListener('visibilitychange', resume);
+    document.addEventListener('visibilitychange', sync);
     window.addEventListener('resize', resize, { passive: true });
 
     if (mode.interactive)
         window.addEventListener('pointermove', onMove, { passive: true });
 
-    resume();
+    sync();
 
     return () => {
         stop();
+        releaseMotion();
         observer?.disconnect();
-        document.removeEventListener('visibilitychange', resume);
+        document.removeEventListener('visibilitychange', sync);
         window.removeEventListener('resize', resize);
         window.removeEventListener('pointermove', onMove);
     };

@@ -48,15 +48,16 @@ body:has([data-landing])::after { display: none; }
 
 /* canvas fog (LandingFog): fades in once painted, then parts as the page scrolls */
 .ld-fog-wrap { position: absolute; z-index: -1; pointer-events: none; }
+/* bleeds past the viewport by more than the ±30px/±20px pointer parallax, so no edge ever shows */
 .ld-fog-hero {
-  inset: 0 0 auto; height: 100svh;
+  top: -40px; left: -56px; right: -56px; height: calc(100svh + 120px);
   transform: translate3d(calc(var(--mx, 0) * 30px), calc(var(--my, 0) * 20px), 0);
-  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent);
-  mask-image: linear-gradient(to bottom, #000 78%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 52%, rgba(0, 0, 0, 0.82) 64%, rgba(0, 0, 0, 0.45) 78%, rgba(0, 0, 0, 0.14) 90%, transparent);
+  mask-image: linear-gradient(to bottom, #000 0, #000 52%, rgba(0, 0, 0, 0.82) 64%, rgba(0, 0, 0, 0.45) 78%, rgba(0, 0, 0, 0.14) 90%, transparent);
 }
 /* bookend: the same fog closes back in around the final call to action */
 .ld-fog-final {
-  inset: 0; opacity: 0.82;
+  inset: 0;
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 72%, transparent);
   mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 72%, transparent);
 }
@@ -70,7 +71,7 @@ body:has([data-landing])::after { display: none; }
 .ld-hero-scrim {
   position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(8, 6, 5, 0.9) 0%, rgba(8, 6, 5, 0.8) 30%, rgba(8, 6, 5, 0.45) 52%, transparent 72%),
+    linear-gradient(90deg, rgba(8, 6, 5, 0.9) 0%, rgba(8, 6, 5, 0.86) 34%, rgba(8, 6, 5, 0.74) 54%, rgba(8, 6, 5, 0.42) 65%, rgba(8, 6, 5, 0.12) 72%, transparent 80%),
     linear-gradient(to bottom, rgba(8, 6, 5, 0.45), transparent 12rem),
     linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.55) 100%);
 }
@@ -89,7 +90,7 @@ body:has([data-landing])::after { display: none; }
   .ld-hero-copy { max-width: 40rem; }
   .ld-hero-scrim {
     background:
-      linear-gradient(to bottom, rgba(8, 6, 5, 0.74), rgba(8, 6, 5, 0.52) 65%, rgba(0, 0, 0, 0.55));
+      linear-gradient(to bottom, rgba(8, 6, 5, 0.78), rgba(8, 6, 5, 0.74) 60%, rgba(0, 0, 0, 0.74));
   }
 }
 .ld-ornament { display: flex; align-items: center; gap: 0.5rem; }
