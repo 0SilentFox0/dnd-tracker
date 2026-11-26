@@ -35,6 +35,7 @@ import type gameTerms from './messages/uk/gameTerms.json';
 import type help from './messages/uk/help.json';
 import type inventory from './messages/uk/inventory.json';
 import type landing from './messages/uk/landing.json';
+import type legal from './messages/uk/legal.json';
 import type maps from './messages/uk/maps.json';
 import type music from './messages/uk/music.json';
 import type onboarding from './messages/uk/onboarding.json';
@@ -67,6 +68,7 @@ declare module 'next-intl' {
             errors: typeof errors;
             auth: typeof auth;
             landing: typeof landing;
+            legal: typeof legal;
             onboarding: typeof onboarding;
             demoTours: typeof demoTours;
             whatsNew: typeof whatsNew;

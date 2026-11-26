@@ -10,7 +10,7 @@ export function AiMock({ t }: { t: Translator }) {
                     {t('ai.mock.pageTitle')}
                 </p>
                 <p>{t('ai.mock.pageText')}</p>
-                <p className="rounded border-l-2 border-[#8a5cc9] bg-[#8a5cc9]/10 px-2 py-1">
+                <p className="ld-msg ld-msg-4 rounded border-l-2 border-[#8a5cc9] bg-[#8a5cc9]/10 px-2 py-1">
                     <span className="text-[#c9a8f0]">
                         {t('ai.mock.newSceneLabel')}
                     </span>
@@ -23,13 +23,13 @@ export function AiMock({ t }: { t: Translator }) {
                     <Sparkles aria-hidden className="size-3.5" />
                     <span className="hud-sc">{t('ai.mock.panelTitle')}</span>
                 </p>
-                <p className="ml-auto max-w-[85%] rounded-lg bg-hud-raised px-2 py-1.5 text-hud-ink">
+                <p className="ld-msg ml-auto max-w-[85%] rounded-lg bg-hud-raised px-2 py-1.5 text-hud-ink">
                     {t('ai.mock.userMessage')}
                 </p>
-                <p className="max-w-[90%] rounded-lg bg-black/40 px-2 py-1.5 text-hud-bone">
+                <p className="ld-msg ld-msg-2 max-w-[90%] rounded-lg bg-black/40 px-2 py-1.5 text-hud-bone">
                     {t('ai.mock.reply')}
                 </p>
-                <div className="mt-auto rounded-lg border border-[#8a5cc9]/60 bg-[#8a5cc9]/10 p-2">
+                <div className="ld-msg ld-msg-3 mt-auto rounded-lg border border-[#8a5cc9]/60 bg-[#8a5cc9]/10 p-2">
                     <p className="mb-1.5 text-[#c9a8f0]">
                         {t('ai.mock.proposal')}
                     </p>

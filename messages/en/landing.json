@@ -8,7 +8,9 @@
     "aria": "Sections",
     "items": {
       "combat": "Combat",
+      "features": "Features",
       "mechanics": "Mechanics",
+      "systems": "Systems",
       "prep": "Preparation",
       "ai": "AI",
       "faq": "FAQ"
@@ -26,7 +28,7 @@
     "member": "My campaigns",
     "secondary": "See how it works",
     "note": "Works in the browser · players join from their phones",
-    "alt": "The DM screen of a battle: initiative queue, tactical map with tokens, combat log and music player"
+    "alt": "The DM's campaign dashboard: party, preparation, world map and quick actions"
   },
   "problem": {
     "eyebrow": "Sound familiar?",
@@ -70,6 +72,48 @@
     },
     "hubTag": "all in one place"
   },
+  "replace": {
+    "eyebrow": "One tab instead of six",
+    "title": "Everything you juggle now, in one place",
+    "text": "Most tables run on a map tool, a tracker, a notes app, sheets, a music player and a chat. Here they are one connected workspace.",
+    "caption": "What you use today compared with what you get here",
+    "headers": {
+      "category": "What you need",
+      "separate": "Separate tools"
+    },
+    "rows": {
+      "map": {
+        "category": "Maps",
+        "separate": "A map tool and a folder of images",
+        "ours": "Tactical battle maps and a world map with your party's trail"
+      },
+      "initiative": {
+        "category": "Initiative",
+        "separate": "A tracker plus a notebook",
+        "ours": "Turn order, damage and effects counted for you"
+      },
+      "scenario": {
+        "category": "Prep",
+        "separate": "Documents and scattered notes",
+        "ours": "Scenes, slides and DM notes linked to battles"
+      },
+      "sheets": {
+        "category": "Character sheets",
+        "separate": "PDFs and spreadsheets",
+        "ours": "Live sheets that players open on a phone"
+      },
+      "music": {
+        "category": "Music and sound",
+        "separate": "A separate player and playlists",
+        "ours": "Scene music and a soundboard at your fingertips"
+      },
+      "show": {
+        "category": "Handouts",
+        "separate": "Screen sharing and a group chat",
+        "ours": "Slides pushed to every player's screen at once"
+      }
+    }
+  },
   "combat": {
     "eyebrow": "Tactical combat",
     "title": "Combat that runs itself",
@@ -100,36 +144,44 @@
         "text": "Enemy strength scales to your party automatically, or follow an XP budget for 5e-style encounters."
       }
     },
-    "demoSteps": {
-      "1": "A player picks a spell",
-      "2": "The dice roll themselves",
-      "3": "Damage is calculated",
-      "4": "Everyone sees it at once"
-    },
     "demo": {
-      "windowTitle": "DM screen · Tomb of the Nameless · round 2",
-      "tokens": {
-        "wizard": "Eldrin",
-        "dwarf": "Torvald",
-        "bard": "Lyra",
-        "goblin": "Goblin",
-        "orc": "Orc",
-        "owlbear": "Owlbear"
+      "label": "A battle playing out on the DM screen",
+      "windowTitle": "DM screen · battle",
+      "alt": "The DM's battle screen: initiative queue, tactical map with tokens, turn actions and the combat log",
+      "names": {
+        "attacker": "Elowen Thorne",
+        "caster": "Maelis Voss",
+        "target": "Treant #1",
+        "foeA": "Wolf Spider #1",
+        "foeB": "Wolf Spider #2"
       },
-      "check": "Goblin: Dexterity 7 + 2 < DC 15 · failed",
-      "logCaster": "Eldrin",
-      "logText": "Fireball → Goblin down, Orc −12",
-      "music": "♫ Battle in the tomb",
-      "phone": {
-        "role": "Wizard · level 5",
-        "slots": "Level 3 slots: ●●○",
-        "spells": {
-          "1": "Fireball",
-          "2": "Shield",
-          "3": "Magic Missile"
-        }
+      "turn": {
+        "attacker": "Turn · Elowen Thorne",
+        "caster": "Turn · Maelis Voss"
       },
-      "stepsLabel": "How a turn plays out: "
+      "roll": {
+        "label": "Attack roll",
+        "target": "vs AC 16",
+        "hit": "Hit"
+      },
+      "spell": {
+        "name": "Fireball",
+        "dc": "DEX save · DC 14"
+      },
+      "save": {
+        "label": "DEX save",
+        "fail": "Fail",
+        "success": "Success"
+      },
+      "log": {
+        "title": "Combat log",
+        "round": "Round {n}",
+        "attack": "attack",
+        "spell": "spell",
+        "hit": "Elowen Thorne → Treant #1: 22 vs AC 16, hit for 12 piercing damage",
+        "fireball": "Maelis Voss casts Fireball: Wolf Spider #1 fails the save, Wolf Spider #2 takes half",
+        "older": "Elowen Thorne → Treant #1: 2 damage"
+      }
     },
     "fx": {
       "title": "Magic you can see",
@@ -156,6 +208,37 @@
         "12": "Stunned"
       },
       "more": "and more"
+    }
+  },
+  "features": {
+    "eyebrow": "Features",
+    "title": "Built for the whole session",
+    "text": "The pieces a Dungeon Master reaches for, designed to work together.",
+    "items": {
+      "sheet": {
+        "title": "Character sheets",
+        "text": "Stats, spells and abilities that update with the battle, on any device."
+      },
+      "world": {
+        "title": "World map",
+        "text": "Markers, zones and a trail that shows where your party has been."
+      },
+      "soundboard": {
+        "title": "Soundboard",
+        "text": "Ambience and effects one tap away, played for the whole table."
+      },
+      "scenarioGraph": {
+        "title": "Scenario graph",
+        "text": "See how scenes, characters and places connect across your story."
+      },
+      "contentCopy": {
+        "title": "Content copy",
+        "text": "Reuse monsters, spells and maps between your campaigns."
+      },
+      "mcp": {
+        "title": "AI assistant access",
+        "text": "Let your own AI assistant read and prepare your campaign through MCP."
+      }
     }
   },
   "mechanics": {
@@ -203,6 +286,34 @@
     "templatesNote": "Start from an official template, or from scratch.",
     "alt": "Spell library of a campaign: school and level groups, import, CSV export and a card for every spell",
     "footnote": "Built for D&D-style, turn-based tabletop RPGs. Imported rules are validated row by row; check results before play."
+  },
+  "systems": {
+    "eyebrow": "Rule systems",
+    "title": "Pick a system or build your own",
+    "text": "Start from a ready-made rule set, or shape the rules to fit your table.",
+    "count": {
+      "spells": "Spells: {n}",
+      "units": "Creatures: {n}",
+      "classes": "Classes: {n}",
+      "races": "Races: {n}"
+    },
+    "cards": {
+      "srd": {
+        "tag": "Built-in",
+        "name": "5e SRD 5.2",
+        "text": "The open D&D 5e rules: classes, races, spells and a bestiary, ready to play."
+      },
+      "grim": {
+        "tag": "Built-in",
+        "name": "Grim d100",
+        "text": "A grim fantasy d100 system with its own careers, spells and creatures."
+      },
+      "custom": {
+        "tag": "Yours",
+        "name": "Your own rules",
+        "text": "Use the constructor to define races, classes, abilities and rules, or import your own content."
+      }
+    }
   },
   "prep": {
     "eyebrow": "Campaign preparation",
@@ -373,6 +484,13 @@
     "credits": "Photos from Unsplash. Token silhouettes and battle action icons from game-icons.net (Delapouite, Lorc, Caro Asercion), CC BY 3.0.",
     "disclaimer": "{brand} is an independent project. Dungeons & Dragons is a trademark of Wizards of the Coast; this project is not affiliated with it.",
     "signIn": "Sign in",
-    "signUp": "Sign up"
+    "signUp": "Sign up",
+    "legalAria": "Legal",
+    "legal": {
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies"
+    },
+    "srd": "This work includes material from the SRD 5.2 by Wizards of the Coast LLC, licensed under CC BY 4.0."
   }
 }

@@ -2,16 +2,17 @@ import { LANDING_TEMPLATES } from '@/components/landing/flags';
 import { CAPABILITY_ICONS } from '@/components/landing/media';
 import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { SectionTitle } from '@/components/landing/parts';
+import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 
-export function Mechanics({ t }: { t: Translator }) {
+export function Mechanics({ t, locale }: { t: Translator; locale: Locale }) {
     return (
         <section
             id="mechanics"
             className="ld-lazy relative isolate scroll-mt-20 overflow-hidden border-y border-hud-rule px-4 py-20"
         >
-            <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_85%_10%,rgba(230,194,90,.1),transparent_55%),#0b0908]" />
-            <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
+            <div className="absolute inset-0 -z-10 [background:radial-gradient(ellipse_at_85%_10%,rgba(230,194,90,.1),transparent_55%),#0b0908]" />
+            <div className="ld-container grid items-center gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
                 <div className="space-y-5">
                     <SectionTitle
                         align="left"
@@ -25,24 +26,27 @@ export function Mechanics({ t }: { t: Translator }) {
                         </p>
                     )}
                 </div>
-                <MediaFrame
-                    title={t('mechanics.eyebrow')}
-                    className="landing-reveal"
-                >
-                    <Screen id="mechanics" alt={t('mechanics.alt')} />
-                </MediaFrame>
+                <div className="ld-page-in">
+                    <MediaFrame title={t('mechanics.eyebrow')}>
+                        <Screen
+                            locale={locale}
+                            id="mechanics"
+                            alt={t('mechanics.alt')}
+                        />
+                    </MediaFrame>
+                </div>
             </div>
 
-            <ul className="mx-auto mt-14 grid max-w-6xl gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="ld-container mt-14 grid gap-x-8 gap-y-3 min-[2560px]:grid-cols-4 sm:grid-cols-2 lg:grid-cols-3">
                 {Object.entries(CAPABILITY_ICONS).map(([id, Icon]) => {
                     return (
                         <li
                             key={id}
-                            className="landing-reveal group flex gap-3 border-l-2 border-hud-rule py-2 pl-4 transition hover:border-hud-muted"
+                            className="ld-entry group relative flex gap-3 border-l-2 border-hud-rule py-2 pl-4 transition hover:border-hud-muted"
                         >
                             <Icon
                                 aria-hidden
-                                className="mt-1 size-5 shrink-0 text-[var(--ld-gold)] transition group-hover:text-hud-ink"
+                                className="ld-stamp mt-1 size-5 shrink-0 text-[var(--ld-gold)] transition group-hover:text-hud-ink"
                             />
                             <div>
                                 <h3 className="hud-sc text-lg text-hud-ink">

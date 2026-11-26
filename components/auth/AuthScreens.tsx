@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { AuthCard } from '@/components/auth/AuthCard';
 import {
@@ -20,6 +20,7 @@ import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { LabeledInput } from '@/components/ui/labeled-input';
 import { AFTER_SIGN_IN_PATH, PASSWORD_MIN_LENGTH } from '@/lib/constants/auth';
+import { LEGAL_PATH } from '@/lib/constants/site';
 import {
     useAuthUrlError,
     useEmailSignIn,
@@ -28,6 +29,7 @@ import {
     useRedirectIfSignedIn,
     useUpdatePassword,
 } from '@/lib/hooks/auth';
+import type { Locale } from '@/lib/i18n/config';
 import { emailSchema, signInSchema, signUpSchema } from '@/lib/schemas/auth';
 
 function SignInCard() {
@@ -106,6 +108,8 @@ function SignInCard() {
 
 function SignUpCard() {
     const t = useTranslations('auth');
+
+    const locale = useLocale() as Locale;
 
     const tRoot = useTranslations();
 
@@ -215,6 +219,26 @@ function SignUpCard() {
                 >
                     {pending ? t('signUp.submitting') : t('signUp.submit')}
                 </Button>
+                <p className="text-center text-xs text-hud-muted">
+                    {t.rich('signUp.consent', {
+                        terms: (chunks) => (
+                            <Link
+                                href={LEGAL_PATH[locale].terms}
+                                className="underline hover:text-hud-ink"
+                            >
+                                {chunks}
+                            </Link>
+                        ),
+                        privacy: (chunks) => (
+                            <Link
+                                href={LEGAL_PATH[locale].privacy}
+                                className="underline hover:text-hud-ink"
+                            >
+                                {chunks}
+                            </Link>
+                        ),
+                    })}
+                </p>
             </form>
         </AuthCard>
     );

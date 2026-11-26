@@ -74,10 +74,13 @@ export function useFogCompact() {
     return mobile || coarse;
 }
 
-export function useFogQuality(): FogQuality {
+// `trackHidden: false` for callers that pause on visibilitychange themselves instead of re-rendering
+export function useFogQuality({ trackHidden = true } = {}): FogQuality {
     const reduced = useReducedMotion();
 
-    const hidden = usePageHidden();
+    const pageHidden = usePageHidden();
+
+    const hidden = trackHidden && pageHidden;
 
     const compact = useFogCompact();
 

@@ -54,6 +54,7 @@ const SITE_NAMESPACES = [
     'errors',
     'auth',
     'landing',
+    'legal',
     'demoTours',
     'whatsNew',
     'help',

@@ -8,79 +8,133 @@ body:has([data-landing])::after { display: none; }
 
   @supports (animation-timeline: view()) {
     .landing-reveal { animation: ld-reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
+    .landing-reveal.ld-drift { animation: ld-reveal linear both, ld-drift linear both; animation-timeline: view(), view(); animation-range: entry 0% entry 60%, cover; }
   }
 }
 
 @keyframes ld-reveal { from { transform: translateY(32px) scale(0.98); } }
 
-/* Hero session demo: one 8s loop, every element keys off the same percentages */
-.ld-demo { --ld-t: 8s; }
-.ld-demo :is(.ld-tap, .ld-ripple, .ld-die, .ld-die-roll, .ld-die-result, .ld-check, .ld-orb, .ld-blast, .ld-ring, .ld-dmg-a, .ld-dmg-b, .ld-fall, .ld-hp-a, .ld-hp-b, .ld-turn-a, .ld-turn-b, .ld-log, .ld-step-1, .ld-step-2, .ld-step-3, .ld-step-4, .ld-progress) {
-  animation-duration: var(--ld-t);
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-out;
+/* shared backdrop: fixed layers behind all sections; --mx/--my come from PointerParallax */
+.ld-bg, .ld-light, .ld-vignette { position: fixed; pointer-events: none; z-index: -1; }
+.ld-bg {
+  inset: -6% -6% -16%;
+  background: #0b0908 url(/bg/vey-strait-2k.webp) center / cover no-repeat;
+  transform: translate3d(calc(var(--mx, 0) * -12px), calc(var(--my, 0) * -12px), 0);
 }
-.ld-tap { animation-name: ld-tap; }
-.ld-ripple { animation-name: ld-ripple; opacity: 0; }
-.ld-die { animation-name: ld-die; opacity: 0; }
-.ld-die-roll { animation-name: ld-die-roll; }
-.ld-die-result { animation-name: ld-die-result; opacity: 0; }
-.ld-check { animation-name: ld-check; opacity: 0; }
-.ld-orb { animation-name: ld-orb; opacity: 0; animation-timing-function: ease-in; }
-.ld-blast { animation-name: ld-blast; opacity: 0; }
-.ld-ring { animation-name: ld-ring; opacity: 0; }
-.ld-dmg-a { animation-name: ld-dmg; opacity: 0; }
-.ld-dmg-b { animation-name: ld-dmg; opacity: 0; animation-delay: 0.15s; }
-.ld-fall { animation-name: ld-fall; }
-.ld-hp-a { animation-name: ld-hp-a; }
-.ld-hp-b { animation-name: ld-hp-b; }
-.ld-turn-a { animation-name: ld-turn-a; }
-.ld-turn-b { animation-name: ld-turn-b; opacity: 0; }
-.ld-log { animation-name: ld-log; opacity: 0; }
-.ld-step-1 { animation-name: ld-step-1; }
-.ld-step-2 { animation-name: ld-step-2; }
-.ld-step-3 { animation-name: ld-step-3; }
-.ld-step-4 { animation-name: ld-step-4; }
+@media (min-width: 1921px) {
+  .ld-bg { background-image: url(/bg/vey-strait-4k.webp); }
+}
+.ld-light, .ld-vignette { inset: 0; }
+.ld-light {
+  background: radial-gradient(600px at calc(50% + var(--mx, 0) * 30%) calc(40% + var(--my, 0) * 30%), rgba(230, 194, 90, 0.08), transparent 70%);
+}
+.ld-vignette { background: radial-gradient(130% 100% at 60% 40%, transparent 45%, rgba(0, 0, 0, 0.55) 100%); }
 
-@keyframes ld-tap {
-  0%, 6% { transform: none; box-shadow: 0 0 0 0 rgba(255, 140, 60, 0); }
-  8% { box-shadow: 0 0 0 4px rgba(255, 140, 60, 0.45); }
-  10% { transform: scale(0.93); filter: brightness(1.5); }
-  13%, 60% { transform: none; filter: none; box-shadow: 0 0 0 2px #ff9a4d; }
-  66%, 100% { box-shadow: 0 0 0 0 rgba(255, 140, 60, 0); }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .ld-bg { animation: ld-bg-scroll linear both; animation-timeline: scroll(root); }
+  }
 }
-@keyframes ld-ripple { 0%, 9% { opacity: 0; transform: scale(0.2); } 10% { opacity: 0.8; } 18%, 100% { opacity: 0; transform: scale(2.4); } }
-@keyframes ld-die {
-  0%, 13% { opacity: 0; transform: translate(-50%, -50%) translateY(-40px) rotate(-260deg) scale(0.5); }
-  15% { opacity: 1; }
-  22% { transform: translate(-50%, -50%) rotate(0) scale(1.15); }
-  25%, 48% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  54%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+@media (prefers-reduced-motion: no-preference) and (min-width: 769px) {
+  .ld-bg { animation: ld-push 2.5s cubic-bezier(.16, .84, .3, 1) both; }
+  @supports (animation-timeline: scroll()) {
+    .ld-bg { animation: ld-push 2.5s cubic-bezier(.16, .84, .3, 1) both, ld-bg-scroll linear both; animation-timeline: auto, scroll(root); }
+    .ld-fog-hero { animation: ld-fog-part linear both; animation-timeline: scroll(root); animation-range: 0 90vh; }
+  }
 }
-@keyframes ld-die-roll { 0%, 21% { opacity: 1; } 22%, 100% { opacity: 0; } }
-@keyframes ld-die-result { 0%, 21% { opacity: 0; } 22%, 100% { opacity: 1; } }
-@keyframes ld-check { 0%, 23% { opacity: 0; transform: translate(-50%, 6px); } 26%, 50% { opacity: 1; transform: translate(-50%, 0); } 55%, 100% { opacity: 0; } }
-@keyframes ld-orb {
-  0%, 25% { opacity: 0; left: 15.625%; top: 45%; transform: translate(-50%, -50%) scale(0.4); }
-  26% { opacity: 1; }
-  35% { opacity: 1; left: 68.75%; top: 55%; transform: translate(-50%, -50%) scale(1.1); }
-  36%, 100% { opacity: 0; left: 68.75%; top: 55%; }
+@keyframes ld-bg-scroll { to { translate: 0 -8%; } }
+@keyframes ld-push { from { scale: 1.12; } }
+@keyframes ld-fog-part { to { opacity: 0; scale: 1.25; } }
+
+/* canvas fog (LandingFog): fades in once painted, then parts as the page scrolls */
+.ld-fog-wrap { position: absolute; z-index: -1; pointer-events: none; }
+/* bleeds past the viewport by more than the ±30px/±20px pointer parallax, so no edge ever shows */
+.ld-fog-hero {
+  top: -40px; left: -56px; right: -56px; height: calc(100svh + 120px);
+  transform: translate3d(calc(var(--mx, 0) * 30px), calc(var(--my, 0) * 20px), 0);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 52%, rgba(0, 0, 0, 0.82) 64%, rgba(0, 0, 0, 0.45) 78%, rgba(0, 0, 0, 0.14) 90%, transparent);
+  mask-image: linear-gradient(to bottom, #000 0, #000 52%, rgba(0, 0, 0, 0.82) 64%, rgba(0, 0, 0, 0.45) 78%, rgba(0, 0, 0, 0.14) 90%, transparent);
 }
-@keyframes ld-blast { 0%, 35% { opacity: 0; } 36%, 46% { opacity: 1; } 50%, 100% { opacity: 0; } }
-@keyframes ld-ring { 0%, 35% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); } 38% { opacity: 0.9; } 44% { transform: translate(-50%, -50%) scale(1); } 58%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1); } }
-@keyframes ld-dmg { 0%, 38% { opacity: 0; transform: translate(-50%, 0) scale(0.6); } 40% { opacity: 1; transform: translate(-50%, -6px) scale(1.35); } 44% { transform: translate(-50%, -8px) scale(1); } 58% { opacity: 1; } 64%, 100% { opacity: 0; transform: translate(-50%, -28px); } }
-@keyframes ld-fall { 0%, 44% { opacity: 1; filter: none; transform: translate(-50%, -50%); } 50%, 94% { opacity: 0.45; filter: grayscale(1); transform: translate(-50%, -50%) rotate(80deg) scale(0.85); } 100% { opacity: 1; filter: none; transform: translate(-50%, -50%); } }
-@keyframes ld-hp-a { 0%, 39% { width: 100%; } 44%, 94% { width: 0; } 100% { width: 100%; } }
-@keyframes ld-hp-b { 0%, 39% { width: 100%; } 44%, 94% { width: 45%; } 100% { width: 100%; } }
-@keyframes ld-turn-a { 0%, 68% { opacity: 1; } 72%, 96% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes ld-turn-b { 0%, 68% { opacity: 0; } 72%, 96% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes ld-log { 0%, 46% { opacity: 0; transform: translateY(6px); } 50%, 92% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
-@keyframes ld-step-1 { 0%, 14% { color: #ffe08a; } 16%, 100% { color: #b3a893; } }
-@keyframes ld-step-2 { 0%, 14% { color: #b3a893; } 16%, 32% { color: #ffe08a; } 34%, 100% { color: #b3a893; } }
-@keyframes ld-step-3 { 0%, 32% { color: #b3a893; } 34%, 62% { color: #ffe08a; } 64%, 100% { color: #b3a893; } }
-@keyframes ld-step-4 { 0%, 62% { color: #b3a893; } 64%, 98% { color: #ffe08a; } 100% { color: #b3a893; } }
-.ld-progress { animation: ld-progress var(--ld-t) linear infinite; transform-origin: left; }
-@keyframes ld-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+/* bookend: the same fog closes back in around the final call to action */
+.ld-fog-final {
+  inset: 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 72%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 72%, transparent);
+}
+.ld-fog-canvas { display: block; width: 100%; height: 100%; opacity: 0; }
+.ld-fog-canvas[data-ready] { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .ld-fog-canvas { transition: opacity 1.8s ease-out; }
+}
+
+/* hero: the map is the stage; darkening only behind the copy and towards the sections below */
+.ld-hero-scrim {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(8, 6, 5, 0.9) 0%, rgba(8, 6, 5, 0.86) 34%, rgba(8, 6, 5, 0.74) 54%, rgba(8, 6, 5, 0.42) 65%, rgba(8, 6, 5, 0.12) 72%, transparent 80%),
+    linear-gradient(to bottom, rgba(8, 6, 5, 0.45), transparent 12rem),
+    linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.55) 100%);
+}
+.ld-hero { overflow-x: clip; }
+.ld-below { background: rgba(0, 0, 0, 0.55); }
+.ld-hero-stage { position: relative; z-index: 1; display: flex; align-items: center; min-height: calc(100svh - 8rem); padding: 7rem 0 2rem; }
+.ld-hero-copy { max-width: 58%; }
+.ld-hero-title { font-size: clamp(2.25rem, 0.6rem + 3.3vw, 6rem); line-height: 1.04; text-wrap: balance; }
+@media (min-width: 1024px) {
+  .ld-hero-title > span { white-space: nowrap; }
+}
+@media (min-width: 2200px) {
+  .ld-hero-copy > :not(h1) { zoom: 1.4; }
+}
+@media (max-width: 1023px) {
+  .ld-hero-copy { max-width: 40rem; }
+  .ld-hero-scrim {
+    background:
+      linear-gradient(to bottom, rgba(8, 6, 5, 0.78), rgba(8, 6, 5, 0.74) 60%, rgba(0, 0, 0, 0.74));
+  }
+}
+.ld-ornament { display: flex; align-items: center; gap: 0.5rem; }
+.ld-ornament > span { height: 1px; width: 4.5rem; background: linear-gradient(90deg, var(--ld-gold), transparent); }
+.ld-ornament > span:first-child { width: 1.5rem; background: linear-gradient(90deg, transparent, var(--ld-gold)); }
+.ld-ornament > i { width: 6px; height: 6px; rotate: 45deg; border: 1px solid var(--ld-gold); }
+
+.ld-hero-shot { position: relative; padding-bottom: 6rem; perspective: 1800px; view-timeline: --ld-shot block; }
+.ld-tilt { transform-origin: 50% 100%; }
+.ld-shot-fog {
+  position: absolute; left: -12%; right: -12%; top: -11rem; height: 14rem; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='700'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0042 0.009' numOctaves='4' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .9 0 0 0 0 .91 0 0 0 0 .93 2.4 0 0 0 -1.0'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E") repeat, radial-gradient(50% 45% at 50% 55%, rgba(190, 196, 204, 0.3), transparent 100%);
+  opacity: 0.6;
+  -webkit-mask-image: radial-gradient(50% 50% at 50% 50%, #000 35%, transparent 100%);
+  mask-image: radial-gradient(50% 50% at 50% 50%, #000 35%, transparent 100%);
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 769px) {
+  @supports (animation-timeline: view()) {
+    .ld-tilt { animation: ld-tilt linear both; animation-timeline: --ld-shot; animation-range: entry 0% cover 45%; }
+    .ld-shot-fog { animation: ld-shot-fog linear both; animation-timeline: --ld-shot; animation-range: entry 0% cover 45%; }
+  }
+}
+@keyframes ld-tilt { from { transform: translateY(-8rem) rotateX(24deg) scale(0.9); } }
+@keyframes ld-shot-fog { from { translate: 0 9rem; scale: 1.15 1.5; opacity: 1; } to { translate: 0 3rem; opacity: 0; } }
+
+/* fluid layout utilities; inside a padded section the container already has its gutter */
+[data-landing] { --ld-max: clamp(72rem, 80vw, 120rem); }
+.ld-container { width: min(100% - 2rem, var(--ld-max)); margin-inline: auto; }
+section > .ld-container, section > div > .ld-container { width: min(100%, var(--ld-max)); }
+.ld-h1 { font-size: clamp(2.5rem, 1.2rem + 4vw, 6rem); }
+.ld-h2 { font-size: clamp(1.75rem, 1rem + 2vw, 3.75rem); }
+.ld-lead { font-size: clamp(1rem, 0.9rem + 0.35vw, 1.375rem); }
+.ld-panel {
+  background: rgba(13, 10, 8, 0.78);
+  background: color-mix(in srgb, var(--palette-page) 78%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--hud-rule);
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ld-drift { animation: ld-drift linear both; animation-timeline: view(); animation-range: cover; }
+  }
+}
+@keyframes ld-drift { from { translate: 0 4%; } to { translate: 0 -4%; } }
 
 /* Gothicvania Magic Pack 9 sprite strips (CC0), one frame wide */
 .ld-sprite { background-repeat: no-repeat; image-rendering: pixelated; animation: ld-frames var(--ld-sd, 0.7s) steps(var(--ld-n)) infinite; }
@@ -95,7 +149,7 @@ body:has([data-landing])::after { display: none; }
 @keyframes ld-d20 { 0% { transform: rotate(-540deg) scale(0.6); } 45%, 100% { transform: rotate(0) scale(1); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .ld-demo *, .ld-sprite, .ld-d20-spin { animation: none !important; }
+  .ld-sprite, .ld-d20-spin { animation: none !important; }
 }
 
 /* below-the-fold sections render (and fetch their backgrounds/sprites) only near the viewport */

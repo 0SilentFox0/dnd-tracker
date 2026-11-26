@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
-import { LANDING_PATHS } from '@/lib/constants/site';
+import { STATIC_PUBLIC_PATHS } from '@/lib/constants/site';
 import { bearerToken } from '@/lib/utils/api/bearer';
 import {
     checkIpRateLimit,
@@ -102,7 +102,7 @@ export async function updateSession(request: NextRequest) {
     )
         return NextResponse.next();
 
-    if (LANDING_PATHS.includes(request.nextUrl.pathname)) {
+    if (STATIC_PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
         // Supabase falls back to the Site URL when a redirectTo isn't allow-listed: finish the auth link anyway
         if (
             request.nextUrl.searchParams.has('code') ||

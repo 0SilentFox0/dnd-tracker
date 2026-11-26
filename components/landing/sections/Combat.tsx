@@ -1,25 +1,27 @@
+import { D20 } from '@/components/landing/Dice';
 import { FX_SPRITES } from '@/components/landing/media';
 import { keysOf, listOf } from '@/components/landing/messages';
 import { SectionTitle } from '@/components/landing/parts';
-import { D20, SessionDemo } from '@/components/landing/SessionDemo';
+import { CombatDemo } from '@/components/landing/sections/CombatDemo';
+import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 import { cn } from '@/lib/utils';
 
-export function Combat({ t }: { t: Translator }) {
+export function Combat({ t, locale }: { t: Translator; locale: Locale }) {
     return (
         <section
             id="combat"
-            className="ld-lazy scroll-mt-20 border-t border-hud-rule px-4 py-20"
+            className="ld-lazy ld-panel scroll-mt-20 border-t border-hud-rule px-4 py-20"
         >
             <SectionTitle
                 eyebrow={t('combat.eyebrow')}
                 title={t('combat.title')}
                 text={t('combat.text')}
             />
-            <div className="mx-auto mt-14 max-w-6xl">
-                <SessionDemo t={t} />
+            <div className="ld-container mt-14">
+                <CombatDemo t={t} locale={locale} />
 
-                <ol className="mt-20 grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+                <ol className="mt-20 grid gap-x-10 gap-y-6 min-[2560px]:grid-cols-4 sm:grid-cols-2 lg:grid-cols-3">
                     {keysOf(t, 'combat.points').map((key, i) => (
                         <li
                             key={key}
@@ -44,7 +46,7 @@ export function Combat({ t }: { t: Translator }) {
                 </ol>
 
                 <div className="relative isolate mt-20 overflow-hidden rounded-2xl border border-hud-rule px-4 py-12 sm:px-8">
-                    <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_30%,rgba(120,80,200,.16),transparent_60%),#0e0b09]" />
+                    <div className="absolute inset-0 -z-10 [background:radial-gradient(ellipse_at_50%_30%,rgba(120,80,200,.16),transparent_60%),#0e0b09]" />
                     <div className="mx-auto max-w-2xl space-y-2 text-center">
                         <h3 className="hud-sc text-2xl text-hud-ink sm:text-3xl">
                             {t('combat.fx.title')}

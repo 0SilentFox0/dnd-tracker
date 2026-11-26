@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { ChevronRight, Home } from 'lucide-react';
 
 import { DM_SECTIONS } from '@/lib/constants/campaigns';
-import { LANDING_PATHS } from '@/lib/constants/site';
+import { STATIC_PUBLIC_PATHS } from '@/lib/constants/site';
 import type { Translator } from '@/lib/i18n/translator';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';
@@ -76,7 +76,7 @@ export function Breadcrumbs() {
     if (
         pathname?.startsWith('/sign-in') ||
         pathname?.startsWith('/sign-up') ||
-        LANDING_PATHS.includes(pathname)
+        STATIC_PUBLIC_PATHS.includes(pathname)
     ) {
         return null;
     }
