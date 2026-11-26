@@ -23,6 +23,11 @@ export { useInfoReferenceFilters } from './useInfoReferenceFilters';
 export { useJoinBattle } from './useJoinBattle';
 export { useMapLibraryEnabled } from './useMapLibraryEnabled';
 export { usePublishTemplate } from './usePublishTemplate';
+export {
+    type ReferenceEntry,
+    type ReferenceGroup,
+    useReferenceGroups,
+} from './useReferenceGroups';
 export { type RefKey, useReferenceSelection } from './useReferenceSelection';
 export { useRemoveCustomCondition } from './useRemoveCustomCondition';
 export { HERO_LEVELS, type RulesFormState, useRulesForm } from './useRulesForm';

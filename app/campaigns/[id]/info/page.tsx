@@ -42,7 +42,7 @@ export default async function CampaignInfoPage({
         : null;
 
     return (
-        <HudPage width="md">
+        <HudPage>
             <HudPageHeader
                 title={t('info.title')}
                 subtitle={t(

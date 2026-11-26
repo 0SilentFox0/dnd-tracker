@@ -231,7 +231,6 @@
       "ariaSkills": "Search skills, spells and artifacts",
       "clear": "Clear search",
       "filters": "Filters",
-      "filtersActive": "on",
       "reset": "Reset filters"
     },
     "filters": {
@@ -264,52 +263,23 @@
         "all": "All sets"
       }
     },
-    "count": {
-      "classes": "Classes: <strong>{count}</strong>",
-      "skills": "Skills: <strong>{count}</strong>",
-      "spells": "Spells: <strong>{count}</strong>",
-      "artifacts": "Artifacts: <strong>{count}</strong>"
-    },
-    "shown": {
-      "classes": "Classes shown: <strong>{count}</strong>",
-      "skills": "Skills shown: <strong>{count}</strong>",
-      "spells": "Spells shown: <strong>{count}</strong>",
-      "artifacts": "Artifacts shown: <strong>{count}</strong>"
-    },
-    "jump": {
-      "classes": "To classes",
-      "skills": "To skills",
-      "spells": "To spells",
-      "artifacts": "To artifacts"
-    },
     "empty": {
       "nothing": "Nothing found",
       "nothingHint": "Change the search or filters, or reset them.",
-      "resetAll": "Reset filters and search",
-      "classes": "No classes match this search.",
-      "skills": "No skills match these filters.",
-      "spells": "No spells match these filters.",
-      "artifacts": "No artifacts match these filters."
+      "resetAll": "Reset filters and search"
     },
     "sections": {
       "classes": {
-        "title": "Classes",
-        "intro": "Campaign classes: features, abilities by level and subclasses."
+        "title": "Classes"
       },
       "skills": {
-        "title": "Skills",
-        "intro": "How skills work and how they look in the game. Only the DM can edit the appearance description."
+        "title": "Skills"
       },
       "spells": {
-        "title": "Spells",
-        "intro": "How spells work and how they look. Only the DM can edit the appearance description."
+        "title": "Spells"
       },
       "artifacts": {
-        "title": "Artifacts",
-        "intro": "Campaign artifacts: what they grant and who carries them. Each artifact is unique and belongs to one hero."
-      },
-      "sets": {
-        "title": "Sets"
+        "title": "Artifacts"
       }
     },
     "card": {
