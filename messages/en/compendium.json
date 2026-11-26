@@ -97,7 +97,11 @@
     "choices": "Choices: {count}",
     "skillsTools": "Skills: {skills}; tools: {tools}",
     "originFeat": "Origin feat: {names}",
-    "manualGear": "Gear and money are manual"
+    "manualGear": "Gear and money are manual",
+    "title": "Summary",
+    "records": "Records: {count}",
+    "images": "Images: {count}",
+    "next": "Next"
   },
   "info": {
     "unsupportedCategories": "Skipped unsupported categories: {categories}",
@@ -108,10 +112,7 @@
     "subtitle": "One file → check → confirm. The campaign is not changed until you confirm.",
     "back": "Back to campaign",
     "rights": "I have the right to use this file and its images in this campaign",
-    "previewTtl": "The preview is valid for 15 minutes. A new check is required after the campaign or the selection changes.",
     "confirm": "Import",
-    "saved": "Import saved: {runId}",
-    "close": "Clear the file and close the wizard",
     "steps": {
       "label": "Import steps",
       "file": "File",
@@ -162,7 +163,8 @@
   "file": {
     "intro": "One file → check → confirm. The campaign is not changed until you confirm. UTF-8 JSON up to 3 MiB; up to 2000 selected records per atomic import.",
     "csvHint": "CSV/TSV and plain table JSON are available through the “Import” button in the matching library.",
-    "label": "JSON compendium"
+    "drop": "Drop a JSON file here or choose one",
+    "replace": "Replace"
   },
   "categoriesStep": {
     "title": "Categories · pick DM materials explicitly",
@@ -282,7 +284,6 @@
   "runs": {
     "title": "Saved reports",
     "loadFailed": "Could not load the saved reports",
-    "report": "Report {id}",
     "prev": "Previous reports",
     "next": "Next reports"
   },
@@ -296,7 +297,7 @@
     "previewSecretRequired": "Import is unavailable: COMPENDIUM_PREVIEW_SECRET is not set on the server (a random string of at least 32 characters). Add it to the environment variables (.env.local or Vercel) and restart the server.",
     "previewStale": "The campaign or the preview expiry has changed. Run the check again.",
     "previewInvalid": "The preview signature is invalid. Run the check again.",
-    "notesSize": "The entry notes are too large. Shorten the description or deselect this section/entry.",
+    "notesSize": "A record's notes are too large",
     "notesSizeEntry": "Entry: {entry} (limit 64 KB).",
     "requestSize": "The selected set is too large. Choose fewer categories or sections.",
     "forbidden": "Only the campaign DM has access, via a session.",
@@ -347,8 +348,7 @@
     "provenanceConflict": "A record provenance conflict; repeat the preview",
     "provenanceTarget": "A provenance record points to an unavailable target; repeat the preview",
     "creditsSize": "The attribution is too large; choose fewer sources",
-    "identitySize": "A record identifier is too large",
-    "notesSize": "A record's notes are too large"
+    "identitySize": "A record identifier is too large"
   },
   "issueTitles": {
     "MANUAL": "Configure manually",
@@ -405,5 +405,30 @@
   "advanced": {
     "title": "Advanced",
     "active": "● enabled"
+  },
+  "wizard": {
+    "restart": "Start over",
+    "restartConfirm": "Clear the file and start the import over?",
+    "resetNotice": "Changing the categories resets the existing check."
+  },
+  "check": {
+    "tabs": {
+      "records": "Records",
+      "deps": "Dependencies",
+      "sources": "Sources and coverage",
+      "media": "Images"
+    }
+  },
+  "confirm": {
+    "expiresIn": "The check is valid until {time}",
+    "expired": "The check has expired. Check the import again.",
+    "recheck": "Check again"
+  },
+  "result": {
+    "title": "Import complete"
+  },
+  "history": {
+    "row": "Import #{id}",
+    "open": "Open report"
   }
 }

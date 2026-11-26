@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { compendiumStep, CompendiumSteps } from '../CompendiumSteps';
+import { compendiumStep, compendiumUnlocked } from '../CompendiumSteps';
 
 import { StepIndicator } from '@/components/common/shell/StepIndicator';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
@@ -21,46 +21,25 @@ const state = (patch: Partial<State>) =>
 afterEach(cleanup);
 
 describe('compendiumStep', () => {
-    it('виводить крок зі стану екрана', () => {
+    it('derives the reached step from the screen state', () => {
         expect(compendiumStep(state({}))).toBe(0);
         expect(compendiumStep(state({ root: {} }))).toBe(1);
         expect(
             compendiumStep(state({ root: {}, preview: {} as State['preview'] }))
         ).toBe(2);
-        expect(
-            compendiumStep(
-                state({ preview: {} as State['preview'], rights: true })
-            )
-        ).toBe(3);
         expect(compendiumStep(state({ result: {} as State['result'] }))).toBe(
             4
         );
     });
-});
 
-describe('CompendiumSteps', () => {
-    it('рендерить чотири кроки з поточним', () => {
-        render(
-            <CompendiumSteps
-                wizard={
-                    { state: state({ root: {} }) } as CompendiumImportController
-                }
-            />
-        );
-
-        const items = screen.getAllByRole('listitem');
-
-        expect(items).toHaveLength(4);
-        expect(items.map((li) => li.getAttribute('data-state'))).toEqual([
-            'done',
-            'current',
-            'todo',
-            'todo',
-        ]);
-        expect(items[1].getAttribute('aria-current')).toBe('step');
+    it('unlocks the confirm step as soon as a preview exists', () => {
+        expect(compendiumUnlocked(state({ root: {} }))).toBe(2);
         expect(
-            screen.getByText('compendium.import.steps.categories')
-        ).toBeTruthy();
+            compendiumUnlocked(state({ preview: {} as State['preview'] }))
+        ).toBe(4);
+        expect(
+            compendiumUnlocked(state({ result: {} as State['result'] }))
+        ).toBe(5);
     });
 });
 

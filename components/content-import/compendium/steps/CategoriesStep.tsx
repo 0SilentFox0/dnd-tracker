@@ -1,39 +1,38 @@
 'use client';
-import { CategoryChip } from '../shared/CategoryChip';
-import { CompendiumAdvanced } from './CompendiumAdvanced';
-import { CompendiumMaterials } from './CompendiumMaterials';
+import { CategoryChip } from '../../shared/CategoryChip';
+import { CompendiumAdvanced } from '../CompendiumAdvanced';
+import { CompendiumMaterials } from '../CompendiumMaterials';
 
 import { HudSection } from '@/components/hud/form';
+import { HudSegmented } from '@/components/hud/HudSegmented';
 import { HudPanel } from '@/components/hud/page';
-import { ActionBar } from '@/components/ui/action-bar';
-import { Button } from '@/components/ui/button';
 import { Disclosure } from '@/components/ui/disclosure';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {
     allKinds,
     chapterBlocks,
-    estimateRecords,
     groupInventory,
     recommendedKinds,
 } from '@/lib/utils/compendium-import/categories';
 import { categoryLabel } from '@/lib/utils/compendium-import/flow';
 
-export function CompendiumCategories({
+const PRESETS = ['all', 'none', 'recommended'] as const;
+
+const sameSet = (a: string[], b: string[]) =>
+    a.length === b.length && a.every((kind) => b.includes(kind));
+
+export function CategoriesStep({
     wizard,
 }: {
     wizard: CompendiumImportController;
 }) {
     const t = useTranslator('compendium');
 
-    const { root, categories, excludedChapters, busy } = wizard.state;
+    const { root, categories, excludedChapters, preview, busy } = wizard.state;
 
-    const {
-        toggleCategory,
-        selectCategories,
-        setChapterExclusions,
-        runPreview,
-    } = wizard.actions;
+    const { toggleCategory, selectCategories, setChapterExclusions } =
+        wizard.actions;
 
     if (!root) return null;
 
@@ -41,44 +40,36 @@ export function CompendiumCategories({
 
     const blocks = chapterBlocks(root, categories);
 
-    const records = estimateRecords(root, categories, excludedChapters);
+    const presets = {
+        all: allKinds(root),
+        none: [] as string[],
+        recommended: recommendedKinds(root),
+    };
+
+    const preset =
+        PRESETS.find((key) => sameSet(presets[key], categories)) ?? null;
 
     return (
         <HudPanel className="space-y-4">
+            {preview && (
+                <p className="ds-inset rounded-lg border border-hud-accent px-3 py-2 text-sm">
+                    {t('wizard.resetNotice')}
+                </p>
+            )}
             <HudSection
                 title={t('categoriesStep.title')}
                 action={
-                    <div className="flex flex-wrap gap-2">
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            disabled={busy}
-                            onClick={() => selectCategories(allKinds(root))}
-                        >
-                            {t('categoriesStep.all')}
-                        </Button>
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            disabled={busy}
-                            onClick={() => selectCategories([])}
-                        >
-                            {t('categoriesStep.none')}
-                        </Button>
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            disabled={busy}
-                            onClick={() =>
-                                selectCategories(recommendedKinds(root))
-                            }
-                        >
-                            {t('categoriesStep.recommended')}
-                        </Button>
-                    </div>
+                    <HudSegmented
+                        id="compendium-presets"
+                        label={t('categoriesStep.title')}
+                        value={preset}
+                        disabled={busy}
+                        options={PRESETS.map((key) => ({
+                            value: key,
+                            label: t(`categoriesStep.${key}`),
+                        }))}
+                        onValueChange={(key) => selectCategories(presets[key])}
+                    />
                 }
             >
                 <fieldset disabled={busy} className="space-y-3">
@@ -135,23 +126,6 @@ export function CompendiumCategories({
                 onChange={setChapterExclusions}
             />
             <CompendiumAdvanced root={root} wizard={wizard} />
-            <ActionBar>
-                <p
-                    className="self-center text-sm text-hud-muted"
-                    data-testid="import-summary"
-                >
-                    {t('categoriesStep.summary', {
-                        categories: categories.length,
-                        records,
-                    })}
-                </p>
-                <Button
-                    disabled={busy || !categories.length}
-                    onClick={() => void runPreview()}
-                >
-                    {t('categoriesStep.preview')}
-                </Button>
-            </ActionBar>
         </HudPanel>
     );
 }
