@@ -340,6 +340,17 @@
       "dice": "Dice: {count}d",
       "resolution": "Check: {value}",
       "cost": "Cost: {value}"
+    },
+    "detail": {
+      "empty": "Select an entry from the list",
+      "edit": "Edit"
+    },
+    "list": {
+      "showAll": "Show all ({count})",
+      "found": "Found: {count}"
+    },
+    "rail": {
+      "sections": "Sections"
     }
   },
   "prep": {

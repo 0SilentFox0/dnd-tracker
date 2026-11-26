@@ -340,6 +340,17 @@
       "dice": "Кубики: {count}к",
       "resolution": "Перевірка: {value}",
       "cost": "Вартість: {value}"
+    },
+    "detail": {
+      "empty": "Оберіть запис зі списку",
+      "edit": "Редагувати"
+    },
+    "list": {
+      "showAll": "Показати всі ({count})",
+      "found": "Знайдено: {count}"
+    },
+    "rail": {
+      "sections": "Розділи"
     }
   },
   "prep": {
