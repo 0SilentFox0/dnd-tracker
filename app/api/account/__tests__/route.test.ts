@@ -31,6 +31,7 @@ const req = (body: unknown) =>
 
 beforeEach(() => {
     vi.clearAllMocks();
+    signOut.mockResolvedValue({});
     vi.mocked(requireAuthUser).mockResolvedValue(session);
     vi.mocked(deleteAccount).mockResolvedValue({ deletedCampaigns: 0 });
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -57,6 +58,14 @@ describe('DELETE /api/account', () => {
             API_ERRORS.ACCOUNT_EMAIL_MISMATCH
         );
         expect(deleteAccount).not.toHaveBeenCalled();
+    });
+
+    it('200 even when the local sign-out rejects', async () => {
+        signOut.mockRejectedValue(new Error('boom'));
+
+        expect((await DELETE(req({ email: 'hero@example.com' }))).status).toBe(
+            200
+        );
     });
 
     it('409 when the template guard blocks', async () => {

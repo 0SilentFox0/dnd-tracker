@@ -186,6 +186,29 @@ describe.skipIf(!isLocalDevDatabaseEnv())('deleteAccount', () => {
         expect(await db.user.findUnique({ where: { id: id('a') } })).toBeNull();
     });
 
+    it('removes the published base rows of an owned template', async () => {
+        await user('a');
+        await campaign('t', 'a', { kind: 'template' });
+        await db.spellBase.create({
+            data: {
+                id: id('sp'),
+                name: 'Bolt',
+                type: 'attack',
+                damageType: 'fire',
+                sourceCampaignId: id('t'),
+                validFrom: 1,
+            },
+        });
+
+        await deleteAccount(id('a'), deps());
+
+        expect(
+            await db.spellBase.count({
+                where: { sourceCampaignId: id('t') },
+            })
+        ).toBe(0);
+    });
+
     it('is idempotent once the users row is gone', async () => {
         const d = deps();
 

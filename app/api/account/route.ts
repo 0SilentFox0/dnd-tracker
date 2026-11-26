@@ -26,7 +26,9 @@ export async function DELETE(req: Request) {
         await deleteAccount(auth.userId);
 
         // the auth user is gone, so only a local sign-out can clear the cookies
-        await (await createClient()).auth.signOut({ scope: 'local' });
+        await (await createClient()).auth
+            .signOut({ scope: 'local' })
+            .catch(() => undefined);
 
         return NextResponse.json({ success: true });
     } catch (error) {

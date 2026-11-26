@@ -16,7 +16,7 @@ const sameEmail = (a: string, b: string) =>
 export function DeleteAccountSection({ email }: { email: string }) {
     const t = useTranslations('auth.deleteAccount');
 
-    const { remove, isPending, error, isBlocked } = useDeleteAccount();
+    const { remove, reset, isPending, error, isBlocked } = useDeleteAccount();
 
     const [open, setOpen] = useState(false);
 
@@ -27,6 +27,7 @@ export function DeleteAccountSection({ email }: { email: string }) {
 
         setOpen(next);
         setTyped('');
+        reset();
     };
 
     return (

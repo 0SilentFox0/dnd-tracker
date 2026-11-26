@@ -1,3 +1,6 @@
+import type { Prisma } from '@prisma/client';
+
+import { CampaignKind } from '@/lib/constants/campaigns';
 import { prisma } from '@/lib/db';
 
 export class AccountDeleteBlockedError extends Error {
@@ -7,9 +10,12 @@ export class AccountDeleteBlockedError extends Error {
     }
 }
 
-export async function findBlockingTemplates(userId: string): Promise<string[]> {
-    const templates = await prisma.campaign.findMany({
-        where: { dmUserId: userId, kind: 'template' },
+export async function findBlockingTemplates(
+    userId: string,
+    db: Pick<Prisma.TransactionClient, 'campaign'> = prisma
+): Promise<string[]> {
+    const templates = await db.campaign.findMany({
+        where: { dmUserId: userId, kind: CampaignKind.TEMPLATE },
         select: { id: true },
     });
 
@@ -19,7 +25,7 @@ export async function findBlockingTemplates(userId: string): Promise<string[]> {
 
     const foreign = { dmUserId: { not: userId } };
 
-    const dependants = await prisma.campaign.findMany({
+    const dependants = await db.campaign.findMany({
         where: {
             ...foreign,
             OR: [

@@ -19,6 +19,7 @@ export function useDeleteAccount() {
 
     return {
         remove: (email: string) => mutation.mutateAsync(email).catch(() => {}),
+        reset: mutation.reset,
         isPending: mutation.isPending,
         error: mutation.error,
         isBlocked:
