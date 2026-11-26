@@ -8,8 +8,8 @@ import type { Translator } from '@/lib/i18n/translator';
 const COUNT_KEYS = ['spells', 'units', 'classes', 'races'] as const;
 
 const SYSTEMS = [
-    { id: 'srd', stats: getTemplateStats('srd-5.2') },
-    { id: 'grim', stats: getTemplateStats('grim-d100') },
+    { id: 'srd', stats: getTemplateStats('srd') },
+    { id: 'grim', stats: getTemplateStats('grim') },
     { id: 'custom', stats: null },
 ] as const;
 

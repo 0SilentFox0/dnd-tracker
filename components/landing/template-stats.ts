@@ -1,10 +1,5 @@
-import grimRaces from '@/data/templates/grim-d100/races.json';
-import grimSpells from '@/data/templates/grim-d100/spells.json';
-import grimUnits from '@/data/templates/grim-d100/units.json';
-import srdClasses from '@/data/templates/srd-5.2/classes.json';
-import srdRaces from '@/data/templates/srd-5.2/races.json';
-import srdSpells from '@/data/templates/srd-5.2/spells.json';
-import srdUnits from '@/data/templates/srd-5.2/units.json';
+import cards from '@/components/landing/template-cards.json';
+import { MANIFESTS } from '@/data/templates/manifests';
 
 export type TemplateStats = {
     spells: number;
@@ -13,22 +8,20 @@ export type TemplateStats = {
     races: number;
 };
 
-const STATS = {
-    'srd-5.2': {
-        spells: srdSpells.length,
-        units: srdUnits.length,
-        classes: srdClasses.length,
-        races: srdRaces.length,
-    },
-    // grim has careers instead of classes
-    'grim-d100': {
-        spells: grimSpells.length,
-        units: grimUnits.length,
-        classes: 0,
-        races: grimRaces.length,
-    },
-} satisfies Record<string, TemplateStats>;
+export type TemplateCardId = keyof typeof cards;
 
-export function getTemplateStats(key: keyof typeof STATS): TemplateStats {
-    return STATS[key];
+type Counts = Partial<Record<keyof TemplateStats, number>>;
+
+const manifests: Record<string, { counts: Counts }> = MANIFESTS;
+
+// templates without classes (careers instead) report 0 and the chip is hidden
+export function getTemplateStats(card: TemplateCardId): TemplateStats {
+    const { counts } = manifests[cards[card]];
+
+    return {
+        spells: counts.spells ?? 0,
+        units: counts.units ?? 0,
+        classes: counts.classes ?? 0,
+        races: counts.races ?? 0,
+    };
 }

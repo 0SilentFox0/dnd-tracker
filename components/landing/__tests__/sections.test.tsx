@@ -37,7 +37,7 @@ describe.each(LOCALES)('new landing sections (%s)', async (locale) => {
     });
 
     it('Systems shows the SRD spell count and Grim d100, never WFRP', () => {
-        const { spells } = getTemplateStats('srd-5.2');
+        const { spells } = getTemplateStats('srd');
 
         expect(html.systems).toContain('id="systems"');
         expect(html.systems).toContain(String(spells));

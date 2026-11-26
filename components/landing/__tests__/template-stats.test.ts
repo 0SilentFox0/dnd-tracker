@@ -4,7 +4,7 @@ import { getTemplateStats } from '@/components/landing/template-stats';
 
 describe('getTemplateStats', () => {
     it('counts the SRD 5.2 content', () => {
-        expect(getTemplateStats('srd-5.2')).toEqual({
+        expect(getTemplateStats('srd')).toEqual({
             spells: 499,
             units: 331,
             classes: 12,
@@ -13,7 +13,7 @@ describe('getTemplateStats', () => {
     });
 
     it('counts the Grim d100 content', () => {
-        const stats = getTemplateStats('grim-d100');
+        const stats = getTemplateStats('grim');
 
         expect(stats.spells).toBe(252);
         expect(stats.units).toBe(80);

@@ -15,6 +15,9 @@ const STATIC_SAFE = [
     'app/(auth)/reset-password/page.tsx',
     'app/(auth)/sign-in/[[...sign-in]]/page.tsx',
     'app/(auth)/sign-up/[[...sign-up]]/page.tsx',
+    'app/(legal)/cookies/page.tsx',
+    'app/(legal)/privacy/page.tsx',
+    'app/(legal)/terms/page.tsx',
     'app/campaigns/new/page.tsx',
     'app/dev/battle-map/page.tsx',
     'app/dev/fx-lab/page.tsx',
@@ -28,6 +31,9 @@ const STATIC_SAFE = [
     'app/settings/password/page.tsx',
     'app/settings/preferences/page.tsx',
     'app/settings/subscription/page.tsx',
+    'app/uk/cookies/page.tsx',
+    'app/uk/privacy/page.tsx',
+    'app/uk/terms/page.tsx',
     'app/uk/page.tsx',
 ];
 
