@@ -1,4 +1,8 @@
 {
+  "2026-11-26-codex": {
+    "title": "Codex redesign",
+    "body": "Library forms are now wide workbenches with a live preview. New /info reference, a compendium import wizard and a rules book. The hero page and the app header are refreshed."
+  },
   "2026-11-25-design-system": {
     "title": "A new look for the platform",
     "body": "One look across the whole platform: a new interface style, two themes (Tavern and Parchment), an updated profile with settings, the character sheet and the campaign dashboard."
