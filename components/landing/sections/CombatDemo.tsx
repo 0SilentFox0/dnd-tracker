@@ -489,29 +489,7 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                                 '--h': log.h,
                             })}
                         >
-                            <p className="ld-demo-round">
-                                {t('combat.demo.log.round', { n: scene.round })}
-                            </p>
                             <ol aria-label={t('combat.demo.log.title')}>
-                                <Entry
-                                    t={T.logSpell}
-                                    portrait={PORTRAIT.caster}
-                                    who={name('caster')}
-                                    kind={t('combat.demo.log.spell')}
-                                    text={t('combat.demo.log.fireball')}
-                                    tags={[
-                                        `${name('foeA')} −${spellLoss('foeA')}`,
-                                        `${name('foeB')} −${spellLoss('foeB')}`,
-                                    ]}
-                                />
-                                <Entry
-                                    t={T.logHit}
-                                    portrait={PORTRAIT.attacker}
-                                    who={name('attacker')}
-                                    kind={t('combat.demo.log.attack')}
-                                    text={t('combat.demo.log.hit')}
-                                    tags={[`${name('target')} −${hitLoss}`]}
-                                />
                                 <li className="ld-demo-round">
                                     {t('combat.demo.log.round', {
                                         n: scene.round - 1,
@@ -523,6 +501,30 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                                     kind={t('combat.demo.log.attack')}
                                     text={t('combat.demo.log.older')}
                                     tags={[`${name('target')} −2`]}
+                                />
+                                <li className="ld-demo-round">
+                                    {t('combat.demo.log.round', {
+                                        n: scene.round,
+                                    })}
+                                </li>
+                                <Entry
+                                    t={T.logHit}
+                                    portrait={PORTRAIT.attacker}
+                                    who={name('attacker')}
+                                    kind={t('combat.demo.log.attack')}
+                                    text={t('combat.demo.log.hit')}
+                                    tags={[`${name('target')} −${hitLoss}`]}
+                                />
+                                <Entry
+                                    t={T.logSpell}
+                                    portrait={PORTRAIT.caster}
+                                    who={name('caster')}
+                                    kind={t('combat.demo.log.spell')}
+                                    text={t('combat.demo.log.fireball')}
+                                    tags={[
+                                        `${name('foeA')} −${spellLoss('foeA')}`,
+                                        `${name('foeB')} −${spellLoss('foeB')}`,
+                                    ]}
                                 />
                             </ol>
                         </div>
