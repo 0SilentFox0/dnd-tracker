@@ -1,6 +1,7 @@
 import { invalidateCampaignLists } from '@/lib/cache/campaign-list';
 import { invalidateAllReference } from '@/lib/cache/tags';
 import { CampaignKind } from '@/lib/constants/campaigns';
+import { DAY_MS } from '@/lib/constants/time';
 import { prisma } from '@/lib/db';
 import {
     planUserStorage,
@@ -17,6 +18,7 @@ import {
     deleteTemplateBaseRows,
 } from '@/lib/server/campaigns/delete-campaign-rows';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { hashEmail } from '@/lib/utils/admin/email-hash';
 
 type Deps = {
     removeAuthUser?: (id: string) => Promise<void>;
@@ -41,7 +43,8 @@ async function removeAuthUserById(id: string): Promise<void> {
 
 export async function deleteAccount(
     userId: string,
-    deps: Deps = {}
+    deps: Deps = {},
+    opts: { by?: 'self' | 'admin' } = {}
 ): Promise<{ deletedCampaigns: number }> {
     const removeAuthUser = deps.removeAuthUser ?? removeAuthUserById;
 
@@ -104,6 +107,26 @@ export async function deleteAccount(
             await tx.character.update({
                 where: { id: c.id },
                 data: { controlledBy: c.campaign.dmUserId },
+            });
+
+        const account = await tx.user.findUnique({
+            where: { id: userId },
+            select: { createdAt: true, email: true },
+        });
+
+        if (account)
+            await tx.accountDeletion.create({
+                data: {
+                    by: opts.by ?? 'self',
+                    accountAgeDays: Math.floor(
+                        (Date.now() - account.createdAt.getTime()) / DAY_MS
+                    ),
+                    campaigns: owned.length,
+                    emailHash: hashEmail(
+                        account.email,
+                        process.env.ADMIN_HASH_SECRET
+                    ),
+                },
             });
 
         await tx.user.deleteMany({ where: { id: userId } });

@@ -1,6 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
-import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+    afterAll,
+    afterEach,
+    beforeEach,
+    describe,
+    expect,
+    it,
+    vi,
+} from 'vitest';
 
 import { deleteAccount } from '@/lib/server/account/delete-account';
 import { AccountDeleteBlockedError } from '@/lib/server/account/template-guard';
@@ -11,6 +19,7 @@ import {
     isLocalDevDatabaseEnv,
     singleConnectionDatabaseUrl,
 } from '@/lib/server/test-support/local-db';
+import { hashEmail } from '@/lib/utils/admin/email-hash';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { splitParticipant } from '@/lib/utils/battle/store/split-participant';
 import { hashJson } from '@/lib/utils/battle/store/stable-json';
@@ -65,7 +74,12 @@ const deps = () => ({
         .mockResolvedValue({ battleIds: [], failedBattleIds: [] }),
 });
 
+const suiteStart = new Date();
+
 const cleanup = async () => {
+    await db.accountDeletion.deleteMany({
+        where: { deletedAt: { gte: suiteStart } },
+    });
     await db.campaign.deleteMany({
         where: { id: { startsWith: `del-${tag}` } },
     });
@@ -78,6 +92,59 @@ describe.skipIf(!isLocalDevDatabaseEnv())('deleteAccount', () => {
     afterAll(async () => {
         await cleanup();
         await db.$disconnect();
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
+    });
+
+    it('logs a self deletion with campaign count and hashed email', async () => {
+        vi.stubEnv('ADMIN_HASH_SECRET', 'test-secret');
+        await user('a');
+        await campaign('c1', 'a');
+        await campaign('c2', 'a');
+        await member('c1', 'a', 'dm');
+        await member('c2', 'a', 'dm');
+
+        await deleteAccount(id('a'), deps());
+
+        const rows = await db.accountDeletion.findMany({
+            where: { deletedAt: { gte: suiteStart } },
+        });
+
+        expect(rows).toHaveLength(1);
+        expect(rows[0]).toMatchObject({
+            by: 'self',
+            campaigns: 2,
+            accountAgeDays: 0,
+        });
+        expect(rows[0].emailHash).toBe(
+            hashEmail(`${id('a')}@example.test`, 'test-secret')
+        );
+    });
+
+    it('stores a null emailHash without the secret and honours by=admin', async () => {
+        vi.stubEnv('ADMIN_HASH_SECRET', '');
+        await user('a');
+
+        await deleteAccount(id('a'), deps(), { by: 'admin' });
+
+        const rows = await db.accountDeletion.findMany({
+            where: { deletedAt: { gte: suiteStart } },
+        });
+
+        expect(rows).toHaveLength(1);
+        expect(rows[0]).toMatchObject({ by: 'admin', emailHash: null });
+    });
+
+    it('writes nothing for a missing user', async () => {
+        await deleteAccount(id('ghost'), deps());
+
+        expect(
+            await db.accountDeletion.count({
+                where: { deletedAt: { gte: suiteStart } },
+            })
+        ).toBe(0);
     });
 
     it('removes the DM account with its campaign, keeps the player user', async () => {
@@ -276,6 +343,11 @@ describe.skipIf(!isLocalDevDatabaseEnv())('deleteAccount', () => {
 
         expect(err).toBeInstanceOf(AccountDeleteBlockedError);
         expect(err.templateIds).toEqual([id('t')]);
+        expect(
+            await db.accountDeletion.count({
+                where: { deletedAt: { gte: suiteStart } },
+            })
+        ).toBe(0);
         expect(
             await db.user.findUnique({ where: { id: id('a') } })
         ).not.toBeNull();
