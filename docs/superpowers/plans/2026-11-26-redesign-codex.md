@@ -48,7 +48,7 @@ A24 (мінімум листа: липка колонка стягу, опис �
 | `gameTerms` — кореневий скоуп, ліміт 20 KB | `gameTerms` входить у `CAMPAIGN_BASE` (15,62 / 16,2 KB) і тому в кожен маршрут кампанії | 18 ключів світогляду = +0,17 KB (виміряно) — у межах квоти L2 |
 | `rules` у кампанійному скоупі | Пак `rules` є на `[id]`, `[id]/info`, `[id]/character`, `[id]/battles`, `[id]/dm/rules` | Квота L4 ≤ +0,12 KB |
 | Тур онбордингу «довідник» (`demoTours`, `clickFromTarget`) треба оновити | У `lib/onboarding/demo-tours.ts` немає кроків для `/info` і немає `data-tour` у `components/campaigns/info` | Нічого не робимо |
-| Кар'єра WFRP (`CareersPage`) — «той самий каркас, якщо на `HudFormPage`» | Не на `HudFormPage` | Поза обсягом |
+| Кар'єра WFRP (`CareersPage`) — «той самий каркас, якщо на `HudFormPage`» | Не на `HudFormPage` (список + `CareerForm` у `ResponsiveDialog`) | **В обсязі за рішенням власника 2026-11-26** — T1.7 (A2) |
 | Скіл: `SkillCreateForm`, `MainSkillEditForm` | Є ще `systems/skilltrees/ui/content/skills/EditSkill.tsx` (теж `HudFormPage`) | Додано в T1.4 |
 | `HudForm` має `triggerClassName`, ніхто не передає | Передає `components/rules/RulesForm.tsx` (`"flex-none px-3"`) | T0.2 переводить цей виклик на `tabStyles` |
 | Шапка `wide` липне на `--hud-top` | Змінна в коді — `--shell-header-h` (так у `HudTabs`) | Використовуємо `--shell-header-h` |
@@ -107,7 +107,7 @@ A24 (мінімум листа: липка колонка стягу, опис �
 |---|---|---|---|
 | 1 | **A0** | T0.1, T0.2, T0.3 | `components/hud/**`, `hud.css`, `lib/hooks/common/useRovingIndex.ts`, `common.json`, виклики `HudFormPage`, `scripts/shared/i18n-ns-gzip.ts` |
 | 2 ‖ | **A1** | T1.1, T1.2 | `components/units/form/*`, `components/spells/form/forms/*`, `components/artifacts/ArtifactForm.tsx`, сторінки `app/.../dm/{units,spells,artifacts}/[...]/page.tsx`, `SourceNotes.tsx` |
-| 2 ‖ | **A2** | T1.3, T1.4 | `components/races/*Form*`, `components/feats/FeatForm.tsx`, `systems/d20/ui/content/{classes,backgrounds}/*Form*`, `systems/skilltrees/ui/content/**/{*Form*,EditSkill.tsx}`, `systems/artifactsets/ui/content/*`, сторінки цих видів, `ui-layers.mjs` |
+| 2 ‖ | **A2** | T1.3, T1.4, T1.7 | `components/races/*Form*`, `components/feats/FeatForm.tsx`, `systems/d20/ui/content/{classes,backgrounds}/*Form*`, `systems/skilltrees/ui/content/**/{*Form*,EditSkill.tsx}`, `systems/artifactsets/ui/content/*`, сторінки цих видів, `ui-layers.mjs`, `systems/wfrp/ui/{dm/CareersPage,careers/*}.tsx` |
 | 2 ‖ | **A3** | T3.1, T3.2 | `components/campaigns/info/{detail,rows,layout}/*`, `lib/hooks/campaigns/useReferenceSelection.ts` + барель |
 | 2 ‖ | **A4** | T4.1, T4.2 | `lib/utils/rules/{sections,core-sections,section-groups}.ts`, `systems/*/rules/sections.ts`, `lib/hooks/campaigns/useRulesForm.ts`, `components/rules/**` |
 | 2 ‖ | **A5** | T5.1, T5.2 | `components/common/fields/FileDropZone.tsx`, `components/common/shell/StepIndicator.tsx`, `components/content-import/compendium/**`, `lib/hooks/compendium-import/**`, `lib/constants/compendium-import.ts`, `lib/server/compendium-import/service/token.ts` (лише імпорт константи), `compendium.json` |
@@ -274,6 +274,12 @@ export function HudSegmented<T extends string>(p: {
 ### T1.4 Скіл, гілка, набір артефактів (A2)
 **Файли:** `systems/skilltrees/ui/content/skills/form/SkillCreateForm.tsx`, `systems/skilltrees/ui/content/skills/EditSkill.tsx`, `systems/skilltrees/ui/content/main-skills/MainSkillEditForm.tsx`, `systems/artifactsets/ui/content/{ArtifactSetForm,ArtifactSetsPage}.tsx`. Учасники набору переходять на `ds-list-grid`. `side` = лише `SourceNotes` (перегляд — P2).
 - [ ] Наявні тести зелені (`pnpm test:run systems/skilltrees systems/artifactsets`) → коміт `feat(library): wide forms for system content`.
+
+### T1.7 Кар'єри WFRP на каркасі `wide` (A2; рішення власника 2026-11-26)
+**Файли:** `systems/wfrp/ui/dm/CareersPage.tsx`, `systems/wfrp/ui/careers/{CareerForm,CareerTierFields,CareerSkillPicker}.tsx`, `systems/wfrp/__tests__/ui/dm/CareersPage.test.tsx`, `messages/*/` лише ns, які вже читає wfrp (квота ≤ +0.05 KB; краще 0 — перевикористати наявні ключі).
+**Рішення:** `CareersPage` — системна `dmPages.careers` (окремого маршруту немає, нового не створювати). Діалог `ResponsiveDialog` прибирається: створення/редагування рендерить `HudFormPage width="wide"` прямо на сторінці замість списку, стан — у URL `?career=<id>|new` (`router.push`, щоб «назад» повертав до списку). Вкладки `HudForm tabStyles={{ variant: 'rail' }}`: «Основне» (назва, клас — `.ds-fields`) + 4 вкладки ступенів (`CareerTierFields`; навички/таланти — `.ds-list-grid`). Дії — `HudFormPage.actions` (Скасувати / Зберегти); «Видалити» (лише для наявної) — `HudFormMenu` + `useConfirm`. `side` — `SourceNotes`, якщо кар'єра має джерело, інакше без `side`. Список кар'єр лишається на `HudPage`, клік по картці → `?career=<id>`.
+- [ ] Тести (`CareersPage.test.tsx` оновити): `?career=new` → форма на сторінці, діалогу немає; «Видалити» в «⋯» → confirm → мутація; submit-кнопка має `form=`; без параметра — список.
+- [ ] Реалізація; `pnpm test:run systems/wfrp/__tests__/ui/dm` → коміт `feat(wfrp): careers on wide form`.
 
 ### T1.5 Перегляди партії 1: закляття, артефакт, клас (агент A7, після T3.1)
 **Файли:** створити `lib/utils/spells/reference-preview.ts`, `lib/utils/artifacts/reference-preview.ts`, `lib/utils/characters/classes/reference-preview.ts` + `__tests__/` поруч; змінити `SpellCreateForm`/`SpellEditForm`, `ArtifactForm`, `ClassForm`; `scripts/shared/ui-layers.mjs` (+ `'@/components/campaigns/info/detail/ClassReferenceDetail'`).
