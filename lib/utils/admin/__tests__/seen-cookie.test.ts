@@ -30,9 +30,9 @@ describe('seen cookie', () => {
     });
 
     it('never returns less than 60 seconds until midnight', () => {
-        expect(
-            secondsUntilUtcMidnight(new Date('2026-11-27T23:59:30Z'))
-        ).toBe(60);
+        expect(secondsUntilUtcMidnight(new Date('2026-11-27T23:59:30Z'))).toBe(
+            60
+        );
         expect(secondsUntilUtcMidnight(now)).toBe(14 * 3600);
     });
 });

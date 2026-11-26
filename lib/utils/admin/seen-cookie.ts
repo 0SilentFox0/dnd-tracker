@@ -25,5 +25,8 @@ export function secondsUntilUtcMidnight(now: Date): number {
         now.getUTCDate() + 1
     );
 
-    return Math.max(MIN_MAX_AGE_SECONDS, Math.ceil((next - now.getTime()) / 1000));
+    return Math.max(
+        MIN_MAX_AGE_SECONDS,
+        Math.ceil((next - now.getTime()) / 1000)
+    );
 }
