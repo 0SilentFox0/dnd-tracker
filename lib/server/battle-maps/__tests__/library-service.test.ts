@@ -241,6 +241,7 @@ vi.mock('@/lib/supabase/battle-map-storage', () => ({
 
 import { clearGeometryCache } from '../assemble';
 import {
+    clearArtBakedTx,
     cloneMap,
     createMap,
     deleteMap,
@@ -657,6 +658,29 @@ describe('battle map library service', () => {
             });
 
             expect(headerOf(id).artBaked).toBe(true);
+        });
+
+        it('clearArtBakedTx drops the flag, bumps the version and snapshots', async () => {
+            const id = await seedBaked();
+
+            const before = db.maps.get(id)?.mapVersion as number;
+
+            await db.api.$transaction((tx: unknown) =>
+                clearArtBakedTx(tx as Parameters<typeof clearArtBakedTx>[0], id)
+            );
+
+            expect(headerOf(id).artBaked).toBeUndefined();
+            expect(db.maps.get(id)?.mapVersion).toBe(before + 1);
+
+            const snap = db.versions.find(
+                (v) => v.mapId === id && v.version === before + 1
+            );
+
+            expect(snap).toBeDefined();
+            expect(
+                (snap?.payload as { header: { artBaked?: boolean } }).header
+                    .artBaked
+            ).toBeUndefined();
         });
 
         it('drops the flag when the background changes', async () => {

@@ -5,7 +5,11 @@ import { prisma } from '@/lib/db';
 import type { BattleMapSaveInput } from '@/lib/schemas/battle-maps';
 import { storedRecord } from '@/lib/schemas/stored-json';
 import { removeUnreferencedBackgrounds } from '@/lib/server/battle-maps/background-cleanup';
-import { saveMapTx } from '@/lib/server/battle-maps/library-service';
+import {
+    clearArtBakedTx,
+    lockMapRow,
+    saveMapTx,
+} from '@/lib/server/battle-maps/library-service';
 import { ContentError } from '@/lib/server/content/errors';
 import { toInputJsonObject } from '@/lib/utils/common/json';
 import type {
@@ -58,17 +62,13 @@ export async function saveArt(
     const { save, scene, expectedSceneVersion, baked } = input;
 
     const { result, released } = await prisma.$transaction(async (tx) => {
-        await tx.$queryRaw`SELECT 1 FROM battle_map_art WHERE "mapId" = ${mapId} FOR UPDATE`;
+        await lockMapRow(tx, mapId, 'update');
 
         const old = await tx.battleMapArt.findUnique({ where: { mapId } });
 
         const currentVersion = old?.sceneVersion ?? 0;
 
         if (expectedSceneVersion !== currentVersion) throw conflict();
-
-        const { brief, released } = await saveMapTx(tx, mapId, save, {
-            artBaked: baked || undefined,
-        });
 
         const changed =
             !old ||
@@ -78,6 +78,12 @@ export async function saveArt(
             );
 
         const sceneVersion = !old ? 1 : changed ? currentVersion + 1 : currentVersion;
+
+        const stale = !baked && old?.bakedSceneVersion !== sceneVersion;
+
+        const { brief, released } = await saveMapTx(tx, mapId, save, {
+            artBaked: baked ? true : stale ? false : undefined,
+        });
 
         const bakedFields = baked
             ? {
@@ -133,5 +139,11 @@ export async function saveArt(
 }
 
 export async function deleteArt(mapId: string): Promise<void> {
-    await prisma.battleMapArt.deleteMany({ where: { mapId } });
+    await prisma.$transaction(async (tx) => {
+        await lockMapRow(tx, mapId, 'update');
+
+        await tx.battleMapArt.deleteMany({ where: { mapId } });
+
+        await clearArtBakedTx(tx, mapId);
+    });
 }

@@ -469,6 +469,50 @@ export async function saveMapTx(
     return { brief: toBrief(row), released };
 }
 
+/** Detaching art: drop the baked flag so SVG walls draw again (new version + snapshot). */
+export async function clearArtBakedTx(tx: Prisma.TransactionClient, mapId: string) {
+    const current = await tx.battleMap.findUnique({
+        where: { id: mapId },
+        select: { mapVersion: true, header: true },
+    });
+
+    const header = (current?.header ?? {}) as Record<string, unknown>;
+
+    if (!current || header.artBaked !== true) return;
+
+    const { artBaked: _drop, ...rest } = header;
+
+    const base = current.mapVersion;
+
+    const { count } = await tx.battleMap.updateMany({
+        where: { id: mapId, mapVersion: base },
+        data: {
+            header: rest as Prisma.InputJsonObject,
+            mapVersion: { increment: 1 },
+        },
+    });
+
+    if (count === 0) throw conflict();
+
+    const snapshot = await tx.battleMapVersion.findUnique({
+        where: { mapId_version: { mapId, version: base } },
+    });
+
+    const payload = snapshot
+        ? (plain(snapshot.payload) as Record<string, unknown>)
+        : {};
+
+    await tx.battleMapVersion.create({
+        data: {
+            mapId,
+            version: base + 1,
+            payload: { ...payload, header: rest } as Prisma.InputJsonObject,
+        },
+    });
+
+    await pruneMapVersions(tx, mapId, base + 1);
+}
+
 export async function saveMap(
     mapId: string,
     input: BattleMapSaveInput

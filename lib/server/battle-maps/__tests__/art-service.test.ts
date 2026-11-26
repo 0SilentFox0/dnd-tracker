@@ -8,6 +8,7 @@ const h = vi.hoisted(() => {
     const tx = {
         $queryRaw: vi.fn(async () => []),
         battleMapArt: {
+            deleteMany: vi.fn(),
             findUnique: vi.fn(async () => state.art),
             upsert: vi.fn(
                 async (args: {
@@ -38,6 +39,8 @@ const h = vi.hoisted(() => {
         state,
         tx,
         saveMapTx: vi.fn(),
+        lockMapRow: vi.fn(),
+        clearArtBakedTx: vi.fn(),
         cleanup: vi.fn(),
         prisma: {
             $transaction: vi.fn(async (fn: (t: typeof tx) => unknown) => {
@@ -51,7 +54,7 @@ const h = vi.hoisted(() => {
                     throw e;
                 }
             }),
-            battleMapArt: { deleteMany: vi.fn(), findUnique: vi.fn() },
+            battleMapArt: { findUnique: vi.fn() },
         },
     };
 });
@@ -60,6 +63,8 @@ vi.mock('@/lib/db', () => ({ prisma: h.prisma }));
 
 vi.mock('@/lib/server/battle-maps/library-service', () => ({
     saveMapTx: h.saveMapTx,
+    lockMapRow: h.lockMapRow,
+    clearArtBakedTx: h.clearArtBakedTx,
 }));
 
 vi.mock('@/lib/server/battle-maps/background-cleanup', () => ({
@@ -140,6 +145,32 @@ describe('saveArt', () => {
         );
     });
 
+    it('locks the map row first', async () => {
+        await run({});
+
+        expect(h.lockMapRow).toHaveBeenCalledWith(h.tx, 'm1', 'update');
+    });
+
+    it('clears artBaked when an unbaked save changes the scene', async () => {
+        await run({});
+        await run({ expected: 1, baked: true });
+        await run({ expected: 1, scene: scene(0.5) });
+
+        expect(h.saveMapTx).toHaveBeenLastCalledWith(h.tx, 'm1', save, {
+            artBaked: false,
+        });
+    });
+
+    it('keeps the baked flag when an unbaked save leaves a baked scene unchanged', async () => {
+        await run({});
+        await run({ expected: 1, baked: true });
+        await run({ expected: 1 });
+
+        expect(h.saveMapTx).toHaveBeenLastCalledWith(h.tx, 'm1', save, {
+            artBaked: undefined,
+        });
+    });
+
     it('bumps sceneVersion on change and keeps the old baked mark', async () => {
         await run({});
         await run({ expected: 1, baked: true });
@@ -176,11 +207,13 @@ describe('getArt / deleteArt', () => {
         });
     });
 
-    it('deletes by map id', async () => {
+    it('deletes the row and clears the baked flag in one transaction', async () => {
         await deleteArt('m1');
 
-        expect(h.prisma.battleMapArt.deleteMany).toHaveBeenCalledWith({
+        expect(h.tx.battleMapArt.deleteMany).toHaveBeenCalledWith({
             where: { mapId: 'm1' },
         });
+        expect(h.clearArtBakedTx).toHaveBeenCalledWith(h.tx, 'm1');
+        expect(h.prisma.$transaction).toHaveBeenCalledTimes(1);
     });
 });
