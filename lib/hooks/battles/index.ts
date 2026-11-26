@@ -10,6 +10,10 @@ export {
     useBattleMapEditor,
 } from './setup/useBattleMapEditor';
 export {
+    type BattleMapSections,
+    useBattleMapSections,
+} from './setup/useBattleMapSections';
+export {
     type ParticipantActions,
     type ParticipantSelection,
 } from './setup/useBattleParticipants';

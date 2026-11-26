@@ -4,7 +4,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Grid3x3, Library } from 'lucide-react';
 
-import { type BattleMapPanel, BattleMapSidebar } from './BattleMapSidebar';
+import { useMapModeFlags } from './sections/ModeSection';
+import { BattleMapSidebar } from './BattleMapSidebar';
 import { LibraryMapGrid } from './LibraryMapGrid';
 import { MapQuickStart, type MapQuickStartAction } from './MapQuickStart';
 import { type MapSource, MapSourceChoice } from './MapSourceChoice';
@@ -17,7 +18,12 @@ import { MapWorkbench } from '@/components/maps/editor/MapWorkbench';
 import { UvttImportSection } from '@/components/maps/editor/UvttImportSection';
 import { Button } from '@/components/ui/button';
 import { useActiveToolChip, useUvttImport } from '@/lib/hooks/battle-maps';
-import type { BattleLibraryMap, BattleMapEditor } from '@/lib/hooks/battles';
+import {
+    type BattleLibraryMap,
+    type BattleMapEditor,
+    useBattleMapSections,
+} from '@/lib/hooks/battles';
+import { useCoarsePointer } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
 import {
     isEdgeTool,
@@ -82,7 +88,17 @@ function OwnMap({
 
     const toolChip = useActiveToolChip(editor);
 
-    const [panel, setPanel] = useState<BattleMapPanel>('size');
+    const touch = useCoarsePointer();
+
+    const { hasModes, hidesTerrain } = useMapModeFlags(editor);
+
+    const sections = useBattleMapSections(editor, {
+        touch,
+        hasModes,
+        hidesTerrain,
+    });
+
+    const { select } = sections;
 
     const [fullscreen, setFullscreen] = useState(false);
 
@@ -104,16 +120,16 @@ function OwnMap({
                     doors: result.doors,
                 });
                 setStarted(true);
-                setPanel('background');
+                select('background');
             },
-            [replaceMapFromImport]
+            [replaceMapFromImport, select]
         )
     );
 
     const quickStart = (action: MapQuickStartAction) => {
         setStarted(true);
 
-        if (action !== 'grid') setPanel('background');
+        if (action !== 'grid') select('background');
     };
 
     return (
@@ -126,9 +142,9 @@ function OwnMap({
             onEscape={() => {
                 if (toolChip.onEscape()) return true;
 
-                if (panel !== 'motion') return false;
+                if (sections.active !== 'motion') return false;
 
-                setPanel('size');
+                select('grid');
 
                 return true;
             }}
@@ -158,8 +174,7 @@ function OwnMap({
             sidebar={
                 <BattleMapSidebar
                     editor={editor}
-                    panel={panel}
-                    onPanel={setPanel}
+                    sections={sections}
                     uvtt={
                         <UvttImportSection
                             error={uvtt.error}

@@ -178,16 +178,20 @@
       "special": "Special"
     },
     "panels": {
-      "size": "Size and grid",
+      "grid": "Grid & size",
+      "calibration": "Calibration",
       "background": "Background",
+      "margins": "Margins",
       "cells": "Cells",
       "edges": "Walls and doors",
       "mode": "Mode",
       "motion": "Motion"
     },
     "panelDescription": {
-      "size": "Grid type, cell count and non-playable margins.",
-      "background": "Map image, grid scale and offset, calibration.",
+      "grid": "Grid type and map size in cells.",
+      "calibration": "Cell size and grid offset relative to the background.",
+      "background": "Image, default background and grid opacity.",
+      "margins": "Unplayable cells along the map edges.",
       "cells": "Mark blocked cells and hazardous areas.",
       "edges": "Draw walls, bars and doors along cell edges.",
       "mode": "A special map mode, such as a maze.",

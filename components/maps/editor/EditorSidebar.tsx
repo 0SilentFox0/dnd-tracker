@@ -7,16 +7,16 @@ import { PANEL_ICONS, panelsFor } from './editor-icons';
 import { TilePalettePanel } from './TilePalettePanel';
 import { UvttImportSection } from './UvttImportSection';
 
-import { MapBackgroundSection } from '@/components/battle/setup/map/MapBackgroundSection';
+import { MapBackgroundSection } from '@/components/battle/setup/map/shared/MapBackgroundSection';
 import {
     ART_CELL_TOOLS,
     MapCellToolsSection,
-} from '@/components/battle/setup/map/MapCellToolsSection';
+} from '@/components/battle/setup/map/shared/MapCellToolsSection';
 import {
     DoorToolOptions,
     EDGE_TOOLS,
     ToolButtons,
-} from '@/components/battle/setup/map/MapToolButtons';
+} from '@/components/battle/setup/map/shared/MapToolButtons';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type {

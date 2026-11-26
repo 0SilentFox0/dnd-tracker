@@ -1,10 +1,14 @@
 // @vitest-environment happy-dom
+import { useEffect } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BattleMapSidebar } from '../BattleMapSidebar';
+import { useMapModeFlags } from '../sections/ModeSection';
 
 import type { BattleMapEditor } from '@/lib/hooks/battles';
+import { useBattleMapSections } from '@/lib/hooks/battles/setup/useBattleMapSections';
+import type { BattleMapSection } from '@/lib/utils/battle/grid/map-sections';
 
 const touch = vi.hoisted(() => ({ value: false }));
 
@@ -34,15 +38,25 @@ vi.mock('@/components/onboarding/OnboardingHint', () => ({
     OnboardingHint: () => null,
 }));
 
-vi.mock('../MapBackgroundSection', () => ({
-    MapBackgroundSection: () => <p>background-section</p>,
+vi.mock('../shared/MapBackgroundImage', () => ({
+    MapBackgroundImage: () => <p>background-image</p>,
 }));
 
-vi.mock('../MapCellToolsSection', () => ({
+vi.mock('../shared/MapGridAlignment', () => ({
+    MapGridAlignment: () => <p>alignment</p>,
+}));
+
+vi.mock('../shared/MapCellToolsSection', () => ({
     MapCellToolsSection: () => <p>cell-tools</p>,
 }));
 
-vi.mock('../GridTypeChoice', () => ({ GridTypeChoice: () => null }));
+vi.mock('../sections/GridSizeSection', () => ({
+    GridSizeSection: () => <p>grid-size</p>,
+}));
+
+vi.mock('../sections/MarginsSection', () => ({
+    MarginsSection: () => <p>margins-section</p>,
+}));
 
 const Toggle = () => <p>maze-toggle</p>;
 
@@ -70,22 +84,39 @@ function makeEditor(
     return { editor, setTool };
 }
 
-function renderSidebar(
-    editor: BattleMapEditor,
-    panel: 'size' | 'edges' | 'cells' | 'mode' = 'size'
-) {
-    const onPanel = vi.fn();
+function Harness({
+    editor,
+    initial,
+}: {
+    editor: BattleMapEditor;
+    initial: BattleMapSection;
+}) {
+    const { hasModes, hidesTerrain } = useMapModeFlags(editor);
 
-    render(
+    const sections = useBattleMapSections(editor, {
+        touch: touch.value,
+        hasModes,
+        hidesTerrain,
+    });
+
+    const { select } = sections;
+
+    useEffect(() => select(initial), [select, initial]);
+
+    return (
         <BattleMapSidebar
             editor={editor}
-            panel={panel}
-            onPanel={onPanel}
+            sections={sections}
             uvtt={<p>uvtt</p>}
         />
     );
+}
 
-    return onPanel;
+function renderSidebar(
+    editor: BattleMapEditor,
+    initial: BattleMapSection = 'grid'
+) {
+    render(<Harness editor={editor} initial={initial} />);
 }
 
 beforeEach(() => {
@@ -149,27 +180,42 @@ describe('BattleMapSidebar', () => {
         expect(tab('motion')).toBeNull();
     });
 
-    it('clears a cell tool when leaving the cells panel', () => {
+    it('splits grid, calibration, background and margins into own sections', () => {
+        renderSidebar(makeEditor().editor);
+
+        ['grid', 'calibration', 'background', 'margins'].forEach((id) =>
+            expect(tab(id)).toBeTruthy()
+        );
+        expect(screen.getByText('grid-size')).toBeTruthy();
+    });
+
+    it('shows alignment only on the calibration section', () => {
+        renderSidebar(makeEditor().editor, 'calibration');
+
+        expect(screen.getByText('alignment')).toBeTruthy();
+        expect(screen.queryByText('background-image')).toBeNull();
+    });
+
+    it('clears a cell tool when leaving the cells section', () => {
         const { editor, setTool } = makeEditor({ tool: 'blocked' });
 
-        const onPanel = renderSidebar(editor, 'cells');
+        renderSidebar(editor, 'cells');
 
         fireEvent.mouseDown(tab('edges') as HTMLElement);
         fireEvent.click(tab('edges') as HTMLElement);
 
         expect(setTool).toHaveBeenCalledWith(null);
-        expect(onPanel).toHaveBeenCalledWith('edges');
+        expect(tab('edges')?.getAttribute('data-state')).toBe('active');
     });
 
-    it('keeps a tool that belongs to the target panel', () => {
+    it('keeps a tool that belongs to the target section', () => {
         const { editor, setTool } = makeEditor({ tool: 'edge-wall' });
 
-        const onPanel = renderSidebar(editor, 'size');
+        renderSidebar(editor, 'grid');
 
         fireEvent.mouseDown(tab('edges') as HTMLElement);
         fireEvent.click(tab('edges') as HTMLElement);
 
         expect(setTool).not.toHaveBeenCalled();
-        expect(onPanel).toHaveBeenCalledWith('edges');
     });
 });
