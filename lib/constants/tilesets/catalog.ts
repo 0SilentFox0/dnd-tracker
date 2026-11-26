@@ -213,6 +213,22 @@ function toDefinition(seed: Seed, index: number): TileDefinition {
     };
 }
 
+const ASSET_DIRECTORY: Partial<Record<TileLayer, string>> = {
+    ground: 'ground',
+    wallfill: 'wallfill',
+    objects: 'objects',
+    'edge-art': 'edges',
+};
+
+export function tileAssetPath(def: TileDefinition): string {
+    const directory = ASSET_DIRECTORY[def.layer];
+
+    if (!directory || !def.assetFile)
+        throw new Error('Tile has no raster asset');
+
+    return `/assets/battle-tiles/${directory}/${def.assetFile}`;
+}
+
 export const TILE_CATALOG: readonly TileDefinition[] = SEEDS.map(toDefinition);
 
 const byId = new Map<number, TileDefinition>(

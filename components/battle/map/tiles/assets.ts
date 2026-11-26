@@ -1,3 +1,4 @@
+import { tileAssetPath } from '@/lib/constants/tilesets/catalog';
 import type { TileDefinition } from '@/lib/constants/tilesets/types';
 import type { GridWindow } from '@/lib/utils/battle/grid';
 import { CHUNK_SIDE, chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
@@ -6,21 +7,7 @@ import { loadImage } from '@/lib/utils/common/image-decode';
 
 const imagePromises = new Map<string, Promise<HTMLImageElement>>();
 
-const ASSET_DIRECTORY: Partial<Record<TileDefinition['layer'], string>> = {
-    ground: 'ground',
-    wallfill: 'wallfill',
-    objects: 'objects',
-    'edge-art': 'edges',
-} as const;
-
-export function tileAssetUrl(definition: TileDefinition): string {
-    const directory = ASSET_DIRECTORY[definition.layer];
-
-    if (!directory || !definition.assetFile)
-        throw new Error('Tile has no raster asset');
-
-    return `/assets/battle-tiles/${directory}/${definition.assetFile}`;
-}
+export const tileAssetUrl = tileAssetPath;
 
 export function visibleTileIds(
     chunks: TileLayerChunks,

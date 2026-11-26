@@ -192,3 +192,24 @@ describe('battle map library schemas on hex grids', () => {
         }
     );
 });
+
+describe('map art fields', () => {
+    const save = (map: object) => ({ ...input(map), expectedVersion: 1 });
+
+    it('allows hex background width 200 + 1/3', () => {
+        expect(
+            battleMapSaveSchema.safeParse(
+                save({ gridType: 'hex', cols: 200, backgroundCols: 200.34 })
+            ).success
+        ).toBe(true);
+    });
+
+    it('allows artBaked true only', () => {
+        expect(
+            battleMapSaveSchema.safeParse(save({ artBaked: true })).success
+        ).toBe(true);
+        expect(
+            battleMapSaveSchema.safeParse(save({ artBaked: false })).success
+        ).toBe(false);
+    });
+});
