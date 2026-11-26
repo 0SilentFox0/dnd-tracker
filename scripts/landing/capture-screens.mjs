@@ -99,14 +99,26 @@ async function login() {
         ],
         { stdio: 'ignore' }
     );
-    console.log('Log in in the opened Chrome window, then press Enter here…');
-    await new Promise((r) => process.stdin.once('data', r));
-    const browser = await chromium.connectOverCDP(`http://localhost:${port}`);
+    console.log('Log in in the opened Chrome window; the session is saved automatically…');
+    let browser;
+    for (let i = 0; i < 30 && !browser; i++) {
+        await new Promise((r) => setTimeout(r, 1000));
+        browser = await chromium
+            .connectOverCDP(`http://localhost:${port}`)
+            .catch(() => null);
+    }
+    if (!browser) throw new Error('Chrome debugging port did not come up');
+    const context = browser.contexts()[0];
+    const hasSession = async () =>
+        (await context.cookies(BASE)).some((c) => /auth-token(\.\d+)?$/.test(c.name));
+    for (let i = 0; i < 300 && !(await hasSession()); i++)
+        await new Promise((r) => setTimeout(r, 2000));
+    if (!(await hasSession())) throw new Error('Login timed out');
+    await new Promise((r) => setTimeout(r, 2000));
     await mkdir(path.dirname(STATE), { recursive: true });
-    await browser.contexts()[0].storageState({ path: STATE });
+    await context.storageState({ path: STATE });
     await browser.close();
     chrome.kill();
-    process.stdin.pause();
 }
 
 async function prepareBattle(browser) {
@@ -157,10 +169,14 @@ const resolved = (v) => !JSON.stringify(v).includes('TODO');
 
 async function shoot(browser, shot) {
     const kind = shot.mobile ? MOBILE : DESKTOP;
+    const zoom = shot.zoom ?? 1;
     const ctx = await browser.newContext({
         storageState: STATE,
-        viewport: kind.viewport,
-        deviceScaleFactor: kind.dpr,
+        viewport: {
+            width: Math.round(kind.viewport.width / zoom),
+            height: Math.round(kind.viewport.height / zoom),
+        },
+        deviceScaleFactor: kind.dpr * zoom,
         locale: uiLocale === 'uk' ? 'uk-UA' : 'en-US',
         extraHTTPHeaders: { 'Accept-Language': uiLocale },
     });
@@ -183,6 +199,14 @@ async function shoot(browser, shot) {
                     .click();
         if (step.goto)
             await page.goto(c(step.goto), { waitUntil: 'networkidle' });
+        if (step.text)
+            await page.getByText(tx(step.text), { exact: true }).first().click();
+        if (step.eval) await page.evaluate(step.eval);
+        if (step.scroll !== undefined)
+            await page.evaluate((y) => {
+                const el = [...document.querySelectorAll('main, [data-scroll]')].find((e) => e.scrollHeight > e.clientHeight);
+                (el ?? document.scrollingElement).scrollTo({ top: y });
+            }, step.scroll);
         if (step.wait) await page.waitForTimeout(step.wait);
     }
     for (const hint of await page
@@ -238,7 +262,7 @@ try {
         if (!resolved(profile.campaignId))
             throw new Error(`Profile ${profileName} has no campaignId yet`);
         await mkdir(OUT, { recursive: true });
-        if (profile.battleId && resolved(profile.battleId))
+        if (profile.replayBattle && profile.battleId && resolved(profile.battleId))
             await prepareBattle(browser);
         for (const shot of profile.shots) {
             if (ONLY && !ONLY.includes(shot.name)) continue;
