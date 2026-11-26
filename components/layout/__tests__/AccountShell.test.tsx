@@ -77,7 +77,7 @@ describe('AccountShell', () => {
         );
 
         expect(container.querySelector('main')?.className).toContain(
-            'max-sm:[&>.hud-form-page]:-mx-3'
+            'max-sm:[&>.hud-form-page]:-mx-4'
         );
     });
 });
