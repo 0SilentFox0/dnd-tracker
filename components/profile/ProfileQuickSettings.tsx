@@ -34,10 +34,10 @@ export function ProfileQuickSettings({
                 </Link>
                 {showOpsLink && (
                     <Link
-                        href="/ops"
+                        href="/admin"
                         className="flex min-h-10 items-center text-sm underline"
                     >
-                        {tProfile('opsLink')}
+                        {tProfile('adminLink')}
                     </Link>
                 )}
             </div>

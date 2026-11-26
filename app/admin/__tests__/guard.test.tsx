@@ -10,13 +10,19 @@ const notFound = vi.hoisted(() =>
     })
 );
 
-vi.mock('next/navigation', () => ({ notFound }));
+const permanentRedirect = vi.hoisted(() =>
+    vi.fn(() => {
+        throw new Error('NEXT_REDIRECT');
+    })
+);
+
+vi.mock('next/navigation', () => ({ notFound, permanentRedirect }));
 vi.mock('@/lib/auth', () => ({ getAuthUserOptional }));
 
 import robots from '@/app/robots';
-import { assertOpsAdmin } from '@/lib/server/ops/page-guard';
+import { assertAdmin } from '@/lib/server/admin/page-guard';
 
-describe('assertOpsAdmin', () => {
+describe('assertAdmin', () => {
     beforeEach(() => {
         getAuthUserOptional.mockReset();
         notFound.mockClear();
@@ -26,25 +32,25 @@ describe('assertOpsAdmin', () => {
 
     it('calls notFound without a session and for non-owners', async () => {
         getAuthUserOptional.mockResolvedValue(null);
-        await expect(assertOpsAdmin()).rejects.toThrow('NEXT_NOT_FOUND');
+        await expect(assertAdmin()).rejects.toThrow('NEXT_NOT_FOUND');
 
         getAuthUserOptional.mockResolvedValue({ id: 'someone', email: 'no@x.com' });
-        await expect(assertOpsAdmin()).rejects.toThrow('NEXT_NOT_FOUND');
+        await expect(assertAdmin()).rejects.toThrow('NEXT_NOT_FOUND');
     });
 
     it('passes for the owner', async () => {
         getAuthUserOptional.mockResolvedValue({ id: 'owner', email: null });
 
-        await expect(assertOpsAdmin()).resolves.toBeUndefined();
+        await expect(assertAdmin()).resolves.toBeUndefined();
 
         getAuthUserOptional.mockResolvedValue({ id: 'x', email: 'OK@x.com' });
-        await expect(assertOpsAdmin()).resolves.toBeUndefined();
+        await expect(assertAdmin()).resolves.toBeUndefined();
         expect(notFound).not.toHaveBeenCalled();
     });
 });
 
 describe('robots', () => {
-    it('disallows /ops when indexing is on', async () => {
+    it('disallows /ops and /admin when indexing is on', async () => {
         vi.resetModules();
         vi.doMock('@/lib/constants/site', () => ({
             SITE_INDEXING: true,
@@ -56,6 +62,18 @@ describe('robots', () => {
         const rules = mod.default().rules as { disallow: string[] };
 
         expect(rules.disallow).toContain('/ops');
+        expect(rules.disallow).toContain('/admin');
         expect(robots).toBeTypeOf('function');
+    });
+});
+
+describe('legacy /ops page', () => {
+    it('permanently redirects to /admin/ops', async () => {
+        vi.doMock('@/lib/server/ops/summary', () => ({ buildSummary: vi.fn() }));
+
+        const mod = await import('@/app/ops/page');
+
+        expect(() => mod.default()).toThrow('NEXT_REDIRECT');
+        expect(permanentRedirect).toHaveBeenCalledWith('/admin/ops');
     });
 });

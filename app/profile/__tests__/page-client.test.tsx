@@ -88,7 +88,7 @@ describe('ProfileClient', () => {
             />
         );
 
-        expect(screen.queryByText('opsLink')).toBeNull();
+        expect(screen.queryByText('adminLink')).toBeNull();
 
         rerender(
             <ProfileClient
@@ -96,7 +96,7 @@ describe('ProfileClient', () => {
             />
         );
 
-        expect(screen.getByText('opsLink')).toBeTruthy();
+        expect(screen.getByText('adminLink')).toBeTruthy();
     });
 
     it('omits zero counts and a missing date from the summary', () => {

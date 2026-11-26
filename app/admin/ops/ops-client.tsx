@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { QueryState } from '@/components/common/states';
-import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { HudPanel } from '@/components/hud/page';
 import { AlertList } from '@/components/ops/AlertList';
 import { DbTopTable } from '@/components/ops/DbTopTable';
 import { LimitGauge } from '@/components/ops/LimitGauge';
@@ -35,12 +35,10 @@ export function OpsClient() {
     const mute = useMuteAlert();
 
     return (
-        <HudPage>
-            <HudPageHeader
-                title={t('title')}
-                subtitle={t('subtitle')}
-                actions={<TestNotifyButton />}
-            />
+        <div className="space-y-4">
+            <div className="flex justify-end">
+                <TestNotifyButton />
+            </div>
             <QueryState query={summary}>
                 {(data) => (
                     <>
@@ -102,6 +100,6 @@ export function OpsClient() {
                     )}
                 </QueryState>
             </HudPanel>
-        </HudPage>
+        </div>
     );
 }

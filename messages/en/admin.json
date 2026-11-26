@@ -1,0 +1,17 @@
+{
+  "title": "Admin panel",
+  "tabs": {
+    "label": "Admin sections",
+    "overview": "Overview",
+    "users": "Users",
+    "security": "Security",
+    "ops": "Ops"
+  },
+  "dataSince": "Data since {date}",
+  "common": {
+    "refresh": "Refresh",
+    "na": "n/a",
+    "none": "None",
+    "soon": "Coming soon"
+  }
+}

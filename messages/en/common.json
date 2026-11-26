@@ -267,7 +267,7 @@
       "tooLarge": "The image is larger than 15 MB",
       "failed": "Couldn't update the photo"
     },
-    "opsLink": "Ops dashboard",
+    "adminLink": "Admin panel",
     "sections": {
       "account": "Account"
     }
