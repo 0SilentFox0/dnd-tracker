@@ -123,7 +123,15 @@ function OwnMap({
                 set: setFullscreen,
                 label: t('fullscreen'),
             }}
-            onEscape={toolChip.onEscape}
+            onEscape={() => {
+                if (toolChip.onEscape()) return true;
+
+                if (panel !== 'motion') return false;
+
+                setPanel('size');
+
+                return true;
+            }}
             toolbar={
                 <div className="flex flex-wrap items-center gap-2">
                     <ActiveToolChip

@@ -180,7 +180,7 @@ function EdgesPanel({
     blocked,
 }: {
     editor: BattleMapEditor;
-    blocked: 'hexEdgesOff' | 'edgesDesktopOnly' | 'edgesDisabledMode' | null;
+    blocked: 'edgesDesktopOnly' | 'edgesDisabledMode' | null;
 }) {
     const t = useTranslations('battleSetup.map');
 
@@ -215,17 +215,15 @@ export function BattleMapSidebar({
 
     const touch = useCoarsePointer();
 
-    const { mode, tool, grid } = editor.state;
+    const { mode, tool } = editor.state;
 
     const terrainHidden = !!mode && !!MAP_MODE_UI[mode].hidesTerrain;
 
     const edgesBlocked = terrainHidden
         ? 'edgesDisabledMode'
-        : grid === 'hex'
-          ? 'hexEdgesOff'
-          : touch
-            ? 'edgesDesktopOnly'
-            : null;
+        : touch
+          ? 'edgesDesktopOnly'
+          : null;
 
     const hasModes = (Object.keys(MAP_MODE_UI) as MapModeKey[]).some(
         (key) => MAP_MODE_UI[key].SetupToggle && editor.state.modeSupported(key)

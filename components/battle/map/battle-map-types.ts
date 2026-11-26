@@ -25,6 +25,8 @@ export interface BattleMapProps {
 export interface BattleMapLook {
     tiles?: TileRenderState;
     className?: string;
+    /** read-only previews: no zoom buttons */
+    hideCameraControls?: boolean;
 }
 
 export interface ArtPreviewState {

@@ -8,6 +8,7 @@ import {
     discardBattleMapBackground,
     uploadBattleMapBackground,
 } from '@/lib/api/battle-map-background';
+import { DEFAULT_MAP_BACKGROUND } from '@/lib/constants/battle';
 import { battleMapToLibraryInput } from '@/lib/utils/battle/grid';
 import { normalizeUvttBackground } from '@/lib/utils/battle/uvtt/normalize-background';
 import type { BattleMapConfig } from '@/types/battle-grid';
@@ -25,17 +26,21 @@ export function useSaveMapToLibrary(campaignId: string) {
         let uploaded: string | undefined;
 
         try {
-            let source = map;
+            // the setup canvas shows the default image for a null background; keep what the DM saw
+            let source: BattleMapConfig = {
+                ...map,
+                background: map.background ?? DEFAULT_MAP_BACKGROUND,
+            };
 
-            if (map.background?.startsWith('data:')) {
+            if (source.background?.startsWith('data:')) {
                 setIsUploading(true);
 
                 uploaded = await uploadBattleMapBackground(
                     campaignId,
-                    await normalizeUvttBackground(map.background)
+                    await normalizeUvttBackground(source.background)
                 );
 
-                source = { ...map, background: uploaded };
+                source = { ...source, background: uploaded };
             }
 
             return await create.mutateAsync(

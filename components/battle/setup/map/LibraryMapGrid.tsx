@@ -19,6 +19,10 @@ import { cn } from '@/lib/utils';
 
 const NO_PARTICIPANTS: never[] = [];
 
+const PREVIEW_LOOK = { className: 'h-full', hideCameraControls: true };
+
+const PREVIEW_EDITING = { showDefaultBackground: false };
+
 function SelectedPreview({
     campaignId,
     mapId,
@@ -41,7 +45,8 @@ function SelectedPreview({
             <BattleMap
                 map={{ ...data.map, walls: data.walls, bars: data.bars }}
                 participants={NO_PARTICIPANTS}
-                look={{ className: 'h-full' }}
+                look={PREVIEW_LOOK}
+                editing={PREVIEW_EDITING}
             />
         </div>
     );

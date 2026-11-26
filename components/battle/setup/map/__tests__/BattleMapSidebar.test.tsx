@@ -99,11 +99,11 @@ const tab = (name: string) =>
     screen.queryByRole('tab', { name: `battleSetup.map.panels.${name}` });
 
 describe('BattleMapSidebar', () => {
-    it('explains why walls are off on a hex grid', () => {
+    it('keeps walls available on a hex grid', () => {
         renderSidebar(makeEditor({ grid: 'hex' }).editor, 'edges');
 
-        expect(screen.getByText('battleSetup.map.hexEdgesOff')).toBeTruthy();
-        expect(tab('edges')?.getAttribute('aria-disabled')).toBe('true');
+        expect(screen.queryByText('battleSetup.map.edgesDesktopOnly')).toBeNull();
+        expect(tab('edges')?.getAttribute('aria-disabled')).toBeNull();
     });
 
     it('explains that walls are desktop only on touch', () => {

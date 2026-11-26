@@ -193,7 +193,6 @@
       "mode": "A special map mode, such as a maze.",
       "motion": "Movement animation on the map."
     },
-    "hexEdgesOff": "Walls and doors are unavailable on a hex grid — switch to a square grid",
     "quickStart": {
       "title": "Get started",
       "image": "Upload a map image",

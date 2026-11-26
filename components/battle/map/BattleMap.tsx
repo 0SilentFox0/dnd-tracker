@@ -56,7 +56,7 @@ export function BattleMap({
     editing = NO_EDITING,
     phone = false,
 }: BattleMapProps) {
-    const { tiles, className } = look;
+    const { tiles, className, hideCameraControls } = look;
 
     const { clickableBlocked, showBlocked, strokeTool, showDefaultBackground } =
         editing;
@@ -336,7 +336,7 @@ export function BattleMap({
                 )}
                 <WeatherLayer weather={map.weather} phone={phone} />
             </div>
-            {frame && (
+            {frame && !hideCameraControls && (
                 <MapCameraControls
                     onZoomIn={() => camera.zoomBy(ZOOM_STEP)}
                     onZoomOut={() => camera.zoomBy(1 / ZOOM_STEP)}
