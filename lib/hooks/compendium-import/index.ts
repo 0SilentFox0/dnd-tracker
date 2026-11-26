@@ -9,4 +9,10 @@ export {
     useCompendiumMedia,
 } from './useCompendiumMedia';
 export { useCompendiumReports } from './useCompendiumReports';
+export {
+    type CompendiumStepId,
+    type CompendiumWizardView,
+    useCompendiumWizardView,
+    usePreviewDeadline,
+} from './useCompendiumWizardView';
 export { useSourceNotes } from './useSourceNotes';

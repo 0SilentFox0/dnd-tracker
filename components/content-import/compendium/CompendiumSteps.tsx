@@ -1,36 +1,31 @@
-'use client';
-import { useTranslations } from 'next-intl';
+import type {
+    CompendiumImportController,
+    CompendiumStepId,
+} from '@/lib/hooks/compendium-import';
 
-import { StepIndicator } from '@/components/common/shell/StepIndicator';
-import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
+export const COMPENDIUM_STEP_KEYS = [
+    'file',
+    'categories',
+    'check',
+    'confirm',
+    'result',
+] as const;
 
-const KEYS = ['file', 'categories', 'check', 'confirm'] as const;
+type State = Pick<
+    CompendiumImportController['state'],
+    'root' | 'preview' | 'result'
+>;
 
-export function compendiumStep({
-    root,
-    preview,
-    rights,
-    result,
-}: CompendiumImportController['state']) {
-    if (result) return KEYS.length;
+export function compendiumStep({ root, preview, result }: State) {
+    if (result) return 4;
 
-    if (preview) return rights ? 3 : 2;
+    if (preview) return 2;
 
     return root ? 1 : 0;
 }
 
-export function CompendiumSteps({
-    wizard,
-}: {
-    wizard: CompendiumImportController;
-}) {
-    const t = useTranslations('compendium.import.steps');
-
+export function compendiumUnlocked(state: State): CompendiumStepId {
     return (
-        <StepIndicator
-            label={t('label')}
-            steps={KEYS.map((key) => t(key))}
-            current={compendiumStep(wizard.state)}
-        />
-    );
+        state.preview && !state.result ? 4 : compendiumStep(state) + 1
+    ) as CompendiumStepId;
 }
