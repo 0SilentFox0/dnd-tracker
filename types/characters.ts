@@ -424,7 +424,8 @@ export type RestBody = {
 export type SheetRollSubject =
     | { kind: 'check'; skill: DndSkill }
     | { kind: 'check'; ability: AbilityKey }
-    | { kind: 'save'; ability: AbilityKey };
+    | { kind: 'save'; ability: AbilityKey }
+    | { kind: 'attack'; attackId: string };
 
 export type SheetTestSubject =
     | { kind: 'test'; characteristic: string }

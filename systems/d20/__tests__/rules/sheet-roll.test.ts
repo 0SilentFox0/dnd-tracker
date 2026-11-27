@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { makeT } from '@/lib/i18n/test/mock-t';
 import { seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { attackSheet } from '@/lib/utils/characters/sheet/lines';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { rollFromSheet } from '@/systems/d20/rules/sheet-roll';
 import type { BattleParticipant } from '@/types/battle';
@@ -108,5 +109,38 @@ describe('rollFromSheet', () => {
             ).label
         ).toBe('gameTerms.dndSkills.stealth');
         expect(r).toMatchObject({ total: 11, autoFail: false });
+    });
+
+    it('attack: d20 + the same to-hit as the sheet row', () => {
+        const p = rogue();
+
+        const attack = p.battleData.attacks[0];
+
+        const id = attack.id ?? attack.name;
+
+        const r = rollFromSheet(
+            p,
+            { kind: 'attack', attackId: id },
+            opts(false)
+        );
+
+        const row = attackSheet(p, attack, DEFAULT_RULES);
+
+        expect(r).toMatchObject({
+            label: attack.name,
+            roll: 11,
+            mod: row.toHit.total,
+        });
+        expect(r.total).toBe(11 + row.toHit.total);
+    });
+
+    it('attack: unknown id is a 404', () => {
+        expect(() =>
+            rollFromSheet(
+                rogue(),
+                { kind: 'attack', attackId: 'nope' },
+                opts(false)
+            )
+        ).toThrow();
     });
 });

@@ -49,6 +49,11 @@ export const sheetRollSchema = z.union([
         ability: z.enum(ABILITY_KEYS),
         useInspiration,
     }),
+    z.object({
+        kind: z.literal('attack'),
+        attackId: z.string().min(1).max(200),
+        useInspiration,
+    }),
     z
         .object({
             kind: z.literal('test'),

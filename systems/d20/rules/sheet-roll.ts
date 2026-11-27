@@ -1,11 +1,17 @@
+import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { Translator } from '@/lib/i18n/translator';
+import { ContentError } from '@/lib/utils/api/content-error';
+import { calculateAttackBonus } from '@/lib/utils/battle/attack';
 import type { Ruleset } from '@/lib/utils/rules';
 import { rollCheck } from '@/systems/d20/rules/checks/roll-check';
+import { rollD20WithMode } from '@/systems/d20/rules/dice/roll-d20';
 import { rollSave } from '@/systems/d20/rules/saves/roll-save';
 import type { BattleParticipant } from '@/types/battle';
 import type { SheetD20RollResult, SheetRollSubject } from '@/types/characters';
 
 function sheetRollLabel(subject: SheetRollSubject, t: Translator): string {
+    if (subject.kind === 'attack') return subject.attackId;
+
     if ('skill' in subject) return t(`gameTerms.dndSkills.${subject.skill}`);
 
     const ability = t(`gameTerms.abilities.${subject.ability}.label`);
@@ -40,6 +46,32 @@ export function rollFromSheet(
         rng: opts.rng,
         advantage: opts.inspiration,
     };
+
+    if (subject.kind === 'attack') {
+        const attack = p.battleData.attacks.find(
+            (a) => (a.id ?? a.name) === subject.attackId
+        );
+
+        if (!attack) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+
+        const mode = opts.inspiration ? 'advantage' : 'normal';
+
+        const { roll, rolls } = rollD20WithMode(mode, opts.rng);
+
+        const mod = calculateAttackBonus(p, attack, opts.rules);
+
+        return {
+            ...base,
+            label: attack.name,
+            rolls,
+            roll,
+            mod,
+            bonus: 0,
+            total: roll + mod,
+            mode,
+            autoFail: false,
+        };
+    }
 
     if (subject.kind === 'save') {
         const r = rollSave({
