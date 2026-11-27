@@ -81,7 +81,7 @@ export function useSpellBook(
 ) {
     const scene = useBattleScene();
 
-    const { tested: magic, attackDice } = useBattleRules();
+    const { tested: magic, attackDice, saveDice } = useBattleRules();
 
     const text = useText();
 
@@ -325,7 +325,7 @@ export function useSpellBook(
         inRange,
         saveTargetIds: saveTargets.map((t) => t.basicInfo.id),
         bypassCost,
-        attackDice,
+        dice: { attack: attackDice, save: saveDice },
         setFinishLong,
         onDone: options.onDone,
     });

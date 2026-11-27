@@ -33,13 +33,17 @@ vi.mock('@/lib/hooks/spells', async (importOriginal) => ({
     })),
 }));
 
-const rules = vi.hoisted(() => ({ attackDice: 6 as number | undefined }));
+const rules = vi.hoisted(() => ({
+    attackDice: 6 as number | undefined,
+    saveDice: 4 as number | undefined,
+}));
 
 vi.mock('../useBattleRules', () => ({
     useBattleRules: () => ({
         tested: false,
         dice: 6,
         attackDice: rules.attackDice,
+        saveDice: rules.saveDice,
     }),
 }));
 
@@ -110,7 +114,7 @@ describe('useSpellBook: aiDamage uses the magic attack die', () => {
         }
     });
 
-    it('auto roll fills missing saving throws of the save targets', async () => {
+    it('auto roll fills missing saving throws with magic.saveDice sides', async () => {
         const scene = fakeScene({
             isDM: true,
             knownSpells: ['rage'],
@@ -134,11 +138,43 @@ describe('useSpellBook: aiDamage uses the magic attack die', () => {
         const save = result.current.state.saves.gob;
 
         expect(save).toBeGreaterThanOrEqual(1);
-        expect(save).toBeLessThanOrEqual(20);
+        expect(save).toBeLessThanOrEqual(4);
 
         act(() => result.current.actions.setSave('gob', 7));
         act(() => result.current.actions.aiDamage());
         expect(result.current.state.saves.gob).toBe(7);
+    });
+
+    it('auto roll leaves saves empty when the system rolls no save die', async () => {
+        rules.saveDice = undefined;
+
+        try {
+            const scene = fakeScene({
+                isDM: true,
+                knownSpells: ['rage'],
+                slots: { '1': { max: 2, current: 2 } },
+            });
+
+            const { result } = renderHook(() => useSpellBook(scene.me), {
+                wrapper: scene.wrapper,
+            });
+
+            act(() => result.current.actions.open(1));
+            await waitFor(() =>
+                expect(result.current.view.spells).toHaveLength(1)
+            );
+            act(() =>
+                result.current.actions.pick(result.current.view.spells[0])
+            );
+            act(() => result.current.actions.toTargets());
+            act(() => result.current.actions.toggleTarget('gob'));
+            act(() => result.current.actions.confirmTargets());
+            act(() => result.current.actions.aiDamage());
+
+            expect(result.current.state.saves.gob).toBeUndefined();
+        } finally {
+            rules.saveDice = 4;
+        }
     });
 
     it('openSpell skips the book and goes straight to targeting', async () => {
@@ -157,9 +193,7 @@ describe('useSpellBook: aiDamage uses the magic attack die', () => {
 
         act(() => result.current.actions.openSpell(1, 'rage'));
 
-        await waitFor(() =>
-            expect(result.current.state.step).toBe('targets')
-        );
+        await waitFor(() => expect(result.current.state.step).toBe('targets'));
         expect(result.current.view.selected?.id).toBe('rage');
         expect(result.current.view.autoPicking).toBe(false);
     });
