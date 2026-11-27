@@ -173,7 +173,7 @@ function resolve(cands: AutoEntry[], text: string): MentionOption | null {
     return top.length === 1 ? top[0].option : null;
 }
 
-// text typed with combining marks (и + U+0306) is scanned in NFC and mapped back to the original offsets
+// text typed with combining marks (U+0438 + U+0306) is scanned in NFC and mapped back to the original offsets
 export function findAutoMentions(
     index: AutoMentionIndex,
     text: string,
