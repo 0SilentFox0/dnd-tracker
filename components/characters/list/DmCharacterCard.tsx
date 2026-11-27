@@ -12,6 +12,7 @@ import { levelUpAvailable } from '@/lib/constants/experience';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { useClassMode } from '@/lib/hooks/classes';
 import { useRuleSystem } from '@/lib/hooks/systems';
+import { cn } from '@/lib/utils';
 import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
 import { currentHp } from '@/lib/utils/characters/resources/hp';
 import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
@@ -26,6 +27,7 @@ interface DmCharacterCardProps {
     maxLevel?: number;
     actions: { onLevelUp?: () => void; onDelete: () => void };
     canEdit?: boolean;
+    compact?: boolean;
 }
 
 export function DmCharacterCard({
@@ -35,6 +37,7 @@ export function DmCharacterCard({
     maxLevel = 20,
     actions,
     canEdit = true,
+    compact = false,
 }: DmCharacterCardProps) {
     const t = useTranslations('characters.card');
 
@@ -99,14 +102,27 @@ export function DmCharacterCard({
                 href: `/campaigns/${campaignId}/dm/characters/${character.id}`,
                 label: character.name,
             }}
-            className="space-y-3 p-3"
+            className={
+                compact
+                    ? 'flex items-center gap-3 p-2'
+                    : 'space-y-3 p-3'
+            }
         >
             <HeroPortrait
                 src={character.avatar}
                 name={character.name}
-                className="max-h-72"
+                className={
+                    compact
+                        ? 'h-12 w-12 shrink-0 rounded-lg text-lg'
+                        : 'max-h-72'
+                }
             />
-            <div className="flex items-start gap-3">
+            <div
+                className={cn(
+                    'flex gap-3',
+                    compact ? 'min-w-0 flex-1 items-center' : 'items-start'
+                )}
+            >
                 <div className="min-w-0 flex-1 space-y-1">
                     <p className="hud-sc truncate text-lg leading-6 text-hud-ink">
                         {character.name}
@@ -168,7 +184,7 @@ export function DmCharacterCard({
                     />
                 )}
             </div>
-            <div className="flex gap-1.5">
+            <div className={cn('flex gap-1.5', compact && 'shrink-0')}>
                 {!hideProgression && (
                     <HudStatChip
                         short={t('statLevel')}

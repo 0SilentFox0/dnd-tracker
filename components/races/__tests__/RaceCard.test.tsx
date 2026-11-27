@@ -22,10 +22,11 @@ const race = {
 describe('RaceCard skill summary slot', () => {
     afterEach(cleanup);
 
-    it('shows 0 skills when no module supplies a summary', () => {
+    it('hides the empty skill count and the unrestricted-skills block', () => {
         render(<RaceCard race={race} campaignId="c" />);
 
-        expect(screen.getByText(/0/)).toBeTruthy();
+        expect(screen.queryByText(/skillsCount/)).toBeNull();
+        expect(screen.queryByText('races.card.availableSkills')).toBeNull();
     });
 
     it('uses the count of the supplied summary hook', () => {

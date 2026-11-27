@@ -21,6 +21,7 @@ import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import { proficiencyForChallenge } from '@/lib/constants/challenge';
 import type { WeaponTrait } from '@/lib/constants/weapon-traits';
 import type { Ability, Effect } from '@/lib/utils/abilities/schema';
+import { STATBLOCK_NOTE } from '@/lib/utils/abilities/statblock-note';
 import { getAbilityModifier } from '@/lib/utils/common/calculations';
 import { groupBy } from '@/lib/utils/common/collections';
 import {
@@ -315,7 +316,7 @@ export function convertUnits(data: Open5eData): UnitRow[] {
             const abilities: Ability[] = [
                 noteAbility(
                     uniqueId(seen, 'statblock'),
-                    'Statblock',
+                    STATBLOCK_NOTE,
                     [statblockText(c), ...blockTexts].join('\n\n')
                 ),
             ];

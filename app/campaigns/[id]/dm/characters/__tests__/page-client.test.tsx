@@ -211,3 +211,30 @@ describe('DMCharactersClient level up', () => {
         ).toBeNull();
     });
 });
+
+describe('DMCharactersClient view toggle', () => {
+    afterEach(() => window.localStorage.clear());
+
+    it('switches to the list view and remembers it', async () => {
+        renderIt();
+
+        const listBtn = await screen.findByRole('button', {
+            name: 'characters.list.views.list',
+        });
+
+        expect(listBtn.getAttribute('aria-pressed')).toBe('false');
+
+        fireEvent.click(listBtn);
+
+        await vi.waitFor(() =>
+            expect(
+                screen
+                    .getByRole('button', { name: 'characters.list.views.list' })
+                    .getAttribute('aria-pressed')
+            ).toBe('true')
+        );
+        expect(window.localStorage.getItem('characters-list-view')).toBe(
+            'list'
+        );
+    });
+});

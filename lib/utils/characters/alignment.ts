@@ -43,7 +43,9 @@ export function alignmentLabelKey(
     value: string,
     form: 'name' | 'short'
 ): string | null {
-    const key = alignmentKey(value);
+    const key =
+        alignmentKey(value) ??
+        (normalize(value) === 'unaligned' ? 'unaligned' : null);
 
     return key ? `alignments.${key}.${form}` : null;
 }

@@ -18,7 +18,8 @@
   "card": {
     "level": "Рівень {level}+",
     "repeatable": "Повторювана",
-    "choices": "{count, plural, one {# вибір} few {# вибори} many {# виборів} other {# виборів}}"
+    "choice": "{label} ×{count}",
+    "choicesMore": "+{count}"
   },
   "create": {
     "title": "Нова риса",

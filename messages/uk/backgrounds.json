@@ -9,7 +9,8 @@
     "classesOnly": "Передісторії доступні в режимі класів 5e."
   },
   "card": {
-    "choices": "{count, plural, one {# вибір} few {# вибори} many {# виборів} other {# виборів}}"
+    "choice": "{label} ×{count}",
+    "choicesMore": "+{count}"
   },
   "create": {
     "title": "Нова передісторія",
