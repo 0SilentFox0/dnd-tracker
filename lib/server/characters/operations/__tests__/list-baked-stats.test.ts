@@ -1,64 +1,65 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { bakedStatsById } from '../list-baked-stats';
+import { bakedStatsFor } from '../list-baked-stats';
 
-import { prisma } from '@/lib/db';
-import { buildCharacterParticipant } from '@/lib/server/characters/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/start/start-build-context';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 
-vi.mock('@/lib/db', () => ({ prisma: { character: { findMany: vi.fn() } } }));
-vi.mock('@/lib/server/characters/participant', () => ({
-    buildCharacterParticipant: vi.fn(),
+vi.mock('@/lib/server/battles/mutations/start/start-build-context', () => ({
+    buildCampaignContextForStart: vi.fn(),
+}));
+vi.mock('@/lib/server/battles/participant/from-character', () => ({
+    createBattleParticipantFromCharacter: vi.fn(),
 }));
 
-const campaign = { maxLevel: 20, rules: DEFAULT_RULES };
+const participant = {
+    basicInfo: { id: 'p' },
+    combatStats: { maxHp: 15, armorClass: 12 },
+    battleData: {
+        activeEffects: [],
+        resolvedAbilities: [
+            {
+                id: 'ud',
+                name: 'Unarmored Defense',
+                trigger: { event: 'passive' },
+                effects: [{ kind: 'modifyStat', stat: 'armor', flat: 3 }],
+                source: { type: 'class', id: 'c', name: 'c' },
+                key: 'class:c:ud',
+            },
+        ],
+    },
+};
 
-describe('bakedStatsById', () => {
-    beforeEach(() => vi.clearAllMocks());
+describe('bakedStatsFor', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.mocked(buildCampaignContextForStart).mockResolvedValue({
+            campaignContext: {},
+            racesById: {},
+        } as never);
+    });
 
-    it('returns maxHp and AC per character and skips failures', async () => {
-        vi.mocked(prisma.character.findMany).mockResolvedValue([
+    it('returns maxHp and AC per character in one batched context and skips failures', async () => {
+        vi.mocked(createBattleParticipantFromCharacter).mockImplementation(((
+            c: { id: string }
+        ) =>
+            c.id === 'a'
+                ? Promise.resolve(participant)
+                : Promise.reject(new Error('boom'))) as never);
+
+        const map = await bakedStatsFor('camp', [
             { id: 'a' },
             { id: 'b' },
         ] as never);
-        vi.mocked(buildCharacterParticipant).mockImplementation(((c: {
-            id: string;
-        }) =>
-            c.id === 'a'
-                ? Promise.resolve({
-                      participant: {
-                          basicInfo: { id: 'p' },
-                          combatStats: { maxHp: 15, armorClass: 12 },
-                          battleData: {
-                              activeEffects: [],
-                              resolvedAbilities: [
-                                  {
-                                      id: 'ud',
-                                      name: 'Unarmored Defense',
-                                      trigger: { event: 'passive' },
-                                      effects: [
-                                          {
-                                              kind: 'modifyStat',
-                                              stat: 'armor',
-                                              flat: 3,
-                                          },
-                                      ],
-                                      source: { type: 'class', id: 'c', name: 'c' },
-                                      key: 'class:c:ud',
-                                  },
-                              ],
-                          },
-                      },
-                  })
-                : Promise.reject(new Error('boom'))) as never);
-
-        const map = await bakedStatsById(['a', 'b'], campaign);
 
         expect([...map]).toEqual([['a', { maxHp: 15, armorClass: 15 }]]);
+        expect(buildCampaignContextForStart).toHaveBeenCalledTimes(1);
+        expect(console.error).toHaveBeenCalled();
     });
 
-    it('does not query for an empty list', async () => {
-        expect((await bakedStatsById([], campaign)).size).toBe(0);
-        expect(prisma.character.findMany).not.toHaveBeenCalled();
+    it('does nothing for an empty list', async () => {
+        expect((await bakedStatsFor('camp', [])).size).toBe(0);
+        expect(buildCampaignContextForStart).not.toHaveBeenCalled();
     });
 });

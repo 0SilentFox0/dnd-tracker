@@ -1,48 +1,47 @@
-import { prisma } from '@/lib/db';
-import { buildCharacterParticipant } from '@/lib/server/characters/participant';
-import { statWithModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
-import type { Ruleset } from '@/lib/utils/rules';
-import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
+import type { Prisma } from '@prisma/client';
+
+import { ParticipantSide } from '@/lib/constants/battle';
+import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/start/start-build-context';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
+import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
+
+type FullRow = Prisma.CharacterGetPayload<{ include: { inventory: true } }>;
 
 /** Max HP and AC as the battle/sheet show them (race, class and item abilities included); a hero that fails to build is left out. */
-export async function bakedStatsById(
-    ids: string[],
-    campaign: { maxLevel: number; rules: Ruleset }
+export async function bakedStatsFor(
+    campaignId: string,
+    rows: FullRow[]
 ): Promise<Map<string, { maxHp: number; armorClass: number }>> {
-    if (ids.length === 0) return new Map();
+    const result = new Map<string, { maxHp: number; armorClass: number }>();
 
-    const rows = await prisma.character.findMany({
-        where: { id: { in: ids } },
-        include: { inventory: true },
-    });
+    if (rows.length === 0) return result;
 
-    const built = await Promise.all(
-        rows.map(async (row) => {
-            try {
-                const { participant } = await buildCharacterParticipant(
-                    withStoredColumns(row),
-                    campaign
-                );
-
-                const { maxHp, armorClass } = participant.combatStats;
-
-                return [
-                    row.id,
-                    {
-                        maxHp,
-                        armorClass: statWithModifiers(
-                            [participant],
-                            participant.basicInfo.id,
-                            'armor',
-                            armorClass
-                        ),
-                    },
-                ] as const;
-            } catch {
-                return null;
-            }
-        })
+    const { campaignContext } = await buildCampaignContextForStart(
+        campaignId,
+        rows,
+        []
     );
 
-    return new Map(built.filter((x) => x !== null));
+    if (!campaignContext) return result;
+
+    for (const row of rows) {
+        try {
+            const participant = await createBattleParticipantFromCharacter(
+                row,
+                '',
+                ParticipantSide.ALLY,
+                undefined,
+                campaignContext
+            );
+
+            result.set(row.id, {
+                maxHp: participant.combatStats.maxHp,
+                armorClass: getEffectiveArmorClass(participant),
+            });
+        } catch (error) {
+            console.error('baked stats failed', row.id, error);
+        }
+    }
+
+    return result;
 }

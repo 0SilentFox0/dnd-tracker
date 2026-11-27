@@ -8,7 +8,7 @@ import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rule
 vi.mock('@/lib/utils/api/api-auth', () => ({ requireCampaignAccess: vi.fn() }));
 vi.mock('@/lib/db', () => ({ prisma: { character: { findMany: vi.fn() } } }));
 vi.mock('@/lib/server/characters/operations/list-baked-stats', () => ({
-    bakedStatsById: vi.fn(async () => new Map([['h1', { maxHp: 15, armorClass: 14 }]])),
+    bakedStatsFor: vi.fn(async () => new Map([['h1', { maxHp: 15, armorClass: 14 }]])),
 }));
 
 const list = async (qs = '') => {
@@ -70,17 +70,18 @@ describe('listCharacters status filter', () => {
 });
 
 describe('listCharacters baked maxHp', () => {
-    const access = (isDM: boolean) =>
+    const access = (isDM: boolean, isDemo = false) =>
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
             userId: 'u',
             isDM,
+            isDemo,
             campaign: { rules: DEFAULT_RULES, maxLevel: 20 },
         } as never);
 
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(prisma.character.findMany).mockResolvedValue([
-            { id: 'h1', name: 'A' },
+            { id: 'h1', name: 'A', characteristics: { armorClass: 12 } },
             { id: 'h2', name: 'B' },
         ] as never);
     });
@@ -93,6 +94,22 @@ describe('listCharacters baked maxHp', () => {
         expect(body[0].maxHp).toBe(15);
         expect(body[0].armorClass).toBe(14);
         expect(body[1].maxHp).toBeUndefined();
+    });
+
+    it('baked AC wins over the stored armorClass column', async () => {
+        access(true);
+
+        const body = await (await list('?maxHp=1')).json();
+
+        expect(body[0].armorClass).toBe(14);
+    });
+
+    it('demo viewer gets the baked values too', async () => {
+        access(false, true);
+
+        const body = await (await list('?maxHp=1')).json();
+
+        expect(body[0].maxHp).toBe(15);
     });
 
     it('no flag or non-DM: no maxHp', async () => {
