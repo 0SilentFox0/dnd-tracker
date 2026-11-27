@@ -60,7 +60,7 @@
     "panels": {
       "background": "Background",
       "cells": "Cells",
-      "edges": "Edges",
+      "edges": "Walls & doors",
       "art": "Art",
       "objects": "Objects"
     },
@@ -155,12 +155,13 @@
       "ambient": "Ambience",
       "ambientTint": "Tint",
       "darkness": "Darkness: {value}%",
-      "bake": "Bake",
-      "bakeStale": "The background is out of date — bake it.",
-      "bakeDone": "Baked in {seconds} s, {px} px/cell",
+      "bake": "Apply to background",
+      "bakeHint": "Embeds the painted art into the map background image. Without it, the battle and players still see the old background.",
+      "bakeStale": "The background is out of date — apply the art to it.",
+      "bakeDone": "Applied in {seconds} s, {px} px/cell",
       "detach": "Detach art",
       "phase": {
-        "baking": "Baking...",
+        "baking": "Applying...",
         "uploading": "Uploading...",
         "saving": "Saving..."
       },
@@ -208,9 +209,9 @@
         "blood": "Blood"
       },
       "bakeFailed": {
-        "too-large": "The map is too large to bake in the browser. Reduce the map size.",
-        "canvas": "The browser could not create a canvas for baking.",
-        "encode": "Could not encode the baked image."
+        "too-large": "The map is too large to process in the browser. Reduce the map size.",
+        "canvas": "The browser could not create a canvas for applying art.",
+        "encode": "Could not encode the final image."
       },
       "notice": {
         "openingNeedsWall": "Openings can only be placed on walls.",

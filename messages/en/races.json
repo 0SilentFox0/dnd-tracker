@@ -10,7 +10,6 @@
   },
   "card": {
     "availableSkills": "Available skills:",
-    "noRestrictions": "No restrictions (all groups)",
     "skillsCount": "Skills: {count}",
     "disabledCount": "Disabled: {count}",
     "statModifiers": "Ability modifiers:",

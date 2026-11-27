@@ -199,7 +199,7 @@ describe('ScenarioRichText', () => {
                     <ScenarioRichText
                         doc={noSrc}
                         campaignId="c"
-                        showMissingMedia
+                        missingMediaLabel="scenario.image.missing"
                     />
                 ).container.textContent
             ).toBe('scenario.image.missing');

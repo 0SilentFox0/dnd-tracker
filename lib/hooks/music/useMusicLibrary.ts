@@ -33,6 +33,7 @@ export interface MusicLibrary {
     update(id: string, patch: UpdateTrackData): Promise<boolean>;
     remove(track: CampaignTrack): Promise<void>;
     move(id: string, dir: -1 | 1): void;
+    saveDuration(id: string, sec: number): void;
 }
 
 const stripExtension = (name: string, fallback: string) =>
@@ -43,6 +44,9 @@ const DELETE_NOTE_KEYS = {
     file: 'music.library.deleteNote.file',
     youtube: 'music.library.deleteNote.youtube',
 } as const;
+
+// one patch per track per session, even across remounts
+const savedDurations = new Set<string>();
 
 const NO_TRACKS: CampaignTrack[] = [];
 
@@ -163,6 +167,23 @@ export function useMusicLibrary(
         [update]
     );
 
+    const saveDuration = useCallback(
+        (id: string, sec: number) => {
+            if (savedDurations.has(id)) return;
+
+            savedDurations.add(id);
+            updateTrack(campaignId, id, { durationSec: sec })
+                .then((saved) =>
+                    queryClient.setQueryData<CampaignTrack[]>(
+                        trackKeys.list(campaignId),
+                        (list) => list?.map((x) => (x.id === id ? saved : x))
+                    )
+                )
+                .catch(() => savedDurations.delete(id));
+        },
+        [campaignId, queryClient]
+    );
+
     const isBusy = isUploading || isAddingYoutube || isReordering || isUpdating;
 
     return useMemo(
@@ -176,6 +197,7 @@ export function useMusicLibrary(
             update: updateTrackFields,
             remove,
             move,
+            saveDuration,
         }),
         [
             tracks,
@@ -187,6 +209,7 @@ export function useMusicLibrary(
             updateTrackFields,
             remove,
             move,
+            saveDuration,
         ]
     );
 }

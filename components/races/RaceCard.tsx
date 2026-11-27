@@ -117,42 +117,45 @@ export function RaceCard({
                 </div>
             </div>
             <div className="flex flex-1 flex-col gap-3">
-                <div className="space-y-2">
-                    <p className="text-sm font-medium">
-                        {t('card.availableSkills')}
-                    </p>
+                {availableMainSkillsForDisplay.length > 0 && (
+                    <div className="space-y-2">
+                        <p className="text-sm font-medium">
+                            {t('card.availableSkills')}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            {availableMainSkillsForDisplay.map((ms) => (
+                                <span
+                                    key={ms.id}
+                                    className="inline-flex items-center rounded-full px-2 text-xs text-hud-bone"
+                                    style={{
+                                        boxShadow: `inset 0 0 0 1px ${ms.color}`,
+                                    }}
+                                    title={ms.name}
+                                >
+                                    {ms.name}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                {(availableSkillsCount > 0 || disabledSkillsCount > 0) && (
                     <div className="flex flex-wrap gap-2">
-                        {availableMainSkillsForDisplay.map((ms) => (
-                            <span
-                                key={ms.id}
-                                className="inline-flex items-center rounded-full px-2 text-xs text-hud-bone"
-                                style={{
-                                    boxShadow: `inset 0 0 0 1px ${ms.color}`,
-                                }}
-                                title={ms.name}
-                            >
-                                {ms.name}
-                            </span>
-                        ))}
-                        {availableMainSkillsForDisplay.length === 0 && (
-                            <span className="text-sm text-muted-foreground italic">
-                                {t('card.noRestrictions')}
-                            </span>
+                        {availableSkillsCount > 0 && (
+                            <Badge variant="outline">
+                                {t('card.skillsCount', {
+                                    count: availableSkillsCount,
+                                })}
+                            </Badge>
+                        )}
+                        {disabledSkillsCount > 0 && (
+                            <Badge variant="outline">
+                                {t('card.disabledCount', {
+                                    count: disabledSkillsCount,
+                                })}
+                            </Badge>
                         )}
                     </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">
-                        {t('card.skillsCount', { count: availableSkillsCount })}
-                    </Badge>
-                    {disabledSkillsCount > 0 && (
-                        <Badge variant="outline">
-                            {t('card.disabledCount', {
-                                count: disabledSkillsCount,
-                            })}
-                        </Badge>
-                    )}
-                </div>
+                )}
 
                 {passiveAbility && (
                     <div className="space-y-2">

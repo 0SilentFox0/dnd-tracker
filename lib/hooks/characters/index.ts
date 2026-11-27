@@ -17,6 +17,10 @@ export {
     useUpdateCharacter,
 } from './useCharacters';
 export { useCharacterSheet } from './useCharacterSheet';
+export {
+    type CharactersListView,
+    useCharactersListView,
+} from './useCharactersListView';
 export { useCharacterTokens } from './useCharacterTokens';
 export { type ChoiceRefsView, useChoiceRefs } from './useChoiceRefs';
 export { useChoiceWizard } from './useChoiceWizard';

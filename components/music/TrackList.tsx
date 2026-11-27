@@ -10,6 +10,7 @@ import {
     Trash2,
 } from 'lucide-react';
 
+import { TrackDuration } from './TrackDuration';
 import { TrackTitleInput } from './TrackTitleInput';
 
 import { HudCard } from '@/components/hud/page';
@@ -24,10 +25,8 @@ export interface TrackListActions {
     onEdit(track: CampaignTrack): void;
     onDelete(track: CampaignTrack): void;
     onMove(id: string, dir: -1 | 1): void;
+    onDuration?(id: string, sec: number): void;
 }
-
-const duration = (sec: number | null) =>
-    sec ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` : null;
 
 function kindLabel(track: CampaignTrack, fileLabel: string) {
     if (track.kind === 'youtube') return 'YouTube';
@@ -72,8 +71,6 @@ export function TrackList({
 
                 const failed = preview.failedId === track.id;
 
-                const time = duration(track.durationSec);
-
                 return (
                     <li key={track.id} className="min-w-0">
                         <HudCard
@@ -110,7 +107,10 @@ export function TrackList({
                                 <span className="rounded bg-white/5 px-1.5 py-0.5">
                                     {kindLabel(track, fileKind)}
                                 </span>
-                                {time && <span>{time}</span>}
+                                <TrackDuration
+                                    track={track}
+                                    onDuration={actions.onDuration}
+                                />
                                 {failed && (
                                     <span
                                         role="alert"

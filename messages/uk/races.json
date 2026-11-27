@@ -10,7 +10,6 @@
   },
   "card": {
     "availableSkills": "Доступні навики:",
-    "noRestrictions": "Немає обмежень (усі групи)",
     "skillsCount": "Скілів: {count}",
     "disabledCount": "Відключені: {count}",
     "statModifiers": "Модифікатори характеристик:",
@@ -21,7 +20,7 @@
     "noPassive": "Пасивна здібність не вказана"
   },
   "passive": {
-    "title": "Вроджена пасивка:",
+    "title": "Вроджені риси:",
     "defaultName": "Пасивна здібність",
     "whatItDoes": "Що робить:",
     "appearance": "Як це виглядає:"

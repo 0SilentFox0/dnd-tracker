@@ -12,6 +12,7 @@ import type { CampaignTrack } from '@/types/audio';
 vi.unmock('next-intl');
 
 vi.mock('@/lib/hooks/music', () => ({
+    useTrackDuration: () => null,
     useTrackPreview: () => ({
         playingId: null,
         failedId: null,

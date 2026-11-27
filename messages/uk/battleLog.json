@@ -69,7 +69,7 @@
     "thresholdStep": "Поріг шкоди {threshold}"
   },
   "details": {
-    "damage": "Урон: {rows}",
+    "damage": "Шкода: {rows}",
     "type": "Тип",
     "attackOfKind": "{kind} атака",
     "weapon": "Зброя",

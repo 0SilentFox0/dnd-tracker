@@ -129,4 +129,27 @@ describe('useMusicLibrary', () => {
             durationSec: 90,
         });
     });
+
+    it('saveDuration patches a track once and updates the cache without a refetch', async () => {
+        vi.mocked(updateTrack).mockResolvedValue({
+            ...tracks[1],
+            durationSec: 187,
+        });
+
+        const { result } = renderHook(() => useMusicLibrary('c1', tracks), {
+            wrapper: wrapper(true),
+        });
+
+        vi.mocked(updateTrack).mockClear();
+        act(() => result.current.saveDuration('b', 187));
+        act(() => result.current.saveDuration('b', 187));
+
+        await waitFor(() =>
+            expect(result.current.tracks[1].durationSec).toBe(187)
+        );
+        expect(updateTrack).toHaveBeenCalledTimes(1);
+        expect(updateTrack).toHaveBeenCalledWith('c1', 'b', {
+            durationSec: 187,
+        });
+    });
 });

@@ -227,7 +227,12 @@
     "searchPlaceholder": "Search by name or player",
     "levelUpFailed": "Could not level up. Please try again.",
     "deleteTitle": "Delete the character?",
-    "deleteDescription": "The character \"{name}\" will be deleted. This action cannot be undone."
+    "deleteDescription": "The character \"{name}\" will be deleted. This action cannot be undone.",
+    "viewToggle": "List view",
+    "views": {
+      "grid": "Grid",
+      "list": "List"
+    }
   },
   "editor": {
     "deleteTitle": "Delete character: {name}?",

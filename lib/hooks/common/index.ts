@@ -38,6 +38,7 @@ export { type GhostFlash, useGhostValue } from './useGhostValue';
 export { useHydrated } from './useHydrated';
 export { useImageSize } from './useImageSize';
 export { flipDelta, useIndicatorFlip } from './useIndicatorFlip';
+export { useInView } from './useInView';
 export { DESKTOP_QUERY, useIsCompact, useIsMobile } from './useIsMobile';
 export { useLibraryList } from './useLibraryList';
 export { useMediaQuery } from './useMediaQuery';

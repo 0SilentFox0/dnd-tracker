@@ -15,6 +15,7 @@ import {
 } from '@/components/scenario';
 import { Button } from '@/components/ui/button';
 import { useScenarioPageActions, useScenarioPages } from '@/lib/hooks/scenario';
+import { filterPages, indexStats } from '@/lib/utils/scenario/index-filter';
 
 export function ScenarioIndexPageClient({
     campaignId,
@@ -35,6 +36,8 @@ export function ScenarioIndexPageClient({
 
     const [creating, setCreating] = useState(false);
 
+    const [filter, setFilter] = useState('');
+
     return (
         <ScenarioBook>
             <div className="sb-index">
@@ -47,7 +50,10 @@ export function ScenarioIndexPageClient({
                     />
                 )}
                 <div className="sb-tools">
-                    <ScenarioSearch campaignId={campaignId} />
+                    <ScenarioSearch
+                        campaignId={campaignId}
+                        onQueryChange={setFilter}
+                    />
                     {canEdit && (
                         <Button
                             onClick={() => setCreating(true)}
@@ -78,20 +84,45 @@ export function ScenarioIndexPageClient({
                         />
                     }
                 >
-                    {(list) => (
-                        <ScenarioIndex
-                            campaignId={campaignId}
-                            pages={list}
-                            onMove={
-                                canEdit
-                                    ? (id, dir, siblings) =>
-                                          void actions
-                                              .move(id, dir, siblings)
-                                              .catch(() => {})
-                                    : undefined
-                            }
-                        />
-                    )}
+                    {(list) => {
+                        const stats = indexStats(list);
+
+                        const visible = filterPages(list, filter);
+
+                        return (
+                            <>
+                                <p
+                                    className="sb-stats"
+                                    data-testid="scenario-stats"
+                                >
+                                    {t('stats', { ...stats })}
+                                </p>
+                                {visible.length === 0 ? (
+                                    <p className="sb-stats">{t('noMatches')}</p>
+                                ) : (
+                                    <ScenarioIndex
+                                        campaignId={campaignId}
+                                        pages={list}
+                                        visibleIds={
+                                            new Set(visible.map((p) => p.id))
+                                        }
+                                        onMove={
+                                            canEdit && !filter.trim()
+                                                ? (id, dir, siblings) =>
+                                                      void actions
+                                                          .move(
+                                                              id,
+                                                              dir,
+                                                              siblings
+                                                          )
+                                                          .catch(() => {})
+                                                : undefined
+                                        }
+                                    />
+                                )}
+                            </>
+                        );
+                    }}
                 </QueryState>
             </div>
             <CreateScenarioPageDialog

@@ -18,7 +18,8 @@
   "card": {
     "level": "Level {level}+",
     "repeatable": "Repeatable",
-    "choices": "{count, plural, one {# choice} other {# choices}}"
+    "choice": "{label} ×{count}",
+    "choicesMore": "+{count}"
   },
   "create": {
     "title": "New feat",
