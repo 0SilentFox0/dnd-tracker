@@ -52,8 +52,8 @@ export function SetupParticipantRow({
                     src={avatar}
                     name={name}
                     alt=""
-                    size={72}
-                    className="size-[72px] rounded-lg"
+                    size={160}
+                    className="aspect-square h-auto w-full rounded-lg"
                 />
                 <span className="w-full truncate text-center text-sm font-medium">
                     {name}
@@ -64,7 +64,7 @@ export function SetupParticipantRow({
                     )}
                 </span>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-1">
+            <div className="flex w-full items-center gap-1">
                 {reserved > 0 && (quantity ?? 1) > 1 && (
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Button
@@ -96,6 +96,7 @@ export function SetupParticipantRow({
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="flex-1"
                     aria-pressed={reserved > 0}
                     title={reserved > 0 ? t('unreserve') : t('reserve')}
                     onClick={() =>
@@ -114,6 +115,7 @@ export function SetupParticipantRow({
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="flex-1"
                     onClick={actions.onMoveToOtherSide}
                     title={isAlly ? t('moveToEnemies') : t('moveToAllies')}
                     aria-label={isAlly ? t('moveToEnemies') : t('moveToAllies')}
@@ -124,6 +126,7 @@ export function SetupParticipantRow({
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="flex-1"
                     onClick={actions.onRemove}
                     title={t('remove')}
                     aria-label={t('remove')}

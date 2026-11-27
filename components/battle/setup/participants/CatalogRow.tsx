@@ -44,6 +44,7 @@ function AddButtons({
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full"
                 aria-label={t('addAlly', { name })}
                 onClick={() => add(ParticipantSide.ALLY)}
             >
@@ -54,6 +55,7 @@ function AddButtons({
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full"
                 aria-label={t('addEnemy', { name })}
                 onClick={() => add(ParticipantSide.ENEMY)}
             >
@@ -147,8 +149,8 @@ export function CatalogRow({
                     src={entity.avatar}
                     name={entity.name}
                     alt=""
-                    size={72}
-                    className="size-[72px] rounded-lg"
+                    size={160}
+                    className="aspect-square h-auto w-full rounded-lg"
                 />
                 <span className="block w-full min-w-0">
                     <span className="block truncate text-sm font-medium">
@@ -161,7 +163,13 @@ export function CatalogRow({
                     )}
                 </span>
             </HudButton>
-            <div className="flex flex-wrap items-center justify-center gap-1">
+            <div
+                className={
+                    state
+                        ? 'flex w-full flex-wrap items-center justify-center gap-1'
+                        : 'grid w-full grid-cols-2 gap-1'
+                }
+            >
                 {state ? (
                     <>
                         <SideToggle
@@ -169,6 +177,7 @@ export function CatalogRow({
                             onChange={actions.setSide}
                             label={t('sideAria', { name: entity.name })}
                             size="sm"
+                            fill
                         />
                         {kind === 'unit' && (
                             <QuantityStepper
