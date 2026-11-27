@@ -84,6 +84,7 @@ export function BonusActionPicker({
                         canOffHandAttack(participant, battle.rules) && (
                             <HudButton
                                 type="button"
+                                data-ux-tile
                                 disabled={isPending}
                                 onClick={() => {
                                     onOpenChange(false);
@@ -105,6 +106,7 @@ export function BonusActionPicker({
                                 <HudButton
                                     key={a.key}
                                     type="button"
+                                    data-ux-tile
                                     disabled={cooldownLeft > 0 || isPending}
                                     onClick={() => pick(a)}
                                     className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left disabled:opacity-50"

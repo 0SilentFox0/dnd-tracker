@@ -180,7 +180,7 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
     class="mt-3 grid grid-cols-[1.25fr_1fr] gap-2"
   >
     <button
-      class="ds-interactive cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em] whitespace-nowrap border-white/25 text-[var(--bone)]"
+      class="ds-interactive cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hud-sc flex h-12 w-full items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em] whitespace-nowrap border-white/25 text-[var(--bone)]"
       data-slot="hud-button"
       type="button"
     >
@@ -224,7 +224,7 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
       Авто-кидок
     </button>
     <button
-      class="ds-interactive cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hud-sc flex h-[52px] items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em] border-white/25"
+      class="ds-interactive cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hud-sc flex h-12 items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em] border-white/25"
       data-slot="hud-button"
       type="button"
     >

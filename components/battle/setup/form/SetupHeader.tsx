@@ -36,7 +36,7 @@ const DetailsButton = forwardRef<
         <HudButton
             ref={ref}
             className={cn(
-                'relative inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-sm text-hud-muted hover:text-hud-ink',
+                'relative inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-sm text-hud-muted hover:text-hud-ink',
                 className
             )}
             {...props}

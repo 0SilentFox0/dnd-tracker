@@ -35,6 +35,7 @@ export function WeaponStep({
                     <HudButton
                         key={id}
                         type="button"
+                        data-ux-tile
                         disabled={locked}
                         onClick={() => actions.selectWeapon(a)}
                         className={cn(

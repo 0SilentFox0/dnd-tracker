@@ -80,6 +80,7 @@ function MapTokenImpl({
             <button
                 ref={shakeRef}
                 type="button"
+                data-ux-tile
                 aria-label={name}
                 data-fx-participant={id}
                 data-fx-anchor="map"

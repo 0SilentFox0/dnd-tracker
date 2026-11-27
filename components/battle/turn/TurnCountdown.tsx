@@ -46,7 +46,7 @@ export function TurnCountdown({
             <HudButton
                 type="button"
                 onClick={onStay}
-                className="hud-sc h-9 border border-white/40 px-3.5 text-base font-bold text-[var(--ink)]"
+                className="hud-sc h-10 border border-white/40 px-3.5 text-base font-bold text-[var(--ink)]"
             >
                 {t('stay')}
             </HudButton>

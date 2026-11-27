@@ -111,7 +111,8 @@ function SideSheet({
                     aria-label={t('close')}
                     title={t('close')}
                     onClick={() => onOpenChange(false)}
-                    className="size-10 text-[var(--ink)] hover:bg-white/10"
+                    size="md"
+                    className="text-[var(--ink)] hover:bg-white/10"
                 >
                     <X className="size-4" />
                 </HudIconButton>

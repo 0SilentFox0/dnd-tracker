@@ -168,6 +168,7 @@ export function DmQuickActionsPanel({
             {!panel && (
                 <HudButton
                     type="button"
+                    data-ux-tile
                     onClick={() => setOpen(true)}
                     className={cn(
                         'fixed top-1/2 right-0 z-50 flex h-24 w-10 -translate-y-1/2 items-center justify-center',
@@ -344,7 +345,7 @@ export function DmQuickActionsPanel({
                     {isActive && (
                         <HudButton
                             type="button"
-                            className="metal-gold metal-fill hud-sc flex h-11 w-full items-center justify-center gap-2 text-base font-bold tracking-[.08em]"
+                            className="metal-gold metal-fill hud-sc flex h-10 w-full items-center justify-center gap-2 text-base font-bold tracking-[.08em]"
                             onClick={() => {
                                 actions.complete.mutate({});
                                 closePanel();

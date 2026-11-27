@@ -78,7 +78,7 @@ export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
                             'flex flex-col items-center justify-center rounded-full border text-[var(--ink)]',
                             ring
                                 ? `${HUD_GLASS} pointer-events-auto absolute`
-                                : 'size-9 md:size-10',
+                                : 'size-10',
                             'focus-visible:ring-2 focus-visible:outline-none',
                             active
                                 ? 'border-hud-accent ring-1'

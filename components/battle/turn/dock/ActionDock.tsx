@@ -53,6 +53,7 @@ export function ActionDock({
     const actionsButton = (
         <HudButton
             type="button"
+            data-ux-tile
             onClick={on.actions}
             data-tour={panel?.open ? undefined : 'battle.turn-controls'}
             className={cn(

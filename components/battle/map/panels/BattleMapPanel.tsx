@@ -40,7 +40,7 @@ function UpdateMapButton({
             title={tool.available ? undefined : t('upToDate')}
             onClick={() => void tool.run()}
             className={cn(
-                tall ? '' : 'h-7',
+                tall && 'h-10',
                 'bg-black/60 px-2 text-xs text-hud-muted',
                 tool.available && 'border-hud-accent text-hud-ink'
             )}

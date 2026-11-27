@@ -24,7 +24,7 @@ import type { LogLine } from '@/types/text';
 type Book = ReturnType<typeof useSpellBook>;
 
 const seal =
-    'spell-book-seal hud-sc flex h-[52px] w-full items-center justify-center gap-3 text-lg tracking-[.08em] disabled:opacity-50';
+    'spell-book-seal hud-sc flex h-12 w-full items-center justify-center gap-3 text-lg tracking-[.08em] disabled:opacity-50';
 
 const TARGETS_LABEL: Partial<Record<SpellTargetMode, 'next' | 'template'>> = {
     none: 'next',

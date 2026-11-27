@@ -147,7 +147,7 @@ export function BattleResultScreen() {
                     ) : (
                         <Link
                             href={exitHref}
-                            className="hud-sc flex h-[52px] items-center justify-center border border-hud-accent bg-hud-accent text-lg font-bold tracking-[.06em] text-hud-accent-ink"
+                            className="hud-sc flex h-12 items-center justify-center border border-hud-accent bg-hud-accent text-lg font-bold tracking-[.06em] text-hud-accent-ink"
                         >
                             {t('exit')}
                         </Link>
@@ -155,7 +155,7 @@ export function BattleResultScreen() {
                     <HudButton
                         type="button"
                         onClick={() => resultScreen.setOpen(false)}
-                        className="hud-sc flex h-11 items-center justify-center border border-white/[.25] text-base tracking-[.06em] text-[var(--ink)]"
+                        className="hud-sc flex h-10 items-center justify-center border border-white/[.25] text-base tracking-[.06em] text-[var(--ink)]"
                     >
                         {t('review')}
                     </HudButton>

@@ -83,7 +83,7 @@ export function BattlePreparationView({
                         <HudButton
                             type="button"
                             data-tour="battle.start"
-                            className="metal-gold metal-fill hud-sc h-16 w-full text-xl font-extrabold tracking-[.2em] transition-transform active:scale-95 disabled:opacity-50 sm:w-80 sm:text-2xl"
+                            className="metal-gold metal-fill hud-sc h-12 w-full text-xl font-extrabold tracking-[.2em] transition-transform active:scale-95 disabled:opacity-50 sm:w-80 sm:text-2xl"
                             onClick={onStartBattle}
                             disabled={isStarting || !canStart}
                         >

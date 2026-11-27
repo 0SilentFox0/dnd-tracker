@@ -93,6 +93,7 @@ export const ParticipantRow = memo(function ParticipantRow({
         >
             <HudButton
                 type="button"
+                data-ux-tile
                 aria-label={participant.basicInfo.name}
                 onClick={() => onSelect(participant.basicInfo.id)}
                 className="absolute inset-0"

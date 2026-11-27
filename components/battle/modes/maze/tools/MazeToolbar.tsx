@@ -45,7 +45,7 @@ function ToolButton({
             aria-pressed={active}
             onClick={onClick}
             className={cn(
-                tall ? 'h-8' : 'h-7',
+                tall ? 'h-10' : 'h-8',
                 'shrink-0 rounded-lg border bg-black/60 px-2 text-xs hover:bg-black/80',
                 active
                     ? 'border-hud-accent text-hud-ink'
@@ -124,7 +124,7 @@ export function MazeToolbar({
                         { value: NO_HERO, label: t('toolbar.asHeroOff') },
                         ...heroes.map((h) => ({ value: h.id, label: h.name })),
                     ]}
-                    className={cn(tall ? 'h-8' : 'h-7', 'w-32 px-2 text-xs')}
+                    className={cn(tall ? 'h-10' : 'h-8', 'w-32 px-2 text-xs')}
                 />
             </label>
             {/* leaving the player view must not depend on whether the list fits under the trigger */}

@@ -73,7 +73,7 @@ export function SummaryStep({
                                 disabled={submitting}
                                 onClick={() => actions.toggleCunning(o.effect)}
                                 className={cn(
-                                    'h-9 border px-3 text-sm',
+                                    'h-8 border px-3 text-sm',
                                     o.selected
                                         ? 'border-[var(--enemy)] bg-white/10 font-bold text-[var(--ink)]'
                                         : 'border-white/25 text-hud-soft'

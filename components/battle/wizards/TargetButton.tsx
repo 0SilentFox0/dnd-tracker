@@ -50,6 +50,7 @@ export function TargetButton({
     return (
         <HudButton
             type="button"
+            data-ux-tile
             aria-pressed={selected}
             disabled={disabled}
             onClick={onClick}

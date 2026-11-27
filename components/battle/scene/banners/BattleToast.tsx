@@ -13,7 +13,7 @@ export function BattleToast() {
             type="button"
             onClick={toast.dismiss}
             role="status"
-            className="flex min-h-11 w-full animate-[hud-fade_.2s] items-center gap-2.5 border border-white/25 bg-hud-surface/95 px-3.5 text-left text-sm text-hud-text"
+            className="flex min-h-10 w-full animate-[hud-fade_.2s] items-center gap-2.5 border border-white/25 bg-hud-surface/95 px-3.5 text-left text-sm text-hud-text"
         >
             {toast.message}
         </HudButton>

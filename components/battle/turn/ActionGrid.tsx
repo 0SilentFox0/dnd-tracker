@@ -29,6 +29,7 @@ const Tile = ({
     return (
         <HudButton
             type="button"
+            data-ux-tile
             disabled={used}
             onClick={onClick}
             className={cn(
@@ -257,7 +258,7 @@ export function ActionGrid({
                     type="button"
                     disabled={pending}
                     onClick={() => void turn.actions.endTurn()}
-                    className="hud-sc mt-2 flex h-11 w-full items-center justify-center border border-white/15 text-base tracking-[.08em] text-hud-soft disabled:opacity-50"
+                    className="hud-sc mt-2 flex h-10 w-full items-center justify-center border border-white/15 text-base tracking-[.08em] text-hud-soft disabled:opacity-50"
                 >
                     {t('endTurn')}
                 </HudButton>

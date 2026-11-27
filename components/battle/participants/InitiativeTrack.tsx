@@ -130,6 +130,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                         data-flip={keys[i]}
                         data-current={e.current ? '' : undefined}
                         type="button"
+                        data-ux-tile
                         onClick={() => select(e.participant.basicInfo.id)}
                         className={cn(
                             'shrink-0',
@@ -187,8 +188,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                     title={t(showNext ? 'hideNextRound' : 'showNextRound')}
                     onClick={() => setShowNext((v) => !v)}
                     className={cn(
-                        'flex shrink-0 items-center justify-center rounded-full text-[var(--hud-muted)] hover:text-[var(--ink)]',
-                        compact ? 'size-5' : 'size-7',
+                        'flex size-8 shrink-0 items-center justify-center rounded-full text-[var(--hud-muted)] hover:text-[var(--ink)]',
                         showNext && 'text-hud-accent-fg'
                     )}
                 >

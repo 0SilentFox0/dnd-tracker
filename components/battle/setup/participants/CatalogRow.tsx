@@ -84,7 +84,7 @@ function QuantityStepper({
             className="flex min-w-0 flex-1 items-center justify-center border-l border-hud-rule"
         >
             <HudIconButton
-                className="h-9 w-7"
+                className="size-8"
                 aria-label={t('quantityLess', { name })}
                 disabled={value <= UNIT_QUANTITY.min}
                 onClick={() => onChange(clampUnitQuantity(value - 1))}
@@ -98,7 +98,7 @@ function QuantityStepper({
                 {value}
             </span>
             <HudIconButton
-                className="h-9 w-7"
+                className="size-8"
                 aria-label={t('quantityMore', { name })}
                 disabled={value >= UNIT_QUANTITY.max}
                 onClick={() => onChange(clampUnitQuantity(value + 1))}
