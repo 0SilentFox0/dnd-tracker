@@ -195,14 +195,16 @@ export function ArtPanel({
             <section className={SECTION}>
                 <BakeStatus save={artSave} />
                 <div className="flex flex-wrap gap-2">
-                    <Button
-                        type="button"
-                        size="sm"
-                        disabled={!artSave.needsBake || artSave.isSaving}
-                        onClick={() => artSave.save({ bake: true })}
-                    >
-                        {t('bake')}
-                    </Button>
+                    <span title={t('bakeHint')}>
+                        <Button
+                            type="button"
+                            size="sm"
+                            disabled={!artSave.needsBake || artSave.isSaving}
+                            onClick={() => artSave.save({ bake: true })}
+                        >
+                            {t('bake')}
+                        </Button>
+                    </span>
                     <Button
                         type="button"
                         size="sm"

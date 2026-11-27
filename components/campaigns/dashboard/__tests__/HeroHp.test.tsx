@@ -16,4 +16,16 @@ describe('HeroHp', () => {
         expect(meter.getAttribute('aria-valuemax')).toBe('30');
         expect(meter.getAttribute('aria-valuetext')).toBe('12/30');
     });
+
+    it('colors the bar by hp percent', () => {
+        const { container } = render(
+            <HeroHp hp={{ current: 5, max: 30, temp: 0 }} />
+        );
+
+        expect(
+            container
+                .querySelector('[data-hp-tone]')
+                ?.getAttribute('data-hp-tone')
+        ).toBe('low');
+    });
 });

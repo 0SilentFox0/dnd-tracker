@@ -1,6 +1,7 @@
 'use client';
 
 import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIndicatorFlip } from '@/lib/hooks/common';
@@ -34,10 +35,15 @@ export function SheetTabList({
 
     const [atEnd, setAtEnd] = useState(false);
 
+    const [atStart, setAtStart] = useState(true);
+
     const syncEdge = () => {
         const el = list.current;
 
-        if (el) setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 2);
+        if (!el) return;
+
+        setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 2);
+        setAtStart(el.scrollLeft <= 2);
     };
 
     useEffect(() => {
@@ -55,7 +61,7 @@ export function SheetTabList({
             <TabsList
                 ref={list}
                 onScroll={syncEdge}
-                className="hud-scroll-x relative flex h-auto w-full justify-start gap-0.5 overflow-x-auto rounded-lg border border-hud-line bg-hud-panel/70 [mask-image:linear-gradient(90deg,transparent,#000_16px,#000_calc(100%-16px),transparent)] p-[3px] md:[mask-image:none]"
+                className="hud-scroll-x relative flex h-auto w-full justify-start gap-0.5 overflow-x-auto rounded-lg border border-hud-line bg-hud-panel/70 p-[3px]"
             >
                 {tabs.map((tab) => (
                     <TabsTrigger
@@ -88,12 +94,26 @@ export function SheetTabList({
                     </TabsTrigger>
                 ))}
             </TabsList>
-            {!atEnd && (
-                <span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-y-px right-px w-10 bg-gradient-to-l from-hud-page to-transparent md:hidden"
-                />
-            )}
+            {!atStart && <Edge side="left" />}
+            {!atEnd && <Edge side="right" />}
         </div>
+    );
+}
+
+function Edge({ side }: { side: 'left' | 'right' }) {
+    const Icon = side === 'left' ? ChevronLeft : ChevronRight;
+
+    return (
+        <span
+            aria-hidden
+            className={cn(
+                'pointer-events-none absolute inset-y-px flex w-10 items-center from-hud-page to-transparent md:hidden',
+                side === 'left'
+                    ? 'left-px justify-start bg-gradient-to-r pl-1'
+                    : 'right-px justify-end bg-gradient-to-l pr-1'
+            )}
+        >
+            <Icon className="size-5 text-hud-muted" />
+        </span>
     );
 }

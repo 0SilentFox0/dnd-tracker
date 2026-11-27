@@ -1,6 +1,6 @@
 'use client';
 
-import type { ComponentType } from 'react';
+import { type ComponentType, useState } from 'react';
 
 import { DIE_SIDES } from '../spell-form-defaults';
 import type { SpellFormFieldsProps } from './SpellFormBasicFields';
@@ -9,6 +9,7 @@ import { SpellTargetingFields } from './SpellTargetingFields';
 import { HudSection } from '@/components/hud/form';
 import type { SpellMagicFieldsProps } from '@/components/systems';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CommaListInput } from '@/components/ui/comma-list-input';
 import { Input } from '@/components/ui/input';
@@ -39,6 +40,8 @@ export function SpellFormPowerFields({
     const tp = (key: string, values?: Record<string, string | number>) =>
         t(`spellEditor.power.${key}`, values);
 
+    const [advanced, setAdvanced] = useState(false);
+
     const zone = targeting.kind === 'template' ? targeting.zone : undefined;
 
     return (
@@ -53,7 +56,7 @@ export function SpellFormPowerFields({
                     onCommit={(dice) => setFormData({ ...formData, dice })}
                     className="w-24"
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-1 text-sm text-muted-foreground">
                     {tp('baseDiceHint')}
                 </p>
             </div>
@@ -150,6 +153,26 @@ export function SpellFormPowerFields({
                     formData.fixedDice !== undefined ||
                     formData.damageBonus != null) && (
                     <div className="ds-span">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            aria-expanded={advanced}
+                            aria-controls="spell-power-advanced"
+                            onClick={() => setAdvanced((v) => !v)}
+                        >
+                            {advanced
+                                ? tp('advancedHide')
+                                : tp('advancedShow')}
+                        </Button>
+                    </div>
+                )}
+            {!magic &&
+                advanced &&
+                (classesEnabled ||
+                    formData.fixedDice !== undefined ||
+                    formData.damageBonus != null) && (
+                    <div className="ds-span" id="spell-power-advanced">
                         <HudSection title="5e">
                             <div className="ds-fields [&>*]:min-w-0">
                                 <label className="ds-span flex items-center gap-2">

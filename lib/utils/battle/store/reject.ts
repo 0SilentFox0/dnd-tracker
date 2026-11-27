@@ -76,5 +76,7 @@ export const REJECT = {
     participantInactive: 'battleLog.reject.participantInactive',
     unitNotAssignable: 'battleLog.reject.unitNotAssignable',
     playerNotInBattle: 'battleLog.reject.playerNotInBattle',
+    moveOutOfReach: 'battleLog.reject.moveOutOfReach',
+    moveNotYourTurn: 'battleLog.reject.moveNotYourTurn',
     // END
 } as const satisfies Record<string, AppMessageKey>;

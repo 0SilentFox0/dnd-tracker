@@ -17,6 +17,7 @@ import { DND_SKILLS } from '@/lib/constants/skills';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { MULTICLASS_SKILLS_ID } from '@/lib/utils/characters/choices/class-choices';
 import { resolveChoiceCount } from '@/lib/utils/characters/choices/count';
+import { featSpellList } from '@/lib/utils/characters/choices/describe';
 import {
     isUnmet,
     requirementsOf,
@@ -214,6 +215,13 @@ function FeatList({
 
             const available = !requirements.some(isUnmet) && !taken;
 
+            const list = featSpellList(f);
+
+            const title =
+                list && feats.some((o) => o !== f && o.name === f.name)
+                    ? `${f.name} (${list})`
+                    : f.name;
+
             return {
                 key: f.id,
                 available,
@@ -227,10 +235,19 @@ function FeatList({
                                 onClick: () => actions.onToggle(f.id),
                             }}
                             content={{
-                                title: f.name,
-                                name: f.name,
+                                title,
+                                name: title,
                                 icon: f.icon,
-                                summary: summarize(f.description ?? undefined),
+                                summary: (
+                                    <>
+                                        {summarize(f.description ?? undefined)}
+                                        {list && (
+                                            <span className="block text-hud-muted">
+                                                {t('picker.featList', { list })}
+                                            </span>
+                                        )}
+                                    </>
+                                ),
                                 description: f.description ?? undefined,
                                 note: taken ? t('picker.featTaken') : undefined,
                             }}

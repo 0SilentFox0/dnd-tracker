@@ -94,6 +94,41 @@ describe('updateSession', () => {
         );
     });
 
+    it('гість на /join/<код> — redirect на /sign-in з next', async () => {
+        signedOut();
+
+        const res = await updateSession(request('/join/AB3K9Z'));
+
+        const location = new URL(res.headers.get('location') ?? '');
+
+        expect(location.pathname).toBe('/sign-in');
+        expect(location.search).toBe('?next=%2Fjoin%2FAB3K9Z');
+    });
+
+    it('гість на /campaigns — без next', async () => {
+        signedOut();
+
+        const res = await updateSession(request('/campaigns'));
+
+        expect(new URL(res.headers.get('location') ?? '').search).toBe('');
+    });
+
+    it('/sign-in із сесією і next — redirect на next, чужий next ігнорується', async () => {
+        signedIn();
+
+        const ok = await updateSession(request('/sign-in?next=/join/X'));
+
+        expect(new URL(ok.headers.get('location') ?? '').pathname).toBe(
+            '/join/X'
+        );
+
+        const evil = await updateSession(request('/sign-up?next=//evil.com'));
+
+        expect(new URL(evil.headers.get('location') ?? '').pathname).toBe(
+            '/campaigns'
+        );
+    });
+
     it('сторінка із сесією — пропускає, перевіряючи JWT через getClaims, а не getUser', async () => {
         signedIn();
 

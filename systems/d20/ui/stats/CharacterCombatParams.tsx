@@ -45,7 +45,7 @@ export function CharacterCombatParams({
     const { armorClass, initiative, speed, minTargets, maxTargets } = data;
 
     return (
-        <div className="grid w-full grid-cols-2 items-end gap-x-4 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid w-full grid-cols-2 items-start gap-x-4 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
             {classArmor === undefined ? (
                 <LabeledInput
                     id="armorClass"
@@ -86,6 +86,14 @@ export function CharacterCombatParams({
             <LabeledInput
                 id="initiative"
                 label={tc('initiative')}
+                description={
+                    initiativeRange
+                        ? t('initiativeHint', {
+                              min: initiativeRange.heroMin,
+                              max: initiativeRange.heroMax,
+                          })
+                        : undefined
+                }
                 labelClassName="text-xs leading-tight"
                 type="number"
                 min={initiativeRange?.heroMin}
@@ -118,6 +126,7 @@ export function CharacterCombatParams({
             <LabeledInput
                 id="minTargets"
                 label={t('minTargets')}
+                description={t('targetsHint')}
                 labelClassName="text-xs leading-tight"
                 type="number"
                 min="1"
@@ -131,6 +140,7 @@ export function CharacterCombatParams({
             <LabeledInput
                 id="maxTargets"
                 label={t('maxTargets')}
+                description={t('targetsHint')}
                 labelClassName="text-xs leading-tight"
                 type="number"
                 min="1"

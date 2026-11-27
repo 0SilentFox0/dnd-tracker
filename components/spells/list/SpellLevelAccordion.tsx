@@ -116,7 +116,7 @@ export function SpellLevelAccordion({
                     )}
                 </div>
                 <AccordionContent>
-                    <div className="grid auto-rows-fr grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid grid-cols-1 items-start gap-2 md:grid-cols-2 xl:grid-cols-3">
                         {spells.map((spell, i) => (
                             <SpellCard
                                 key={spell.id}

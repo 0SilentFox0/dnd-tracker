@@ -69,15 +69,17 @@ function IndexRow({
 export function ScenarioIndex({
     campaignId,
     pages,
+    visibleIds,
     onMove,
 }: {
     campaignId: string;
     pages: ScenarioPageSummary[];
+    visibleIds?: ReadonlySet<string>;
     onMove?: Move;
 }) {
     const t = useTranslations('scenario');
 
-    const groups = groupIndex(pages);
+    const groups = groupIndex(pages, visibleIds);
 
     const flat = (list: ScenarioPageSummary[], numbers?: number[]) =>
         list.map((p, i) => (

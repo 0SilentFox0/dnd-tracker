@@ -17,6 +17,10 @@ export {
     useUpdateCharacter,
 } from './useCharacters';
 export { useCharacterSheet } from './useCharacterSheet';
+export {
+    type CharactersListView,
+    useCharactersListView,
+} from './useCharactersListView';
 export { useCharacterTokens } from './useCharacterTokens';
 export { type ChoiceRefsView, useChoiceRefs } from './useChoiceRefs';
 export { useChoiceWizard } from './useChoiceWizard';
@@ -47,12 +51,14 @@ export {
     type InventorySelection,
     useInventory,
 } from './useInventory';
+export { useOpenSpellPicks } from './useOpenSpellPicks';
 export {
     useAwardXp,
     useCharacterLog,
     useEditResources,
     useRest,
     useSheetRoll,
+    useSlotToggle,
     useSpendHitDie,
 } from './useOutOfCombat';
 export {

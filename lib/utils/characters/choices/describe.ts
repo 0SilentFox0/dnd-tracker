@@ -40,3 +40,14 @@ export function describeFeatPicks(
         return [];
     });
 }
+
+/** The single spell list a feat variant draws from (e.g. Magic Initiate by class), or null for a feat open to several lists. */
+export function featSpellList(feat: Pick<FeatData, 'choices'>): string | null {
+    const lists = feat.choices.flatMap((c) =>
+        c.kind === 'spell' && c.spells?.lists.length === 1 ? c.spells.lists : []
+    );
+
+    return lists.length > 0 && lists.every((l) => l === lists[0])
+        ? lists[0]
+        : null;
+}

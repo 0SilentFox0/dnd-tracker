@@ -64,6 +64,8 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
     ...(await orig<object>()),
     useCharacterRoster: () => ({ data: [], isLoading: false }),
     useTransferArtifact: () => ({ mutateAsync: vi.fn(), isPending: false }),
+    useSheetRoll: () => ({ mutateAsync: vi.fn(), isPending: false }),
+    useSlotToggle: () => ({ setCurrent: vi.fn(), isPending: false }),
     useStashAction: () => ({ mutateAsync: vi.fn(), isPending: false }),
     useCharacterSheet: () => h.sheetQuery,
     useCharacterGoals: () => ({ save: vi.fn(), isPending: false }),
@@ -470,7 +472,8 @@ describe('CharacterProfile — редагування ДМа', () => {
         expect(screen.getByRole('dialog')).toHaveAccessibleName(
             'characterProfile.spellBook.title'
         );
-        expect(screen.getByText('Мітка мисливця')).toBeTruthy();
+        // list row + wide-screen detail preview
+        expect(screen.getAllByText('Мітка мисливця')).toHaveLength(2);
     });
 
     it('wfrp: в редакторі є «Магія» і «Речі»', async () => {

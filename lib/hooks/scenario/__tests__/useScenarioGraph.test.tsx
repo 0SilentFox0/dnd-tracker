@@ -132,7 +132,26 @@ describe('useScenarioGraph', () => {
         expect(
             result.current.state.graph?.nodes.map((n) => n.id).sort()
         ).toEqual(['scene:s1', 'scene:s2', 'unit:u1']);
-        expect(result.current.state.filters.showAll).toBe(false);
+        expect([...result.current.state.filters.types]).toEqual(['unit']);
+    });
+
+    it('shows single-link entities by default in a small graph', async () => {
+        vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue({
+            ...index,
+            entities: [
+                ...index.entities,
+                entity('unit', 'u9', 'Тролль', ['s1']),
+            ],
+            edges: [...index.edges, edge('s1', 'unit', 'u9')],
+        });
+
+        const { result } = setup();
+
+        await waitFor(() => expect(result.current.state.graph).not.toBeNull());
+        expect(result.current.state.filters.showLeaves).toBe(true);
+        expect(
+            result.current.state.graph?.nodes.some((n) => n.id === 'unit:u9')
+        ).toBe(true);
     });
 
     it('selection highlights relation partners', async () => {
@@ -275,6 +294,9 @@ describe('useScenarioGraph', () => {
         const { result } = setup();
 
         await waitFor(() => expect(result.current.state.graph).not.toBeNull());
+        act(() =>
+            result.current.set.filters({ showAll: false, showLeaves: false })
+        );
         expect(
             result.current.state.graph?.nodes.some((n) => n.id === 'unit:u9')
         ).toBe(false);

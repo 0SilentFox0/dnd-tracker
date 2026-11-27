@@ -10,12 +10,16 @@ import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { buildCharacterParticipant } from '@/lib/server/characters/participant';
 import { ContentError } from '@/lib/server/content/errors';
-import { restUses, shortRegainOf } from '@/lib/utils/abilities/engine/core/usage';
+import {
+    restUses,
+    shortRegainOf,
+} from '@/lib/utils/abilities/engine/core/usage';
 import { editResources } from '@/lib/utils/characters/resources/edit';
+import { ownerMayEdit } from '@/lib/utils/characters/resources/owner-edit';
 import { readResources } from '@/lib/utils/characters/resources/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { ResolvedAbility } from '@/types/abilities';
-import type { AbilityPool } from '@/types/battle';
+import type { AbilityPool, BattleParticipant } from '@/types/battle';
 
 function chargeLimits(
     data:
@@ -43,11 +47,23 @@ function chargeLimits(
     return { ...Object.fromEntries(abilities), ...data?.pools };
 }
 
+function slotMaxOf(built: BattleParticipant | null) {
+    return Object.fromEntries(
+        Object.entries(built?.spellcasting?.spellSlots ?? {}).map(([k, s]) => [
+            k,
+            s.max,
+        ])
+    );
+}
+
 export async function editResourcesFor(
     { access, character }: CharacterGate,
     body: ResourcesEditInput
 ) {
     const { rules, maxLevel } = access.campaign;
+
+    if (!access.isDM && !ownerMayEdit(body))
+        throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
     if (!rules.outOfCombat.persistResources)
         throw new ContentError(API_ERRORS.OOC_RESOURCES_DISABLED, 409);
@@ -55,7 +71,9 @@ export async function editResourcesFor(
     await assertNotInActiveBattle(character.campaignId, [character.id]);
 
     const built =
-        body.hp !== undefined || body.charges !== undefined
+        body.hp !== undefined ||
+        body.charges !== undefined ||
+        body.slotsSpent !== undefined
             ? (await buildCharacterParticipant(character, { maxLevel, rules }))
                   .participant
             : null;
@@ -74,7 +92,10 @@ export async function editResourcesFor(
             body,
             maxHp,
             chargeLimits(built?.battleData),
-            limits?.(character)
+            {
+                ...limits?.(character),
+                slotMax: slotMaxOf(built),
+            }
         );
 
         await tx.character.update({

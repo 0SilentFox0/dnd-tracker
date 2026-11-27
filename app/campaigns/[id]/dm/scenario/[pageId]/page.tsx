@@ -14,10 +14,14 @@ import type { ScenarioPage } from '@/types/scenario';
 
 export default async function DMScenarioPageRoute({
     params,
+    searchParams,
 }: {
     params: Promise<{ id: string; pageId: string }>;
+    searchParams: Promise<{ edit?: string }>;
 }) {
     const { id, pageId } = await params;
+
+    const { edit } = await searchParams;
 
     const { isDemo } = await requireCampaignDMOrDemo(id);
 
@@ -44,6 +48,7 @@ export default async function DMScenarioPageRoute({
                 aiEnabled={!isDemo && isAiConfigured()}
                 canEdit={!isDemo}
                 isDemo={isDemo}
+                startEditing={edit === '1'}
             />
         </PrefetchedQuery>
     );

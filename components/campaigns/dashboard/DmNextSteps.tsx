@@ -4,6 +4,12 @@ import Link from 'next/link';
 import { Database } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { DM_DASHBOARD_SECTIONS } from '@/lib/constants/campaign-dashboard';
 import { useTranslator } from '@/lib/i18n/use-translator';
 
@@ -31,41 +37,52 @@ export function DmNextSteps({
             <h2 className="hud-sc mb-3 text-sm tracking-[.06em] text-hud-ink">
                 {t('nextSteps.title')}
             </h2>
-            <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-3">
-                {sections.map(({ key, href, icon: Icon }) => (
-                    <Button
-                        asChild
-                        key={key}
-                        variant="outline"
-                        data-ux-tile
-                        className={TILE}
-                    >
-                        <Link href={href(campaignId)}>
-                            <Icon
+            <TooltipProvider>
+                <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-3">
+                    {sections.map(({ key, href, icon: Icon }) => (
+                        <Tooltip key={key}>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    data-ux-tile
+                                    className={TILE}
+                                >
+                                    <Link
+                                        href={href(campaignId)}
+                                        aria-label={`${t(`sections.${key}.title`)}. ${t(`sections.${key}.subtitle`)}`}
+                                    >
+                                        <Icon
+                                            aria-hidden
+                                            className="size-7 shrink-0 text-hud-muted"
+                                        />
+                                        <span className="line-clamp-2 text-center text-xs leading-tight">
+                                            {t(`sections.${key}.title`)}
+                                        </span>
+                                    </Link>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                {t(`sections.${key}.subtitle`)}
+                            </TooltipContent>
+                        </Tooltip>
+                    ))}
+                    <Button asChild variant="outline" data-ux-tile className={TILE}>
+                        <Link
+                            href={`/campaigns/${campaignId}/dm/compendium`}
+                            aria-label={t('page.compendium.link')}
+                        >
+                            <Database
                                 aria-hidden
                                 className="size-7 shrink-0 text-hud-muted"
                             />
                             <span className="line-clamp-2 text-center text-xs leading-tight">
-                                {t(`sections.${key}.title`)}
+                                {t('page.compendium.action')}
                             </span>
                         </Link>
                     </Button>
-                ))}
-                <Button asChild variant="outline" data-ux-tile className={TILE}>
-                    <Link
-                        href={`/campaigns/${campaignId}/dm/compendium`}
-                        aria-label={t('page.compendium.link')}
-                    >
-                        <Database
-                            aria-hidden
-                            className="size-7 shrink-0 text-hud-muted"
-                        />
-                        <span className="line-clamp-2 text-center text-xs leading-tight">
-                            {t('page.compendium.action')}
-                        </span>
-                    </Link>
-                </Button>
-            </div>
+                </div>
+            </TooltipProvider>
         </section>
     );
 }

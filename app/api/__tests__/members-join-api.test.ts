@@ -215,7 +215,7 @@ describe('POST /campaigns/join', () => {
             userId: 'u1',
             authUser: { id: 'u1', email: 'u1@x.y' },
         });
-        db.campaign.findFirst.mockResolvedValue({
+        db.campaign.findUnique.mockResolvedValue({
             id: 'c1',
             status: 'active',
             members: [{ userId: 'dm' }],
@@ -238,7 +238,7 @@ describe('POST /campaigns/join', () => {
         });
 
         expect((await joinWith('code')).status).toBe(429);
-        expect(db.campaign.findFirst).not.toHaveBeenCalled();
+        expect(db.campaign.findUnique).not.toHaveBeenCalled();
     });
 
     it('ліміт рахується з memoryFallback', async () => {
@@ -262,13 +262,13 @@ describe('POST /campaigns/join', () => {
     });
 
     it('невідомий код — 404', async () => {
-        db.campaign.findFirst.mockResolvedValue(null);
+        db.campaign.findUnique.mockResolvedValue(null);
 
         expect((await joinWith('nope')).status).toBe(404);
     });
 
     it('вже учасник — 400 без дубля', async () => {
-        db.campaign.findFirst.mockResolvedValue({
+        db.campaign.findUnique.mockResolvedValue({
             id: 'c1',
             status: 'active',
             members: [{ userId: 'u1' }],

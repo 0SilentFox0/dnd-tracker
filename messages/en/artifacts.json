@@ -29,7 +29,9 @@
     "searchLabel": "Search artifacts",
     "searchPlaceholder": "Search by name or set",
     "setsSection": "Artifact sets",
-    "ungroupedSection": "Artifacts without a set"
+    "ungroupedSection": "Artifacts without a set",
+    "emptyHint": "Create an artifact or import a ready list with the Import button above.",
+    "emptyHintReadOnly": "Artifacts the DM creates will appear here."
   },
   "card": {
     "slotChangeFailed": "Failed to change the slot",

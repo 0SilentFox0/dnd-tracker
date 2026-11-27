@@ -49,8 +49,8 @@ vi.mock('@/lib/supabase/avatar-storage', () => ({
         avatar: a,
     })),
 }));
-vi.mock('@/lib/db', () => ({
-    prisma: {
+vi.mock('@/lib/db', () => {
+    const prisma: Record<string, unknown> = {
         character: {
             create: vi.fn(async ({ data }: { data: object }) => ({
                 id: 'new',
@@ -58,8 +58,12 @@ vi.mock('@/lib/db', () => ({
             })),
         },
         characterInventory: { create: vi.fn() },
-    },
-}));
+    };
+
+    prisma.$transaction = (fn: (tx: unknown) => unknown) => fn(prisma);
+
+    return { prisma };
+});
 
 const body = {
     name: 'Lia',

@@ -17,6 +17,11 @@ import { isUp } from '@/lib/utils/battle/participant/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
+export const isTargetableForViewer = (
+    p: BattleParticipant,
+    visible: (p: BattleParticipant) => boolean
+) => !isAirborne(p) && visible(p);
+
 export function useAttackTargets(
     attacker: BattleParticipant | null,
     attack: BattleAttack | null,
@@ -38,9 +43,8 @@ export function useAttackTargets(
     const targets = order.filter(
         (p) =>
             alive(p) &&
-            !isAirborne(p) &&
+            isTargetableForViewer(p, visible) &&
             p !== attacker &&
-            visible(p) &&
             (foe(p) || scene.battle.campaign?.friendlyFire === true)
     );
 

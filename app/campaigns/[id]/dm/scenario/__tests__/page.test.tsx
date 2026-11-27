@@ -90,6 +90,7 @@ describe('DM scenario pages (server)', () => {
 
         const el = (await DMScenarioPageRoute({
             params: Promise.resolve({ id: 'c1', pageId: 'p1' }),
+            searchParams: Promise.resolve({}),
         })) as Seeded;
 
         expect(el.props.queryKey).toEqual(scenarioKeys.page('c1', 'p1'));
@@ -111,6 +112,7 @@ describe('DM scenario pages (server)', () => {
         await expect(
             DMScenarioPageRoute({
                 params: Promise.resolve({ id: 'c1', pageId: 'p1' }),
+            searchParams: Promise.resolve({}),
             })
         ).rejects.toThrow('NEXT_NOT_FOUND');
     });
@@ -122,6 +124,7 @@ describe('DM scenario pages (server)', () => {
 
         const el = (await DMScenarioPageRoute({
             params: Promise.resolve({ id: 'c1', pageId: 'p1' }),
+            searchParams: Promise.resolve({}),
         })) as Seeded;
 
         expect(el.props.data).toBeNull();

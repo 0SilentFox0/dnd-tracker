@@ -85,10 +85,10 @@ export function AlignmentGrid({
                                 text={{
                                     title: (
                                         <>
-                                            <span aria-hidden>
+                                            <span aria-hidden className="block">
                                                 {t(`${key}.short`)}
                                             </span>
-                                            <span className="sr-only">
+                                            <span className="block text-xs font-normal leading-tight text-[var(--hud-muted)]">
                                                 {t(`${key}.name`)}
                                             </span>
                                         </>

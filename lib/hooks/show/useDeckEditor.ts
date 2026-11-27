@@ -26,6 +26,7 @@ import {
     newSlideId,
     sameDraft,
 } from '@/lib/utils/show/deck-draft';
+import { isUnsupportedSlideFile } from '@/lib/utils/show/deck-files';
 import type { SlideDeck } from '@/types/show';
 
 const draftOf = (deck: SlideDeck): DeckDraft => ({
@@ -96,6 +97,14 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
 
     const addPuzzle = useCallback(
         async (file: File) => {
+            if (isUnsupportedSlideFile(file)) {
+                notify(
+                    t('errors.unsupportedFormat', { name: file.name })
+                );
+
+                return;
+            }
+
             const size = await imageSizeOf(file);
 
             const { width, height } = fitWithin(
@@ -124,7 +133,7 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
                     ],
                 });
         },
-        [upload]
+        [upload, notify, t]
     );
 
     const addUrl = useCallback(

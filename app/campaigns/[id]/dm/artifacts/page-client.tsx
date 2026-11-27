@@ -88,6 +88,9 @@ export function DMArtifactsPageClient({
                     className="bg-hud-panel"
                     illustration={<BlankTome />}
                     title={t('page.emptyTitle')}
+                    description={t(
+                        canEdit ? 'page.emptyHint' : 'page.emptyHintReadOnly'
+                    )}
                     action={
                         canEdit ? (
                             <Button asChild>

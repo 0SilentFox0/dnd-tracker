@@ -33,6 +33,22 @@ export const SpellListsSchema = z
     .array(z.string().trim().min(1).max(CHOICE_LIMITS.listLength))
     .max(CHOICE_LIMITS.lists);
 
+export const StartingKitSchema = z.object({
+    items: z
+        .array(
+            z.object({
+                artifact: z.string().trim().min(1).max(100),
+                quantity: z
+                    .number()
+                    .int()
+                    .min(1)
+                    .max(CHOICE_LIMITS.kitQuantity),
+            })
+        )
+        .max(CHOICE_LIMITS.kitItems),
+    gp: z.number().int().min(0).max(CHOICE_LIMITS.kitGold),
+});
+
 export const ChoiceOptionSchema = z.object({
     id: choiceId,
     name: z.string().trim().min(1).max(100),
@@ -50,6 +66,7 @@ export const ChoiceOptionSchema = z.object({
         )
         .max(CHOICE_LIMITS.optionSpells)
         .optional(),
+    kit: StartingKitSchema.optional(),
 });
 
 const countSchema = z.union([
@@ -95,6 +112,11 @@ function kindIssues(c: Choice, ctx: z.RefinementCtx) {
         'choices.validation.maxPerAbilityOnly'
     );
     need(
+        !c.atCreation || c.kind === 'option',
+        ['atCreation'],
+        'choices.validation.atCreationOptionOnly'
+    );
+    need(
         !c.grant || c.kind === 'spell',
         ['grant'],
         'choices.validation.grantSpellOnly'
@@ -125,6 +147,7 @@ export const ChoiceSchema = z
         level: z.number().int().min(1).max(MAX_CLASS_LEVEL).default(1),
         count: countSchema.default(1),
         lineage: z.literal(true).optional(),
+        atCreation: z.literal(true).optional(),
         kind: z.enum(CHOICE_KINDS),
         options: z
             .array(ChoiceOptionSchema)
@@ -179,6 +202,13 @@ function ownerIssues(owner: ChoiceOwner) {
                 code: 'custom',
                 path: [],
                 message: 'choices.validation.lineageRaceOnly',
+            });
+
+        if (owner !== 'class' && list.some((c) => c.atCreation))
+            ctx.addIssue({
+                code: 'custom',
+                path: [],
+                message: 'choices.validation.atCreationClassOnly',
             });
 
         if (owner === 'race' && list.filter((c) => c.lineage).length > 1)

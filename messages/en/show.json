@@ -73,7 +73,8 @@
     "urlLabel": "Image link",
     "generate": "Generate",
     "max": "Maximum {max} slides",
-    "progress": "Uploading {done} of {total}"
+    "progress": "Uploading {done} of {total}",
+    "puzzleHint": "Cuts one image into pieces that players assemble together on their screens"
   },
   "generate": {
     "title": "Generate an image",
@@ -138,6 +139,7 @@
     "openShow": "Open the show",
     "preview": "Preview slides",
     "previewReadOnly": "Private read-only preview. Your selection is not shared with the campaign.",
+    "slideTrack": "Slide music:",
     "previewSlideCount": "Slide {current} of {total}",
     "previousSlide": "Previous",
     "nextSlide": "Next",
@@ -159,7 +161,8 @@
     "bindScene": "Could not attach the deck to the scene",
     "save": "Could not save the deck",
     "uploadFile": "{name}: {message}",
-    "uploadUnknown": "error"
+    "uploadUnknown": "error",
+    "unsupportedFormat": "{name}: this format is not supported. Use JPEG, PNG, WebP or GIF (.ico files cannot be used as slides)."
   },
   "validation": {
     "httpUrl": "An http(s) link is required",

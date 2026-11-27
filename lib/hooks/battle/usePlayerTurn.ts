@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { turnStartDue, turnStartOutcome } from './turn-start-check';
 import type { TurnGateControls } from './types';
+import { readAutoEndTurn } from './useAutoEndTurnSetting';
 import { useBattleRules } from './useBattleRules';
 import { useBattleScene } from './useBattleScene';
 
@@ -124,6 +125,8 @@ export function usePlayerTurn(
     const actions = {
         afterAction: () => {
             if (scene.readBattle()?.status !== BattleStatus.ACTIVE) return;
+
+            if (!readAutoEndTurn()) return;
 
             if (
                 turnExhausted(fresh(), bonusSpells, scene.battle.rules, {

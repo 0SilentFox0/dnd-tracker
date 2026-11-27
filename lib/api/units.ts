@@ -1,4 +1,8 @@
-import { campaignDelete, createCampaignCrudApi } from '@/lib/api/client';
+import {
+    campaignDelete,
+    campaignGet,
+    createCampaignCrudApi,
+} from '@/lib/api/client';
 import type { Unit } from '@/types/units';
 
 const unitsApi = createCampaignCrudApi<
@@ -9,6 +13,11 @@ const unitsApi = createCampaignCrudApi<
 >('/units');
 
 export const getUnits = unitsApi.list;
+export type UnitListItem = Pick<Unit, 'id' | 'name' | 'avatar'>;
+
+export const getUnitsCompact = (campaignId: string) =>
+    campaignGet<UnitListItem[]>(campaignId, '/units?compact=1');
+
 export const getUnit = unitsApi.get;
 export const createUnit = unitsApi.create;
 export const updateUnit = unitsApi.update;

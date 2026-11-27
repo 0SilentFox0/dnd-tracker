@@ -24,4 +24,4 @@ export const isChoiceOpen = (
     choice: Choice,
     level: number,
     owner: ChoiceOwner
-): boolean => owner === 'feat' || choice.level <= level;
+): boolean => !choice.atCreation && (owner === 'feat' || choice.level <= level);

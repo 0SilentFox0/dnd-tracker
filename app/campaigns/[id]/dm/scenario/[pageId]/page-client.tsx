@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { BookOpen, ChevronsUpDown, History, Moon, Sun } from 'lucide-react';
@@ -46,6 +46,7 @@ export function ScenarioPageClient({
     aiEnabled,
     canEdit = true,
     isDemo = false,
+    startEditing = false,
 }: {
     campaignId: string;
     pageId: string;
@@ -53,6 +54,7 @@ export function ScenarioPageClient({
     aiEnabled: boolean;
     canEdit?: boolean;
     isDemo?: boolean;
+    startEditing?: boolean;
 }) {
     const query = useScenarioPage(campaignId, pageId);
 
@@ -66,6 +68,7 @@ export function ScenarioPageClient({
                     aiEnabled={aiEnabled}
                     canEdit={canEdit}
                     isDemo={isDemo}
+                    startEditing={startEditing}
                 />
             )}
         </QueryState>
@@ -79,6 +82,7 @@ function ScenarioPageBody({
     aiEnabled,
     canEdit,
     isDemo,
+    startEditing,
 }: {
     campaignId: string;
     page: ScenarioPage;
@@ -86,6 +90,7 @@ function ScenarioPageBody({
     aiEnabled: boolean;
     canEdit: boolean;
     isDemo: boolean;
+    startEditing: boolean;
 }) {
     const t = useTranslations('scenario.pageBody');
 
@@ -98,6 +103,13 @@ function ScenarioPageBody({
     const neighbours = useSceneNeighbours(campaignId, page.id);
 
     const edit = useScenarioEditSession();
+
+    const { start: startEdit } = edit;
+
+    useEffect(() => {
+        if (startEditing && canEdit) startEdit(page);
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- open once on arrival
+    }, []);
 
     const [hideNotes, setHideNotes] = useState(false);
 
@@ -209,6 +221,11 @@ function ScenarioPageBody({
                 }
                 menu={menu}
             />
+            {edit.base && page.content.sections.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                    {t('emptyEditorHint')}
+                </p>
+            )}
             {edit.base ? (
                 <ScenarioEditor
                     key={edit.base.version}

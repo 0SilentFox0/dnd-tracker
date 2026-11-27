@@ -89,6 +89,7 @@ export function DMMusicPageClient({
                         onEdit: setEditing,
                         onDelete: (t) => void library.remove(t),
                         onMove: library.move,
+                        onDuration: library.saveDuration,
                     }}
                 />
             )}

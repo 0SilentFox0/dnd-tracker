@@ -50,6 +50,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({
         battle,
         turn: { queue, isMyTurn },
         effects,
+        select,
     } = useBattleSceneData();
 
     const { hpTerm } = useBattleRules();
@@ -87,6 +88,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                 <PortraitFx effects={heroEffects} size={compact ? 48 : 64}>
                     <ZoomablePortrait
                         participant={hero}
+                        onOpenDetails={() => select(hero.basicInfo.id)}
                         fx="main"
                         size={compact ? 48 : 64}
                         me

@@ -120,13 +120,30 @@ describe('SheetVitals', () => {
         expect(bar).toHaveAttribute('aria-valuemax', '30');
     });
 
-    it('non-DM sees numbers but no controls', async () => {
+    it('the owner gets damage, heal and temp controls', async () => {
         await inProfile(dmSheet(false), <SheetVitals />);
 
         expect(
             screen.getByLabelText('HP 20 / 30', { selector: 'button' })
         ).toBeInTheDocument();
         expect(screen.getByText('+5 temp')).toBeInTheDocument();
+        expect(screen.getByLabelText('− Damage')).toBeInTheDocument();
+        expect(screen.getByLabelText('+ Heal')).toBeInTheDocument();
+        expect(
+            screen.getByRole('button', { name: 'Temp' })
+        ).toBeInTheDocument();
+    });
+
+    it('a viewer who is neither DM nor owner sees no controls', async () => {
+        await inProfile(
+            withSheet({
+                system: 'dnd5e',
+                viewer: { isDM: false, isOwner: false },
+                rest: rest({}),
+            }),
+            <SheetVitals />
+        );
+
         expect(screen.queryByLabelText('− Damage')).toBeNull();
         expect(screen.queryByLabelText('+ Heal')).toBeNull();
         expect(screen.queryByRole('button', { name: 'Temp' })).toBeNull();

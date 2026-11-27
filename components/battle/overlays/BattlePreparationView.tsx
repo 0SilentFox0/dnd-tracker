@@ -2,7 +2,10 @@
 
 import { useTranslations } from 'next-intl';
 
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudButton } from '@/components/hud';
+import { ParticipantSide } from '@/lib/constants/battle';
+import type { PrepRoster } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 
 interface BattlePreparationViewProps {
@@ -12,6 +15,56 @@ interface BattlePreparationViewProps {
     onStartBattle: () => void;
     isStarting: boolean;
     canStart?: boolean;
+    roster?: PrepRoster | null;
+}
+
+function TeamList({
+    side,
+    entries,
+}: {
+    side: ParticipantSide;
+    entries: PrepRoster[ParticipantSide];
+}) {
+    const t = useTranslations('battle.prep');
+
+    if (entries.length === 0) return null;
+
+    return (
+        <ul
+            data-testid={`prep-team-${side}`}
+            aria-label={t(
+                side === ParticipantSide.ALLY ? 'teamAllies' : 'teamEnemies'
+            )}
+            className="flex flex-wrap justify-center gap-2"
+        >
+            {entries.map((e) => (
+                <li
+                    key={e.id}
+                    className="flex w-20 flex-col items-center gap-1 text-xs"
+                >
+                    <EntityIcon
+                        src={e.avatar}
+                        name={e.name}
+                        size={80}
+                        className={cn(
+                            'size-14 rounded-lg bg-black/30 ring-1',
+                            side === ParticipantSide.ALLY
+                                ? 'ring-hud-accent'
+                                : 'ring-hud-crimson'
+                        )}
+                    />
+                    <span className="w-full truncate">
+                        {e.name}
+                        {e.quantity > 1 && (
+                            <span className="ml-1 text-hud-muted">
+                                ×{e.quantity}
+                            </span>
+                        )}
+                    </span>
+                </li>
+            ))}
+        </ul>
+    );
 }
 
 export function BattlePreparationView({
@@ -21,6 +74,7 @@ export function BattlePreparationView({
     onStartBattle,
     isStarting,
     canStart = true,
+    roster = null,
 }: BattlePreparationViewProps) {
     const t = useTranslations('battle.prep');
 
@@ -49,19 +103,21 @@ export function BattlePreparationView({
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
                     {[
                         {
+                            side: ParticipantSide.ALLY,
                             label: ts('allies'),
                             value: alliesCount,
                             color: 'text-hud-info',
                         },
                         {
+                            side: ParticipantSide.ENEMY,
                             label: ts('enemies'),
                             value: enemiesCount,
                             color: 'text-hud-danger',
                         },
-                    ].map((stat, idx) => (
+                    ].map((stat) => (
                         <div
-                            key={idx}
-                            className="flex flex-col items-center gap-1 border border-hud-line bg-hud-panel p-4 sm:p-6"
+                            key={stat.side}
+                            className="flex flex-col items-center gap-3 border border-hud-line bg-hud-panel p-4 sm:p-6"
                         >
                             <span className="hud-sc text-sm tracking-[.1em] text-[var(--hud-muted)]">
                                 {stat.label}
@@ -74,6 +130,12 @@ export function BattlePreparationView({
                             >
                                 {stat.value}
                             </span>
+                            {roster && (
+                                <TeamList
+                                    side={stat.side}
+                                    entries={roster[stat.side]}
+                                />
+                            )}
                         </div>
                     ))}
                 </div>

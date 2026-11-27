@@ -17,18 +17,12 @@ import { systemUiOf } from '@/components/systems';
 import { useAlignmentLabel } from '@/lib/hooks/characters';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { cn } from '@/lib/utils';
+import { biographyLead } from '@/lib/utils/characters/biography';
 import { signed } from '@/lib/utils/common/format';
 import { stagger } from '@/lib/utils/common/motion';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
 const LEAD_FOLD = 320;
-
-const excerpt = (text: string | null) =>
-    text
-        ?.replace(/[#*_>`~[\]]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 700);
 
 export function SheetIdentityPanel({
     badge,
@@ -98,7 +92,7 @@ export function SheetIdentityPanel({
         system.identity.alignments ? alignmentLabel(shown.alignment) : null,
     ].filter(Boolean);
 
-    const lead = excerpt(sheet.story.biography);
+    const lead = biographyLead(sheet.story.biography)?.slice(0, 700);
 
     const long = (lead?.length ?? 0) > LEAD_FOLD;
 

@@ -27,7 +27,8 @@ import type { BattleParticipant } from '@/types/battle';
 
 export function useAttackWizard(
     attacker: BattleParticipant | null,
-    onDone?: () => void
+    onDone?: () => void,
+    { systemInput = false }: { systemInput?: boolean } = {}
 ) {
     const scene = useBattleScene();
 
@@ -101,7 +102,8 @@ export function useAttackWizard(
                 ? Object.fromEntries(
                       attacks.map((a) => [
                           a.id ?? a.name,
-                          attackTarget?.(attacker, a, scene.battle.rules)?.target,
+                          attackTarget?.(attacker, a, scene.battle.rules)
+                              ?.target,
                       ])
                   )
                 : {},
@@ -185,6 +187,7 @@ export function useAttackWizard(
             : {},
         attack,
         attacks,
+        pools: attackPools,
         targets,
         steps,
         estimate,
@@ -225,6 +228,7 @@ export function useAttackWizard(
         mode: currentMode,
         attackCtx,
         serverJudged,
+        systemInput,
         dice,
     });
 

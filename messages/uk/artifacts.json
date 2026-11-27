@@ -29,7 +29,9 @@
     "searchLabel": "Пошук артефактів",
     "searchPlaceholder": "Пошук за назвою або сетом",
     "setsSection": "Сети артефактів",
-    "ungroupedSection": "Артефакти без сету"
+    "ungroupedSection": "Артефакти без сету",
+    "emptyHint": "Створіть артефакт або імпортуйте готовий список кнопкою «Імпорт» вище.",
+    "emptyHintReadOnly": "Артефакти, створені ДМ, з’являться тут."
   },
   "card": {
     "slotChangeFailed": "Не вдалося змінити слот",

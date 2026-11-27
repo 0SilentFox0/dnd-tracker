@@ -1,6 +1,5 @@
 import { Fragment, type ReactNode } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
 
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { CALLOUT_KINDS, MENTION_TYPES } from '@/lib/constants/scenario';
@@ -15,7 +14,7 @@ import type {
 type Ctx = {
     campaignId: string;
     linkMentions: boolean;
-    showMissingMedia: boolean;
+    missingMediaLabel?: string;
 };
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -55,8 +54,6 @@ function Mention({ node, ctx }: { node: RichNode; ctx: Ctx }) {
 }
 
 function ImageBlock({ node, ctx }: { node: RichNode; ctx: Ctx }) {
-    const t = useTranslations('scenario.image');
-
     const src = str(node.attrs?.src);
 
     const alt = str(node.attrs?.alt);
@@ -64,8 +61,8 @@ function ImageBlock({ node, ctx }: { node: RichNode; ctx: Ctx }) {
     const caption = str(node.attrs?.caption);
 
     if (!src)
-        return ctx.showMissingMedia ? (
-            <p className="sb-empty">{t('missing')}</p>
+        return ctx.missingMediaLabel ? (
+            <p className="sb-empty">{ctx.missingMediaLabel}</p>
         ) : null;
 
     return (
@@ -151,18 +148,18 @@ export function ScenarioRichText({
     doc,
     campaignId,
     linkMentions = false,
-    showMissingMedia = false,
+    missingMediaLabel,
 }: {
     doc: RichDoc;
     campaignId: string;
     linkMentions?: boolean;
-    showMissingMedia?: boolean;
+    missingMediaLabel?: string;
 }) {
     return (
         <>
             {children(
                 { type: 'doc', content: doc.content },
-                { campaignId, linkMentions, showMissingMedia }
+                { campaignId, linkMentions, missingMediaLabel }
             )}
         </>
     );

@@ -221,6 +221,18 @@ export function ParticipantCatalog({
                     }))}
                 />
             )}
+            {tab === 'units' && filter.levelChips.length > 1 && (
+                <HudChipTabs
+                    ariaLabel={t('levelFilter')}
+                    wrap
+                    items={filter.levelChips.map((chip) => ({
+                        key: String(chip.level),
+                        active: chip.active,
+                        onSelect: () => filter.toggleLevel(chip.level),
+                        label: `${t('levelChip', { level: chip.level })} · ${chip.count}`,
+                    }))}
+                />
+            )}
             <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
                 {tab === 'heroes' &&
                     heroGroups.map((g) => (

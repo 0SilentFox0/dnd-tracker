@@ -2,11 +2,17 @@ import { useTranslations } from 'next-intl';
 
 import type { MoneyMode } from '../stash/MoneyDialog';
 
-import { HudIconButton } from '@/components/hud';
-import { COINS } from '@/lib/constants/inventory';
+import { HudButton } from '@/components/hud';
+import { type Coin,COINS } from '@/lib/constants/inventory';
 import type { InventoryModel } from '@/lib/hooks/characters';
 import type { CurrencyView } from '@/lib/hooks/systems';
 import type { Purse } from '@/types/inventory';
+
+const COIN_DOT: Record<Coin, string> = {
+    gp: 'bg-amber-400 border-amber-600',
+    sp: 'bg-slate-300 border-slate-500',
+    cp: 'bg-orange-600 border-orange-800',
+};
 
 const BUTTONS: { mode: MoneyMode; sign: string; dmOnly?: boolean }[] = [
     { mode: 'spend', sign: '−' },
@@ -32,6 +38,10 @@ export function PurseBar({
             <span className="text-sm text-hud-ink">
                 {COINS.map((c) => (
                     <span key={c} className="mr-3 whitespace-nowrap last:mr-0">
+                        <span
+                            aria-hidden
+                            className={`mr-1 inline-block size-3 rounded-full border align-middle ${COIN_DOT[c]}`}
+                        />
                         {purse[c]}{' '}
                         <span className="text-xs text-hud-muted">
                             {currency ? currency.label(c) : t(`coins.${c}`)}
@@ -43,16 +53,19 @@ export function PurseBar({
                 <span className="flex gap-1">
                     {BUTTONS.filter((b) => !b.dmOnly || access.isDM).map(
                         (b) => (
-                            <HudIconButton
+                            <HudButton
                                 key={b.mode}
                                 type="button"
                                 aria-label={t(`purse.${b.mode}`)}
                                 title={t(`purse.${b.mode}`)}
                                 onClick={() => onMode(b.mode)}
-                                className="rounded-sm border border-hud-line text-hud-ink hover:border-hud-muted"
+                                className="inline-flex min-h-8 items-center gap-1 rounded-sm border border-hud-line px-2 text-xs text-hud-ink hover:border-hud-muted"
                             >
                                 {b.sign}
-                            </HudIconButton>
+                                <span className="max-sm:sr-only">
+                                    {t(`purse.${b.mode}`)}
+                                </span>
+                            </HudButton>
                         )
                     )}
                 </span>

@@ -23,6 +23,7 @@ import { HudFormMenu } from '@/components/hud';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import {
     type BattleSetup,
     type BattleSetupInitial,
@@ -337,8 +338,13 @@ export function BattleSetupForm({
     campaignId,
     battleId,
 }: BattleSetupFormProps) {
-    if (battleId)
-        return <EditBattleSetup campaignId={campaignId} battleId={battleId} />;
-
-    return <BattleSetupLayout campaignId={campaignId} />;
+    return (
+        <TooltipProvider delayDuration={200}>
+            {battleId ? (
+                <EditBattleSetup campaignId={campaignId} battleId={battleId} />
+            ) : (
+                <BattleSetupLayout campaignId={campaignId} />
+            )}
+        </TooltipProvider>
+    );
 }

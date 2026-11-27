@@ -73,7 +73,8 @@
     "urlLabel": "Посилання на картинку",
     "generate": "Згенерувати",
     "max": "Максимум {max} слайдів",
-    "progress": "Завантаження {done} з {total}"
+    "progress": "Завантаження {done} з {total}",
+    "puzzleHint": "Розрізає одне зображення на шматки, які гравці складають разом на своїх екранах"
   },
   "generate": {
     "title": "Згенерувати зображення",
@@ -138,6 +139,7 @@
     "openShow": "Відкрити показ",
     "preview": "Переглянути слайди",
     "previewReadOnly": "Приватний перегляд лише для читання. Ваш вибір не передається учасникам кампанії.",
+    "slideTrack": "Музика слайда:",
     "previewSlideCount": "Слайд {current} з {total}",
     "previousSlide": "Назад",
     "nextSlide": "Далі",
@@ -159,7 +161,8 @@
     "bindScene": "Не вдалося прив'язати набір до сцени",
     "save": "Не вдалося зберегти набір",
     "uploadFile": "{name}: {message}",
-    "uploadUnknown": "помилка"
+    "uploadUnknown": "помилка",
+    "unsupportedFormat": "{name}: формат не підтримується. Використайте JPEG, PNG, WebP або GIF (файли .ico не підходять для слайдів)."
   },
   "validation": {
     "httpUrl": "Потрібне посилання http(s)",

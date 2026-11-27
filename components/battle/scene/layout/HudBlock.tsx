@@ -10,7 +10,7 @@ import {
     Eye,
 } from 'lucide-react';
 
-import { HUD_GLASS, HudButton } from '@/components/hud';
+import { HUD_GLASS, HudButton, HudIconButton } from '@/components/hud';
 import {
     type HudBlockKey,
     toggleHudAll,
@@ -106,14 +106,13 @@ export function HudRestoreButton() {
     if (!useHudAllHidden()) return null;
 
     return (
-        <HudButton
+        <HudIconButton
             type="button"
             aria-label={t('hotkey')}
-            title={t('hotkey')}
             onClick={toggleHudAll}
-            className={`${HUD_GLASS} pointer-events-auto absolute right-3 bottom-3 z-50 flex size-8 items-center justify-center rounded-lg text-[var(--ink)] opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:outline-none`}
+            className={`${HUD_GLASS} pointer-events-auto absolute right-3 bottom-3 z-50 flex items-center justify-center rounded-lg text-[var(--ink)] opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:outline-none`}
         >
             <Eye className="size-4" aria-hidden />
-        </HudButton>
+        </HudIconButton>
     );
 }

@@ -561,3 +561,43 @@ describe('useAttackWizard on a server-judged system', () => {
         );
     });
 });
+
+describe('useAttackWizard quick', () => {
+    it('quick кидає d20 і шкоду та одразу відправляє типовою зброєю', async () => {
+        const scene = fakeScene({
+            afterLog: hitLog([{ participantId: 'gob', change: 9 }]),
+        });
+
+        scene.mutateAsync.mockResolvedValue(undefined);
+
+        const { result } = renderHook(() => useAttackWizard(scene.me), {
+            wrapper: scene.wrapper,
+        });
+
+        act(() => result.current.actions.quick('gob'));
+
+        expect(result.current.state.quick).toBe(true);
+        await waitFor(() => expect(result.current.state.step).toBe('result'));
+        expect(scene.mutateAsync).toHaveBeenCalledWith(
+            expect.objectContaining({
+                targetIds: ['gob'],
+                attackRoll: expect.any(Number),
+            })
+        );
+        expect(result.current.state.quick).toBeUndefined();
+    });
+
+    it('systemInput: quick відкриває візард замість кидка', () => {
+        const scene = fakeScene({});
+
+        const { result } = renderHook(
+            () => useAttackWizard(scene.me, undefined, { systemInput: true }),
+            { wrapper: scene.wrapper }
+        );
+
+        act(() => result.current.actions.quick('gob'));
+
+        expect(result.current.state.quick).toBeUndefined();
+        expect(result.current.state.step).toBe('roll');
+    });
+});

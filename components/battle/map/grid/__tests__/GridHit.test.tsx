@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { clickCell, hoverCell, pressCell } from '../../__tests__/grid-pointer';
 import { GridHit } from '../GridHit';
 
+import { UNIT } from '@/lib/utils/battle/grid';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 afterEach(cleanup);
@@ -17,6 +18,7 @@ function setup(
         clickableBlocked?: boolean;
         onStrokeStart?: () => void;
         wasDragged?: boolean;
+        tokenDrag?: string[];
     } = {}
 ) {
     const onCellClick = vi.fn();
@@ -40,6 +42,7 @@ function setup(
                     onCellHover,
                     wasDragged: () => options.wasDragged ?? false,
                     svgRef,
+                    tokenDrag: options.tokenDrag && new Set(options.tokenDrag),
                 }}
                 onStrokeStart={options.onStrokeStart as never}
                 scene={{ clickableBlocked: options.clickableBlocked }}
@@ -112,5 +115,56 @@ describe('GridHit', () => {
 
         expect(onCellClick).not.toHaveBeenCalled();
         expect(onCellHover).not.toHaveBeenCalled();
+    });
+
+    describe('token drag', () => {
+        const down = { x: 0, y: 0 };
+
+        const dragTo = (container: HTMLElement, p: { x: number; y: number }) => {
+            pressCell(container, down);
+            fireEvent.pointerMove(
+                container.querySelector('[data-grid-hit]') as Element,
+                {
+                    pointerId: 1,
+                    clientX: (2 + 0.5) * UNIT,
+                    clientY: (2 + 0.5) * UNIT,
+                }
+            );
+            fireEvent.pointerUp(
+                container.querySelector('[data-grid-hit]') as Element,
+                {
+                    pointerId: 1,
+                    clientX: (p.x + 0.5) * UNIT,
+                    clientY: (p.y + 0.5) * UNIT,
+                }
+            );
+        };
+
+        it('drop on another cell goes through the click path and swallows the click', () => {
+            const { container, onCellClick } = setup({ tokenDrag: ['0:0'] });
+
+            dragTo(container, { x: 2, y: 2 });
+            clickCell(container, { x: 2, y: 2 });
+
+            expect(onCellClick).toHaveBeenCalledTimes(1);
+            expect(onCellClick).toHaveBeenCalledWith({ x: 2, y: 2 });
+        });
+
+        it('drop on the origin cell cancels', () => {
+            const { container, onCellClick } = setup({ tokenDrag: ['0:0'] });
+
+            dragTo(container, { x: 0, y: 0 });
+
+            expect(onCellClick).not.toHaveBeenCalled();
+        });
+
+        it('a plain press without movement stays a click', () => {
+            const { container, onCellClick } = setup({ tokenDrag: ['0:0'] });
+
+            pressCell(container, down);
+            clickCell(container, down);
+
+            expect(onCellClick).toHaveBeenCalledWith(down);
+        });
     });
 });

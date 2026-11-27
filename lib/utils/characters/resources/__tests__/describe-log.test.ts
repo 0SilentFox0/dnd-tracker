@@ -40,6 +40,14 @@ describe('describeCharacterLog', () => {
             '🎲 Рятівний кидок: Мудрість: автопровал',
         ],
         [
+            {
+                kind: 'check',
+                data: { rolls: [4, 5], total: 9, mode: 'normal', manualCrit: true },
+            },
+            'rest.log.roll',
+            '🎲 Кидок: 4 / 5 → 9 · крит (вручну)',
+        ],
+        [
             { kind: 'check', data: { rolls: [4], total: 6, mode: 'normal' } },
             'rest.log.roll',
             '🎲 Кидок: 4 → 6',

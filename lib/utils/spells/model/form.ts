@@ -9,6 +9,7 @@ import type { Spell, SpellFormData } from '@/types/spells';
 
 export function defaultSpellForm(): SpellFormData {
     return {
+        executionMode: 'manual',
         name: '',
         level: 1,
         groupId: null,

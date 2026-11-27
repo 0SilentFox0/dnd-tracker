@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl';
 
 import { terrainTitle } from './grid-style';
 
+import { DRAG_THRESHOLD } from '@/lib/hooks/common';
 import { useFormatDuration } from '@/lib/i18n/use-duration';
 import {
     cellAtScreenPoint,
@@ -30,6 +31,7 @@ export interface GridCellActions {
     onCellHover?: BattleMapActions['onCellHover'];
     wasDragged: () => boolean;
     svgRef: RefObject<SVGSVGElement | null>;
+    tokenDrag?: ReadonlySet<string>;
 }
 
 interface GridHitProps {
@@ -51,7 +53,8 @@ export const GridHit = memo(function GridHit({
 
     const formatDuration = useFormatDuration();
 
-    const { onCellClick, onCellHover, wasDragged, svgRef } = cellActions;
+    const { onCellClick, onCellHover, wasDragged, svgRef, tokenDrag } =
+        cellActions;
 
     const { cols, rows, terrain } = map;
 
@@ -69,6 +72,34 @@ export const GridHit = memo(function GridHit({
         return ctm
             ? cellAtScreenPoint({ cols, rows }, ctm, e.clientX, e.clientY, grid)
             : null;
+    };
+
+    const press = useRef<{
+        x: number;
+        y: number;
+        id: number;
+        active: boolean;
+    } | null>(null);
+
+    const swallowClick = useRef(false);
+
+    const endDrag = (e: PointerEvent, drop: boolean) => {
+        const d = press.current;
+
+        if (!d || d.id !== e.pointerId) return;
+
+        press.current = null;
+        (e.currentTarget as HTMLElement).style.cursor = '';
+        e.currentTarget.releasePointerCapture?.(e.pointerId);
+
+        if (!d.active) return;
+
+        swallowClick.current = true;
+
+        const p = drop ? cellAt(e) : null;
+
+        if (p && !tokenDrag?.has(cellKey(p))) onCellClick?.(p);
+        else moveTo(null);
     };
 
     const isBlocked = (p: GridPoint) => blocked.has(cellKey(p));
@@ -103,9 +134,65 @@ export const GridHit = memo(function GridHit({
     return (
         <g
             style={{ cursor }}
-            onPointerMove={(e) => moveTo(cellAt(e))}
-            onPointerLeave={() => moveTo(null)}
+            onPointerMove={(e) => {
+                const d = press.current;
+
+                if (d && d.id === e.pointerId) {
+                    if (
+                        !d.active &&
+                        Math.hypot(e.clientX - d.x, e.clientY - d.y) >
+                            DRAG_THRESHOLD
+                    )
+                        d.active = true;
+
+                    if (d.active) {
+                        e.stopPropagation();
+                        e.currentTarget.style.cursor = 'grabbing';
+
+                        const p = cellAt(e);
+
+                        moveTo(p && !isBlocked(p) ? p : null);
+
+                        return;
+                    }
+                }
+
+                moveTo(cellAt(e));
+            }}
+            onPointerLeave={() => {
+                if (!press.current?.active) moveTo(null);
+            }}
+            onPointerUp={(e) => endDrag(e, true)}
+            onPointerCancel={(e) => endDrag(e, false)}
             onPointerDown={(e) => {
+                if (press.current && press.current.id !== e.pointerId) {
+                    press.current = null;
+                    swallowClick.current = true;
+                    e.currentTarget.style.cursor = '';
+                    moveTo(null);
+
+                    return;
+                }
+
+                swallowClick.current = false;
+
+                const at = !onStrokeStart && tokenDrag ? cellAt(e) : null;
+
+                if (
+                    at &&
+                    tokenDrag?.has(cellKey(at)) &&
+                    e.button === 0 &&
+                    e.isPrimary
+                ) {
+                    press.current = {
+                        x: e.clientX,
+                        y: e.clientY,
+                        id: e.pointerId,
+                        active: false,
+                    };
+                    e.currentTarget.setPointerCapture?.(e.pointerId);
+                }
+
                 if (e.pointerType !== 'mouse') moveTo(cellAt(e));
 
                 const p = onStrokeStart && cellAt(e);
@@ -113,6 +200,12 @@ export const GridHit = memo(function GridHit({
                 if (p) onStrokeStart?.(p, e);
             }}
             onClick={(e) => {
+                if (swallowClick.current) {
+                    swallowClick.current = false;
+
+                    return;
+                }
+
                 if (onStrokeStart || wasDragged()) return;
 
                 const p = cellAt(e);

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy, Link } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { useCopyToClipboard } from '@/lib/hooks/common';
+import { inviteLinkPath } from '@/lib/utils/campaigns/invite-link';
 
 interface InviteCodeDisplayProps {
     inviteCode: string;
@@ -17,17 +18,12 @@ export function InviteCodeDisplay({
 }: InviteCodeDisplayProps) {
     const t = useTranslations('campaigns');
 
-    const [copied, setCopied] = useState(false);
+    const code = useCopyToClipboard();
 
-    const handleCopy = async () => {
-        try {
-            await navigator.clipboard.writeText(inviteCode);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
-            console.error('Failed to copy:', err);
-        }
-    };
+    const link = useCopyToClipboard();
+
+    const iconClass = (done: boolean) =>
+        `${compact ? 'size-3.5' : 'size-4'}${done ? ' text-hud-accent-fg' : ''}`;
 
     return (
         <div className="flex min-w-0 items-center gap-1">
@@ -43,22 +39,26 @@ export function InviteCodeDisplay({
             <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleCopy}
-                className={'shrink-0'}
+                onClick={() => void code.copy(inviteCode)}
+                className="shrink-0"
                 title={t('settings.copyCode')}
                 aria-label={t('settings.copyCode')}
             >
-                {copied ? (
-                    <Check
-                        className={
-                            compact
-                                ? 'size-3.5 text-hud-accent-fg'
-                                : 'h-4 w-4 text-hud-accent-fg'
-                        }
-                    />
-                ) : (
-                    <Copy className={compact ? 'size-3.5' : 'h-4 w-4'} />
-                )}
+                {code.copied ? <Check className={iconClass(true)} /> : <Copy className={iconClass(false)} />}
+            </Button>
+            <Button
+                variant="ghost"
+                size="icon"
+                onClick={() =>
+                    void link.copy(
+                        `${window.location.origin}${inviteLinkPath(inviteCode)}`
+                    )
+                }
+                className="shrink-0"
+                title={link.copied ? t('settings.linkCopied') : t('settings.copyLink')}
+                aria-label={t('settings.copyLink')}
+            >
+                {link.copied ? <Check className={iconClass(true)} /> : <Link className={iconClass(false)} />}
             </Button>
         </div>
     );

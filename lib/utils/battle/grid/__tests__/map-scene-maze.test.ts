@@ -49,6 +49,7 @@ function scene(
             canSeeEnemyHp: false,
         },
         canAct: true,
+        isMyTurn: true,
         isDM,
         attackReady: true,
     };

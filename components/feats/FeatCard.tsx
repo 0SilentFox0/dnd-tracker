@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { DmEntityCard } from '@/components/common/entity/DmEntityCard';
 import { HudPill } from '@/components/hud/page';
+import { summarizeChoices } from '@/lib/utils/choices/summary';
 import type { FeatData } from '@/types/choices';
 
 export function FeatCard({
@@ -19,7 +20,7 @@ export function FeatCard({
 }) {
     const t = useTranslations('feats');
 
-    const choices = feat.choices.length;
+    const choices = summarizeChoices(feat.choices);
 
     return (
         <DmEntityCard
@@ -36,8 +37,20 @@ export function FeatCard({
                 </HudPill>
             )}
             {feat.repeatable && <HudPill>{t('card.repeatable')}</HudPill>}
-            {choices > 0 && (
-                <HudPill>{t('card.choices', { count: choices })}</HudPill>
+            {choices.items.map((choice) => (
+                <HudPill key={choice.id}>
+                    {choice.count > 1
+                        ? t('card.choice', {
+                              label: choice.label,
+                              count: choice.count,
+                          })
+                        : choice.label}
+                </HudPill>
+            ))}
+            {choices.more > 0 && (
+                <HudPill>
+                    {t('card.choicesMore', { count: choices.more })}
+                </HudPill>
             )}
         </DmEntityCard>
     );

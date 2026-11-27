@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import {
     AbilityCard,
@@ -12,6 +12,7 @@ import {
 import { useProfile } from '@/components/character-profile/ProfileContext';
 import { HudSheetHeading } from '@/components/hud/page';
 import type { StatsTabProps } from '@/components/systems/types';
+import type { DndSkill } from '@/lib/constants/skills';
 import { cn } from '@/lib/utils';
 import { stagger } from '@/lib/utils/common/motion';
 
@@ -22,7 +23,16 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
 
     const tg = useTranslations('gameTerms');
 
+    const locale = useLocale();
+
     const roll: RollProps = { canRoll, onRoll };
+
+    const sortedSkills = [...sheet.skills].sort((a, b) =>
+        tg(`dndSkills.${a.key as DndSkill}`).localeCompare(
+            tg(`dndSkills.${b.key as DndSkill}`),
+            locale
+        )
+    );
 
     if (section === 'top') {
         return (
@@ -85,7 +95,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                 </HudSheetHeading>
                 <div className={cn(panel, 'px-3')}>
                     <ul className="-mb-px grid gap-x-8 text-base md:grid-cols-2">
-                        {sheet.skills.map((s) => (
+                        {sortedSkills.map((s) => (
                             <SkillRow key={s.key} skill={s} roll={roll} />
                         ))}
                     </ul>

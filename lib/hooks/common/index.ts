@@ -14,6 +14,7 @@ export {
 export { useCheckedIds } from './useCheckedIds';
 export { useCoarsePointer } from './useCoarsePointer';
 export { useConfirm } from './useConfirm';
+export { useCopyToClipboard } from './useCopyToClipboard';
 export { useCountUp } from './useCountUp';
 export { useCrudMutation } from './useCrudMutation';
 export { useCssVarHeight } from './useCssVarHeight';
@@ -30,6 +31,7 @@ export { type GhostFlash, useGhostValue } from './useGhostValue';
 export { useHydrated } from './useHydrated';
 export { useImageSize } from './useImageSize';
 export { flipDelta, useIndicatorFlip } from './useIndicatorFlip';
+export { useInView } from './useInView';
 export { DESKTOP_QUERY, useIsCompact, useIsMobile } from './useIsMobile';
 export { useLibraryList } from './useLibraryList';
 export { useMediaQuery } from './useMediaQuery';

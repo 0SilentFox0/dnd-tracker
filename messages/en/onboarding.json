@@ -11,7 +11,7 @@
       },
       "players": {
         "title": "Invite players",
-        "description": "Send players the invite code from the \"Campaign settings\" block below."
+        "description": "Send players the invite code or link from the pill at the top of this page."
       },
       "characters": {
         "title": "Approve or create a hero",
@@ -149,7 +149,7 @@
       },
       "character": {
         "title": "Your hero sheet",
-        "body": "The \"Combat\", \"Path\", \"Magic\", \"Inventory\" and \"History\" tabs hold everything about your hero. New levels and progression appear here after battles."
+        "body": "The \"Combat\", \"Path\" (or \"Traits\", depending on the rules system), \"Magic\", \"Inventory\" and \"History\" tabs hold everything about your hero. New levels and progression appear here after battles."
       },
       "draft": {
         "title": "Hero draft",

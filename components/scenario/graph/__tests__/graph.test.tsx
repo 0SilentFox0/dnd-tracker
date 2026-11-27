@@ -114,6 +114,13 @@ const FULL: ScenarioIndex = {
 const node = (id: string) =>
     document.querySelector(`[data-node-id="${id}"]`) as SVGGElement;
 
+const collapseLeaves = () =>
+    fireEvent.click(
+        screen.getByRole('checkbox', {
+            name: /scenarioGraph.toolbar.showLeaves/,
+        })
+    );
+
 describe('ScenarioGraph', () => {
     beforeEach(() => {
         index = FULL;
@@ -125,12 +132,20 @@ describe('ScenarioGraph', () => {
 
     it('renders nodes and edges, hiding single-link entities behind a +N badge', () => {
         render(<ScenarioGraph campaignId="c" />);
+        collapseLeaves();
 
         expect(document.querySelectorAll('[data-node-id]')).toHaveLength(4);
         expect(
             document.querySelectorAll('[data-edge-id]:not([data-sequence])')
         ).toHaveLength(3);
         expect(screen.getByText('+1')).toBeInTheDocument();
+    });
+
+    it('shows single-link entities by default in a small graph', () => {
+        render(<ScenarioGraph campaignId="c" />);
+
+        expect(document.querySelectorAll('[data-node-id]')).toHaveLength(5);
+        expect(screen.queryByText('+1')).toBeNull();
     });
 
     it('marks missing nodes and secret edges', () => {
@@ -322,6 +337,7 @@ describe('ScenarioGraph', () => {
 
     it('draws the story thread between scenes and toggles it from the toolbar', () => {
         render(<ScenarioGraph campaignId="c" />);
+        collapseLeaves();
 
         expect(document.querySelectorAll('[data-sequence]')).toHaveLength(1);
         expect(document.querySelectorAll('[data-edge-id]')).toHaveLength(4);
@@ -357,6 +373,7 @@ describe('ScenarioGraph', () => {
 
     it('lists pages and entities, including collapsed ones, and selects on click', () => {
         render(<ScenarioGraph campaignId="c" />);
+        collapseLeaves();
 
         const item = (id: string) =>
             document.querySelector(`[data-list-id="${id}"]`) as HTMLElement;
@@ -471,6 +488,7 @@ describe('ScenarioGraph', () => {
 
     it('gives the +N badge accessible text', () => {
         render(<ScenarioGraph campaignId="c" />);
+        collapseLeaves();
 
         expect(
             node('scene:a').querySelector('g > g > title')?.textContent
@@ -490,6 +508,7 @@ describe('ScenarioGraph', () => {
 
     it('finds a collapsed single-page entity by search', () => {
         render(<ScenarioGraph campaignId="c" />);
+        collapseLeaves();
 
         expect(node('spell:s')).toBeNull();
 

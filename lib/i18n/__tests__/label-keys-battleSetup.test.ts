@@ -27,6 +27,7 @@ const statuses = Object.values(BattleStatus);
 expectLabelKeys('battleSetup', 'list.status', statuses);
 expectLabelKeys('battleSetup', 'list.sections', statuses);
 expectLabelKeys('battleSetup', 'map.tools', Object.keys(TOOLS));
+expectLabelKeys('battleSetup', 'map.toolHints', Object.keys(TOOLS));
 expectLabelKeys('battleSetup', 'map.margins', Object.keys(MARGINS));
 expectLabelKeys(
     'battleSetup',

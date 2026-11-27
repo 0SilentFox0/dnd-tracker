@@ -1,12 +1,15 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { Users } from 'lucide-react';
 
 import { AcquaintanceCard } from '@/components/acquaintances/AcquaintanceCard';
 import { SearchInput } from '@/components/common/fields/SearchInput';
 import { EmptyState, QueryState } from '@/components/common/states';
 import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { Button } from '@/components/ui/button';
 import { useAcquaintances } from '@/lib/hooks/acquaintances';
 import { useSearch } from '@/lib/hooks/common';
 import { useSeenOnOpen } from '@/lib/hooks/notifications';
@@ -33,7 +36,23 @@ function Grid({
 
     const search = useSearch(items, fieldsOf);
 
-    if (!items.length) return <EmptyState title={t('page.empty')} />;
+    if (!items.length)
+        return (
+            <EmptyState
+                icon={Users}
+                title={t('page.empty')}
+                description={t(isDM ? 'page.emptyHintDm' : 'page.emptyHint')}
+                action={
+                    isDM && !isDemo ? (
+                        <Button asChild>
+                            <Link href={`/campaigns/${campaignId}/dm/scenario`}>
+                                {t('page.add')}
+                            </Link>
+                        </Button>
+                    ) : undefined
+                }
+            />
+        );
 
     return (
         <div className="space-y-3">

@@ -736,3 +736,85 @@ describe('System input in attack flow', () => {
         ).not.toHaveProperty('system');
     });
 });
+
+describe('attackFlow QUICK_ROLL', () => {
+    const picked = () =>
+        run(
+            {
+                type: 'OPEN',
+                weaponCount: 1,
+                attackId: 'rapier',
+                maxTargets: 1,
+                diceSlots: [8],
+                targetIds: ['e1'],
+                picked: true,
+            },
+            { type: 'CONFIRM_TARGETS' }
+        );
+
+    it('влучання - одразу в submitting з шкодою', () => {
+        const s = attackFlow(picked(), {
+            type: 'QUICK_ROLL',
+            d20: 15,
+            outcome: 'hit',
+            damage: [5],
+        });
+
+        expect(s).toMatchObject({ step: 'submitting', quick: true });
+        expect(s.strikes[0]).toMatchObject({ d20: 15, damage: [5] });
+        expect(attackPayload(s, 'h')).toMatchObject({
+            attackRoll: 15,
+            damageRolls: [5],
+        });
+    });
+
+    it('промах - submitting без шкоди', () => {
+        const s = attackFlow(picked(), {
+            type: 'QUICK_ROLL',
+            d20: 2,
+            outcome: 'miss',
+            damage: [5],
+        });
+
+        expect(s.step).toBe('submitting');
+        expect(s.strikes[0].damage).toEqual([]);
+    });
+
+    it('server-judged - позначка judge і serverRoll у payload', () => {
+        const s = attackFlow(picked(), {
+            type: 'QUICK_ROLL',
+            outcome: 'hit',
+            judge: 'server',
+            damage: [3],
+        });
+
+        expect(s.judge).toBe('server');
+        expect(attackPayload(s, 'h')).toMatchObject({ serverRoll: true });
+    });
+
+    it('ігнорується поза кроком roll', () => {
+        const action: AttackFlowAction = {
+            type: 'QUICK_ROLL',
+            d20: 10,
+            outcome: 'hit',
+            damage: [1],
+        };
+
+        expect(attackFlow(initialAttackFlow, action)).toBe(initialAttackFlow);
+        expect(run(open(), action).step).toBe('target');
+    });
+
+    it('збій швидкої атаки лишає quick і повертає на roll', () => {
+        const s = attackFlow(
+            attackFlow(picked(), {
+                type: 'QUICK_ROLL',
+                d20: 15,
+                outcome: 'hit',
+                damage: [5],
+            }),
+            { type: 'FAIL', error: 'x' }
+        );
+
+        expect(s).toMatchObject({ step: 'roll', quick: true, error: 'x' });
+    });
+});

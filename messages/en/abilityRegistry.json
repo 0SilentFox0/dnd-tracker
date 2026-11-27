@@ -668,6 +668,7 @@
       "grantRefreshReaction": "refreshes the reaction",
       "note": "{text}",
       "noteDm": "✋ {text}",
+      "noteStatblock": "Statblock",
       "applyCondition": "{condition}{hasPercent, select, yes { {percent}%} other {}}{hasLevels, select, yes { ×{levels}} other {}} × {rounds}{breakOnDamage, select, yes {, until damaged} other {}}{hasSave, select, yes {, {ability} saving throw} other {}}{hasEscape, select, yes {, escape vs spell DC} other {}}",
       "restoreSpellSlotLevels": "restores spell slots up to level {level} by level budget on a short rest",
       "restoreSpellSlot": "+{count} slot",

@@ -8,6 +8,11 @@ import { SideToggle } from './SideToggle';
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudButton, HudIconButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { clampUnitQuantity, UNIT_QUANTITY } from '@/lib/constants/battle-units';
 import { cn } from '@/lib/utils';
@@ -49,7 +54,7 @@ function AddButtons({
                 onClick={() => add(ParticipantSide.ALLY)}
             >
                 <Shield className="text-hud-accent-fg" aria-hidden />
-                <span className="sr-only">{t('ally')}</span>
+                <span className="text-xs">{t('ally')}</span>
             </Button>
             <Button
                 type="button"
@@ -60,7 +65,7 @@ function AddButtons({
                 onClick={() => add(ParticipantSide.ENEMY)}
             >
                 <Swords className="text-hud-crimson-fg" aria-hidden />
-                <span className="sr-only">{t('enemy')}</span>
+                <span className="text-xs">{t('enemy')}</span>
             </Button>
         </>
     );
@@ -84,7 +89,6 @@ function QuantityStepper({
             className="flex min-w-0 flex-1 items-center justify-center border-l border-hud-rule"
         >
             <HudIconButton
-                className="size-8"
                 aria-label={t('quantityLess', { name })}
                 disabled={value <= UNIT_QUANTITY.min}
                 onClick={() => onChange(clampUnitQuantity(value - 1))}
@@ -98,7 +102,6 @@ function QuantityStepper({
                 {value}
             </span>
             <HudIconButton
-                className="size-8"
                 aria-label={t('quantityMore', { name })}
                 disabled={value >= UNIT_QUANTITY.max}
                 onClick={() => onChange(clampUnitQuantity(value + 1))}
@@ -155,17 +158,28 @@ export function CatalogRow({
                 </span>
                 {stats && (
                     <span className="hud-num grid w-full grid-cols-3 divide-x divide-hud-rule rounded-lg bg-black/20 py-1 tabular-nums">
-                        {[
-                            ['DPR', round1(stats.dpr)],
-                            ['HP', stats.hp],
-                            ['KPI', stats.kpi],
-                        ].map(([label, value]) => (
-                            <span key={label} className="flex flex-col">
-                                <span className="hud-label">{label}</span>
-                                <span className="text-xs font-medium">
-                                    {value}
-                                </span>
-                            </span>
+                        {(
+                            [
+                                ['dpr', 'DPR', round1(stats.dpr)],
+                                ['hp', 'HP', stats.hp],
+                                ['kpi', 'KPI', stats.kpi],
+                            ] as const
+                        ).map(([key, label, value]) => (
+                            <Tooltip key={key}>
+                                <TooltipTrigger asChild>
+                                    <span className="flex flex-col">
+                                        <span className="hud-label">
+                                            {label}
+                                        </span>
+                                        <span className="text-xs font-medium">
+                                            {value}
+                                        </span>
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-56 text-xs">
+                                    {t(`stat.${key}`)}
+                                </TooltipContent>
+                            </Tooltip>
                         ))}
                     </span>
                 )}

@@ -13,7 +13,6 @@
     "components/battle/map/panels/BattleMapPanel.tsx": 1,
     "components/battle/scene/drawers/ToolsDrawer.tsx": 1,
     "components/battle/setup/map/MapQuickStart.tsx": 1,
-    "components/battle/setup/participants/CatalogRow.tsx": 2,
     "components/battle/turn/ActionGrid.tsx": 1,
     "components/battle/turn/dock/ActionDock.tsx": 2,
     "components/battle/wizards/attack/WeaponStep.tsx": 1,

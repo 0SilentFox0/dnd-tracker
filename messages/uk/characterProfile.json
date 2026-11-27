@@ -87,7 +87,8 @@
     "langsProfs": "Мови й володіння",
     "score": "значення {n}",
     "state": "Стан",
-    "exhaustionLevel": "Виснаження"
+    "exhaustionLevel": "Виснаження",
+    "targetsHint": "Скільки різних цілей може вразити одна дія атаки."
   },
   "magic": {
     "saveDC": "СЛ заклинань",
@@ -321,5 +322,22 @@
   "wfrp": {
     "characteristics": "ХАРАКТЕРИСТИКИ",
     "skills": "НАВИЧКИ"
+  },
+  "attackRoll": {
+    "roll": "Кидок атаки: {name}",
+    "title": "Атака: {name}"
+  },
+  "slots": {
+    "failed": "Не вдалося оновити слот заклинань",
+    "pip": "{level} коло, слот {n}: {state}",
+    "used": "витрачено",
+    "available": "доступний"
+  },
+  "damageRoll": {
+    "roll": "Кинути шкоду: {name}",
+    "title": "Шкода: {name}",
+    "crit": "Критичне влучання (подвійні кубики)",
+    "detail": "Кубики {dice} · бонус {flat}",
+    "critLabel": "Критичне влучання"
   }
 }

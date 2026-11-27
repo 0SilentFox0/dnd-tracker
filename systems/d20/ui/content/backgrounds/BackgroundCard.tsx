@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { DmEntityCard } from '@/components/common/entity/DmEntityCard';
 import { HudPill } from '@/components/hud/page';
+import { summarizeChoices } from '@/lib/utils/choices/summary';
 import type { BackgroundData } from '@/types/backgrounds';
 
 export function BackgroundCard({
@@ -19,7 +20,7 @@ export function BackgroundCard({
 }) {
     const t = useTranslations('backgrounds');
 
-    const choices = background.choices.length;
+    const choices = summarizeChoices(background.choices);
 
     return (
         <DmEntityCard
@@ -29,8 +30,20 @@ export function BackgroundCard({
             onDelete={() => onDelete?.(background.id)}
             canEdit={canEdit}
         >
-            {choices > 0 && (
-                <HudPill>{t('card.choices', { count: choices })}</HudPill>
+            {choices.items.map((choice) => (
+                <HudPill key={choice.id}>
+                    {choice.count > 1
+                        ? t('card.choice', {
+                              label: choice.label,
+                              count: choice.count,
+                          })
+                        : choice.label}
+                </HudPill>
+            ))}
+            {choices.more > 0 && (
+                <HudPill>
+                    {t('card.choicesMore', { count: choices.more })}
+                </HudPill>
             )}
         </DmEntityCard>
     );

@@ -30,6 +30,8 @@ export function ProfileSpellBook({
 
     const wide = useMediaQuery(DESKTOP_QUERY);
 
+    const preview = book.selected ?? (wide ? book.byLevel[book.level]?.[0] : null) ?? null;
+
     const showDetail = !!book.selected;
 
     return (
@@ -51,14 +53,14 @@ export function ProfileSpellBook({
                     onLevel: book.setLevel,
                 }}
                 pick={{
-                    pickedId: book.selected?.id ?? null,
+                    pickedId: preview?.id ?? null,
                     onPick: book.pick,
                 }}
                 layout={{ wide, showDetail }}
                 detail={
-                    book.selected && (
+                    preview && (
                         <div className="relative flex h-full flex-1 flex-col px-5 pt-6 pb-5">
-                            <SpellDetail spell={book.selected} />
+                            <SpellDetail spell={preview} />
                         </div>
                     )
                 }

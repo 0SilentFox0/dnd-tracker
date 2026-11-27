@@ -31,6 +31,7 @@ function setup(
         isMyTurn?: boolean;
         anyPending?: boolean;
         attackReady?: boolean;
+        meleeOnlyFar?: boolean;
     } = {}
 ) {
     const scene = fakeScene({ map, isMyTurn: opts.isMyTurn });
@@ -42,9 +43,18 @@ function setup(
     gob.battleData.position = { x: 1, y: 0 };
     ally.battleData.position = { x: 0, y: 4 };
 
+    if (opts.meleeOnlyFar) {
+        me.battleData.attacks = me.battleData.attacks.filter(
+            (a) => a.id !== 'bow'
+        );
+        gob.battleData.position = { x: 9, y: 4 };
+    }
+
     const select = vi.fn();
 
     const requestAttack = vi.fn();
+
+    const notify = vi.fn();
 
     const { result } = renderHook(() =>
         useParticipantClick({
@@ -54,6 +64,7 @@ function setup(
             attackReady: opts.attackReady ?? true,
             select,
             requestAttack,
+            notify,
         })
     );
 
@@ -61,6 +72,7 @@ function setup(
         click: (id: string) => act(() => result.current(id)),
         select,
         requestAttack,
+        notify,
     };
 }
 
@@ -78,6 +90,16 @@ describe('useParticipantClick', () => {
             turnIndex: 0,
         });
         expect(select).not.toHaveBeenCalled();
+    });
+
+    it('недосяжний ворог - причина в тості та вибір для інфо-картки', () => {
+        const scene = setup({ meleeOnlyFar: true });
+
+        scene.click('gob');
+
+        expect(scene.notify).toHaveBeenCalled();
+        expect(scene.select).toHaveBeenCalledWith('gob');
+        expect(scene.requestAttack).not.toHaveBeenCalled();
     });
 
     it('союзник — лише вибір', () => {

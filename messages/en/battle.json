@@ -40,6 +40,7 @@
     "dieLabel": "Die {n} (d{sides})",
     "autoRoll": "Auto roll",
     "zoomAvatar": "{name}: full-size avatar",
+    "openDetails": "{name}: open stat card",
     "effects": {
       "collapse": "Collapse effects",
       "showAll": "Show all effects ({count})",
@@ -109,6 +110,7 @@
     "connected": "Connected",
     "connecting": "Connecting",
     "toCampaign": "To campaign",
+    "help": "Battle help",
     "complete": "Complete",
     "nextTurn": "Next turn",
     "nextTurnShort": "Next",
@@ -243,7 +245,9 @@
     "starting": "GATHERING THE ARMY...",
     "start": "TO BATTLE!",
     "waiting": "🗡️ Await the DM's order...",
-    "needOne": "At least one participant must be on the field"
+    "needOne": "At least one participant must be on the field",
+    "teamAllies": "Allied team",
+    "teamEnemies": "Enemy team"
   },
   "resultScreen": {
     "stats": {
@@ -344,6 +348,8 @@
     "gear": "Item",
     "strikeAndReturn": "Return",
     "endTurn": "End turn",
+    "autoEnd": "Auto-end turn",
+    "autoEndHint": "When all actions are spent the turn ends automatically after a short countdown",
     "popoverTitle": "Turn actions · {name} · round {round}"
   },
   "turnControls": {
@@ -355,7 +361,9 @@
     "noTargets": "No targets"
   },
   "countdown": {
-    "endsIn": "The turn ends in <b>{left}</b>",
+    "endsIn": "The turn ends in <b>{left} s</b>",
+    "reason": "Nothing left to do, so the turn ends automatically. Press Stay to keep playing.",
+    "disable": "Turn off auto-end",
     "stay": "Stay"
   },
   "notify": {

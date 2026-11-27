@@ -3,8 +3,12 @@ import {
     backgroundFeatVariants,
     convertBackgrounds,
 } from '../convert/backgrounds';
-import { applyClassChoices } from '../convert/class-choices';
-import { convertClasses } from '../convert/classes';
+import {
+    applyClassChoices,
+    applyStartingEquipment,
+    gearSlugsByKey,
+} from '../convert/class-choices';
+import { convertClasses, startingEquipmentCells } from '../convert/classes';
 import { convertFeats } from '../convert/feats';
 import { applyItemCasting, convertMagicItems } from '../convert/magic-items';
 import { convertMonsterActions } from '../convert/monster-actions';
@@ -146,6 +150,13 @@ export function buildSrdData(source: Open5eData): SrdData {
             pks(data.feats)
         );
 
+    const gear = convertArtifacts(data);
+
+    const artifacts = applyItemCasting(
+        [...gear, ...convertMagicItems(data, gear)],
+        data
+    ).sort(bySlug);
+
     const out: SrdData = {
         'spell-groups': convertSpellGroups(),
         spells: [
@@ -154,7 +165,11 @@ export function buildSrdData(source: Open5eData): SrdData {
             ...convertBreathSpells(data),
         ].sort(bySlug),
         races: applyRaceChoices(convertRaces(data), data),
-        classes: applyClassChoices(convertClasses(data)),
+        classes: applyStartingEquipment(
+            applyClassChoices(convertClasses(data)),
+            startingEquipmentCells(data),
+            gearSlugsByKey(artifacts)
+        ),
         feats: (() => {
             const feats = convertFeats(data);
 
@@ -164,14 +179,7 @@ export function buildSrdData(source: Open5eData): SrdData {
         })(),
         backgrounds: convertBackgrounds(data),
         units: convertUnits(data),
-        artifacts: (() => {
-            const gear = convertArtifacts(data);
-
-            return applyItemCasting(
-                [...gear, ...convertMagicItems(data, gear)],
-                data
-            ).sort(bySlug);
-        })(),
+        artifacts,
     };
 
     assertKnown(

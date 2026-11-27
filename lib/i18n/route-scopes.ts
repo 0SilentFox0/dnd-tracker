@@ -78,7 +78,7 @@ export const PACKS = {
     ],
     mapStamps: ['mapStamps'],
     battle: [...BATTLE_NAMESPACES, 'maps', 'tileLabels', 'music'],
-    ai: ['ai', 'scenario'],
+    ai: ['ai'],
     units: ['units'],
     reference: ['reference'],
     scenarioTexts: ['scenario'],
@@ -90,7 +90,11 @@ const PREVIEW = [...EDITOR, 'reference'] as const;
 
 const CONTENT_LIST = ['contentLibrary', 'abilityDisplay'] as const;
 
-const CONTENT_EDIT = [...CONTENT_LIST, 'abilityEditor', 'characterSheet'] as const;
+const CONTENT_EDIT = [
+    ...CONTENT_LIST,
+    'abilityEditor',
+    'characterSheet',
+] as const;
 
 const CONSERVATIVE = [
     'characterSheet',
@@ -110,7 +114,11 @@ const SYSTEM_SECTION = [
     'contentTransfer',
 ] as const;
 
-const MAIN_SKILLS = ['characterSheet', 'abilityDisplay', 'contentTransfer'] as const;
+const MAIN_SKILLS = [
+    'characterSheet',
+    'abilityDisplay',
+    'contentTransfer',
+] as const;
 
 const SYSTEM_EDIT = [...EDITOR, 'contentTransfer'] as const;
 
@@ -118,17 +126,18 @@ export const ROUTE_SCOPES = {
     list: ['campaigns'],
     new: ['campaigns'],
     '[id]': ['dashboard', 'rules'],
-    '[id]/info': ['dashboard', 'rules', 'characterSheet', 'abilityDisplay', 'reference'],
-    '[id]/character': ['characterSheet', 'abilityDisplay', 'rules', 'scenarioTexts'],
+    '[id]/info': [
+        'dashboard',
+        'rules',
+        'characterSheet',
+        'abilityDisplay',
+        'reference',
+    ],
+    '[id]/character': ['characterSheet', 'abilityDisplay', 'rules'],
     '[id]/character/draft': ['characterSheet', 'contentLibrary'],
     '[id]/character/new': ['characterSheet', 'contentLibrary'],
     '[id]/character/edit': ['characterSheet', 'contentLibrary'],
-    '[id]/battles': [
-        'battle',
-        'abilityDisplay',
-        'characterSheet',
-        'rules',
-    ],
+    '[id]/battles': ['battle', 'abilityDisplay', 'characterSheet', 'rules'],
     '[id]/journal': ['story'],
     '[id]/world': ['story'],
     '[id]/show': ['story'],
@@ -164,7 +173,6 @@ export const ROUTE_SCOPES = {
         'characterSheet',
         'abilityDisplay',
         'contentLibrary',
-        'scenarioTexts',
     ],
     '[id]/dm/units': ['units', ...CONTENT_LIST],
     '[id]/dm/units/new': ['units', ...EDITOR],

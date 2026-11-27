@@ -63,7 +63,10 @@
     "campaignNotFound": "Campaign not found. Check the invite code.",
     "alreadyMember": "You are already a member of this campaign.",
     "campaignNotActive": "The campaign is not active.",
-    "failed": "Failed to join the campaign"
+    "failed": "Failed to join the campaign",
+    "templateNotJoinable": "Templates cannot be joined.",
+    "demoNotJoinable": "The demo campaign cannot be joined.",
+    "rateLimited": "Too many attempts. Try again in a few minutes."
   },
   "renameGroup": {
     "title": "Rename group",

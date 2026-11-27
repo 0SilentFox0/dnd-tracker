@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
     createCampaignSchema,
+    joinCampaignSchema,
     updateCampaignSchema,
 } from '@/lib/schemas/campaigns';
 
@@ -96,5 +97,19 @@ describe('campaign cover image', () => {
             updateCampaignSchema.safeParse({ coverImage: 'x'.repeat(5_500_001) })
                 .success
         ).toBe(false);
+    });
+});
+
+describe('joinCampaignSchema', () => {
+    it('trims and uppercases the code', () => {
+        expect(joinCampaignSchema.parse({ inviteCode: ' ab3k9z ' })).toEqual({
+            inviteCode: 'AB3K9Z',
+        });
+    });
+
+    it('rejects an empty code', () => {
+        expect(joinCampaignSchema.safeParse({ inviteCode: '  ' }).success).toBe(
+            false
+        );
     });
 });

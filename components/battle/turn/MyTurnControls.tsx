@@ -13,14 +13,18 @@ import { modeUiOf } from '@/components/battle/modes';
 import { useSceneSlot } from '@/components/battle/scene/layout/SceneSlots';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { AuraZonePicker } from '@/components/battle/wizards/AuraZonePicker';
+import { QuickAttackCard } from '@/components/battle/wizards/QuickAttackCard';
+import { HudToggleChip } from '@/components/hud';
 import { ParticipantSourceType } from '@/lib/constants/battle';
 import {
     useAttackWizard,
     useAuraZones,
+    useAutoEndTurnSetting,
     useBattleRules,
     useBattleScene,
     useBonusSpells,
     usePlayerTurn,
+    useQuickAttack,
     useSpellBook,
 } from '@/lib/hooks/battle';
 import { coreActionsOn } from '@/lib/utils/battle/actions/access';
@@ -87,7 +91,7 @@ export function MyTurnControls({
 
     const { anyPending, battle, intents } = useBattleScene();
 
-    const { actionEconomy, tested, spells } = useBattleRules();
+    const { actionEconomy, tested, spells, serverJudged } = useBattleRules();
 
     const {
         attack: attackIntent,
@@ -99,13 +103,15 @@ export function MyTurnControls({
 
     const turn = usePlayerTurn(hero, useBonusSpells(hero));
 
-    const attack = useAttackWizard(hero, turn.actions.afterAction);
+    const systemUi = useSystemBattleUi();
+
+    const attack = useAttackWizard(hero, turn.actions.afterAction, {
+        systemInput: serverJudged && !!systemUi.RollBody,
+    });
 
     const book = useSpellBook(hero, { onDone: turn.actions.afterAction });
 
     const [channelOpen, setChannelOpen] = useState(false);
-
-    const systemUi = useSystemBattleUi();
 
     const zone = useAuraZones(hero);
 
@@ -120,6 +126,8 @@ export function MyTurnControls({
     const [actionsOpen, setActionsOpen] = useState(false);
 
     const dockSlot = useSceneSlot('dock');
+
+    const { autoEnd, setAutoEnd } = useAutoEndTurnSetting();
 
     const bonusAbilities = usableAbilities(
         hero,
@@ -149,8 +157,6 @@ export function MyTurnControls({
         status: { actionUsed, attackLeft, skipped },
     } = turn;
 
-    const { open: openAttack } = attack.actions;
-
     const { currentRound: round, currentTurnIndex: turnIndex } = battle;
 
     const heroId = hero.basicInfo.id;
@@ -163,6 +169,10 @@ export function MyTurnControls({
         skipped,
         attackLeft,
     });
+
+    const quick = useQuickAttack(attack, hero, attackReady);
+
+    const { begin: beginQuick } = quick;
 
     useEffect(() => {
         setAttackReady(attackReady ? heroId : null);
@@ -197,7 +207,7 @@ export function MyTurnControls({
                 attackLeft,
             })
         )
-            openAttack(attackIntent.targetId, attackIntent.attackId);
+            beginQuick(attackIntent.targetId, attackIntent.attackId);
 
         clearAttackIntent();
     }, [
@@ -209,7 +219,7 @@ export function MyTurnControls({
         actionUsed,
         attackLeft,
         skipped,
-        openAttack,
+        beginQuick,
         clearAttackIntent,
     ]);
 
@@ -219,7 +229,17 @@ export function MyTurnControls({
         open();
     };
 
-    const grid = (
+    const autoEndToggle = (
+        <HudToggleChip
+            active={autoEnd}
+            onClick={() => setAutoEnd(!autoEnd)}
+            title={t('autoEndHint')}
+        >
+            {t('autoEnd')}
+        </HudToggleChip>
+    );
+
+    const actionGrid = (
         <ActionGrid
             turn={turn}
             channelLabel={systemUi.ChannelLabel && <systemUi.ChannelLabel />}
@@ -247,7 +267,8 @@ export function MyTurnControls({
             }}
             actions={{
                 channel: () => run(() => setChannelOpen(true)),
-                attack: () => run(() => attack.actions.open()),
+                attack: () => run(() => quick.begin()),
+                attackWizard: () => run(() => attack.actions.open()),
                 magic: () => run(() => book.actions.open()),
                 bonus: () => run(() => setBonusOpen(true)),
                 ability: () => run(() => setAbilityOpen(true)),
@@ -256,6 +277,13 @@ export function MyTurnControls({
                 strikeAndReturn: () => run(() => turn.strikeAndReturn.run()),
             }}
         />
+    );
+
+    const grid = (
+        <>
+            {actionGrid}
+            <div className="mt-2 flex">{autoEndToggle}</div>
+        </>
     );
 
     const gatePanel = turn.phase === 'gate' && systemUi.turnStart && (
@@ -277,6 +305,10 @@ export function MyTurnControls({
             seconds={COUNTDOWN_SECONDS}
             onElapsed={() => void turn.actions.endTurn()}
             onStay={turn.actions.stay}
+            onDisable={() => {
+                setAutoEnd(false);
+                turn.actions.stay();
+            }}
         />
     );
 
@@ -331,6 +363,10 @@ export function MyTurnControls({
         <>
             {dock ? dockView : full}
             {!dock && countdown}
+            {quick.open &&
+                (dockSlot
+                    ? createPortal(<QuickAttackCard quick={quick} />, dockSlot)
+                    : <QuickAttackCard quick={quick} />)}
             <AttackWizard wizard={attack} />
             <SpellBook book={book} />
             {tested && systemUi.ChannelDialog && (

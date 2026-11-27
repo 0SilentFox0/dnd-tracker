@@ -28,7 +28,7 @@ export function AudioPlayerPanel({
         <section
             aria-label={t('player.label')}
             className={cn(
-                'w-64 rounded-lg border border-hud-rule bg-black/85 p-2 text-xs text-hud-bone shadow-lg',
+                'w-56 rounded-lg border border-hud-rule bg-black/85 p-2 text-xs text-hud-bone shadow-lg',
                 view.capped &&
                     'max-h-[50dvh] min-h-0 overflow-y-auto overscroll-contain pt-0'
             )}

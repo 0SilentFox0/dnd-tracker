@@ -11,6 +11,7 @@ import {
     alert,
     asi,
     featsById,
+    magicInitiate,
     scores,
     sorcerer,
     spells,
@@ -349,5 +350,44 @@ describe('ChoicePicker', () => {
         expect(json()).toEqual([
             { id: 'f-asi', picks: { asi: [{ id: 'dexterity' }] } },
         ]);
+    });
+
+    it('feat: variants with the same name show their spell list', () => {
+        const variant = (id: string, list: string) => ({
+            ...magicInitiate,
+            id,
+            choices: magicInitiate.choices.map((c) => ({
+                ...c,
+                spells: { ...c.spells!, lists: [list] },
+            })),
+        });
+
+        const choice: Choice = {
+            id: 'mi',
+            label: 'Origin',
+            level: 1,
+            count: 1,
+            kind: 'feat',
+            featTypes: ['origin'],
+        };
+
+        render(
+            <Harness
+                choice={choice}
+                context={ctx(1, {
+                    feats: [
+                        variant('mi-c', 'Cleric'),
+                        variant('mi-w', 'Wizard'),
+                    ],
+                })}
+            />
+        );
+
+        expect(
+            screen.getByRole('radio', { name: /Magic Initiate \(Cleric\)/ })
+        ).toBeTruthy();
+        expect(
+            screen.getByRole('radio', { name: /Magic Initiate \(Wizard\)/ })
+        ).toBeTruthy();
     });
 });

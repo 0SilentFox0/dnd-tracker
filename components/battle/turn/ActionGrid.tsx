@@ -66,6 +66,7 @@ type TileSpec = {
     used: boolean;
     primary?: boolean;
     run?: () => void;
+    alt?: () => void;
 };
 
 export function ActionGrid({
@@ -95,6 +96,7 @@ export function ActionGrid({
     actions: {
         channel?(): void;
         attack(): void;
+        attackWizard?(): void;
         magic(): void;
         bonus(): void;
         ability?(): void;
@@ -118,6 +120,7 @@ export function ActionGrid({
                 pending,
             primary: true,
             run: actions.attack,
+            alt: actions.attackWizard,
         },
         ...(available.magicTile !== false
             ? [
@@ -224,6 +227,7 @@ export function ActionGrid({
         items: keyed.map((tile) => ({
             key: tile.id,
             run: () => tile.run?.(),
+            alt: tile.alt && (() => tile.alt?.()),
             disabled: tile.used,
         })),
     });

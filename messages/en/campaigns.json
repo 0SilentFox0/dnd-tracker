@@ -95,7 +95,9 @@
     "confirmDelete": {
       "title": "Delete the campaign “{name}”?",
       "description": "All characters, battles, units and the campaign library will be deleted permanently."
-    }
+    },
+    "copyLink": "Copy invite link",
+    "linkCopied": "Link copied"
   },
   "members": {
     "promote": "Make DM",
@@ -134,6 +136,7 @@
     "language": "Language",
     "official": "Official",
     "mine": "Mine",
+    "recommended": "Recommended",
     "other": "Other",
     "file": "File: {name}",
     "importFile": "Import from file",
@@ -225,5 +228,13 @@
   },
   "sync": {
     "compendiumNotSynced": "The DM compendium materials are not part of the source-sync scopes; update them with a repeated JSON import or manually"
+  },
+  "joinLink": {
+    "title": "Join the campaign",
+    "description": "You have been invited to play.",
+    "dm": "DM: {name}",
+    "submit": "Join",
+    "joining": "Joining...",
+    "back": "To my campaigns"
   }
 }

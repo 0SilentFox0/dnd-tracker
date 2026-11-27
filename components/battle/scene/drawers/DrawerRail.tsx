@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { type DrawerKey, railKeys } from './rail-items';
 
-import { HUD_GLASS, HudButton } from '@/components/hud';
+import { HUD_GLASS, HudIconButton } from '@/components/hud';
 import { actionIcon } from '@/components/hud/icons/battle';
 import { useBattleScene } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
@@ -56,24 +56,24 @@ export function DrawerRail({
                 const Icon = ICON[key];
 
                 return (
-                    <HudButton
+                    <HudIconButton
                         key={key}
+                        size="md"
                         type="button"
                         data-tour={TOUR[key]}
                         aria-label={t(key)}
-                        title={t(key)}
                         aria-pressed={active === key}
                         onClick={() => onToggle(key)}
                         className={cn(
                             HUD_GLASS,
-                            'flex size-10 items-center justify-center rounded-xl focus-visible:ring-2 focus-visible:outline-none',
+                            'flex items-center justify-center rounded-xl focus-visible:ring-2 focus-visible:outline-none',
                             active === key
                                 ? 'border-hud-accent text-hud-accent-fg!'
                                 : ''
                         )}
                     >
                         <Icon className="size-6" aria-hidden />
-                    </HudButton>
+                    </HudIconButton>
                 );
             })}
         </div>

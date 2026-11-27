@@ -4,6 +4,12 @@ import { useTranslations } from 'next-intl';
 
 import { HudButton } from '@/components/hud';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { BattleMapEditor } from '@/lib/hooks/battles';
 import { cn } from '@/lib/utils';
 import type { SetupTool } from '@/lib/utils/battle/grid';
@@ -27,24 +33,34 @@ export function ToolButtons({
     const t = useTranslations('battleSetup.map');
 
     return (
-        <div className="flex flex-wrap gap-1.5">
-            {tools.map((value) => (
-                <HudButton
-                    key={value}
-                    type="button"
-                    aria-pressed={tool === value}
-                    onClick={() => onPick(tool === value ? null : value)}
-                    className={cn(
-                        'h-8 rounded-lg border bg-black/30 px-3 text-sm hover:bg-black/50',
-                        tool === value
-                            ? 'border-hud-accent text-hud-ink'
-                            : 'border-hud-rule text-hud-muted'
-                    )}
-                >
-                    {t(`tools.${value}`)}
-                </HudButton>
-            ))}
-        </div>
+        <TooltipProvider delayDuration={200}>
+            <div className="flex flex-wrap gap-1.5">
+                {tools.map((value) => (
+                    <Tooltip key={value}>
+                        <TooltipTrigger asChild>
+                            <HudButton
+                                type="button"
+                                aria-pressed={tool === value}
+                                onClick={() =>
+                                    onPick(tool === value ? null : value)
+                                }
+                                className={cn(
+                                    'h-8 rounded-lg border bg-black/30 px-3 text-sm hover:bg-black/50',
+                                    tool === value
+                                        ? 'border-hud-accent text-hud-ink'
+                                        : 'border-hud-rule text-hud-muted'
+                                )}
+                            >
+                                {t(`tools.${value}`)}
+                            </HudButton>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {t(`toolHints.${value}`)}
+                        </TooltipContent>
+                    </Tooltip>
+                ))}
+            </div>
+        </TooltipProvider>
     );
 }
 

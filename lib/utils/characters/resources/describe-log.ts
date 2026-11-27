@@ -45,6 +45,7 @@ export function describeCharacterLog(
                     hasLabel: yes(d.label),
                     label: String(d.label ?? ''),
                     autoFail: yes(d.autoFail),
+                    manualCrit: yes(d.manualCrit),
                     rolls: Array.isArray(d.rolls)
                         ? (d.rolls as number[]).join(' / ')
                         : '',

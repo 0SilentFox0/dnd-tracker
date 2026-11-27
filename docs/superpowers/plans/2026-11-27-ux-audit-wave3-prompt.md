@@ -1,0 +1,11 @@
+# Промпт для нової сесії: UX-аудит — хвиля 3 (П4 бій)
+
+Модель сесії: Sonnet (оркестрація/виконання); spec для 4.7 «швидка атака» — Opus-субагентом з одним питанням власнику; розмова українською. Головну теку `/Users/silentfox/Work/dnd-tracker` не чіпати: worktree `../dnd-tracker-ux3`, гілка `fix/ux-audit-w3` від локального `main`, якщо `fix/ux-audit-w2` змерджено, інакше від `fix/ux-audit-w2`. Одразу `pnpm install --frozen-lockfile`; `.env.local` з головної теки (локальна `prodcopy`).
+
+1. Прочитай `CLAUDE.md`, `docs/architecture/battle.md`, план `docs/superpowers/plans/2026-11-27-ux-audit-fixes.md` (П4, блок «Хвиля 2», рішення власника), звіти `docs/superpowers/research/2026-11-27-ux-audit/` (`ux-code-map.md`). Пам'ять: `project-ux-audit-2026-11-27`.
+2. Пункти 4.1–4.10 (4.11 не потрібен: П0.1 не був багом). **Reuse:** `HudIconButton` + `Tooltip`, `cellClickOf`, `MapToken`, `components/dice`.
+3. Групи (імплементери Sonnet, 2–3 суміжні пункти на агента, тести пишуть, **не запускають**; паралельно лише неперетинні файли, коміти лише своїх файлів): 4.1+4.2+4.10 (мапа/токен); 4.3+4.5 (HUD, портрет); 4.4+4.6; 4.7 (після spec); 4.8+4.9 (налаштування бою/арена).
+4. Уроки: НІКОЛИ не запускай тести паралельно (один тест-джоб за раз; оркестратор ганяє гейти послідовно); імпорт барелів (`@/lib/utils/battle/attack`) у нових модулях ламав vi.mock-тести бою — імпортуй конкретні модулі; `next build` — `NODE_OPTIONS=--max-old-space-size=8192`; порт 3000 може бути зайнятий іншим проєктом — бери інший; `tsc` потребує 8 ГБ heap; бюджети i18n = виміряне + 0.5; у core-неймспейси не додавати ключі модулів (ratchet system-surface).
+5. Гейти один раз у кінці: `NODE_OPTIONS=--max-old-space-size=8192 pnpm exec tsc --noEmit`, повний `pnpm test:run` (лог у файл, `grep -E "Test Files|Tests |FAIL"`), `pnpm cycles`, `pnpm lint:dirs --changed main`. Потім один Opus-рев'ю, фікси (`test:related`).
+6. Живий прогін: `pnpm build:local` + `next start -p <вільний порт>`, `RATE_LIMIT_ALLOW_MEMORY=1`; перевірка субагентом (JS/текст, скорочені скрін), тестові сутності «ТЕСТ ux3» видалити; потрібні ДМ і гравець, бій з реальною мапою.
+7. Мердж/пуш — лише з «так» власника. Онови `docs/STATUS.md`, ✅ у плані, пам'ять. Наступна — П6 (бібліотеки ДМ). Контекст ~150k — зупинись і дай промпт на продовження.

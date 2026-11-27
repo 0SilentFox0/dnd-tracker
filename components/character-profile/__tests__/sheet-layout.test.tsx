@@ -57,6 +57,8 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
     ...(await orig<object>()),
     useCharacterRoster: () => ({ data: [], isLoading: false }),
     useTransferArtifact: () => ({ mutateAsync: vi.fn(), isPending: false }),
+    useSheetRoll: () => ({ mutateAsync: vi.fn(), isPending: false }),
+    useSlotToggle: () => ({ setCurrent: vi.fn(), isPending: false }),
     useStashAction: () => ({ mutateAsync: vi.fn(), isPending: false }),
     useCharacterSheet: () => h.sheetQuery,
 }));

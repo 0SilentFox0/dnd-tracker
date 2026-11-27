@@ -282,11 +282,6 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
         reason: PACK,
     },
     {
-        route: '[id]/dm/ai',
-        ns: ['scenario'],
-        reason: PACK,
-    },
-    {
         route: '[id]/dm/print',
         ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'abilityEditor', 'editors', 'contentImport', 'contentCopy'],
         reason: PACK,

@@ -1,4 +1,16 @@
 {
+  "2026-11-27-quick-attack": {
+    "title": "Quick attack",
+    "body": "Click an enemy on your turn: a card shows the target, the default weapon, cover and an Attack button that rolls and submits in one click. The attack wizard stays one link away for manual dice."
+  },
+  "2026-11-27-starting-equipment": {
+    "title": "Starting equipment for new heroes",
+    "body": "When you create a hero you can pick a starting equipment package of the class: weapons, armor and shield go to the inventory (and are equipped) together with the gold. A reminder shows when spells are still unpicked."
+  },
+  "2026-11-27-invite-links": {
+    "title": "Invite players with a link",
+    "body": "Copy the invite link next to the code in the campaign header and send it. The player signs in or registers and lands straight on the join page. Codes no longer use 0, O, 1 and I."
+  },
   "2026-11-27-scenario-auto-mentions": {
     "title": "Auto-mentions in the scenario",
     "body": "Names of units, artifacts, heroes and NPCs turn into mentions as you type, no «@» needed (Ctrl+Z restores the text). The «Tag matches» button tags an already written page."

@@ -19,7 +19,12 @@ import {
     pickVariant,
 } from '@/lib/utils/campaigns/template-variants';
 import type { TemplateContentLocale } from '@/lib/utils/templates/manifest';
-import { isCanonicalTemplate } from '@/lib/utils/templates/registry';
+import {
+    DEFAULT_TEMPLATE_KEY,
+    isCanonicalTemplate,
+    templateDisplayName,
+    templateKeyOf,
+} from '@/lib/utils/templates/registry';
 import type { TemplateCard, TemplateSelection } from '@/types/campaigns';
 
 interface TemplatePickerProps {
@@ -55,10 +60,18 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
 
     const current = value.file ? FILE_VALUE : (value.templateId ?? NONE_VALUE);
 
-    const toOption = (tpl: TemplateCard) => ({
-        value: tpl.id,
-        label: tpl.name,
-    });
+    const isRecommended = (tpl: TemplateCard) =>
+        templateKeyOf(tpl) === DEFAULT_TEMPLATE_KEY &&
+        (tpl.locale == null || tpl.locale === 'en');
+
+    const toOption = (tpl: TemplateCard) => {
+        const name = templateDisplayName(tpl, uiLocale);
+
+        return {
+            value: tpl.id,
+            label: isRecommended(tpl) ? `${name} · ${t('recommended')}` : name,
+        };
+    };
 
     const officialGroups = groupTemplates(data?.official ?? []);
 
@@ -194,6 +207,9 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
                                 },
                             ]}
                         />
+                    )}
+                    {selected && isRecommended(selected) && (
+                        <HudPill tone="meta">{t('recommended')}</HudPill>
                     )}
                     {selected?.system && (
                         <HudPill tone="npc">

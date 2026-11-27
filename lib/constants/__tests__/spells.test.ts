@@ -13,7 +13,7 @@ describe('spellLevelName', () => {
         const en = await getTranslator('en', 'gameTerms');
 
         expect([0, 1, 9].map((l) => spellLevelName(l, uk))).toEqual([
-            'Замовляння',
+            'Заговір',
             'Перше коло',
             "Дев'яте коло",
         ]);

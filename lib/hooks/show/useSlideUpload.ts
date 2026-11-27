@@ -14,6 +14,7 @@ import {
     resizeImageToBlob,
 } from '@/lib/utils/common/image-resize';
 import { newSlideId } from '@/lib/utils/show/deck-draft';
+import { isUnsupportedSlideFile } from '@/lib/utils/show/deck-files';
 import type { Slide } from '@/types/show';
 
 const PARALLEL = 3;
@@ -42,6 +43,17 @@ export function useSlideUpload(
             const worker = async () => {
                 while (next < files.length) {
                     const i = next++;
+
+                    if (isUnsupportedSlideFile(files[i])) {
+                        onError(
+                            t('show.errors.unsupportedFormat', {
+                                name: files[i].name,
+                            })
+                        );
+                        done += 1;
+                        setProgress({ done, total: files.length });
+                        continue;
+                    }
 
                     try {
                         slides[i] = {

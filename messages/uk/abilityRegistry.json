@@ -668,6 +668,7 @@
       "grantRefreshReaction": "оновлює реакцію",
       "note": "{text}",
       "noteDm": "✋ {text}",
+      "noteStatblock": "Статблок",
       "applyCondition": "{condition}{hasPercent, select, yes { {percent}%} other {}}{hasLevels, select, yes { ×{levels}} other {}} × {rounds}{breakOnDamage, select, yes {, до шкоди} other {}}{hasSave, select, yes {, рятівний кидок {ability}} other {}}{hasEscape, select, yes {, вирватися проти СК} other {}}",
       "restoreSpellSlotLevels": "відновлює слоти до {level}-го кола за бюджетом кіл на короткому відпочинку",
       "restoreSpellSlot": "+{count} слот",

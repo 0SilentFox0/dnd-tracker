@@ -17,7 +17,7 @@ export const resourcesOperation = defineCharacterOperation({
         requireCharacterAccess(
             ctx.campaignId,
             ctx.characterId,
-            gateOptions(ctx, true)
+            gateOptions(ctx)
         ),
     run: editResourcesFor,
 });

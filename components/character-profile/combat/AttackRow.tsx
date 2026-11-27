@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Crosshair, Swords } from 'lucide-react';
+import { Crosshair, Dices, Flame, Swords } from 'lucide-react';
 
+import { useProfile } from '../ProfileContext';
+import { useSheetRoll } from '../sheet/SheetRollProvider';
 import { Breakdown } from './Breakdown';
 
 import { HudButton } from '@/components/hud';
 import { AttackType } from '@/lib/constants/battle';
+import { useCampaignSystem } from '@/lib/hooks/systems';
 import { cn } from '@/lib/utils';
 import { signed } from '@/lib/utils/common/format';
 import { stagger } from '@/lib/utils/common/motion';
@@ -52,6 +55,18 @@ export function AttackRow({
 }) {
     const t = useTranslations('characterProfile.combat');
 
+    const tr = useTranslations('characterProfile.attackRoll');
+
+    const td = useTranslations('characterProfile.damageRoll');
+
+    const { campaignId, sheet } = useProfile();
+
+    const { def: system } = useCampaignSystem(campaignId, sheet.system);
+
+    const { onRoll, canRoll } = useSheetRoll();
+
+    const rollable = canRoll && system.sheetTest.accepts({ kind: 'attack' });
+
     const [open, setOpen] = useState<Panel | null>(null);
 
     const toggle = (panel: Panel) =>
@@ -77,6 +92,37 @@ export function AttackRow({
                 <span className="min-w-0 flex-1 truncate text-base font-medium text-hud-ink">
                     {a.name}
                 </span>
+                {rollable && (
+                    <HudButton
+                        aria-label={tr('roll', { name: a.name })}
+                        onClick={() =>
+                            onRoll({
+                                label: tr('title', { name: a.name }),
+                                subject: {
+                                    kind: 'attack',
+                                    attackId: a.id,
+                                },
+                            })
+                        }
+                        className="motion-press flex min-h-10 min-w-10 items-center justify-center rounded-sm border border-hud-line text-hud-accent-fg hover:bg-hud-raised"
+                    >
+                        <Dices aria-hidden className="size-5" />
+                    </HudButton>
+                )}
+                {rollable && (
+                    <HudButton
+                        aria-label={td('roll', { name: a.name })}
+                        onClick={() =>
+                            onRoll({
+                                label: td('title', { name: a.name }),
+                                subject: { kind: 'damage', attackId: a.id },
+                            })
+                        }
+                        className="motion-press flex min-h-10 min-w-10 items-center justify-center rounded-sm border border-hud-line text-hud-danger hover:bg-hud-raised"
+                    >
+                        <Flame aria-hidden className="size-5" />
+                    </HudButton>
+                )}
                 <StatButton
                     label={t('hitShort')}
                     value={signed(a.toHit.total)}

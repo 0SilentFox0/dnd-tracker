@@ -141,6 +141,7 @@ html.dark .scenario-book:not([data-theme]) {
 .scenario-book .sb-index-row .mv { display: inline-flex; gap: 2px; color: var(--ink-soft); }
 .scenario-book .sb-index-row .mv button { background: none; border: 0; padding: 4px; cursor: pointer; color: inherit; }
 .scenario-book .sb-index .arc { font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; color: var(--ink-soft); margin: 22px 0 4px; }
+.scenario-book .sb-index .sb-stats { font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; color: var(--ink-soft); margin: 10px 0 0; }
 .scenario-book .sb-index .sb-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-family: var(--font-scenario-sans), sans-serif; }
 .scenario-book .sb-index .sb-tools input { font: inherit; background: var(--page); color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 10px; min-width: 0; flex: 1 1 220px; }
 .scenario-book .sb-hits { margin: 10px 0 0; padding: 0; list-style: none; font-family: var(--font-scenario-sans), sans-serif; font-size: 15px; }

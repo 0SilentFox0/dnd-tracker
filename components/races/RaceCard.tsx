@@ -8,8 +8,7 @@ import { RacePassiveBlock } from './RaceInnateSections';
 
 import { ActionsMenu } from '@/components/common/entity/ActionsMenu';
 import { ZoomableEntityIcon } from '@/components/common/entity/ZoomableEntityIcon';
-import { HudCard } from '@/components/hud/page';
-import { HudPill } from '@/components/hud/page';
+import { HudCard, HudPill } from '@/components/hud/page';
 import { useNoSkillSummary } from '@/components/systems/compose';
 import { abilityScoreTermKey } from '@/lib/constants/abilities';
 import { useMainSkills, useSkills } from '@/lib/hooks/skills';
@@ -117,42 +116,45 @@ export function RaceCard({
                 </div>
             </div>
             <div className="flex flex-1 flex-col gap-3">
-                <div className="space-y-2">
-                    <p className="text-sm font-medium">
-                        {t('card.availableSkills')}
-                    </p>
+                {availableMainSkillsForDisplay.length > 0 && (
+                    <div className="space-y-2">
+                        <p className="text-sm font-medium">
+                            {t('card.availableSkills')}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            {availableMainSkillsForDisplay.map((ms) => (
+                                <span
+                                    key={ms.id}
+                                    className="inline-flex items-center rounded-full px-2 text-xs text-hud-bone"
+                                    style={{
+                                        boxShadow: `inset 0 0 0 1px ${ms.color}`,
+                                    }}
+                                    title={ms.name}
+                                >
+                                    {ms.name}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                {(availableSkillsCount > 0 || disabledSkillsCount > 0) && (
                     <div className="flex flex-wrap gap-2">
-                        {availableMainSkillsForDisplay.map((ms) => (
-                            <span
-                                key={ms.id}
-                                className="inline-flex items-center rounded-full px-2 text-xs text-hud-bone"
-                                style={{
-                                    boxShadow: `inset 0 0 0 1px ${ms.color}`,
-                                }}
-                                title={ms.name}
-                            >
-                                {ms.name}
-                            </span>
-                        ))}
-                        {availableMainSkillsForDisplay.length === 0 && (
-                            <span className="text-sm text-muted-foreground italic">
-                                {t('card.noRestrictions')}
-                            </span>
+                        {availableSkillsCount > 0 && (
+                            <HudPill>
+                                {t('card.skillsCount', {
+                                    count: availableSkillsCount,
+                                })}
+                            </HudPill>
+                        )}
+                        {disabledSkillsCount > 0 && (
+                            <HudPill>
+                                {t('card.disabledCount', {
+                                    count: disabledSkillsCount,
+                                })}
+                            </HudPill>
                         )}
                     </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    <HudPill>
-                        {t('card.skillsCount', { count: availableSkillsCount })}
-                    </HudPill>
-                    {disabledSkillsCount > 0 && (
-                        <HudPill>
-                            {t('card.disabledCount', {
-                                count: disabledSkillsCount,
-                            })}
-                        </HudPill>
-                    )}
-                </div>
+                )}
 
                 {passiveAbility && (
                     <div className="space-y-2">
