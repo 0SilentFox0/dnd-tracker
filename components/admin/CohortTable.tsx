@@ -12,17 +12,20 @@ export function CohortTable({ cohorts }: { cohorts: CohortRow[] }) {
         <HudPanel className="space-y-2">
             <h3 className="hud-sc text-sm">{t('title')}</h3>
             <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-base">
                     <thead>
                         <tr className="text-left text-hud-muted">
-                            <th className="py-1 pr-3 font-normal">
+                            <th className="px-3 py-2.5 text-base font-medium text-hud-muted">
                                 {t('cohort')}
                             </th>
-                            <th className="py-1 pr-3 font-normal">
+                            <th className="px-3 py-2.5 text-base font-medium text-hud-muted">
                                 {t('size')}
                             </th>
                             {COHORT_WEEKS_AFTER.map((w) => (
-                                <th key={w} className="py-1 pr-3 font-normal">
+                                <th
+                                    key={w}
+                                    className="px-3 py-2.5 text-base font-medium text-hud-muted"
+                                >
                                     {t('week', { n: w })}
                                 </th>
                             ))}
@@ -34,12 +37,16 @@ export function CohortTable({ cohorts }: { cohorts: CohortRow[] }) {
                                 key={c.cohortWeek}
                                 className="border-t border-hud-line"
                             >
-                                <td className="py-1 pr-3">{c.cohortWeek}</td>
-                                <td className="py-1 pr-3">{c.size}</td>
+                                <td className="px-3 py-2.5 tabular-nums">
+                                    {c.cohortWeek}
+                                </td>
+                                <td className="px-3 py-2.5 tabular-nums">
+                                    {c.size}
+                                </td>
                                 {c.rates.map((r, i) => (
                                     <td
                                         key={COHORT_WEEKS_AFTER[i]}
-                                        className="py-1 pr-3"
+                                        className="px-3 py-2.5 tabular-nums"
                                     >
                                         {r === null
                                             ? '—'

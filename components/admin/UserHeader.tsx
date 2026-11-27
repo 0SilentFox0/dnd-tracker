@@ -36,11 +36,11 @@ export function UserHeader({ user }: { user: AdminUserDetail['user'] }) {
                     </Badge>
                 )}
             </div>
-            <p className="text-sm text-hud-muted">{user.email}</p>
-            <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-5">
+            <p className="text-base text-hud-muted">{user.email}</p>
+            <dl className="grid grid-cols-2 gap-2 text-base sm:grid-cols-5">
                 {facts.map(([k, v]) => (
                     <div key={k}>
-                        <dt className="text-xs text-hud-muted uppercase">
+                        <dt className="text-sm text-hud-muted uppercase">
                             {k}
                         </dt>
                         <dd>{v}</dd>

@@ -76,7 +76,7 @@ export function UserClient({ id, selfId }: { id: string; selfId: string }) {
                                 {t('user.actionsLog')}
                             </HudSectionTitle>
                             {d.actions.length ? (
-                                <ul className="space-y-1 text-sm">
+                                <ul className="space-y-1 text-base">
                                     {d.actions.map((a, i) => (
                                         <li key={i} className="flex gap-2">
                                             <span className="text-hud-muted">
@@ -87,7 +87,7 @@ export function UserClient({ id, selfId }: { id: string; selfId: string }) {
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="text-sm text-hud-muted">
+                                <p className="text-base text-hud-muted">
                                     {t('user.noActions')}
                                 </p>
                             )}

@@ -34,10 +34,10 @@ export function AdminActionFeed({
     const [now] = useState(() => Date.now());
 
     if (!actions.length)
-        return <p className="text-sm text-hud-muted">{t('actionsEmpty')}</p>;
+        return <p className="text-base text-hud-muted">{t('actionsEmpty')}</p>;
 
     return (
-        <ul className="divide-y divide-hud-rule text-sm">
+        <ul className="divide-y divide-hud-rule text-base">
             {actions.map((a, i) => {
                 const meta = metaText(a.meta);
 
@@ -55,19 +55,19 @@ export function AdminActionFeed({
                         </HudPill>
                         <Link
                             href={`/admin/users/${a.targetUserId}`}
-                            className="font-mono text-xs underline"
+                            className="font-mono text-sm underline"
                         >
                             {a.targetUserId.slice(0, 8)}
                         </Link>
                         {meta && (
-                            <span className="min-w-0 font-mono text-xs break-all text-hud-muted">
+                            <span className="min-w-0 font-mono text-sm break-all text-hud-muted">
                                 {meta}
                             </span>
                         )}
                         <time
                             dateTime={a.at}
                             title={a.at.slice(0, 16).replace('T', ' ')}
-                            className="ml-auto text-xs whitespace-nowrap text-hud-muted"
+                            className="ml-auto text-sm whitespace-nowrap text-hud-muted"
                         >
                             {formatRelative(a.at, locale, now)}
                         </time>

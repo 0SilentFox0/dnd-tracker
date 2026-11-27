@@ -16,7 +16,7 @@ export function UserCampaigns({
     const t = useTranslations('admin.user');
 
     return (
-        <div className="space-y-4 text-sm">
+        <div className="space-y-4 text-base">
             <div>
                 <h3 className="hud-sc mb-1 text-sm">{t('owned')}</h3>
                 {owned.length ? (

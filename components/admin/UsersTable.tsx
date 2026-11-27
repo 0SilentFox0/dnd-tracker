@@ -32,16 +32,16 @@ export function UsersTable({
 
     return (
         <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
                 <thead>
                     <tr className="text-left text-hud-muted">
-                        <th className="sticky left-0 bg-[var(--palette-panel)] py-1 pr-3 font-normal">
+                        <th className="sticky left-0 bg-[var(--palette-panel)] px-3 py-2.5 text-base font-medium text-hud-muted">
                             {t('columns.user')}
                         </th>
                         {COLUMNS.map((c) => (
                             <th
                                 key={c}
-                                className="px-2 py-1 font-normal whitespace-nowrap"
+                                className="px-3 py-2.5 text-base font-medium whitespace-nowrap text-hud-muted"
                             >
                                 {t(`columns.${c}`)}
                             </th>
@@ -51,32 +51,36 @@ export function UsersTable({
                 <tbody>
                     {rows.map((r) => (
                         <tr key={r.id} className="border-t border-hud-line">
-                            <td className="sticky left-0 max-w-56 bg-[var(--palette-panel)] py-1 pr-3">
+                            <td className="sticky left-0 max-w-56 bg-[var(--palette-panel)] px-3 py-2.5">
                                 <Link
                                     href={`/admin/users/${r.id}`}
                                     className="block truncate text-hud-ink underline-offset-2 hover:underline"
                                 >
                                     {r.displayName}
                                 </Link>
-                                <span className="block truncate text-xs text-hud-muted">
+                                <span className="block truncate text-sm text-hud-muted">
                                     {r.email}
                                 </span>
                             </td>
-                            <td className="px-2 whitespace-nowrap">
+                            <td className="px-3 py-2.5 whitespace-nowrap">
                                 {formatDay(r.createdAt)}
                             </td>
-                            <td className="px-2 whitespace-nowrap">
+                            <td className="px-3 py-2.5 whitespace-nowrap">
                                 {formatDay(r.lastActiveAt)}
                             </td>
-                            <td className="px-2 whitespace-nowrap">
+                            <td className="px-3 py-2.5 whitespace-nowrap">
                                 {authMetaAvailable
                                     ? formatDay(r.lastSignInAt)
                                     : na}
                             </td>
-                            <td className="px-2">{r.campaignsDm}</td>
-                            <td className="px-2">{r.memberships}</td>
-                            <td className="px-2">{r.country ?? '—'}</td>
-                            <td className="px-2">
+                            <td className="px-3 py-2.5 text-right tabular-nums">
+                                {r.campaignsDm}
+                            </td>
+                            <td className="px-3 py-2.5 text-right tabular-nums">
+                                {r.memberships}
+                            </td>
+                            <td className="px-3 py-2.5">{r.country ?? '—'}</td>
+                            <td className="px-3 py-2.5">
                                 <span className="flex gap-1">
                                     {authMetaAvailable ? (
                                         r.bannedUntil && (
@@ -94,7 +98,9 @@ export function UsersTable({
                                     )}
                                 </span>
                             </td>
-                            <td className="px-2">{t('noSubscription')}</td>
+                            <td className="px-3 py-2.5">
+                                {t('noSubscription')}
+                            </td>
                         </tr>
                     ))}
                 </tbody>

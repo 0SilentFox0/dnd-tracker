@@ -14,11 +14,11 @@ export function UserAccessTable({
     const t = useTranslations('admin.user');
 
     if (!access.length)
-        return <p className="text-sm text-hud-muted">{t('accessEmpty')}</p>;
+        return <p className="text-base text-hud-muted">{t('accessEmpty')}</p>;
 
     return (
         <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
                 <thead>
                     <tr className="text-left text-hud-muted">
                         {(
@@ -34,7 +34,7 @@ export function UserAccessTable({
                         ).map((c) => (
                             <th
                                 key={c}
-                                className="px-2 py-1 font-normal whitespace-nowrap"
+                                className="px-3 py-2.5 text-sm font-medium whitespace-nowrap text-hud-muted"
                             >
                                 {t(c)}
                             </th>
@@ -47,17 +47,19 @@ export function UserAccessTable({
                             key={a.ip}
                             className="border-t border-hud-line align-top"
                         >
-                            <td className="px-2 py-1 font-mono">{a.ip}</td>
-                            <td className="px-2 py-1">{a.country ?? '—'}</td>
-                            <td className="px-2 py-1">{a.device ?? '—'}</td>
-                            <td className="px-2 py-1 whitespace-nowrap">
+                            <td className="px-3 py-2.5 font-mono">{a.ip}</td>
+                            <td className="px-3 py-2.5">{a.country ?? '—'}</td>
+                            <td className="px-3 py-2.5">{a.device ?? '—'}</td>
+                            <td className="px-3 py-2.5 whitespace-nowrap">
                                 {formatDay(a.firstSeen)}
                             </td>
-                            <td className="px-2 py-1 whitespace-nowrap">
+                            <td className="px-3 py-2.5 whitespace-nowrap">
                                 {formatDay(a.lastSeen)}
                             </td>
-                            <td className="px-2 py-1">{a.days}</td>
-                            <td className="px-2 py-1">
+                            <td className="px-3 py-2.5 text-right tabular-nums">
+                                {a.days}
+                            </td>
+                            <td className="px-3 py-2.5">
                                 {a.otherAccounts.length
                                     ? a.otherAccounts.map((o) => (
                                           <Link

@@ -19,10 +19,17 @@ import type { AdminSecurity } from '@/types/admin';
 
 const DAYS = [7, 30, 90] as const;
 
-function actionsPerDay(actions: AdminSecurity['actions'], days: number, now: number) {
+function actionsPerDay(
+    actions: AdminSecurity['actions'],
+    days: number,
+    now: number
+) {
     const today = Math.floor(now / DAY_MS) * DAY_MS;
 
-    const times = Array.from({ length: days }, (_, i) => today - (days - 1 - i) * DAY_MS);
+    const times = Array.from(
+        { length: days },
+        (_, i) => today - (days - 1 - i) * DAY_MS
+    );
 
     const values = times.map(() => 0);
 
@@ -46,9 +53,7 @@ export function SecurityClient() {
 
     const chart = useMemo(
         () =>
-            query.data
-                ? actionsPerDay(query.data.actions, days, now)
-                : null,
+            query.data ? actionsPerDay(query.data.actions, days, now) : null,
         [query.data, days, now]
     );
 
@@ -77,18 +82,22 @@ export function SecurityClient() {
                 {(data) => (
                     <>
                         {data.dataSince && (
-                            <p className="text-sm text-hud-muted">
+                            <p className="text-base text-hud-muted">
                                 {t('dataSince', { date: data.dataSince })}
                             </p>
                         )}
                         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                             <KpiTile
                                 label={t('tiles.groups')}
-                                value={data.groups.filter((g) => !g.crowd).length}
+                                value={
+                                    data.groups.filter((g) => !g.crowd).length
+                                }
                             />
                             <KpiTile
                                 label={t('tiles.crowd')}
-                                value={data.groups.filter((g) => g.crowd).length}
+                                value={
+                                    data.groups.filter((g) => g.crowd).length
+                                }
                             />
                             <KpiTile
                                 label={t('tiles.reRegistrations')}
@@ -112,7 +121,7 @@ export function SecurityClient() {
                                 {t('reRegistrations')}
                             </h2>
                             {data.reRegistrations.length ? (
-                                <ul className="divide-y divide-hud-rule text-sm">
+                                <ul className="divide-y divide-hud-rule text-base">
                                     {data.reRegistrations.map((r) => (
                                         <li
                                             key={r.userId}
@@ -124,7 +133,7 @@ export function SecurityClient() {
                                             >
                                                 {r.displayName} ({r.email})
                                             </Link>
-                                            <span className="text-xs text-hud-muted">
+                                            <span className="text-sm text-hud-muted">
                                                 {t('reRegisteredAt', {
                                                     created: formatDay(
                                                         r.createdAt
@@ -138,7 +147,7 @@ export function SecurityClient() {
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="text-sm text-hud-muted">
+                                <p className="text-base text-hud-muted">
                                     {data.hashConfigured
                                         ? t('reRegistrationsEmpty')
                                         : t('hashNotConfigured')}
