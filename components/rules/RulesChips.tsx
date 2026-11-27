@@ -77,7 +77,7 @@ export function ChangedChip({
     onReset: () => void;
 }) {
     return (
-        <span className="inline-flex h-7 items-center gap-0.5 rounded-[var(--r-md)] bg-hud-accent/10 pl-2 text-xs font-semibold text-hud-accent-fg shadow-[inset_0_0_0_1px_var(--color-hud-accent)]">
+        <span className="inline-flex h-8 items-center gap-0.5 rounded-[var(--r-md)] bg-hud-accent/10 pl-2 text-xs font-semibold text-hud-accent-fg shadow-[inset_0_0_0_1px_var(--color-hud-accent)]">
             {label}
             <HudButton
                 aria-label={`${resetLabel}: ${label}`}

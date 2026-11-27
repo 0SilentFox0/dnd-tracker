@@ -25,7 +25,11 @@ export default function NotFound() {
                         <div className="flex flex-col gap-2 sm:flex-row">
                             <Button
                                 variant="outline"
-                                onClick={() => router.back()}
+                                onClick={() =>
+                                    window.history.length > 1
+                                        ? router.back()
+                                        : router.push('/campaigns')
+                                }
                             >
                                 {t('back')}
                             </Button>

@@ -29,6 +29,7 @@ export function HeaderPillLink({
     if (!href)
         return (
             <span
+                role="link"
                 aria-disabled
                 data-slot="header-pill-link"
                 data-tour={dataTour}

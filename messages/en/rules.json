@@ -9,7 +9,6 @@
       "other": "Other"
     },
     "changed": "Changed",
-    "changedSections": "Changed sections: {count}",
     "more": "+{count} more",
     "changes": "Changes",
     "noChanges": "No changes yet",
