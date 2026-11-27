@@ -22,7 +22,7 @@ export const WFRP_META = {
         },
         pages: {
             character: ['wfrpDowntime', 'wfrpCorruption', 'wfrpCareers'],
-            draft: ['wfrpCreation'],
+            draft: ['wfrpCreation', 'wfrpStory'],
             dmCharacter: ['wfrpDowntime', 'wfrpCorruption'],
             dmCharacters: ['wfrpDowntime'],
             dmRules: [

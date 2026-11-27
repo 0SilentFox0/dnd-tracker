@@ -13,7 +13,7 @@ export const STORY_TABLES: Record<
         q,
         Array.from({ length: ROWS }, (_, i) => ({
             max: (i + 1) * 10,
-            key: `story.tables.${q}.${i + 1}`,
+            key: `tables.${q}.${i + 1}`,
         })),
     ])
 ) as Record<RolledQuestionId, { max: number; key: string }[]>;

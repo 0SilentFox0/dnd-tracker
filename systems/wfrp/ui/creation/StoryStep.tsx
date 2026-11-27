@@ -11,7 +11,7 @@ import { FormField } from '@/components/ui/labeled-input';
 import { Textarea } from '@/components/ui/textarea';
 
 export function StoryStep({ form }: { form: WfrpDraftFormState }) {
-    const t = useTranslations('wfrpCreation.story');
+    const t = useTranslations('wfrpStory');
 
     const { answers, set, roll, rollAll, blocks } = form.story;
 

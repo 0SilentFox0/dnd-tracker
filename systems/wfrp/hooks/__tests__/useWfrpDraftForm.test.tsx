@@ -372,7 +372,7 @@ describe('useWfrpDraftForm', () => {
             forward(result);
 
             expect(result.current.identity.values.background).toContain(
-                'wfrpCreation.story.sentences.origin'
+                'wfrpStory.sentences.origin'
             );
             expect(result.current.identity.quiz.canReplace).toBe(false);
         });

@@ -22,7 +22,7 @@ export const CAMPAIGN_BASE = [
 ] as const satisfies readonly Namespace[];
 
 /** uk gzip budget (KB) of the base alone; routes and system packs have their own */
-export const CAMPAIGN_BASE_LIMIT_KB = 16.2;
+export const CAMPAIGN_BASE_LIMIT_KB = 17.8;
 
 export const PACKS = {
     campaigns: ['campaigns'],

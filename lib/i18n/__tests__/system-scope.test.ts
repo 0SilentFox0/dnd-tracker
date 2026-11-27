@@ -43,7 +43,10 @@ describe('systemPackScope', () => {
     });
 
     it('keeps the page slots separate from packs', () => {
-        expect(systemScope({ key: 'wfrp' }, 'draft')).toEqual(['wfrpCreation']);
+        expect(systemScope({ key: 'wfrp' }, 'draft')).toEqual([
+            'wfrpCreation',
+            'wfrpStory',
+        ]);
         expect(systemScope(null, 'character')).toEqual([]);
     });
 });

@@ -31,7 +31,9 @@ export function useStoryQuiz({
     appearance?: Appearance;
     reveal?: Reveal;
 }) {
-    const t = useTranslations('wfrpCreation');
+    const t = useTranslations('wfrpStory');
+
+    const tc = useTranslations('wfrpCreation');
 
     const [answers, setAnswers] = useState<StoryAnswers>({});
 
@@ -52,10 +54,10 @@ export function useStoryQuiz({
             const { value } = rollAppearance(appearance, id, rng);
 
             return id === 'eyes' || id === 'hair'
-                ? t(`story.colours.${value}` as never)
+                ? tc(`story.colours.${value}` as never)
                 : value;
         },
-        [t, rng, appearance]
+        [t, tc, rng, appearance]
     );
 
     const set = useCallback(
@@ -104,7 +106,7 @@ export function useStoryQuiz({
     const compose = useCallback(
         () =>
             composeStory(answers, (id, answer) =>
-                t(`story.sentences.${id}` as 'story.sentences.origin', { answer })
+                t(`sentences.${id}` as 'sentences.origin', { answer })
             ),
         [answers, t]
     );

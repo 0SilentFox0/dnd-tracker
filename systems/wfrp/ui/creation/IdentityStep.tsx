@@ -26,7 +26,7 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
 
     const [goal, setGoal] = useState('');
 
-    const ts = useTranslations('wfrpCreation.story');
+    const ts = useTranslations('wfrpStory');
 
     const { values, set, quiz } = form.identity;
 

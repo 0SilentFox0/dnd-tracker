@@ -215,12 +215,12 @@ describe('WfrpDraftForm', () => {
         );
         fireEvent.click(next());
 
-        expect(screen.getByText('wfrpCreation.story.hint')).toBeTruthy();
+        expect(screen.getByText('wfrpStory.hint')).toBeTruthy();
         expect((next() as HTMLButtonElement).disabled).toBe(false);
 
         fireEvent.click(
             screen.getByRole('button', {
-                name: 'wfrpCreation.story.roll wfrpCreation.story.questions.origin',
+                name: 'wfrpStory.roll wfrpStory.questions.origin',
             })
         );
         fireEvent.click(next());
@@ -231,7 +231,7 @@ describe('WfrpDraftForm', () => {
                     /wfrpCreation.identity.background/
                 ) as HTMLTextAreaElement
             ).value
-        ).toContain('wfrpCreation.story.sentences.origin');
+        ).toContain('wfrpStory.sentences.origin');
     });
 
     it('characterId mode shows only the identity step', () => {
@@ -246,7 +246,7 @@ describe('WfrpDraftForm', () => {
         );
 
         expect(screen.getByText('wfrpCreation.identity.reopenNote')).toBeTruthy();
-        expect(screen.queryByText('wfrpCreation.story.hint')).toBeNull();
+        expect(screen.queryByText('wfrpStory.hint')).toBeNull();
     });
 
     it('shows translated per-code messages for server issues and falls back to the general text', async () => {
@@ -411,7 +411,7 @@ describe('WfrpDraftForm', () => {
             mount({ characterType: 'npc_hero' });
             toIdentity();
 
-            expect(screen.queryByText('wfrpCreation.story.hint')).toBeNull();
+            expect(screen.queryByText('wfrpStory.hint')).toBeNull();
             expect(
                 screen.getByText('wfrpCreation.wizard.steps.story')
             ).toBeTruthy();

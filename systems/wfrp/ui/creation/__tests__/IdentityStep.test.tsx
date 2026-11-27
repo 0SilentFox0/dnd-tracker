@@ -48,10 +48,10 @@ describe('IdentityStep', () => {
 
         const { rerender } = render(<IdentityStep form={form} />);
 
-        expect(screen.queryByText('wfrpCreation.story.replace')).toBeNull();
+        expect(screen.queryByText('wfrpStory.replace')).toBeNull();
 
         rerender(<IdentityStep form={withQuiz({ canReplace: true }, replace)} />);
-        fireEvent.click(screen.getByText('wfrpCreation.story.replace'));
+        fireEvent.click(screen.getByText('wfrpStory.replace'));
 
         expect(replace).toHaveBeenCalled();
     });
@@ -59,6 +59,6 @@ describe('IdentityStep', () => {
     it('shows the truncation warning', () => {
         render(<IdentityStep form={withQuiz({ truncated: true })} />);
 
-        expect(screen.getByText('wfrpCreation.story.truncated')).toBeTruthy();
+        expect(screen.getByText('wfrpStory.truncated')).toBeTruthy();
     });
 });

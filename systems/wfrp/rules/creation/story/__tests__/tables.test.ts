@@ -9,11 +9,16 @@ import {
 } from '../types';
 
 import en from '@/messages/en/wfrpCreation.json';
+import enStory from '@/messages/en/wfrpStory.json';
 import uk from '@/messages/uk/wfrpCreation.json';
+import ukStory from '@/messages/uk/wfrpStory.json';
 
 const FORBIDDEN = /Reikland|Altdorf|Sigmar|Ranald|Empire|Імпері|Рейкл/i;
 
-const locales = { uk, en } as const;
+const locales = {
+    uk: { creation: uk, story: ukStory },
+    en: { creation: en, story: enStory },
+} as const;
 
 function lookup(messages: unknown, path: string): unknown {
     return path
@@ -26,6 +31,9 @@ function lookup(messages: unknown, path: string): unknown {
             messages
         );
 }
+
+const textOf = (m: (typeof locales)[keyof typeof locales], key: string) =>
+    lookup(key.startsWith('story.') ? m.creation : m.story, key);
 
 const fixedRng = (roll: number) => () => (roll - 1 + 0.5) / 100;
 
@@ -46,7 +54,7 @@ describe('story tables', () => {
         const r = rollStory('origin', fixedRng(37));
 
         expect(r.roll).toBe(37);
-        expect(r.key).toBe('story.tables.origin.4');
+        expect(r.key).toBe('tables.origin.4');
     });
 
     describe.each(Object.entries(locales))('%s texts', (_name, messages) => {
@@ -56,14 +64,14 @@ describe('story tables', () => {
             ),
             ...APPEARANCE_COLOURS.map((c) => `story.colours.${c}`),
             ...[...STORY_QUESTIONS, ...APPEARANCE_QUESTIONS].map(
-                (q) => `story.questions.${q}`
+                (q) => `questions.${q}`
             ),
-            ...STORY_BLOCKS.map((b) => `story.blocks.${b.id}`),
+            ...STORY_BLOCKS.map((b) => `blocks.${b.id}`),
         ];
 
         it('has every key as a non-empty string', () => {
             for (const key of keys) {
-                const text = lookup(messages, key);
+                const text = textOf(messages, key);
 
                 expect(typeof text, key).toBe('string');
                 expect((text as string).length, key).toBeGreaterThan(0);
@@ -72,7 +80,7 @@ describe('story tables', () => {
 
         it('contains no book names', () => {
             for (const key of keys) {
-                expect(lookup(messages, key) as string, key).not.toMatch(
+                expect(textOf(messages, key) as string, key).not.toMatch(
                     FORBIDDEN
                 );
             }

@@ -35,7 +35,7 @@ describe('StoryStep', () => {
 
         fireEvent.click(
             screen.getByRole('button', {
-                name: 'wfrpCreation.story.roll wfrpCreation.story.questions.family',
+                name: 'wfrpStory.roll wfrpStory.questions.family',
             })
         );
 
@@ -50,7 +50,7 @@ describe('StoryStep', () => {
         expect(screen.getByDisplayValue('typed')).toBeTruthy();
 
         fireEvent.click(
-            screen.getByRole('button', { name: 'wfrpCreation.story.rollAll' })
+            screen.getByRole('button', { name: 'wfrpStory.rollAll' })
         );
 
         expect(rollAll).toHaveBeenCalled();

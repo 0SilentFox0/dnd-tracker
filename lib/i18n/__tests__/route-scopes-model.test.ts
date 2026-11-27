@@ -49,7 +49,7 @@ describe('route scope model', () => {
             ])
         );
         expect(routeNamespaces('[id]/character/draft', wfrp)).toEqual(
-            expect.arrayContaining(['wfrpCreation'])
+            expect.arrayContaining(['wfrpCreation', 'wfrpStory'])
         );
         expect(routeNamespaces('[id]/dm/rules', wfrp)).toEqual(
             expect.arrayContaining([

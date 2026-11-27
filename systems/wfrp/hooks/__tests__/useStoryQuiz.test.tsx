@@ -22,7 +22,7 @@ describe('useStoryQuiz', () => {
         act(() => result.current.roll('origin'));
 
         expect(result.current.answers.origin).toBe(
-            'wfrpCreation.story.tables.origin.4'
+            'wfrpStory.tables.origin.4'
         );
     });
 
@@ -48,7 +48,7 @@ describe('useStoryQuiz', () => {
 
         expect(result.current.answers.origin).toBe('my own');
         expect(result.current.answers.family).toBe(
-            'wfrpCreation.story.tables.family.4'
+            'wfrpStory.tables.family.4'
         );
     });
 
@@ -79,7 +79,7 @@ describe('useStoryQuiz', () => {
 
         const c = result.current.compose();
 
-        expect(c.background).toContain('wfrpCreation.story.sentences.origin');
+        expect(c.background).toContain('wfrpStory.sentences.origin');
         expect(c.goals).toEqual([{ text: 'S', kind: 'secret' }]);
     });
 });

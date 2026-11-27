@@ -132,6 +132,7 @@ declare module 'next-intl' {
             wfrpEquipment: typeof import('./messages/uk/wfrpEquipment.json');
             wfrpEquipmentEditor: typeof import('./messages/uk/wfrpEquipmentEditor.json');
             wfrpMagic: typeof import('./messages/uk/wfrpMagic.json');
+            wfrpStory: typeof import('./messages/uk/wfrpStory.json');
             wfrpTables: typeof import('./messages/uk/wfrpTables.json');
             wfrpTraits: typeof import('./messages/uk/wfrpTraits.json');
             // </systems:generated>
