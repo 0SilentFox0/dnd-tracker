@@ -160,11 +160,13 @@ export function CatalogRow({
                 </span>
                 {stats && (
                     <span className="hud-num grid w-full grid-cols-3 divide-x divide-hud-rule rounded-md bg-black/20 py-1 tabular-nums">
-                        {[
-                            ['dpr', 'DPR', round1(stats.dpr)],
-                            ['hp', 'HP', stats.hp],
-                            ['kpi', 'KPI', stats.kpi],
-                        ].map(([key, label, value]) => (
+                        {(
+                            [
+                                ['dpr', 'DPR', round1(stats.dpr)],
+                                ['hp', 'HP', stats.hp],
+                                ['kpi', 'KPI', stats.kpi],
+                            ] as const
+                        ).map(([key, label, value]) => (
                             <Tooltip key={key}>
                                 <TooltipTrigger asChild>
                                     <span className="flex flex-col">

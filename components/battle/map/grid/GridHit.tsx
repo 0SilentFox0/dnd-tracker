@@ -89,7 +89,7 @@ export const GridHit = memo(function GridHit({
         if (!d || d.id !== e.pointerId) return;
 
         press.current = null;
-        e.currentTarget.style.cursor = '';
+        (e.currentTarget as HTMLElement).style.cursor = '';
         e.currentTarget.releasePointerCapture?.(e.pointerId);
 
         if (!d.active) return;
