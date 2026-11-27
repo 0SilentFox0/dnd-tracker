@@ -345,6 +345,8 @@
     "fortuneNotFree": "Fortune does not apply to a free cast",
     "barrierDuration": "A barrier needs a duration in rounds",
     "mapOccupied": "The cell is occupied or outside the field",
+    "moveOutOfReach": "Out of movement range",
+    "moveNotYourTurn": "It's not your turn",
     "mapEdgeOutside": "The wall or bars are outside the map",
     "mapEdgeLimit": "Too many walls or bars on the map",
     "mapEdgesInMode": "Walls and bars are unavailable in this map mode",

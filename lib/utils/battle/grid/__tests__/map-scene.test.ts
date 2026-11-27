@@ -103,6 +103,41 @@ describe('deriveMapScene: reach', () => {
     });
 });
 
+describe('deriveMapScene: invalid move feedback', () => {
+    it('empty cell outside the reach rejects with outOfReach', () => {
+        const s = deriveMapScene(input());
+
+        expect(s.cellClick({ x: 9, y: 4 })).toEqual({
+            kind: 'reject',
+            reason: textRef(REJECT.moveOutOfReach),
+        });
+    });
+
+    it('a cell held by someone else rejects as occupied', () => {
+        const s = deriveMapScene(input());
+
+        expect(s.cellClick({ x: 5, y: 0 })).toEqual({
+            kind: 'reject',
+            reason: textRef(REJECT.mapOccupied),
+        });
+    });
+
+    it('owner off-turn gets notYourTurn, a stranger stays silent', () => {
+        const mine = at('m', { x: 3, y: 3 }, ParticipantSide.ALLY);
+
+        mine.basicInfo.controlledBy = 'u1';
+
+        const owner = deriveMapScene(
+            input({ participants: [hero, mine], actor: { canAct: false } })
+        );
+
+        expect(owner.cellClick({ x: 9, y: 4 })).toEqual({
+            kind: 'reject',
+            reason: textRef(REJECT.moveNotYourTurn),
+        });
+    });
+});
+
 describe('deriveMapScene: danger', () => {
     const ranged = {
         id: 'r',
