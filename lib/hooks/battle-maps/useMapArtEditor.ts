@@ -26,7 +26,7 @@ import {
     sceneFromMap,
     snapStampCenter,
 } from '@/lib/utils/battle/map-art';
-import type { TileEditTool } from '@/lib/utils/battle/tiles/edit';
+import { brushFootprint, type TileEditTool } from '@/lib/utils/battle/tiles/edit';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type {
     MapArtLight,
@@ -375,7 +375,9 @@ export function useMapArtEditor({
 
                 const painted = paintFloor(base, cells, code, size, floorTool);
 
-                const keys = cells.map(cellKey);
+                const keys = [
+                    ...brushFootprint(cells, size, mapRef.current, gridOf(mapRef.current)).keys(),
+                ];
 
                 // blocked is derived from the scene on save, so erasing must drop it here
                 commit(
@@ -636,6 +638,18 @@ export function useMapArtEditor({
                             if (s.id !== id) return s;
 
                             const next = { ...s, ...patch };
+
+                            const def = stampDef(s.asset);
+
+                            if (snap && def && 'x' in patch && 'y' in patch)
+                                Object.assign(
+                                    next,
+                                    snapStampCenter(
+                                        next,
+                                        { cols: def.cols, rows: def.rows, rot: next.rot },
+                                        mapRef.current
+                                    )
+                                );
 
                             return {
                                 ...next,

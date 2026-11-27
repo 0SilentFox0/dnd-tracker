@@ -150,10 +150,24 @@ describe('useStampSelection handles', () => {
         expect(sel.onPointerDown({ x: 110, y: 110 })).toBe('s1');
         expect(api.select).toHaveBeenCalledWith('s1');
         sel.onPointerMove({ x: 150, y: 130 });
-        expect(api.update).toHaveBeenLastCalledWith('s1', { x: 140, y: 120 }, 'stamp-move:s1');
+        expect(api.update).toHaveBeenLastCalledWith('s1', { x: 140, y: 120 }, 'stamp-move:s1:0');
         sel.onPointerUp();
         sel.onPointerMove({ x: 0, y: 0 });
         expect(api.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses a fresh coalesce key for each drag', () => {
+        const { api, sel } = setup();
+
+        sel.onPointerDown({ x: 110, y: 110 });
+        sel.onPointerMove({ x: 120, y: 110 });
+        sel.onPointerUp();
+        sel.onPointerDown({ x: 110, y: 110 });
+        sel.onPointerMove({ x: 120, y: 110 });
+
+        const keys = api.update.mock.calls.map((c) => c[2]);
+
+        expect(new Set(keys).size).toBe(2);
     });
 
     it('reports no hit on empty space so the pan can take the gesture', () => {

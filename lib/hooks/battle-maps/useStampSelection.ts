@@ -74,7 +74,11 @@ export function useStampSelection({
         [masks]
     );
 
-    const drag = useRef<{ id: string; dx: number; dy: number } | null>(null);
+    const drag = useRef<{ id: string; dx: number; dy: number; key: string } | null>(
+        null
+    );
+
+    const dragCount = useRef(0);
 
     const scaleStart = useRef<{ id: string; dist: number; scale: number } | null>(
         null
@@ -91,7 +95,14 @@ export function useStampSelection({
 
         const hit = stamps.find((s) => s.id === id);
 
-        drag.current = hit ? { id: hit.id, dx: hit.x - at.x, dy: hit.y - at.y } : null;
+        drag.current = hit
+            ? {
+                  id: hit.id,
+                  dx: hit.x - at.x,
+                  dy: hit.y - at.y,
+                  key: `stamp-move:${hit.id}:${dragCount.current++}`,
+              }
+            : null;
 
         return hit?.id ?? null;
     };
@@ -99,7 +110,7 @@ export function useStampSelection({
     const onPointerMove = (at: Point) => {
         const d = drag.current;
 
-        if (d) api.update(d.id, { x: at.x + d.dx, y: at.y + d.dy }, `stamp-move:${d.id}`);
+        if (d) api.update(d.id, { x: at.x + d.dx, y: at.y + d.dy }, d.key);
     };
 
     const onPointerUp = () => {
