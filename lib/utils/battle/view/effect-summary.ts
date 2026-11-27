@@ -1,11 +1,12 @@
 import { capitalizeLine, lineKey, textRef } from '@/lib/i18n/text-ref';
 import type { Translator } from '@/lib/i18n/translator';
+import { resolveFlat } from '@/lib/utils/abilities/engine/core/flat';
 import { legacyActiveEffectModifiers } from '@/lib/utils/abilities/engine/effects/legacy-active-effects';
 import { describeEffect } from '@/lib/utils/abilities/registry/effects';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { joinSegments } from '@/lib/utils/abilities/segments';
 import { durationRef } from '@/lib/utils/duration/format';
-import type { ActiveEffect } from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
 const uniqueLines = (lines: LogLine[]): LogLine[] =>
@@ -14,7 +15,23 @@ const uniqueLines = (lines: LogLine[]): LogLine[] =>
             lines.findIndex((other) => lineKey(other) === lineKey(line)) === i
     );
 
-export function effectLines(e: ActiveEffect, t: Translator): LogLine[] {
+function withOwnerValues(x: Effect, owner?: BattleParticipant): Effect {
+    if (!owner || !('flat' in x) || typeof x.flat !== 'object' || !('formula' in x.flat))
+        return x;
+
+    try {
+        return { ...x, flat: resolveFlat(x.flat, owner) } as Effect;
+    } catch {
+        return x;
+    }
+}
+
+/** owner: whose variables (hero_level, …) fill formulas, so the line shows a number. */
+export function effectLines(
+    e: ActiveEffect,
+    t: Translator,
+    owner?: BattleParticipant
+): LogLine[] {
     if (e.description) return [e.description];
 
     const guards = e.effects
@@ -27,7 +44,9 @@ export function effectLines(e: ActiveEffect, t: Translator): LogLine[] {
         );
 
     const text = (x: Effect) =>
-        capitalizeLine(joinSegments(t, describeEffect(x)));
+        capitalizeLine(
+            joinSegments(t, describeEffect(withOwnerValues(x, owner)))
+        );
 
     return uniqueLines([
         ...(e.abilityEffects ?? legacyActiveEffectModifiers(e)).map(text),

@@ -10,6 +10,8 @@ import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { processAttack } from '@/lib/utils/battle/attack';
 import { getDisabledAttackKinds } from '@/lib/utils/battle/attack/disabled-attacks';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
+import { footprintDistance, gridOf } from '@/lib/utils/battle/grid/geometry';
+import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import { logFields, withPrefix } from '@/lib/utils/battle/log/lines';
 import { endTurnCleanup } from '@/lib/utils/battle/turn/end-turn-cleanup';
 import { pickOne, rollDiceList, rollDie } from '@/lib/utils/common/dice';
@@ -113,6 +115,28 @@ function finishTurn(
     return { participants: order, actions: [...actions, ...turnEnd] };
 }
 
+function nearestVictim(
+    berserker: BattleParticipant,
+    victims: BattleParticipant[],
+    params: BerserkTurnParams
+): BattleParticipant {
+    const grid = gridOf(params.map);
+
+    const origin = params.map ? cellsOf(berserker, grid) : [];
+
+    const distance = (p: BattleParticipant) =>
+        origin.length > 0 && isOnMap(p)
+            ? footprintDistance(origin, cellsOf(p, grid), grid)
+            : Infinity;
+
+    const best = Math.min(...victims.map(distance));
+
+    return pickOne(
+        victims.filter((p) => distance(p) === best),
+        params.rng
+    );
+}
+
 export function runBerserkTurn(params: BerserkTurnParams): {
     participants: BattleParticipant[];
     actions: BattleAction[];
@@ -165,7 +189,7 @@ export function runBerserkTurn(params: BerserkTurnParams): {
         );
     }
 
-    const target = pickOne(victims, rng);
+    const target = nearestVictim(berserker, victims, params);
 
     const result = processAttack({
         attacker: berserker,

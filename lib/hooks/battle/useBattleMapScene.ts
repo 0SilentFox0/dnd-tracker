@@ -269,6 +269,26 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         fog: { active: !!fogTool?.active, close: fogTool?.close },
     });
 
+    const closeTools = useCallback(() => {
+        setPlacingOn(false);
+        setPlacingId(null);
+        closeTerrain();
+        closeModeTool?.();
+        weatherTool?.close();
+        motionTool?.close();
+        backgroundTool?.close();
+        fogTool?.close();
+    }, [
+        setPlacingOn,
+        setPlacingId,
+        closeTerrain,
+        closeModeTool,
+        weatherTool,
+        motionTool,
+        backgroundTool,
+        fogTool,
+    ]);
+
     const placement = useMemo(
         () => (isDM ? { active: placing, toggle: togglePlacing } : null),
         [isDM, placing, togglePlacing]
@@ -287,6 +307,7 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         followTurn,
         actions: mapActions,
         placement,
+        closeTools,
         terrainTool: isDM ? terrainTool : null,
         fogTool,
         modeTools,

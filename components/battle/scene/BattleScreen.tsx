@@ -6,12 +6,10 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { BattleToast } from './banners/BattleToast';
-import { CornerStack } from './layout/CornerStack';
 import { NoticeStackContext } from './layout/MapStrip';
 import { MobileBattleLayout } from './layout/MobileBattleLayout';
 import { BattlePlayerViewToggle } from './BattlePlayerViewToggle';
 
-import { AudioDock } from '@/components/audio/AudioDock';
 import { BattleAudioProvider } from '@/components/battle/audio/BattleAudioProvider';
 import { CounterWindowBanner } from '@/components/battle/counter/CounterWindowBanner';
 import { CounterWindowDialog } from '@/components/battle/counter/CounterWindowDialog';
@@ -200,9 +198,6 @@ export function BattleScreen() {
                     >
                         {tTop('toCampaign')}
                     </Link>
-                    <CornerStack>
-                        <AudioDock placement="corner" />
-                    </CornerStack>
                 </div>
             ) : (
                 <div className={cn('battle-hud', hudFontClassName)}>

@@ -28,6 +28,8 @@ export interface BattleMapScene {
     followTurn: { on: boolean; toggle(): void } | null;
     actions: BattleMapActions;
     placement: { active: boolean; toggle(): void } | null;
+    /** Turns off every DM map tool (placement, terrain, fog, palettes, mode tool). */
+    closeTools(): void;
     terrainTool: MapTerrainTool | null;
     fogTool: ReturnType<typeof useMapFogTool>;
     modeTools: ModeTools | null;

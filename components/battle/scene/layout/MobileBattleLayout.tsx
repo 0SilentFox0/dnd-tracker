@@ -147,7 +147,9 @@ export function MobileBattleLayout({
                     <div className="absolute inset-0">
                         {mapView ? (
                             <main className="absolute inset-0">
-                                <MapToolsSlotContext.Provider value={toolsSlot}>
+                                <MapToolsSlotContext.Provider
+                                    value={drawer === 'tools' ? toolsSlot : null}
+                                >
                                     <MapPreviewSlotContext.Provider
                                         value={previewSlot}
                                     >

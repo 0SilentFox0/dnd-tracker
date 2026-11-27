@@ -13,6 +13,15 @@ const lib = vi.hoisted(() => ({
             targeting: { kind: 'enemy' },
             resolution: { kind: 'attack' },
         },
+        {
+            id: 'rage',
+            name: 'Шал',
+            level: 1,
+            dice: 0,
+            cost: 'action',
+            targeting: { kind: 'enemy' },
+            resolution: { kind: 'save', ability: 'wisdom', onSuccess: 'none' },
+        },
     ],
 }));
 
@@ -99,5 +108,76 @@ describe('useSpellBook: aiDamage uses the magic attack die', () => {
         } finally {
             rules.attackDice = 6;
         }
+    });
+
+    it('auto roll fills missing saving throws of the save targets', async () => {
+        const scene = fakeScene({
+            isDM: true,
+            knownSpells: ['rage'],
+            slots: { '1': { max: 2, current: 2 } },
+        });
+
+        const { result } = renderHook(() => useSpellBook(scene.me), {
+            wrapper: scene.wrapper,
+        });
+
+        act(() => result.current.actions.open(1));
+        await waitFor(() => expect(result.current.view.spells).toHaveLength(1));
+        act(() => result.current.actions.pick(result.current.view.spells[0]));
+        act(() => result.current.actions.toTargets());
+        act(() => result.current.actions.toggleTarget('gob'));
+        act(() => result.current.actions.confirmTargets());
+
+        expect(result.current.view.saveTargets).toHaveLength(1);
+        act(() => result.current.actions.aiDamage());
+
+        const save = result.current.state.saves.gob;
+
+        expect(save).toBeGreaterThanOrEqual(1);
+        expect(save).toBeLessThanOrEqual(20);
+
+        act(() => result.current.actions.setSave('gob', 7));
+        act(() => result.current.actions.aiDamage());
+        expect(result.current.state.saves.gob).toBe(7);
+    });
+
+    it('openSpell skips the book and goes straight to targeting', async () => {
+        const scene = fakeScene({
+            isDM: true,
+            knownSpells: ['bolt', 'rage'],
+            slots: {
+                '1': { max: 2, current: 2 },
+                universal: { max: 2, current: 2 },
+            },
+        });
+
+        const { result } = renderHook(() => useSpellBook(scene.me), {
+            wrapper: scene.wrapper,
+        });
+
+        act(() => result.current.actions.openSpell(1, 'rage'));
+
+        await waitFor(() =>
+            expect(result.current.state.step).toBe('targets')
+        );
+        expect(result.current.view.selected?.id).toBe('rage');
+        expect(result.current.view.autoPicking).toBe(false);
+    });
+
+    it('openSpell without a free slot stops on the spell page', async () => {
+        const scene = fakeScene({
+            isDM: true,
+            knownSpells: ['rage'],
+            slots: {},
+        });
+
+        const { result } = renderHook(() => useSpellBook(scene.me), {
+            wrapper: scene.wrapper,
+        });
+
+        act(() => result.current.actions.openSpell(1, 'rage'));
+
+        await waitFor(() => expect(result.current.state.step).toBe('spell'));
+        expect(result.current.view.autoPicking).toBe(false);
     });
 });

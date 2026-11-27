@@ -47,6 +47,29 @@ export {
 
 export type { BookSpell };
 
+type BookView = {
+    costUsed(s: BookSpell): boolean;
+    noSlot(s: BookSpell): boolean;
+    grantLabel(s: BookSpell): unknown;
+    slotLeft(level: number): number;
+    slot: { options: unknown[] };
+};
+
+/** Mirrors the enabled state of the book's «choose targets» button. */
+function castsWithoutChoice(s: BookSpell, view: BookView): boolean {
+    return (
+        s.executionMode !== 'manual' &&
+        s.cost !== 'long' &&
+        !view.costUsed(s) &&
+        !(
+            s.level > 0 &&
+            !view.grantLabel(s) &&
+            (view.noSlot(s) ||
+                (!view.slot.options.length && view.slotLeft(s.level) === 0))
+        )
+    );
+}
+
 export function useSpellBook(
     caster: BattleParticipant | null,
     options: {
@@ -63,6 +86,11 @@ export function useSpellBook(
     const text = useText();
 
     const [finishLong, setFinishLong] = useState(false);
+
+    const [autoPick, setAutoPick] = useState<{
+        id: string;
+        stage: 'pick' | 'advance';
+    } | null>(null);
 
     const [flow, dispatch] = useReducer(spellFlow, initialSpellFlow);
 
@@ -295,11 +323,45 @@ export function useSpellBook(
         source: { grantsOf, canSlot, slotChoices, selectedGrant },
         build,
         inRange,
+        saveTargetIds: saveTargets.map((t) => t.basicInfo.id),
         bypassCost,
         attackDice,
         setFinishLong,
         onDone: options.onDone,
     });
 
-    return { state, view, actions };
+    // a recommended spell skips the book: pick it, then go straight to targeting when it can be cast as is
+    if (autoPick?.stage === 'pick' && flow.step !== 'closed') {
+        const target = spells.find((s) => s.id === autoPick.id);
+
+        if (flow.step === 'book' && target) {
+            actions.pick(target);
+            setAutoPick({ id: target.id, stage: 'advance' });
+        } else if (flow.step !== 'book' || spells.length > 0) {
+            setAutoPick(null);
+        }
+    }
+
+    if (autoPick?.stage === 'advance' && flow.step !== 'book') {
+        setAutoPick(null);
+
+        if (
+            flow.step === 'spell' &&
+            selected?.id === autoPick.id &&
+            castsWithoutChoice(selected, view)
+        )
+            actions.toTargets();
+    }
+
+    return {
+        state,
+        view: { ...view, autoPicking: !!autoPick },
+        actions: {
+            ...actions,
+            openSpell: (level: number, spellId?: string) => {
+                actions.open(level);
+                setAutoPick(spellId ? { id: spellId, stage: 'pick' } : null);
+            },
+        },
+    };
 }

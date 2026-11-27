@@ -59,7 +59,7 @@ describe('turnExhausted · дії 5e', () => {
         ).toBe(false);
     });
 
-    it('без правил 5e (HOMM) лежачий не впливає, Ривок теж', () => {
+    it('без правил 5e (HOMM) лежачий не впливає, Ривок поза картою теж', () => {
         expect(
             turnExhausted(prone(), [], DEFAULT_RULES, { coreActions: false })
         ).toBe(true);
@@ -109,9 +109,30 @@ describe('turnExhausted · дії 5e', () => {
                 { coreActions: true }
             )
         ).toBe(true);
+    });
+
+    it('HOMM on a map: leftover movement keeps the turn open too', () => {
+        const placed = {
+            ...used(),
+            battleData: { ...used().battleData, position: { x: 0, y: 0 } },
+        };
+
         expect(
             turnExhausted(placed, [], DEFAULT_RULES, { coreActions: false })
-        ).toBe(true);
+        ).toBe(false);
+    });
+
+    it('an unused bonus action with a gear swap keeps the turn open', () => {
+        const p = {
+            ...used(),
+            actionFlags: { ...used().actionFlags, hasUsedBonusAction: false },
+        };
+
+        expect(turnExhausted(p, [], DEFAULT_RULES, { gear: true })).toBe(false);
+        expect(turnExhausted(p, [], DEFAULT_RULES, { gear: false })).toBe(true);
+        expect(turnExhausted(used(), [], DEFAULT_RULES, { gear: true })).toBe(
+            true
+        );
     });
 
     it('дію не витрачено — не вичерпано й при діях 5e', () => {

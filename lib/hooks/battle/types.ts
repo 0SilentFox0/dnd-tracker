@@ -25,12 +25,17 @@ export interface TurnGateControls {
     skipTurn(): void;
 }
 
+export interface SpellBookIntent {
+    level: number;
+    spellId?: string;
+}
+
 export interface BattleSceneIntents {
     attack: AttackIntent | null;
     requestAttack(intent: AttackIntent): void;
     clearAttack(): void;
-    spellBook: number | null;
-    requestSpellBook(level: number): void;
+    spellBook: SpellBookIntent | null;
+    requestSpellBook(intent: SpellBookIntent): void;
     clearSpellBook(): void;
     mapAim: MapAim | null;
     setMapAim(aim: MapAim | null): void;

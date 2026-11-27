@@ -23,6 +23,7 @@ import { BattleStatus } from '@/lib/constants/battle';
 import type {
     BattleSceneData,
     BattleSceneValue,
+    SpellBookIntent,
 } from '@/lib/hooks/battle/types';
 import { battleQueryKey, useBattle } from '@/lib/hooks/battles';
 import { usePlayerView } from '@/lib/hooks/common';
@@ -76,7 +77,9 @@ export function useBattleSceneValue(
 
     const clearAttackIntent = useCallback(() => setAttackIntent(null), []);
 
-    const [spellBookIntent, setSpellBookIntent] = useState<number | null>(null);
+    const [spellBookIntent, setSpellBookIntent] = useState<SpellBookIntent | null>(
+        null
+    );
 
     const clearSpellBookIntent = useCallback(
         () => setSpellBookIntent(null),
