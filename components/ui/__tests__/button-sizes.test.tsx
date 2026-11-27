@@ -49,7 +49,7 @@ describe('Button sizes', () => {
         expect(HUD_CHIP_CLASS).toContain('rounded-lg');
     });
 
-    it('HeaderPillLink label visible below sm', () => {
+    it('HeaderPillLink is icon-only below sm, label stays for screen readers', () => {
         render(
             <HeaderPillLink
                 href="/x"
@@ -59,7 +59,7 @@ describe('Button sizes', () => {
             />
         );
 
-        expect(screen.getByText('GO').className).not.toContain('hidden');
+        expect(screen.getByText('GO').className).toContain('max-sm:sr-only');
         expect(screen.getByLabelText('Go there')).toBeTruthy();
     });
 });

@@ -4,7 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { ARIA_DISABLED_CLASS } from '@/components/ui/disabled';
 
-const PILL = buttonVariants({ variant: 'default', size: 'sm' });
+const PILL = `${buttonVariants({ variant: 'default', size: 'sm' })} shrink-0 whitespace-nowrap max-sm:px-2`;
 
 export function HeaderPillLink({
     href,
@@ -22,7 +22,7 @@ export function HeaderPillLink({
     const content = (
         <>
             <Icon className="size-4" />
-            <span className="max-[359px]:sr-only">{label}</span>
+            <span className="max-sm:sr-only">{label}</span>
         </>
     );
 
