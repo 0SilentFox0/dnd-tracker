@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const state = vi.hoisted(() => ({
     isAdmin: false,
-    user: { email: 'a@x.com' } as { email: string } | null,
+    user: { email: 'a@x.com' } as { id?: string; email: string } | null,
 }));
 
 const useIsAdmin = vi.hoisted(() => vi.fn());

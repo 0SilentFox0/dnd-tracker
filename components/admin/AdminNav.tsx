@@ -14,7 +14,11 @@ import {
 import { HudChipTabs } from '@/components/hud/page';
 import { cn } from '@/lib/utils';
 
-const ITEMS: { key: string; href: string; icon: LucideIcon }[] = [
+const ITEMS: {
+    key: 'overview' | 'users' | 'security' | 'ops';
+    href: string;
+    icon: LucideIcon;
+}[] = [
     { key: 'overview', href: '/admin', icon: LayoutDashboard },
     { key: 'users', href: '/admin/users', icon: Users },
     { key: 'security', href: '/admin/security', icon: ShieldAlert },

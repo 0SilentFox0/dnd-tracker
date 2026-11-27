@@ -107,7 +107,7 @@ export default function TimeSeriesChartView({
                 active && payload?.length ? (
                     <ChartTooltipBody
                         title={fmt.full(Number(label))}
-                        entries={payload as TooltipEntry[]}
+                        entries={payload as unknown as TooltipEntry[]}
                         format={format}
                         single={series.length === 1}
                     />
