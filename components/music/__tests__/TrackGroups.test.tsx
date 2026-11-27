@@ -12,6 +12,7 @@ vi.mock('@/lib/hooks/music', async () => {
     const { useState } = await import('react');
 
     return {
+        useTrackDuration: () => null,
         useTrackPreview: () => {
             const [playingId, setPlayingId] = useState<string | null>(null);
 

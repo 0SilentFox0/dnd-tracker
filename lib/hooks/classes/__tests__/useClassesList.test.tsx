@@ -20,6 +20,7 @@ vi.mock('../useClasses', () => ({
 vi.mock('next-intl', async (orig) => ({
     ...(await orig<object>()),
     useLocale: () => 'uk',
+    useTranslations: () => (key: string) => key,
 }));
 vi.mock('@/lib/hooks/common', () => ({
     useLibraryList: ({ query }: { query: { data: unknown[] } }) => ({

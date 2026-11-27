@@ -95,7 +95,7 @@ export function ScenarioIndexPageClient({
                                     className="sb-stats"
                                     data-testid="scenario-stats"
                                 >
-                                    {t('stats', stats)}
+                                    {t('stats', { ...stats })}
                                 </p>
                                 {visible.length === 0 ? (
                                     <p className="sb-stats">{t('noMatches')}</p>

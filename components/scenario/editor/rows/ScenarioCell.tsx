@@ -39,6 +39,8 @@ export function ScenarioCell({
 }) {
     const t = useTranslations('scenario.cell');
 
+    const tImage = useTranslations('scenario.image');
+
     if (active) {
         return (
             <div className="sb-cell is-active">
@@ -76,7 +78,7 @@ export function ScenarioCell({
                 <ScenarioRichText
                     doc={doc}
                     campaignId={campaignId}
-                    showMissingMedia
+                    missingMediaLabel={tImage('missing')}
                 />
             )}
         </div>

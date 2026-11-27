@@ -93,22 +93,29 @@ describe('ClassCard', () => {
 describe('BackgroundCard', () => {
     afterEach(cleanup);
 
-    it('shows the choices badge only when the background has choices', () => {
+    it('shows choice labels and an overflow badge only when the background has choices', () => {
         const { rerender } = render(
             <BackgroundCard campaignId="c1" background={background()} />
         );
 
-        expect(screen.queryByText(/вибір|вибори|виборів/)).toBeNull();
+        expect(screen.queryByText('Skill')).toBeNull();
+        expect(screen.queryByText('+1')).toBeNull();
 
         rerender(
             <BackgroundCard
                 campaignId="c1"
                 background={background({
-                    choices: [{}, {}, {}] as BackgroundData['choices'],
+                    choices: [
+                        { id: 'a', label: 'Skill', count: 2 },
+                        { id: 'b', label: 'Tool' },
+                        { id: 'c', label: 'Language' },
+                    ] as BackgroundData['choices'],
                 })}
             />
         );
-        expect(screen.getByText('3 вибори')).toBeInTheDocument();
+        expect(screen.getByText('Skill ×2')).toBeInTheDocument();
+        expect(screen.getByText('Tool')).toBeInTheDocument();
+        expect(screen.getByText('+1')).toBeInTheDocument();
     });
 
     it('links to the background editor', () => {

@@ -42,7 +42,8 @@ const notify = vi.fn(async () => {});
 
 const confirm = vi.fn(async () => true);
 
-vi.mock('@/lib/hooks/common', () => ({
+vi.mock('@/lib/hooks/common', async (importOriginal) => ({
+    ...(await importOriginal<object>()),
     useNotify: () => notify,
     useConfirm: () => confirm,
 }));
