@@ -178,6 +178,7 @@ describe('WfrpDraftForm', () => {
             screen.getByRole('button', { name: 'wfrpCreation.talents.roll' })
         );
         fireEvent.click(next());
+        fireEvent.click(next());
 
         expect(screen.getByText('wfrpCreation.identity.hint')).toBeTruthy();
         expect(
@@ -194,6 +195,58 @@ describe('WfrpDraftForm', () => {
         expect(
             screen.getByText(/wfrpCreation.identity.experience/)
         ).toBeTruthy();
+    });
+
+    it('story step is optional, sits between talents and identity and rolls into the biography', () => {
+        mount();
+
+        fireEvent.click(screen.getByRole('radio', { name: /Human/ }));
+        fireEvent.click(next());
+        fireEvent.click(
+            screen.getByRole('button', { name: 'wfrpCreation.career.roll' })
+        );
+        fireEvent.click(next());
+        fireEvent.click(
+            screen.getByRole('button', { name: 'wfrpCreation.stats.roll' })
+        );
+        fireEvent.click(next());
+        fireEvent.click(
+            screen.getByRole('button', { name: 'wfrpCreation.talents.roll' })
+        );
+        fireEvent.click(next());
+
+        expect(screen.getByText('wfrpCreation.story.hint')).toBeTruthy();
+        expect((next() as HTMLButtonElement).disabled).toBe(false);
+
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'wfrpCreation.story.roll wfrpCreation.story.questions.origin',
+            })
+        );
+        fireEvent.click(next());
+
+        expect(
+            (
+                screen.getByLabelText(
+                    /wfrpCreation.identity.background/
+                ) as HTMLTextAreaElement
+            ).value
+        ).toContain('wfrpCreation.story.sentences.origin');
+    });
+
+    it('characterId mode shows only the identity step', () => {
+        render(
+            <QueryClientProvider client={new QueryClient()}>
+                <WfrpDraftForm
+                    campaignId="c1"
+                    characterId="ch1"
+                    initialIdentity={{ name: 'Hans' }}
+                />
+            </QueryClientProvider>
+        );
+
+        expect(screen.getByText('wfrpCreation.identity.reopenNote')).toBeTruthy();
+        expect(screen.queryByText('wfrpCreation.story.hint')).toBeNull();
     });
 
     it('shows translated per-code messages for server issues and falls back to the general text', async () => {
@@ -216,6 +269,7 @@ describe('WfrpDraftForm', () => {
         fireEvent.click(
             screen.getByRole('button', { name: 'wfrpCreation.talents.roll' })
         );
+        fireEvent.click(next());
         fireEvent.click(next());
         fireEvent.change(screen.getByLabelText(/wfrpCreation.identity.name/), {
             target: { value: 'Hans' },
@@ -308,6 +362,7 @@ describe('WfrpDraftForm', () => {
                 })
             );
             fireEvent.click(next());
+            fireEvent.click(next());
             fireEvent.change(
                 screen.getByLabelText(/wfrpCreation.identity.name/),
                 { target: { value: 'Hans' } }
@@ -350,6 +405,16 @@ describe('WfrpDraftForm', () => {
                     })
                 )
             );
+        });
+
+        it('shows the story step before identity', () => {
+            mount({ characterType: 'npc_hero' });
+            toIdentity();
+
+            expect(screen.queryByText('wfrpCreation.story.hint')).toBeNull();
+            expect(
+                screen.getByText('wfrpCreation.wizard.steps.story')
+            ).toBeTruthy();
         });
 
         it('npc hero shows no player picker', () => {

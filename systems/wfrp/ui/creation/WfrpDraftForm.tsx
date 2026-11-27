@@ -8,6 +8,7 @@ import { CareerStep } from './CareerStep';
 import { IdentityStep } from './IdentityStep';
 import { SpeciesStep } from './SpeciesStep';
 import { StatsStep } from './StatsStep';
+import { StoryStep } from './StoryStep';
 import { TalentsStep } from './TalentsStep';
 
 import { StepIndicator } from '@/components/common/shell/StepIndicator';
@@ -25,6 +26,7 @@ const STEP_ORDER: WfrpDraftStepId[] = [
     'career',
     'stats',
     'talents',
+    'story',
     'identity',
 ];
 
@@ -123,6 +125,7 @@ export function WfrpDraftForm({
                         {step.id === 'career' && <CareerStep form={form} />}
                         {step.id === 'stats' && <StatsStep form={form} />}
                         {step.id === 'talents' && <TalentsStep form={form} />}
+                        {step.id === 'story' && <StoryStep form={form} />}
                         {step.id === 'identity' && <IdentityStep form={form} />}
                     </div>
                 </div>

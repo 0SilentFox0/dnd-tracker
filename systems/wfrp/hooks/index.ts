@@ -24,6 +24,7 @@ export {
 } from './usePsychologyPanel';
 export { useRaceProfiles, useSaveRaceProfile } from './useRaceProfiles';
 export { type SheetFortune, useSheetFortune } from './useSheetFortune';
+export { useStoryQuiz } from './useStoryQuiz';
 export {
     useWfrpDraftForm,
     type WfrpDraftFormOptions,

@@ -333,4 +333,109 @@ describe('useWfrpDraftForm', () => {
             name: 'Old',
         });
     });
+    describe('story quiz hookup', () => {
+        const toStory = () => {
+            const hook = setup();
+
+            act(() => hook.result.current.species.select('r1'));
+            act(() => hook.result.current.career.setMode('choice'));
+            act(() => hook.result.current.career.pick('cb'));
+            act(() => hook.result.current.stats.setMode('free'));
+            act(() => hook.result.current.talents.roll());
+
+            for (let i = 0; i < 4; i++) {
+                act(() => hook.result.current.step.next());
+            }
+
+            expect(hook.result.current.step.id).toBe('story');
+
+            return hook.result;
+        };
+
+        const forward = (result: ReturnType<typeof toStory>) =>
+            act(() => result.current.step.next());
+
+        it('an empty quiz leaves background and goals untouched', () => {
+            const result = toStory();
+
+            forward(result);
+
+            expect(result.current.step.id).toBe('identity');
+            expect(result.current.identity.values.background).toBeUndefined();
+            expect(result.current.identity.values.goals).toBeUndefined();
+        });
+
+        it('quiz answers fill an untouched background', () => {
+            const result = toStory();
+
+            act(() => result.current.story.set('origin', 'Town'));
+            forward(result);
+
+            expect(result.current.identity.values.background).toContain(
+                'wfrpCreation.story.sentences.origin'
+            );
+            expect(result.current.identity.quiz.canReplace).toBe(false);
+        });
+
+        it('keeps a manual background and offers a replace button', () => {
+            const result = toStory();
+
+            act(() => result.current.story.set('origin', 'Town'));
+            forward(result);
+            act(() => result.current.identity.set({ background: 'mine' }));
+            act(() => result.current.step.back());
+            act(() => result.current.story.set('origin', 'Village'));
+            forward(result);
+
+            expect(result.current.identity.values.background).toBe('mine');
+            expect(result.current.identity.quiz.canReplace).toBe(true);
+
+            act(() => result.current.identity.quiz.replace());
+
+            expect(result.current.identity.values.background).toContain(
+                'Village'
+            );
+            expect(result.current.identity.quiz.canReplace).toBe(false);
+        });
+
+        it('re-rolled goals replace the old quiz goal and keep hand-typed ones', () => {
+            const result = toStory();
+
+            act(() => result.current.story.set('ambitionLong', 'First'));
+            forward(result);
+            act(() =>
+                result.current.identity.set({
+                    goals: [
+                        ...(result.current.identity.values.goals ?? []),
+                        { text: 'Typed', kind: 'personal' },
+                    ],
+                })
+            );
+            act(() => result.current.step.back());
+            act(() => result.current.story.set('ambitionLong', 'Second'));
+            forward(result);
+
+            expect(
+                result.current.identity.values.goals?.map((g) => g.text)
+            ).toEqual(['Typed', 'Second']);
+        });
+
+        it('warns about a too long story and submits a background within 4000', async () => {
+            const result = toStory();
+
+            act(() => result.current.story.set('origin', 'word '.repeat(1000)));
+            forward(result);
+
+            expect(result.current.identity.quiz.truncated).toBe(true);
+
+            act(() => result.current.identity.set({ name: 'Hans' }));
+
+            await act(async () => result.current.submit.run());
+
+            const body = vi.mocked(createWfrpDraft).mock.calls.at(-1)?.[1];
+
+            expect(body?.background?.length).toBeGreaterThan(3000);
+            expect(body?.background?.length).toBeLessThanOrEqual(4000);
+        });
+    });
 });

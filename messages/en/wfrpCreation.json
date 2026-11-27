@@ -9,6 +9,7 @@
       "career": "Career",
       "stats": "Characteristics",
       "talents": "Talents",
+      "story": "Story",
       "identity": "Details"
     },
     "back": "Back",
@@ -418,6 +419,34 @@
         "9": "To reach such mastery of my craft that others envy it",
         "10": "To make peace with my past"
       }
+    },
+    "roll": "Roll",
+    "rollAll": "Roll all empty",
+    "skip": "This step is optional: press Next with the fields empty.",
+    "hint": "Your answers become the hero's biography and goals on the next step. Write your own or roll the dice.",
+    "placeholder": "Your own answer or a roll",
+    "replace": "Replace the biography with the quiz story",
+    "truncated": "The story is too long: the biography will be cut to 4000 characters.",
+    "sentences": {
+      "origin": "I come from {answer}.",
+      "family": "My family are {answer}.",
+      "childhood": "My childhood was {answer}.",
+      "turningPoint": "Everything changed when {answer}.",
+      "leftHome": "I had to leave home because {answer}.",
+      "friends": "My closest friends are {answer}.",
+      "loyalty": "My loyalty belongs to {answer}.",
+      "hatred": "Above all, I hate {answer}.",
+      "bestMemory": "My best memory is {answer}.",
+      "worstMemory": "My worst memory is {answer}.",
+      "faith": "On matters of faith: {answer}.",
+      "demeanor": "My temper is {answer}.",
+      "secret": "{answer}",
+      "ambitionShort": "{answer}",
+      "ambitionLong": "{answer}",
+      "age": "I am {answer} years old.",
+      "height": "I stand {answer} cm tall.",
+      "eyes": "My eyes are {answer}.",
+      "hair": "My hair is {answer}."
     }
   }
 }

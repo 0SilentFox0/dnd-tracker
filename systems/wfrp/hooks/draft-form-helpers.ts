@@ -12,6 +12,7 @@ export type WfrpDraftStepId =
     | 'career'
     | 'stats'
     | 'talents'
+    | 'story'
     | 'identity';
 
 export type StatsMode = CreationPicks['stats']['mode'];
@@ -23,6 +24,7 @@ export const FULL_STEPS: WfrpDraftStepId[] = [
     'career',
     'stats',
     'talents',
+    'story',
     'identity',
 ];
 
@@ -44,6 +46,7 @@ export const STEP_ERRORS: Record<WfrpDraftStepId, (code: string) => boolean> = {
     career: (c) => c.startsWith('CAREER_') || c === 'SKILL_CAP',
     stats: (c) => c.startsWith('STATS_') || c.startsWith('POINTS_'),
     talents: (c) => c.startsWith('TALENT_') || c === 'FEAT_UNKNOWN',
+    story: () => false,
     identity: () => false,
 };
 

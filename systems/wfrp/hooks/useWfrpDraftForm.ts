@@ -8,6 +8,7 @@ import {
     type WfrpDraftStepId,
 } from './draft-form-helpers';
 import { useRaceProfiles } from './useRaceProfiles';
+import { useStoryQuiz } from './useStoryQuiz';
 import { useWfrpDraftPicks } from './useWfrpDraftPicks';
 import { useWfrpDraftPlan } from './useWfrpDraftPlan';
 import { useWfrpDraftRolls } from './useWfrpDraftRolls';
@@ -99,6 +100,10 @@ export function useWfrpDraftForm({
         initialIdentity ?? { name: '' }
     );
 
+    const [bgTouched, setBgTouched] = useState(false);
+
+    const [quizGoals, setQuizGoals] = useState<string[]>([]);
+
     const creation = system?.creation;
 
     const species = useWfrpSpecies({
@@ -110,6 +115,12 @@ export function useWfrpDraftForm({
     const selected = species.find((s) => s.race.id === speciesId);
 
     const profile = selected?.profile;
+
+    const story = useStoryQuiz({
+        rng,
+        reveal,
+        appearance: profile?.appearance,
+    });
 
     const talentCount =
         profile && profile.randomTalents.length ? profile.randomTalentCount : 0;
@@ -166,6 +177,30 @@ export function useWfrpDraftForm({
 
     const stepId = steps[index];
 
+    const composed = story.compose();
+
+    const applyStory = () => {
+        const current = identity.goals ?? [];
+
+        const kept = current.filter((g) => !quizGoals.includes(g.text));
+
+        const fresh = composed.goals.filter(
+            (g) => !kept.some((x) => x.text === g.text)
+        );
+
+        setQuizGoals(fresh.map((g) => g.text));
+        setIdentity((prev) => ({
+            ...prev,
+            ...(!bgTouched &&
+                composed.background !== (prev.background ?? '') && {
+                    background: composed.background,
+                }),
+            ...((quizGoals.length > 0 || fresh.length > 0) && {
+                goals: [...kept, ...fresh],
+            }),
+        }));
+    };
+
     const valid: Record<WfrpDraftStepId, boolean> = {
         species: !!profile && (!canonMode || errorsFor('species').length === 0),
         career:
@@ -181,6 +216,7 @@ export function useWfrpDraftForm({
             !!preview &&
             errorsFor('talents').length === 0 &&
             draft.talents.rolled.length === talentCount,
+        story: true,
         identity:
             identity.name.trim().length > 0 &&
             (identityOnly || (!!preview && preview.ok)) &&
@@ -237,7 +273,11 @@ export function useWfrpDraftForm({
             hideNext:
                 stepId === 'species' &&
                 (races.isPending || profiles.isPending || species.length === 0),
-            next: () => setIndex((i) => Math.min(i + 1, steps.length - 1)),
+            next: () => {
+                if (stepId === 'story') applyStory();
+
+                setIndex((i) => Math.min(i + 1, steps.length - 1));
+            },
             back: () => setIndex((i) => Math.max(i - 1, 0)),
         },
         species: {
@@ -330,10 +370,28 @@ export function useWfrpDraftForm({
                 : final,
         preview,
         stepErrors,
+        story,
         identity: {
             values: identity,
-            set: (patch: Partial<WfrpDraftIdentityInput>) =>
-                setIdentity((prev) => ({ ...prev, ...patch })),
+            set: (patch: Partial<WfrpDraftIdentityInput>) => {
+                if ('background' in patch) setBgTouched(true);
+
+                setIdentity((prev) => ({ ...prev, ...patch }));
+            },
+            quiz: {
+                truncated: composed.truncated,
+                canReplace:
+                    bgTouched &&
+                    !!composed.background &&
+                    composed.background !== (identity.background ?? ''),
+                replace: () => {
+                    setIdentity((prev) => ({
+                        ...prev,
+                        background: composed.background,
+                    }));
+                    setBgTouched(false);
+                },
+            },
         },
         reveal,
         submit,
