@@ -96,9 +96,9 @@ describe('SheetStatsPanel', () => {
         expect(screen.queryByTestId('roll-dialog')).toBeNull();
     });
 
-    it('is untouched by sheetFixture defaults without rest', () => {
+    it('still offers rolls to the owner when the sheet has no rest block', () => {
         mount(sheetFixture);
 
-        expect(screen.queryByTestId('roll-dialog')).toBeNull();
+        expect(screen.getByTestId('roll-dialog')).toBeTruthy();
     });
 });

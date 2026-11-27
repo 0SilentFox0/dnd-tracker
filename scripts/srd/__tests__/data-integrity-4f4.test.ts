@@ -80,15 +80,15 @@ describe('SRD 5.2 data: 4f-4', () => {
         ]);
     });
 
-    it('111 class choices: 67 feat, 7 expertise, 2 skill, 20 spell, 15 option', () => {
-        expect(classChoices).toHaveLength(111);
+    it('123 class choices: 67 feat, 7 expertise, 2 skill, 20 spell, 27 option (12 starting equipment)', () => {
+        expect(classChoices).toHaveLength(123);
         expect([
             byKind('feat').length,
             byKind('expertise').length,
             byKind('skill').length,
             byKind('spell').length,
             byKind('option').length,
-        ]).toEqual([67, 7, 2, 20, 15]);
+        ]).toEqual([67, 7, 2, 20, 27]);
         expect(
             classChoices.filter((c) =>
                 c.id.startsWith('ability-score-improvement')

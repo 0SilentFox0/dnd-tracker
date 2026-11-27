@@ -150,7 +150,9 @@ describe('ChoicesEditor', () => {
             );
 
             expect(screen.getByText('choices.kit.title')).toBeTruthy();
-            fireEvent.click(screen.getByRole('radio', { name: /Package A/ }));
+            fireEvent.click(
+                screen.getByRole('checkbox', { name: /Package A/ })
+            );
             expect(json().classes[0].choices).toEqual({
                 'starting-equipment': [{ id: 'a' }],
             });

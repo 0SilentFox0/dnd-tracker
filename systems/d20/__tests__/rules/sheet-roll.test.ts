@@ -185,7 +185,8 @@ describe('rollFromSheet', () => {
 
             expect(r).toMatchObject({ kind: 'damage', crit: false });
             expect(r.kind === 'damage' && r.dice).toEqual([
-                { sides: 6, value: 4 },
+                { sides: 4, value: 3 },
+                { sides: 6, value: 6 },
             ]);
             expect(r.kind === 'damage' && r.total).toBeGreaterThanOrEqual(1);
         });
@@ -194,10 +195,20 @@ describe('rollFromSheet', () => {
             const r = rollFromSheet(
                 armed(),
                 { kind: 'damage', attackId: 'sword', crit: true },
-                opts(false)
+                {
+                    ...opts(false),
+                    rules: {
+                        ...DEFAULT_RULES,
+                        criticals: {
+                            ...DEFAULT_RULES.criticals,
+                            doubleDice: true,
+                        },
+                    },
+                }
             );
 
-            expect(r.kind === 'damage' && r.dice).toHaveLength(2);
+            expect(r).toMatchObject({ kind: 'damage', crit: true });
+            expect(r.kind === 'damage' && r.dice).toHaveLength(4);
         });
 
         it('unknown attack is a 404', () => {

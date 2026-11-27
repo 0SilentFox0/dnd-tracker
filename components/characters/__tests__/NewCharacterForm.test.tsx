@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import { NewCharacterForm } from '@/components/characters/NewCharacterForm';
 
 const set = vi.fn();
@@ -66,6 +67,7 @@ vi.mock('@/lib/utils/rules/systems/stats', () => ({
 vi.mock('@/lib/hooks/characters', () => ({
     useCreateCharacter: () => ({ mutateAsync: vi.fn() }),
     useChoiceRefs: () => ({ ready: false }),
+    useOpenSpellPicks: () => 0,
     useCharacterForm: () => ({
         status: { isLoading: false, error: null },
         formData: {},
@@ -79,7 +81,7 @@ vi.mock('@/lib/hooks/characters', () => ({
 afterEach(cleanup);
 
 const renderForm = () =>
-    render(
+    renderWithConfirm(
         <NewCharacterForm
             campaignId="c1"
             characterType="player"

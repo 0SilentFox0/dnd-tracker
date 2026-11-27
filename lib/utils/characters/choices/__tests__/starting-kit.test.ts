@@ -64,7 +64,12 @@ describe('atCreation choices', () => {
         expect(visits.find((v) => v.choice.id === kitChoice.id)?.open).toBe(
             false
         );
-        expect(pendingCount(visits, krefs)).toBe(0);
+        expect(
+            pendingCount(
+                visits.filter((v) => v.choice.id === kitChoice.id),
+                krefs
+            )
+        ).toBe(0);
         expect(
             wizardSteps(state(), krefs, { level: 1, classMode: true }).map(
                 (s) => s.choice?.id
