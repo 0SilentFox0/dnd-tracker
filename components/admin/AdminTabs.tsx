@@ -33,7 +33,9 @@ export function AdminTabs() {
                         aria-current={active ? 'page' : undefined}
                         className={cn(
                             'hud-sc flex min-h-10 items-center rounded px-3 text-sm',
-                            active ? 'bg-accent' : 'opacity-70 hover:opacity-100'
+                            active
+                                ? 'bg-accent'
+                                : 'opacity-70 hover:opacity-100'
                         )}
                     >
                         {t(key)}

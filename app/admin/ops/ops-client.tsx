@@ -50,10 +50,7 @@ export function OpsClient() {
                                 aria-labelledby="ops-limits"
                                 className="space-y-3"
                             >
-                                <h2
-                                    id="ops-limits"
-                                    className="hud-sc text-lg"
-                                >
+                                <h2 id="ops-limits" className="hud-sc text-lg">
                                     {t('limits.title')}
                                 </h2>
                                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

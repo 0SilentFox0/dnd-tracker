@@ -34,7 +34,10 @@ describe('assertAdmin', () => {
         getAuthUserOptional.mockResolvedValue(null);
         await expect(assertAdmin()).rejects.toThrow('NEXT_NOT_FOUND');
 
-        getAuthUserOptional.mockResolvedValue({ id: 'someone', email: 'no@x.com' });
+        getAuthUserOptional.mockResolvedValue({
+            id: 'someone',
+            email: 'no@x.com',
+        });
         await expect(assertAdmin()).rejects.toThrow('NEXT_NOT_FOUND');
     });
 
@@ -69,7 +72,9 @@ describe('robots', () => {
 
 describe('legacy /ops page', () => {
     it('permanently redirects to /admin/ops', async () => {
-        vi.doMock('@/lib/server/ops/summary', () => ({ buildSummary: vi.fn() }));
+        vi.doMock('@/lib/server/ops/summary', () => ({
+            buildSummary: vi.fn(),
+        }));
 
         const mod = await import('@/app/ops/page');
 
