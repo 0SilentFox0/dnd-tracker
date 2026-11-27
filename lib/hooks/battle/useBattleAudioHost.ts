@@ -14,7 +14,7 @@ export function useBattleAudioHost(): AudioHost {
         campaignId,
         battleId,
         battle,
-        viewer: { isDM },
+        viewer: { isDM, readOnly },
         toast: { show },
     } = useBattleScene();
 
@@ -22,6 +22,7 @@ export function useBattleAudioHost(): AudioHost {
         () => ({
             campaignId,
             isDM,
+            readOnly,
             queryKey: battleKeys.audio(campaignId, battleId),
             seed: battle.audio,
             fetch: () => getBattleAudio(campaignId, battleId),
@@ -29,6 +30,6 @@ export function useBattleAudioHost(): AudioHost {
                 sendBattleAudio(campaignId, battleId, cmd),
             onFailure: show,
         }),
-        [campaignId, battleId, isDM, battle.audio, show]
+        [campaignId, battleId, isDM, readOnly, battle.audio, show]
     );
 }

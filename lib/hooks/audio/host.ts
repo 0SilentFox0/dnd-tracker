@@ -10,6 +10,7 @@ export interface AudioHost {
     campaignId: string;
     isDM: boolean;
     silent?: boolean;
+    readOnly?: boolean;
     queryKey: QueryKey;
     seed: BattleAudioState | null | undefined;
     fetch(): Promise<BattleAudioSnapshot>;
