@@ -63,6 +63,14 @@
 - Крок `background` у `wizardSteps` (`WizardStep.kind: "background"`, `path: "backgroundId"`) з'являється лише при явному `keep` (`startAt: "background"`), у `classMode` і коли в кампанії є передісторії; `withStepBackground` = `mergeBackground`, тож заміна скидає `backgroundChoices`/`backgroundFeatPicks`. `BackgroundPicker` — radio-картки `ChoiceCard`; `ChoiceWizard` попереджає при заміні вже збереженої.
 - `sheet.choices.background` (`SheetBackground`): опис, навички, інструменти, origin feat, `open` і `openKey` (перший відкритий крок власників `background`/`backgroundFeat`, `backgroundOpenCount` у `choices/pending.ts`). `BackgroundSection` над `ClassesHeader`: «Обрати/Змінити» (`openChoices("background")`) лише при `canEdit`; бейдж відкритих виборів веде на `openKey`. Блок передісторії з `FeatsBlock` прибрано.
 
+## Майстер створення героя WFRP (крок «Історія»)
+
+`WfrpDraftForm` (`systems/wfrp/ui/creation/`, логіка в `useWfrpDraftForm`) веде кроки: вид → кар'єра → характеристики → таланти → **Історія** (необовʼязковий) → особисте. У режимі редагування чернетки (`characterId`) лишається лише особисте, кроку «Історія» немає; у варіанті ДМ (`dm`) він є.
+
+- **Квіз.** Тексти — неймспейс `wfrpStory` (`messages/*/wfrpStory.json`), який вантажиться лише на сторінках чернеток (`meta.pages.draft`). Таблиці й складання тексту — чиста логіка `systems/wfrp/rules/creation/story/` (без текстів), стан і кидки — `useStoryQuiz`. Відповідь — рядок таблиці (переклад) або власний текст; кінцева пунктуація відповіді зрізається перед фразою.
+- **Зовнішність.** Блок `appearance` (вік, зріст, очі, волосся) береться з `appearance` у профілі раси (`SpeciesProfile`, опційно, strict-схема); без нього блок прихований і в біографію не входить. Зміна `appearance` (інша раса) скидає відповіді age/height/eyes/hair, а `compose` бере лише видимі блоки.
+- **Звʼязок з особистим.** `applyStory` виконується на «Далі» з кроку «Історія». Біографія заповнюється, лише поки її не чіпали вручну (`bgTouched`); ручний текст ніколи не перезаписується, натомість зʼявляється кнопка «Замінити». Цілі з квізу (`ambitionLong` → main, `ambitionShort` → personal, `secret` → secret) замінюють попередні цілі квізу (`quizGoals`), але ніколи не введені вручну. Ліміт цілей — `WFRP_DRAFT_GOALS_MAX = 5` (спільний із серверною схемою; квізові додаються лише в залишок місця, кнопка «Додати ціль» вимикається на ліміті). Біографія обрізається по слову до 4000 символів (`BACKGROUND_LIMIT`) із попередженням.
+
 ## Характеристики WFRP, Wounds, тести з листа, сесія
 
 Лише для кампаній із `rules.system.key = "wfrp"` (реєстр — [rule-systems.md](rule-systems.md)). JSON `characteristics` живе в `characters` і `units`; для d20 `system-fields.ts` його відкидає, для wfrp ховає шість d20-колонок, рівень і архетип. Wounds = `resources.hp` (максимум — `progression.maxHp` через `characterBaseHp`, тож лист і бій читають одне число), Fortune — `resources.fortune`.
