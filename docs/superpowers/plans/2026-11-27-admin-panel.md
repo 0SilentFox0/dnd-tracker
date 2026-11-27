@@ -21,7 +21,7 @@
 - Без Cyrillic у коді й коментарях (тексти в `messages/{uk,en}/admin.json`); коментарі англійською, мінімальні.
 - IP ніколи не логувати; у логах лише `errorName(e)`.
 - Ретеншн: `user_access` 180 днів за `lastSeen`, `user_activity_days` 400 днів за `day`.
-- Cookie маркера: `cn_seen`, значення `<YYYY-MM-DD UTC>:<userId>`, httpOnly, sameSite lax, secure у prod, `maxAge` до кінця доби UTC.
+- Cookie маркера: `cn_seen`, значення `<userId>:<YYYY-MM-DD UTC>`, httpOnly, sameSite lax, secure у prod, `maxAge` до кінця доби UTC.
 - Polling у адмінці нема; лише запит при відкритті + «Оновити».
 - Тести: агенти пишуть тести й запускають лише свої файли (`pnpm test:run <file>`); повний `pnpm test:run` — один раз у Task 15. Лінт: `pnpm exec eslint --fix <touched files>`, repo-wide lint не запускати.
 - Дані до деплою не існують: UI підписує «дані з <дата першого рядка>».

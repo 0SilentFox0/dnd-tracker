@@ -48,7 +48,7 @@
 - **`admin_actions`** — `id`, `at`, `adminUserId`, `action` (`ban` | `unban` | `signout` | `delete`), `targetUserId` (без FK — ціль може бути видалена), `meta` jsonb (тривалість бану, email цілі на момент видалення — лише в цій таблиці, видимій власнику).
 
 **Збір активності** (`proxy.ts`, лише навігації сторінок, не `/api`):
-- Якщо після `updateSession` є юзер і cookie `cn_seen` ≠ `<YYYY-MM-DD UTC>:<userId>`: у фоні (`waitUntil` з `@vercel/functions`, поза Vercel — без очікування з `catch`) upsert `user_access` (`days` +1, якщо `lastSeen` < сьогодні) і insert-ignore `user_activity_days`; поставити cookie (httpOnly, до кінця доби UTC).
+- Якщо після `updateSession` є юзер і cookie `cn_seen` ≠ `<userId>:<YYYY-MM-DD UTC>`: у фоні (`waitUntil` з `@vercel/functions`, поза Vercel — без очікування з `catch`) upsert `user_access` (`days` +1, якщо `lastSeen` < сьогодні) і insert-ignore `user_activity_days`; поставити cookie (httpOnly, до кінця доби UTC).
 - IP: перший елемент `x-forwarded-for`, далі `x-real-ip`; країна: `x-vercel-ip-country`. Без IP — пишемо лише `user_activity_days`.
 - Помилка запису логується (без IP у лозі) і не впливає на відповідь.
 - Pure-частини в `lib/utils/admin/`: `parseClientIp(headers)`, `parseDevice(ua)`, `shouldTouch(cookie, userId, now)`.
@@ -98,7 +98,7 @@
 
 ## 8. Помилки, i18n, приватність
 
-- Помилки — `{ error, issues? }` з ключами в `lib/constants/api-errors.ts`; не-адмін — 404 на всьому `/api/admin/*`.
+- Помилки — `{ error, issues? }` з ключами в `lib/constants/api-errors.ts`; не-адмін — 404 на всьому `/api/admin/*`, окрім `GET /api/admin/me`: він завжди відповідає `200 { isAdmin }` і розкриває лише власний біт викликача (виняток за рішенням власника).
 - i18n: namespace `admin` (uk/en), додати в core namespaces як `ops`; тексти ops лишаються в `ops`. Whats-new не потрібен (не для юзерів).
 - Політика приватності (uk/en): рядок про зберігання IP, країни й типу пристрою 180 днів для безпеки акаунтів.
 - IP ніколи не потрапляє в логи й відповіді не-адмінам.

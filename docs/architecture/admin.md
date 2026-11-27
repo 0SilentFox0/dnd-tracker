@@ -1,6 +1,6 @@
 # Admin panel
 
-Owner-only `/admin`: tabs Overview, Users, Security, Ops. Access is `isAdmin` (`lib/utils/api/admin-access.ts`: `OPS_ADMIN_EMAILS` or `PLATFORM_ADMIN_USER_IDS`); a non-owner gets 404 on pages and APIs. `/ops` redirects (308) to `/admin/ops`; the header shows an admin link when `GET /api/admin/me` answers `200 { isAdmin: true }` (it never 404s, `useIsAdmin`).
+Owner-only `/admin`: tabs Overview, Users, Security, Ops. Access is `isAdmin` (`lib/utils/api/admin-access.ts`: `OPS_ADMIN_EMAILS` or `PLATFORM_ADMIN_USER_IDS`); a non-owner gets 404 on pages and APIs. `/ops` redirects (308) to `/admin/ops`; the header shows an admin link when `GET /api/admin/me` answers `200 { isAdmin: true }` (explicit exception to "non-admin gets 404": it never 404s and reveals only the caller's own bit; `useIsAdmin`, keyed by user id).
 
 ## Tables and retention
 
@@ -15,7 +15,7 @@ Prune is `pruneAdminData` (`lib/server/admin/prune.ts`), called from the ops col
 
 ## Activity collection (proxy)
 
-`updateSession` (`lib/supabase/middleware.ts`), page navigations only: when a user is signed in and cookie `cn_seen` is not `<UTC date>:<userId>`, it fires `recordActivity` and sets the cookie (httpOnly, until UTC midnight). The write runs in `waitUntil` (`@vercel/functions`) behind a **dynamic import** of `lib/server/admin/record-activity`, so Prisma stays out of the proxy bundle. `recordActivity` upserts `user_access` (`days` +1 when `lastSeen` is an earlier day) and inserts `user_activity_days` with `ON CONFLICT DO NOTHING`; failures log only the error name (never the IP) and never affect the response. IP = first `x-forwarded-for`, then `x-real-ip`; country = `x-vercel-ip-country`; without an IP only the activity day is written. Pure parts: `lib/utils/admin/{client-ip,device,seen-cookie,email-hash}.ts`. There is no history before the deploy.
+`updateSession` (`lib/supabase/middleware.ts`), page navigations only: when a user is signed in and cookie `cn_seen` is not `<userId>:<UTC date>`, it fires `recordActivity` and sets the cookie (httpOnly, until UTC midnight). The write runs in `waitUntil` (`@vercel/functions`) behind a **dynamic import** of `lib/server/admin/record-activity`, so Prisma stays out of the proxy bundle. `recordActivity` upserts `user_access` (`days` +1 when `lastSeen` is an earlier day) and inserts `user_activity_days` with `ON CONFLICT DO NOTHING`; failures log only the error name (never the IP) and never affect the response. IP = first `x-forwarded-for`, then `x-real-ip`; country = `x-vercel-ip-country`; without an IP only the activity day is written. Pure parts: `lib/utils/admin/{client-ip,device,seen-cookie,email-hash}.ts`. There is no history before the deploy.
 
 ## API
 
@@ -31,7 +31,7 @@ All `requirePlatformAdmin`, `privateJson`, `force-dynamic`, thin `route.ts` plus
 
 ## Actions and limits
 
-`runUserAction` (`lib/server/admin/run-user-action.ts`) writes an `admin_actions` row only after the Supabase Admin call succeeds; an action on yourself is 400; Admin client unavailable (no service key / network) is 503 and nothing is logged. Ban sets `ban_duration` (24h, 168h, `876000h` = forever) and signs the user out; unban sets `none`; sign-out revokes sessions via the Admin API with `DELETE FROM auth.sessions` as fallback. Delete is `deleteAccount(id, { by: 'admin' })`, confirmed by typing the user's email; `AccountDeleteBlockedError` returns the blocking template clones. Limit: the session check is local JWT (`getClaims`), so an already issued access token keeps working until it expires (up to 1 h); only refresh stops. The UI says the action takes effect within an hour.
+`runUserAction` (`lib/server/admin/run-user-action.ts`) writes an `admin_actions` row only after the Supabase Admin call succeeds; an action on yourself is 400; Admin client unavailable (no service key / network) is 503 and nothing is logged. Ban sets `ban_duration` (24h, 168h, `876000h` = forever) and signs the user out; unban sets `none`; sign-out revokes sessions via the Admin API with `DELETE FROM auth.sessions` as fallback. Ban applies even if the following session removal fails (`meta.signedOut: false`). Delete preflights the Admin client (missing key is 503 before any DB change) and is `deleteAccount(id, { removeAuthUser }, { by: 'admin' })`; if the Supabase user removal fails after the DB commit, the row is still logged with `meta.authRemoved: false` and the answer is 503 (remove the auth user by hand). Delete is confirmed by typing the user's email; `AccountDeleteBlockedError` returns the blocking template clones. Limit: the session check is local JWT (`getClaims`), so an already issued access token keeps working until it expires (up to 1 h); only refresh stops. The UI says the action takes effect within an hour.
 
 ## `auth` schema
 
