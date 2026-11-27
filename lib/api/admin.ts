@@ -4,6 +4,7 @@ import type {
     AdminCampaignSummary,
     AdminOverview,
     AdminRange,
+    AdminSecurity,
     AdminUserDetail,
     AdminUsersPage,
     AdminUsersQuery,
@@ -58,3 +59,6 @@ export const deleteAdminUser = (id: string, email: string) =>
         method: 'DELETE',
         body: JSON.stringify({ email }),
     });
+
+export const getAdminSecurity = (days: number) =>
+    request<AdminSecurity>(`/api/admin/security?days=${days}`);

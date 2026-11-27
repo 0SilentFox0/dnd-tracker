@@ -135,3 +135,34 @@ export type AdminCampaignSummary = {
     storageBytes: number | null;
     template: { versions: number; clones: number } | null;
 };
+
+export type AdminSecurity = {
+    days: number;
+    groups: {
+        ip: string;
+        country: string | null;
+        sharedDays: number;
+        crowd: boolean;
+        accounts: {
+            userId: string;
+            device: string | null;
+            days: number;
+            displayName: string;
+            email: string;
+        }[];
+    }[];
+    reRegistrations: {
+        userId: string;
+        displayName: string;
+        email: string;
+        createdAt: string;
+        deletedAt: string;
+    }[];
+    actions: {
+        at: string;
+        action: string;
+        adminUserId: string;
+        targetUserId: string;
+        meta: unknown;
+    }[];
+};

@@ -33,3 +33,10 @@ export const banSchema = z.object({
 });
 
 export const adminDeleteSchema = z.object({ email: z.string().email() });
+
+export const adminSecurityQuerySchema = z.object({
+    days: z.coerce
+        .number()
+        .pipe(z.union([z.literal(7), z.literal(30), z.literal(90)]))
+        .default(30),
+});
