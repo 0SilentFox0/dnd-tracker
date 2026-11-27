@@ -478,9 +478,10 @@ export async function clearArtBakedTx(tx: Prisma.TransactionClient, mapId: strin
 
     const header = (current?.header ?? {}) as Record<string, unknown>;
 
-    if (!current || header.artBaked !== true) return;
+    if (!current || (header.artBaked !== true && !('sightBlocked' in header)))
+        return;
 
-    const { artBaked: _drop, ...rest } = header;
+    const { artBaked: _drop, sightBlocked: _sight, ...rest } = header;
 
     const base = current.mapVersion;
 
@@ -517,9 +518,15 @@ export async function saveMap(
     mapId: string,
     input: BattleMapSaveInput
 ): Promise<BattleMapBrief> {
-    const { brief, released } = await prisma.$transaction((tx) =>
-        saveMapTx(tx, mapId, input)
-    );
+    const { brief, released } = await prisma.$transaction(async (tx) => {
+        const hasArt = (await tx.battleMapArt.count({ where: { mapId } })) > 0;
+
+        if (hasArt) return saveMapTx(tx, mapId, input);
+
+        const { sightBlocked: _stale, ...map } = input.map;
+
+        return saveMapTx(tx, mapId, { ...input, map });
+    });
 
     await removeUnreferencedBackgrounds(released.campaignId, released.urls);
 

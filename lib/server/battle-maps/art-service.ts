@@ -120,6 +120,7 @@ export async function saveArt(
             bars: save.bars,
             doors: header.doors,
             blocked: header.blocked,
+            sightBlocked: header.sightBlocked,
             background: header.background,
             backgroundCols: header.backgroundCols,
             backgroundRows: header.backgroundRows,

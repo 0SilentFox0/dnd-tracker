@@ -4,6 +4,9 @@ import { dirtyChunks } from '../dirty';
 import { encodeFloors } from '../floors';
 import { emptyScene } from '../scene';
 
+import { UNIT } from '@/lib/utils/battle/grid/layout';
+import type { MapArtStamp } from '@/types/battle-map';
+
 describe('dirtyChunks', () => {
     it('marks a floor chunk and its neighbours only', () => {
         const prev = emptyScene();
@@ -47,5 +50,64 @@ describe('dirtyChunks', () => {
 
         expect(dirty.has('1:0')).toBe(true);
         expect(dirty.has('0:0')).toBe(true);
+    });
+
+    describe('stamps', () => {
+        const stamp = (over: Partial<MapArtStamp> = {}): MapArtStamp => ({
+            id: 's1',
+            asset: 'altar',
+            x: 2 * UNIT,
+            y: 2 * UNIT,
+            rot: 0,
+            scale: 1,
+            flip: false,
+            z: 0,
+            ...over,
+        });
+
+        const base = emptyScene();
+
+        const withStamps = (stamps: MapArtStamp[]) => ({
+            ...base,
+            stamps,
+        });
+
+        it('marks old and new places of a moved stamp', () => {
+            const prev = withStamps([stamp()]);
+
+            const next = withStamps([stamp({ x: 50 * UNIT, y: 40 * UNIT })]);
+
+            const dirty = dirtyChunks(prev, next, 'square') as Set<string>;
+
+            expect(dirty.has('0:0')).toBe(true);
+            expect(dirty.has('3:2')).toBe(true);
+            expect(dirty.has('2:0')).toBe(false);
+        });
+
+        it('marks both chunks of a rotated stamp near a chunk border', () => {
+            const prev = withStamps([]);
+
+            const next = withStamps([
+                stamp({
+                    asset: 'bed',
+                    x: 16 * UNIT,
+                    y: 2.5 * UNIT,
+                    rot: 90,
+                }),
+            ]);
+
+            const dirty = dirtyChunks(prev, next, 'square') as Set<string>;
+
+            expect(dirty.has('0:0')).toBe(true);
+            expect(dirty.has('1:0')).toBe(true);
+        });
+
+        it('is empty for equal stamps in a new array', () => {
+            const prev = withStamps([stamp()]);
+
+            const next = withStamps([stamp()]);
+
+            expect((dirtyChunks(prev, next, 'square') as Set<string>).size).toBe(0);
+        });
     });
 });

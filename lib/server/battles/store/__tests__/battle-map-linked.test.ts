@@ -112,6 +112,16 @@ describe('loadBattle: карта бібліотеки', () => {
         expect(loaded?.meta.map?.blocked).toContain('2:3');
     });
 
+    it('linked: sightBlocked із header карти бою доходить до ефективної карти', async () => {
+        const loaded = await loadWith({
+            map: { ...header, sightBlocked: ['2:2'] },
+            mapId: 'm1',
+            mapVersion: 3,
+        });
+
+        expect(loaded?.meta.map?.sightBlocked).toEqual(['2:2']);
+    });
+
     it('linked: відсутня pinned-версія дає типізовану помилку з mapId і версією', async () => {
         mocks.getPinned.mockResolvedValue(null);
 

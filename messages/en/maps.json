@@ -136,7 +136,9 @@
         "wall-erase": "Removes walls together with openings on them.",
         "opening": "Click walls to place a door, window, bars or portcullis.",
         "blocked": "Click to place or remove rubble.",
-        "light": "Click to add a light; drag the handles to move."
+        "light": "Click to add a light; drag the handles to move.",
+        "stamp": "Click to place the chosen stamp; R and F turn the ghost.",
+        "stamp-select": "Click a stamp to select it, drag to move, use the handles to rotate and scale."
       },
       "brushSize": "Brush size",
       "floorMaterial": "Floor",
@@ -213,15 +215,44 @@
       "notice": {
         "openingNeedsWall": "Openings can only be placed on walls.",
         "terrainLimit": "The rubble limit for this map is reached.",
-        "lightLimit": "The light limit for this map is reached."
+        "lightLimit": "The light limit for this map is reached.",
+        "unknownStamps": "Removed stamps with unknown assets: {count}"
       },
       "validation": {
         "badEdge": "Invalid wall or opening edge.",
         "openingWithoutWall": "An opening without a wall.",
         "tooManyDoors": "Too many doors on the map.",
         "outOfBounds": "An art element is outside the map.",
+        "unknownStamp": "Unknown stamp.",
+        "duplicateStamp": "Duplicate stamp id.",
+        "tooManyBlocked": "Too many blocked cells on the map.",
         "badFloor": "Invalid floor data."
       }
+    },
+    "stamps": {
+      "tool": "Stamp",
+      "select": "Select stamp",
+      "biome": {
+        "dungeon": "Dungeon",
+        "building": "Building",
+        "nature": "Nature",
+        "settlement": "Settlement"
+      },
+      "categoryLabel": "Category",
+      "search": "Search stamps",
+      "snap": "Snap to cell",
+      "showBlocking": "Show all blocking",
+      "rotate": "Rotation (deg)",
+      "scale": "Scale",
+      "flip": "Flip",
+      "forward": "Forward",
+      "backward": "Backward",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "limit": "The stamp limit for this map is reached.",
+      "empty": "No stamps found.",
+      "hints": "R / Shift+R rotate, F flip, [ ] order, Ctrl/Cmd+D duplicate, Delete remove, wheel scales.",
+      "categoryAll": "All"
     }
   },
   "catalog": {

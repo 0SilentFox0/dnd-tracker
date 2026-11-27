@@ -2,6 +2,7 @@ import type { TileRenderState } from './tiles/TileCanvas';
 
 import type { EdgeEditing, MapDoorsTool, ModeTools } from '@/lib/hooks/battle';
 import type { FogBrush } from '@/lib/hooks/battle';
+import type { EditorStamps } from '@/lib/hooks/battle-maps';
 import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapActions,
@@ -36,6 +37,7 @@ export interface ArtPreviewState {
         select(id: string | null): void;
         move(id: string, at: { x: number; y: number }): void;
     };
+    stamps?: { mode: 'stamp' | 'stamp-select'; api: EditorStamps };
 }
 
 export interface BattleMapEditing {

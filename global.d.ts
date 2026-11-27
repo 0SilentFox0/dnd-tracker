@@ -37,6 +37,7 @@ import type inventory from './messages/uk/inventory.json';
 import type landing from './messages/uk/landing.json';
 import type legal from './messages/uk/legal.json';
 import type maps from './messages/uk/maps.json';
+import type mapStamps from './messages/uk/mapStamps.json';
 import type music from './messages/uk/music.json';
 import type onboarding from './messages/uk/onboarding.json';
 import type ops from './messages/uk/ops.json';
@@ -107,6 +108,7 @@ declare module 'next-intl' {
             world: typeof world;
             maps: typeof maps;
             tileLabels: typeof tileLabels;
+            mapStamps: typeof mapStamps;
             // <systems:generated>
             battleD20: typeof import('./messages/uk/battleD20.json');
             battleMorale: typeof import('./messages/uk/battleMorale.json');

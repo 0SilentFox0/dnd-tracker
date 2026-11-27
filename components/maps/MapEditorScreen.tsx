@@ -10,6 +10,7 @@ import { BattleMap } from '@/components/battle/map';
 import { QueryState } from '@/components/common/states';
 import {
     type EditorPanel,
+    isStampTool,
     useBattleMap,
     useBattleMapTiles,
     useMapArt,
@@ -150,7 +151,8 @@ function EditorContent({
 
     const artTool = panel === 'art' ? artEditor.tool : null;
 
-    const artCellTool = artTool !== null && !isArtEdgeTool(artTool);
+    const artCellTool =
+        artTool !== null && !isArtEdgeTool(artTool) && !isStampTool(artTool);
 
     const cellPainting =
         paintingTiles ||
@@ -165,8 +167,14 @@ function EditorContent({
 
     const derivedDoors = useMemo(
         () =>
-            artScene ? deriveMechanics(artScene, map.gridType ?? 'square').doors : null,
-        [artScene, map.gridType]
+            artScene
+                ? deriveMechanics(artScene, {
+                      cols: map.cols,
+                      rows: map.rows,
+                      gridType: map.gridType,
+                  }).doors
+                : null,
+        [artScene, map.cols, map.rows, map.gridType]
     );
 
     const previewMap = useMemo(() => {
@@ -210,7 +218,7 @@ function EditorContent({
 
     const { edgeEditing } = editor;
 
-    const { lights, revision: artRevision } = artEditor;
+    const { lights, stamps: stampsApi, revision: artRevision } = artEditor;
 
     const artPreview = useMemo(
         () =>
@@ -220,9 +228,12 @@ function EditorContent({
                       scene: artScene,
                       revision: artRevision,
                       ...(artTool === 'light' && { lights }),
+                      ...(isStampTool(artTool) && {
+                          stamps: { mode: artTool, api: stampsApi },
+                      }),
                   }
                 : null,
-        [artScene, artRevision, artTool, lights, source.id]
+        [artScene, artRevision, artTool, lights, stampsApi, source.id]
     );
 
     const artEdges = panel === 'art' ? artEditor.edgeEditing : null;

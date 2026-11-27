@@ -179,7 +179,8 @@ export function useBattleMapEditor(
     );
 
     const applyArt = useCallback(
-        (patch: ArtMapPatch) => setMap((m) => ({ ...m, ...patch })),
+        (patch: ArtMapPatch) =>
+            setMap((m) => ({ ...m, ...patch, sightBlocked: patch.sightBlocked })),
         []
     );
 
