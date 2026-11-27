@@ -23,6 +23,30 @@ export const ART_LAYERS = [
     'effects',
 ] as const;
 
+export interface DroppedLayers {
+    edgeArt: number;
+    effects: number;
+}
+
+/** Painted cells in the layers that conversion discards without a replacement. */
+export function countDroppedLayers(tileLayers: ChunkTileLayers): DroppedLayers {
+    const dropped: DroppedLayers = { edgeArt: 0, effects: 0 };
+
+    for (const layers of Object.values(tileLayers)) {
+        if (layers['edge-art'])
+            dropped.edgeArt += decodeTileChunk(layers['edge-art']).filter(
+                Boolean
+            ).length;
+
+        if (layers.effects)
+            dropped.effects += decodeTileChunk(layers.effects).filter(
+                Boolean
+            ).length;
+    }
+
+    return dropped;
+}
+
 export const hasFloorLayers = (tileLayers: ChunkTileLayers): boolean =>
     Object.values(tileLayers).some((l) => l.ground || l.wallfill);
 

@@ -11,6 +11,8 @@ import { toInputJsonObject } from '@/lib/utils/common/json';
 import {
     type ChunkTileLayers,
     convertTiles,
+    countDroppedLayers,
+    type DroppedLayers,
     hasFloorLayers,
     stripArtLayers,
 } from '@/scripts/maps/lib/tiles-to-scene';
@@ -26,6 +28,7 @@ export interface ChunkRow {
 export interface Conversion {
     scene: MapArtScene;
     wallsClipped: number;
+    dropped: DroppedLayers;
 }
 
 /** Null when the map has no ground/wallfill to convert. */
@@ -58,7 +61,7 @@ export function buildConversion(
     if (!mapArtSceneSchema.safeParse(converted.scene).success)
         throw new Error('scene failed mapArtSceneSchema');
 
-    return converted;
+    return { ...converted, dropped: countDroppedLayers(tileLayers) };
 }
 
 function stripSnapshotLayers(payload: Record<string, unknown>) {

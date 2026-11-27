@@ -67,7 +67,7 @@ async function main() {
                 }
 
                 console.log(
-                    `${map.id} "${map.name}" · floor cells ${countFloorCells(conversion.scene)} · walls ${Object.keys(conversion.scene.walls).length} · walls clipped ${conversion.wallsClipped}`
+                    `${map.id} "${map.name}" · floor cells ${countFloorCells(conversion.scene)} · walls ${Object.keys(conversion.scene.walls).length} · walls clipped ${conversion.wallsClipped} · dropped edge-art cells ${conversion.dropped.edgeArt} · effects cells ${conversion.dropped.effects}`
                 );
 
                 if (!apply) {
