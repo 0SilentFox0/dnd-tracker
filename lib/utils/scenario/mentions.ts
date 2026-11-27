@@ -13,7 +13,7 @@ export type MentionHit = {
 
 const MIN_STEM = 4;
 
-const MAX_ENDING = 3;
+export const MAX_ENDING = 3;
 
 const STRIPPABLE = /[аеєиіїоуюяьй]$/iu;
 

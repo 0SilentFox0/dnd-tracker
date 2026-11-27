@@ -1,4 +1,8 @@
 {
+  "2026-11-27-scenario-auto-mentions": {
+    "title": "Auto-mentions in the scenario",
+    "body": "Names of units, artifacts, heroes and NPCs turn into mentions as you type, no «@» needed (Ctrl+Z restores the text). The «Tag matches» button tags an already written page."
+  },
   "2026-11-26-delete-account": {
     "title": "Delete your account from the profile",
     "body": "The new Danger zone at the bottom of your profile deletes your account, the campaigns you run and your personal files after you confirm with your email."

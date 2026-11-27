@@ -3,11 +3,14 @@
 import { useTranslations } from 'next-intl';
 import type { Editor } from '@tiptap/core';
 
-import { RichTextEditor } from '../rich-text/RichTextEditor';
+import {
+    type MentionSources,
+    RichTextEditor,
+} from '../rich-text/RichTextEditor';
 
 import { ScenarioRichText } from '@/components/scenario/page/ScenarioRichText';
 import { isDocEmpty } from '@/lib/utils/scenario/doc';
-import type { MentionOption, RichDoc } from '@/types/scenario';
+import type { RichDoc } from '@/types/scenario';
 
 export type CellColumn = 'story' | 'notes';
 
@@ -23,7 +26,7 @@ export function ScenarioCell({
     column,
     doc,
     active,
-    searchMentions,
+    mentions,
     handlers,
 }: {
     campaignId: string;
@@ -31,7 +34,7 @@ export function ScenarioCell({
     column: CellColumn;
     doc: RichDoc;
     active: boolean;
-    searchMentions: (query: string) => Promise<MentionOption[]>;
+    mentions: MentionSources;
     handlers: Handlers;
 }) {
     const t = useTranslations('scenario.cell');
@@ -43,7 +46,7 @@ export function ScenarioCell({
                     key={`${rowId}-${column}`}
                     doc={doc}
                     label={column === 'story' ? t('story') : t('notes')}
-                    searchMentions={searchMentions}
+                    mentions={mentions}
                     onReady={handlers.onReady}
                     onChange={handlers.onChange}
                 />

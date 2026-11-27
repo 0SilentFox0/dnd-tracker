@@ -3,6 +3,7 @@ import type {
     MentionNodeAttrs,
     MentionOptions,
 } from '@tiptap/extension-mention';
+import { PluginKey } from '@tiptap/pm/state';
 import { ReactRenderer } from '@tiptap/react';
 import type {
     SuggestionKeyDownProps,
@@ -21,11 +22,16 @@ const GAP = 6;
 
 type Props = SuggestionProps<MentionOption, MentionNodeAttrs>;
 
+export const MENTION_SUGGESTION_KEY = new PluginKey<{ active: boolean }>(
+    'mentionSuggestion'
+);
+
 export function mentionSuggestion(
     search: (q: string) => Promise<MentionOption[]>
 ): MentionOptions['suggestion'] {
     return {
         char: '@',
+        pluginKey: MENTION_SUGGESTION_KEY,
         items: ({ query }) => search(query),
         render: () => {
             let renderer: ReactRenderer<

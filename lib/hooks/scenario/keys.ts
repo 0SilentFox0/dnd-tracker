@@ -6,6 +6,8 @@ export const scenarioKeys = {
         ['scenario-versions', campaignId, pageId] as const,
     mentions: (campaignId: string, q: string) =>
         ['scenario-mentions', campaignId, q] as const,
+    mentionNames: (campaignId: string) =>
+        ['scenario-mention-names', campaignId] as const,
     search: (campaignId: string, q: string) =>
         ['scenario-search', campaignId, q] as const,
     summaries: (campaignId: string) =>

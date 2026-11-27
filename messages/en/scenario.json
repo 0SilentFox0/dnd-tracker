@@ -104,6 +104,10 @@
   "editor": {
     "addRow": "Add a row",
     "addSection": "Add a section",
+    "autoTag": "Tag matches",
+    "autoTagDone": "{count, plural, one {Added # mention} other {Added # mentions}}",
+    "autoTagHint": "Turn names of units, artifacts, heroes and NPCs on this page into mentions",
+    "autoTagNone": "No matches found",
     "done": "Done",
     "exit": "Leave",
     "newChapter": "New chapter",

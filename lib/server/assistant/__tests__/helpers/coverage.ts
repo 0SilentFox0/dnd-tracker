@@ -1269,6 +1269,13 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
+        route: 'campaigns/[id]/scenario/mention-names',
+        methods: ['GET'],
+        task: 6,
+        adapter: 'scenario + legacy proposals',
+        state: 'active',
+    },
+    {
         route: 'campaigns/[id]/scenario/mentions',
         methods: ['GET'],
         task: 6,

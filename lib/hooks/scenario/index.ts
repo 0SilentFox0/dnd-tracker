@@ -1,5 +1,6 @@
 export { scenarioKeys } from './keys';
 export { useActiveSection } from './useActiveSection';
+export { useAutoMentionIndex } from './useAutoMentionIndex';
 export { useGenerateScenarioSummary } from './useGenerateScenarioSummary';
 export { useGraphViewport } from './useGraphViewport';
 export { useMentionSearch } from './useMentionSearch';
