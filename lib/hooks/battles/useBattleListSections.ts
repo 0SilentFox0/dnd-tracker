@@ -25,13 +25,15 @@ export function useBattleListSections<
 
     const active = byStatus(BattleStatus.ACTIVE, battles);
 
+    const matchedActive = byStatus(BattleStatus.ACTIVE, search.items);
+
     return {
         search,
         filter: {
             value: filter,
             set: setFilter,
             counts: {
-                all: active.length + prepared.length + completed.length,
+                all: matchedActive.length + prepared.length + completed.length,
                 prepared: prepared.length,
                 completed: completed.length,
             },

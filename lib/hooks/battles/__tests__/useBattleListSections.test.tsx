@@ -56,6 +56,6 @@ describe('useBattleListSections', () => {
         expect(ids(result.current.active)).toEqual(['1']);
         expect(ids(result.current.prepared)).toEqual(['2']);
         expect(ids(result.current.completed)).toEqual(['4']);
-        expect(result.current.filter.counts.all).toBe(3);
+        expect(result.current.filter.counts.all).toBe(2);
     });
 });

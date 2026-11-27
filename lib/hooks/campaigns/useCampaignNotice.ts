@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 import { useToasts } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -12,10 +12,6 @@ import {
 
 export function useCampaignNotice() {
     const t = useTranslator('dashboard');
-
-    const router = useRouter();
-
-    const pathname = usePathname();
 
     const searchParams = useSearchParams();
 
@@ -28,16 +24,18 @@ export function useCampaignNotice() {
 
         push({ id: `notice:${notice}`, text: t(`notices.${notice}`) });
 
-        const next = new URLSearchParams(searchParams.toString());
+        const next = new URLSearchParams(window.location.search);
 
         next.delete(CAMPAIGN_NOTICE_PARAM);
 
         const query = next.toString();
 
-        router.replace(query ? `${pathname}?${query}` : pathname, {
-            scroll: false,
-        });
-    }, [notice, push, t, router, pathname, searchParams]);
+        window.history.replaceState(
+            window.history.state,
+            '',
+            `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`
+        );
+    }, [notice, push, t]);
 
     return { toasts, dismiss };
 }

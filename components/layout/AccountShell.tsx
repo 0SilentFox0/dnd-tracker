@@ -27,11 +27,13 @@ export function accountNavItems(
     t: HeaderT,
     dmTools = true
 ): GameShellNavItem[] {
-    return NAV.filter((e) => dmTools || !DM_ONLY_NAV.has(e.id)).map(({ id, href }) => ({
-        id,
-        href,
-        label: t(id as Parameters<HeaderT>[0]),
-    }));
+    return NAV.filter((e) => dmTools || !DM_ONLY_NAV.has(e.id)).map(
+        ({ id, href }) => ({
+            id,
+            href,
+            label: t(id as Parameters<HeaderT>[0]),
+        })
+    );
 }
 
 export function accountActiveId(pathname: string): string {
@@ -53,7 +55,11 @@ export function AccountShell({
 
     const pathname = usePathname() ?? '';
 
-    const items = accountNavItems(t, dmTools);
+    const allItems = accountNavItems(t);
+
+    const items = dmTools
+        ? allItems
+        : allItems.filter((i) => !DM_ONLY_NAV.has(i.id));
 
     const activeId = accountActiveId(pathname);
 
@@ -62,8 +68,7 @@ export function AccountShell({
             items={items}
             activeId={activeId}
             title={
-                accountNavItems(t).find((i) => i.id === activeId)?.label ??
-                t('profile')
+                allItems.find((i) => i.id === activeId)?.label ?? t('profile')
             }
         >
             <div className="hud-surface mx-auto w-full max-w-[1400px] overflow-x-clip px-4 pt-3 md:hidden">
@@ -84,7 +89,7 @@ export function AccountShell({
                     activeId={activeId}
                     ariaLabel={t('profile')}
                 />
-                <main className="mx-auto min-w-0 w-full max-w-[960px] flex-1 max-sm:[&>.hud-form-page>.hud-form-actions]:!px-0 max-sm:[&>.hud-form-page>.hud-form-head>*]:!px-0 md:mx-0">
+                <main className="mx-auto w-full max-w-[960px] min-w-0 flex-1 md:mx-0 max-sm:[&>.hud-form-page>.hud-form-actions]:!px-0 max-sm:[&>.hud-form-page>.hud-form-head>*]:!px-0">
                     {children}
                 </main>
             </div>

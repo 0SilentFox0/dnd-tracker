@@ -3,6 +3,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
+import { useMarkNotFound } from '@/lib/hooks/common';
 
 let path = '/';
 
@@ -42,5 +43,24 @@ describe('Breadcrumbs', () => {
         expect(
             screen.getAllByText('common.breadcrumbs.details').length
         ).toBeGreaterThan(0);
+    });
+
+    it('last crumb reads not-found while the 404 marker is mounted', () => {
+        path = '/campaigns/abc/zzz';
+
+        const Marker = () => {
+            useMarkNotFound();
+
+            return null;
+        };
+
+        render(
+            <>
+                <Breadcrumbs />
+                <Marker />
+            </>
+        );
+
+        expect(screen.getByText('common.breadcrumbs.notFound')).toBeTruthy();
     });
 });
