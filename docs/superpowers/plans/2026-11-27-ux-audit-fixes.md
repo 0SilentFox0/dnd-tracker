@@ -12,19 +12,26 @@
 ## П0. Перевірити перед виправленням (≈1 сесія, швидко)
 | # | Що | Де дивитись | Результат |
 |---|---|---|---|
-| 0.1 | Бій англійською/мішаниною («Your turn», «Spellbook») — баг чи перемкнута cookie іншим агентом | бій у кампанії «UX-аудит», окремо uk/en | якщо баг → у П4 |
-| 0.2 | Бій «Триває» в лічильнику «Завершені 1» | `useBattleListSections.ts:24` коректний → дані: статус `completed` при живому бою (reserve / awaiting-DM victory) у `lib/server/battles` | фікс переходу статусу |
-| 0.3 | «Порожня сітка» дає випадкове підземелля | `BattleMapStep.tsx:131-135` бере порожній `DEFAULT_BATTLE_MAP`; підозра на map-art (`ArtStampsLayer`) або maze-дефолт | фікс джерела |
-| 0.4 | Плитки «Скіли/Дерева/Кар'єри» ведуть у 404 на 5e | `DM_DASHBOARD_SECTIONS` (`lib/constants/campaign-dashboard.ts:44`), `dmSectionsFor` (`lib/constants/campaigns.ts:85-185`), фолбек `DEFAULT_DASHBOARD_CONTEXT` у `DashboardGroups.tsx:31` | фікс у П1 |
-| 0.5 | HP 14 (список) vs 15 (бій) | список: `DmCharacterCard.tsx:71` → `characterBaseHp` без baked-абілок; бій: `bake.ts:36-47` (ймовірно Dwarven Toughness) | фікс у П3 |
+| 0.1 ✅ | Бій англійською/мішаниною («Your turn», «Spellbook») — баг чи перемкнута cookie іншим агентом | бій у кампанії «UX-аудит», окремо uk/en | якщо баг → у П4 |
+| 0.2 ✅ | Бій «Триває» в лічильнику «Завершені 1» | `useBattleListSections.ts:24` коректний → дані: статус `completed` при живому бою (reserve / awaiting-DM victory) у `lib/server/battles` | фікс переходу статусу |
+| 0.3 ✅ | «Порожня сітка» дає випадкове підземелля | `BattleMapStep.tsx:131-135` бере порожній `DEFAULT_BATTLE_MAP`; підозра на map-art (`ArtStampsLayer`) або maze-дефолт | фікс джерела |
+| 0.4 ✅ | Плитки «Скіли/Дерева/Кар'єри» ведуть у 404 на 5e | `DM_DASHBOARD_SECTIONS` (`lib/constants/campaign-dashboard.ts:44`), `dmSectionsFor` (`lib/constants/campaigns.ts:85-185`), фолбек `DEFAULT_DASHBOARD_CONTEXT` у `DashboardGroups.tsx:31` | фікс у П1 |
+| 0.5 ✅ | HP 14 (список) vs 15 (бій) | список: `DmCharacterCard.tsx:71` → `characterBaseHp` без baked-абілок; бій: `bake.ts:36-47` (ймовірно Dwarven Toughness) | фікс у П3 |
+
+**Корені П0 (хвиля 1, гілка `fix/ux-audit-w1`):**
+- 0.1 — не баг коду: контент бою бере локаль із cookie на сервері, а chrome (`ClientLocaleProvider`) — при монтуванні; інший аудитор перемкнув спільну cookie посеред сесії. Заголовок «Твій хід» уже через i18n (`useBattleTitle.ts`). Змін немає.
+- 0.2 — статус не ламався (`completed` лише при перемозі/поразці); суперечність давав лічильник «Усі» без активного бою → тепер рахується з активним (і з пошуком).
+- 0.3 — `background: null` скрізь означав дефолтне зображення `nicolas-tomb.webp`; додано `plainGrid` (`BattleMapConfig` + Zod), хелпери в `map-library.ts`.
+- 0.4 — демо/read-only бачили неотфільтрований `DEMO_DASHBOARD_SECTIONS` (`DashboardGroups.tsx`); тепер `demoDashboardSectionsFor(ctx)` тим самим гейтом, що й ДМ.
+- 0.5 — «Дварфова витривалість» (`maxHp` +рівень) печеться лише в бою; список тепер бере baked maxHp/AC пакетно (`buildCampaignContextForStart` + `getEffectiveArmorClass`). 3.1 Unarmored Defense уже був як абілки класів SRD (`scripts/srd/overrides/classes.ts`); ламалось лише відображення AC у списку.
 
 ## П1. Тихі редиректи, мертві посилання, 404
-- **1.1** `lib/server/campaigns/access.ts`: `requireCampaignDM` (:77), `requireMapLibrary` (:94), `app/campaigns/[id]/dm/page.tsx`, `dm/system/[section]/[[...rest]]` — замість голого redirect → redirect з `?notice=<key>` + тост на дашборді («Розділ лише для ДМ», «Бібліотеку мап вимкнено — увімкнути в налаштуваннях», «Недоступно в демо»).
-- **1.2** Демо read-only: `dm/ai`, `dm/compendium`, `dm/assistant`, `dm/print/*` → `requireCampaignDMOrDemo` з read-only рендером (або disabled-плитка з поясненням, якщо read-only неможливий).
-- **1.3** Плитки дашборда фільтрувати тим самим `dmSectionsOf`, що й layout (з П0.4); тест: композиція 5e не має плиток skills/skill-trees/careers.
-- **1.4** `app/not-found.tsx`: всередині кампанії — кнопка «До кампанії» + «До кампаній»; крихта «Деталі» і title «Admin» → «Сторінку не знайдено».
-- **1.5** `/dm/npc-heroes` — активна вкладка NPC (зараз порожній стан без активної вкладки).
-- **1.6** `/library/sounds` прибрати з навігації гравця.
+- **1.1** ✅ `lib/server/campaigns/access.ts`: `requireCampaignDM` (:77), `requireMapLibrary` (:94), `app/campaigns/[id]/dm/page.tsx`, `dm/system/[section]/[[...rest]]` — замість голого redirect → redirect з `?notice=<key>` + тост на дашборді («Розділ лише для ДМ», «Бібліотеку мап вимкнено — увімкнути в налаштуваннях», «Недоступно в демо»).
+- **1.2** ✅ Демо read-only: `dm/ai`, `dm/compendium`, `dm/assistant`, `dm/print/*` → `requireCampaignDMOrDemo` з read-only рендером (або disabled-плитка з поясненням, якщо read-only неможливий).
+- **1.3** ✅ Плитки дашборда фільтрувати тим самим `dmSectionsOf`, що й layout (з П0.4); тест: композиція 5e не має плиток skills/skill-trees/careers.
+- **1.4** ✅ `app/not-found.tsx`: всередині кампанії — кнопка «До кампанії» + «До кампаній»; крихта «Деталі» і title «Admin» → «Сторінку не знайдено».
+- **1.5** ✅ `/dm/npc-heroes` — активна вкладка NPC (зараз порожній стан без активної вкладки).
+- **1.6** ✅ `/library/sounds` прибрати з навігації гравця.
 
 ## П2. Перші кроки ДМ і форми створення
 **Онбординг/дашборд**
@@ -57,9 +64,9 @@
 - 2.19 Порожні стани з CTA: артефакти («Створити/Імпортувати»), знайомства («Додати»), журнал гравця («що тут з'явиться»).
 
 ## П3. Механіка 5e
-- 3.1 Unarmored Defense (варвар 10+Dex+Con, монах 10+Dex+Wis): `lib/utils/characters/classes/armor-class.ts:20-30` (гілка класу) або armor-абілка; бій бере `character.armorClass` (`from-character.ts:645`).
-- 3.2 HP у списку = HP у бою: список показує baked maxHp (той самий пайплайн, що `from-character.ts:725` + `bake.ts`).
-- 3.3 Фікс із П0.2 (статус бою).
+- 3.1 ✅ Unarmored Defense (варвар 10+Dex+Con, монах 10+Dex+Wis): `lib/utils/characters/classes/armor-class.ts:20-30` (гілка класу) або armor-абілка; бій бере `character.armorClass` (`from-character.ts:645`).
+- 3.2 ✅ HP у списку = HP у бою: список показує baked maxHp (той самий пайплайн, що `from-character.ts:725` + `bake.ts`).
+- 3.3 ✅ Фікс із П0.2 (статус бою).
 
 ## П4. Бій
 - 4.1 Недопустимий хід: `cellClickOf` (`lib/utils/battle/grid/map-scene.ts:~666`) повертає `{kind:'invalid', reason}` → тост/хінт «поза зоною руху / не твій хід / зайнято».
