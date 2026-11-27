@@ -13,5 +13,64 @@
     "na": "н/д",
     "none": "Немає",
     "soon": "Скоро"
+  },
+  "overview": {
+    "range": {
+      "label": "Період",
+      "7d": "7 днів",
+      "30d": "30 днів",
+      "90d": "90 днів"
+    },
+    "vsPrevious": "порівняно з попереднім періодом",
+    "tiles": {
+      "usersTotal": "Користувачі",
+      "usersNew": "Нові користувачі",
+      "usersDeleted": "Видалені акаунти",
+      "netGrowth": "Чистий приріст",
+      "dau": "DAU",
+      "wau": "WAU",
+      "mau": "MAU",
+      "stickiness": "Залученість (DAU/MAU)",
+      "campaigns": "Кампанії",
+      "campaignsNew": "Нові кампанії",
+      "templates": "Шаблони",
+      "battles": "Битви",
+      "withAiKey": "З AI-ключем",
+      "activation": "Активація (7 днів)",
+      "revenue": "Дохід",
+      "revenueNotConnected": "Не підключено"
+    },
+    "charts": {
+      "growth": "Реєстрації та видалення",
+      "activity": "Активні користувачі",
+      "content": "Створений контент",
+      "signups": "Реєстрації",
+      "deletions": "Видалення",
+      "usersTotal": "Усього користувачів",
+      "dau": "DAU",
+      "wau": "WAU",
+      "mau": "MAU",
+      "campaigns": "Кампанії",
+      "battles": "Битви",
+      "characters": "Персонажі",
+      "users": "Користувачі",
+      "count": "Кількість",
+      "time": "День",
+      "noData": "Даних поки немає"
+    },
+    "cohorts": {
+      "title": "Утримання за тижнем реєстрації",
+      "cohort": "Тиждень з",
+      "size": "Юзерів",
+      "week": "Тиждень +{n}"
+    },
+    "breakdowns": {
+      "title": "Розрізи",
+      "locale": "Мова",
+      "system": "Система правил",
+      "country": "Країна (30 днів)",
+      "key": "Значення",
+      "users": "Кількість"
+    }
   }
 }

@@ -29,6 +29,7 @@ export interface UplotChartProps {
     unitLabel: string;
     timeLabel: string;
     limitIndex?: number;
+    secondaryFrom?: number;
 }
 
 function readColors(el: HTMLElement) {
@@ -48,6 +49,7 @@ export default function UplotChart({
     unitLabel,
     timeLabel,
     limitIndex,
+    secondaryFrom,
 }: UplotChartProps) {
     const host = useRef<HTMLDivElement>(null);
 
@@ -96,7 +98,7 @@ export default function UplotChart({
                 height: HEIGHT,
                 legend: { show: true, live: true },
                 cursor: { drag: { x: false, y: false } },
-                scales: { x: { time: true } },
+                scales: { x: { time: true }, y2: {} },
                 axes: [
                     axis,
                     {
@@ -106,6 +108,19 @@ export default function UplotChart({
                         values: (_u, ticks) =>
                             ticks.map((v) => formatValue(v, unit)),
                     },
+                    ...(secondaryFrom === undefined
+                        ? []
+                        : [
+                              {
+                                  ...axis,
+                                  scale: 'y2',
+                                  side: 1,
+                                  size: 64,
+                                  grid: { show: false },
+                                  values: (_u: uPlot, ticks: number[]) =>
+                                      ticks.map((v) => formatValue(v, unit)),
+                              },
+                          ]),
                 ],
                 series: [
                     { label: timeLabel },
@@ -121,6 +136,9 @@ export default function UplotChart({
                                 : DASHES[i % DASHES.length],
                         width: i === limitIndex ? 1.5 : 2,
                         spanGaps: false,
+                        ...(secondaryFrom !== undefined && i >= secondaryFrom
+                            ? { scale: 'y2' }
+                            : {}),
                         value: (_u: uPlot, v: number | null) =>
                             v === null ? '—' : formatValue(v, unit),
                     })),
@@ -146,7 +164,15 @@ export default function UplotChart({
             chart.destroy();
             plot.current = null;
         };
-    }, [seriesKey, unit, unitLabel, timeLabel, limitIndex, themeTick]);
+    }, [
+        seriesKey,
+        unit,
+        unitLabel,
+        timeLabel,
+        limitIndex,
+        secondaryFrom,
+        themeTick,
+    ]);
 
     useEffect(() => {
         plot.current?.setData(data as uPlot.AlignedData);

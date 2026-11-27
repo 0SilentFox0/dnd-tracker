@@ -13,5 +13,64 @@
     "na": "n/a",
     "none": "None",
     "soon": "Coming soon"
+  },
+  "overview": {
+    "range": {
+      "label": "Period",
+      "7d": "7 days",
+      "30d": "30 days",
+      "90d": "90 days"
+    },
+    "vsPrevious": "vs previous period",
+    "tiles": {
+      "usersTotal": "Users",
+      "usersNew": "New users",
+      "usersDeleted": "Deleted accounts",
+      "netGrowth": "Net growth",
+      "dau": "DAU",
+      "wau": "WAU",
+      "mau": "MAU",
+      "stickiness": "Stickiness (DAU/MAU)",
+      "campaigns": "Campaigns",
+      "campaignsNew": "New campaigns",
+      "templates": "Templates",
+      "battles": "Battles",
+      "withAiKey": "With AI key",
+      "activation": "Activation (7 days)",
+      "revenue": "Revenue",
+      "revenueNotConnected": "Not connected"
+    },
+    "charts": {
+      "growth": "Signups and deletions",
+      "activity": "Active users",
+      "content": "Content created",
+      "signups": "Signups",
+      "deletions": "Deletions",
+      "usersTotal": "Total users",
+      "dau": "DAU",
+      "wau": "WAU",
+      "mau": "MAU",
+      "campaigns": "Campaigns",
+      "battles": "Battles",
+      "characters": "Characters",
+      "users": "Users",
+      "count": "Count",
+      "time": "Day",
+      "noData": "No data yet"
+    },
+    "cohorts": {
+      "title": "Retention by signup week",
+      "cohort": "Week of",
+      "size": "Users",
+      "week": "Week +{n}"
+    },
+    "breakdowns": {
+      "title": "Breakdowns",
+      "locale": "Language",
+      "system": "Rule system",
+      "country": "Country (30 days)",
+      "key": "Value",
+      "users": "Count"
+    }
   }
 }

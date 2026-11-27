@@ -58,3 +58,5 @@ export function cohortRetention(
             }),
         }));
 }
+
+export const COHORT_WEEKS_AFTER = [1, 2, 4];

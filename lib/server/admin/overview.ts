@@ -3,7 +3,11 @@ import { Prisma } from '@prisma/client';
 import 'server-only';
 import { DAY_MS } from '@/lib/constants/time';
 import { prisma } from '@/lib/db';
-import { cohortRetention, weekStart } from '@/lib/utils/admin/cohorts';
+import {
+    COHORT_WEEKS_AFTER,
+    cohortRetention,
+    weekStart,
+} from '@/lib/utils/admin/cohorts';
 import {
     addDays,
     type DayCount,
@@ -22,8 +26,6 @@ const RANGE_DAYS: Record<AdminRange, number> = {
 };
 
 const COHORT_WEEKS = 12;
-
-const RETENTION_WEEKS = [1, 2, 4];
 
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 
@@ -188,7 +190,7 @@ export async function buildOverview(
         cohorts: cohortRetention(
             cohortSignups,
             activity,
-            RETENTION_WEEKS,
+            COHORT_WEEKS_AFTER,
             today
         ),
         breakdowns: {
