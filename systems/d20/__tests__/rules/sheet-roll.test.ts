@@ -162,6 +162,7 @@ describe('rollFromSheet', () => {
             id: 'sword',
             name: 'Sword',
             type: AttackType.MELEE,
+            attackBonus: 0,
             damageDice: '1d6',
             damageType: 'slashing',
         };

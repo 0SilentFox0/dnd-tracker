@@ -12,6 +12,7 @@ import type { AuthUserResult } from '@/lib/utils/api/api-auth';
 import { normalizeInviteCode } from '@/lib/utils/campaigns/invite-link';
 
 export type JoinFailure = {
+    kind: 'error';
     ok: false;
     error: (typeof API_ERRORS)[keyof typeof API_ERRORS];
     status: 400 | 403 | 404;
@@ -20,7 +21,7 @@ export type JoinFailure = {
 const failure = (
     error: JoinFailure['error'],
     status: JoinFailure['status']
-): JoinFailure => ({ ok: false, error, status });
+): JoinFailure => ({ kind: 'error', ok: false, error, status });
 
 type JoinTarget = {
     kind: string;

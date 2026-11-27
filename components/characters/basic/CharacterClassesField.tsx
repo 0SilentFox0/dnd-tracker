@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
 import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
+import type { DndSkill } from '@/lib/constants/skills';
 import {
     classesById,
     classTotalLevel,
@@ -173,7 +174,7 @@ export function CharacterClassesField({
                             {t('skillChoice', {
                                 count: hint.count,
                                 from: hint.from
-                                    .map((id) => tg(`dndSkills.${id}`))
+                                    .map((id) => tg(`dndSkills.${id as DndSkill}`))
                                     .join(', '),
                             })}
                         </p>
