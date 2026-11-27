@@ -6,7 +6,7 @@ import { DND_SKILLS } from '@/lib/constants/skills';
 
 const characterIds = z.array(z.string().min(1).max(100)).min(1).max(50);
 
-const useInspiration = z.boolean().optional();
+const d20Roll = z.object({ useInspiration: z.boolean().optional() });
 
 export const restSchema = z.object({
     kind: z.enum(['short', 'long', 'close', 'session']),
@@ -34,31 +34,26 @@ const rerolls = z.number().int().min(1).max(9).optional();
 const critical = z.boolean().optional();
 
 export const sheetRollSchema = z.union([
-    z.object({
+    d20Roll.extend({
         kind: z.literal('check'),
         skill: z.enum(DND_SKILLS),
-        useInspiration,
     }),
-    z.object({
+    d20Roll.extend({
         kind: z.literal('check'),
         ability: z.enum(ABILITY_KEYS),
-        useInspiration,
     }),
-    z.object({
+    d20Roll.extend({
         kind: z.literal('save'),
         ability: z.enum(ABILITY_KEYS),
-        useInspiration,
     }),
-    z.object({
+    d20Roll.extend({
         kind: z.literal('attack'),
         attackId: z.string().min(1).max(200),
-        useInspiration,
     }),
-    z.object({
+    d20Roll.extend({
         kind: z.literal('damage'),
         attackId: z.string().min(1).max(200),
         crit: z.boolean().optional(),
-        useInspiration,
     }),
     z
         .object({

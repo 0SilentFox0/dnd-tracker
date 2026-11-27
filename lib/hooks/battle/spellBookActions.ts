@@ -220,15 +220,16 @@ export function spellBookActions({
                 })
             );
 
-            saveTargetIds.forEach(
-                (id) =>
-                    state.saves[id] === undefined &&
-                    dispatch({
-                        type: 'SET_SAVE',
-                        id,
-                        value: rollDie(20, cryptoRandom),
-                    })
-            );
+            if (attackDice)
+                saveTargetIds.forEach(
+                    (id) =>
+                        state.saves[id] === undefined &&
+                        dispatch({
+                            type: 'SET_SAVE',
+                            id,
+                            value: rollDie(attackDice, cryptoRandom),
+                        })
+                );
 
             if (state.pick?.needsAttackRolls && attackDice)
                 state.targetIds.forEach(

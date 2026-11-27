@@ -11,6 +11,7 @@ export const MORALE_META = {
     i18n: {
         packs: { battle: ['battleMorale'] },
         rules: ['rulesMorale'],
+        pages: { character: ['rulesMorale'], dmCharacter: ['rulesMorale'] },
         log: ['moraleLog'],
         legacyKeys: {
             'battleLog.morale.': 'moraleLog.check.',

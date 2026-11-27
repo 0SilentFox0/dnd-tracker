@@ -37,6 +37,11 @@ describe('SpellFormPowerFields: ланцюг', () => {
                 classesEnabled
             />
         );
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'spellEditor.power.advancedShow',
+            })
+        );
         fireEvent.click(screen.getByLabelText('spellEditor.power.fixedDice'));
         expect(setFormData).toHaveBeenLastCalledWith(
             expect.objectContaining({ fixedDice: true })
@@ -147,6 +152,9 @@ it('clears a stored damage bonus through the serialized editor payload', () => {
             setFormData={setFormData}
             classesEnabled
         />
+    );
+    fireEvent.click(
+        screen.getByRole('button', { name: 'spellEditor.power.advancedShow' })
     );
     fireEvent.change(screen.getByLabelText('spellEditor.power.damageBonus'), {
         target: { value: '' },

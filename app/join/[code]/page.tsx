@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import '@/lib/server/systems/registry';
 import { JoinByLinkPanel } from '@/components/campaigns/join/JoinByLinkPanel';
 import { type GameShellNavItem } from '@/components/hud';
 import { HudPage, HudPanel } from '@/components/hud/page';

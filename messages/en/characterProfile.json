@@ -88,8 +88,7 @@
     "score": "score {n}",
     "state": "State",
     "exhaustionLevel": "Exhaustion",
-    "targetsHint": "How many different targets one attack action can hit.",
-    "moraleHint": "Morale shifts the chance of an extra turn (high) or of losing the turn (low) in battle."
+    "targetsHint": "How many different targets one attack action can hit."
   },
   "magic": {
     "saveDC": "Spell save DC",

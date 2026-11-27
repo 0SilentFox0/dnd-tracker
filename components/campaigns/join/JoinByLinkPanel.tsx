@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { AlertCircle } from 'lucide-react';
 
+import '@/components/systems/install';
 import { Button } from '@/components/ui/button';
 import { useJoinCampaign } from '@/lib/hooks/campaigns';
 import { useTranslator } from '@/lib/i18n/use-translator';
