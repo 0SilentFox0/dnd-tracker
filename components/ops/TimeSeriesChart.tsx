@@ -1,20 +1,15 @@
 'use client';
 
 import { useMemo } from 'react';
-import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
-import { HudPanel } from '@/components/hud/page';
+import { ChartPanel, TimeSeriesChart } from '@/components/admin/charts';
 import type { ChartDef } from '@/lib/ops/chart-groups';
-import { hasAnyValue, toUplotData } from '@/lib/utils/ops/uplot-data';
+import { hasAnyValue,toChartData } from '@/lib/utils/ops/chart-data';
+import { formatValue } from '@/lib/utils/ops/format';
 import type { OpsLimitRow, OpsSeriesResponse } from '@/types/ops';
 
-const UplotChart = dynamic(() => import('./UplotChart'), {
-    ssr: false,
-    loading: () => <div className="h-[240px]" aria-hidden />,
-});
-
-export function TimeSeriesChart({
+export function OpsTimeSeriesChart({
     chart,
     response,
     limits,
@@ -44,39 +39,41 @@ export function TimeSeriesChart({
         [limits, chart]
     );
 
-    const data = useMemo(() => {
-        const base = toUplotData(lists);
+    const { times, values } = useMemo(() => toChartData(lists), [lists]);
 
-        return limit === null ? base : [...base, base[0].map(() => limit)];
-    }, [lists, limit]);
-
-    const labels = useMemo(
-        () => [
-            ...chart.series.map((s) => t(`series.${s.id}`)),
-            ...(limit === null ? [] : [t('limit')]),
-        ],
-        [chart, limit, t]
+    const series = useMemo(
+        () =>
+            chart.series.map((s, i) => ({
+                id: s.id,
+                label: t(`series.${s.id}`),
+                values: values[i] ?? [],
+            })),
+        [chart, values, t]
     );
 
     const empty = !response || !hasAnyValue(lists);
 
+    const title = t(`items.${chart.id}`);
+
     return (
-        <HudPanel as="div" className="space-y-2">
-            <h3 className="hud-sc text-sm">{t(`items.${chart.id}`)}</h3>
-            {empty ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                    {response ? t('noData') : t('loading')}
-                </p>
-            ) : (
-                <UplotChart
-                    data={data}
-                    labels={labels}
-                    unit={chart.unit}
-                    unitLabel={t(`units.${chart.unit}`)}
-                    limitIndex={limit === null ? undefined : labels.length - 1}
-                    timeLabel={t('time')}
-                />
-            )}
-        </HudPanel>
+        <ChartPanel
+            title={title}
+            empty={empty}
+            emptyText={response ? t('noData') : t('loading')}
+        >
+            <TimeSeriesChart
+                title={title}
+                times={times}
+                series={series}
+                kind={series.length === 1 ? 'area' : 'line'}
+                format={(v) => formatValue(v, chart.unit)}
+                caption={t(`units.${chart.unit}`)}
+                limit={
+                    limit === null
+                        ? undefined
+                        : { value: limit, label: t('limit') }
+                }
+            />
+        </ChartPanel>
     );
 }

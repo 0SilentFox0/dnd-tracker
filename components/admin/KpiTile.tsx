@@ -1,3 +1,5 @@
+import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 
 export function formatDelta(delta: number): string {
@@ -27,15 +29,15 @@ export function KpiTile({
               : delta > 0;
 
     return (
-        <div className="ds-panel min-w-0 p-3">
+        <div className="ds-panel min-w-0 space-y-1 p-4">
             <p className="truncate text-xs text-hud-muted uppercase">{label}</p>
-            <p className="text-2xl font-semibold text-hud-ink">{value}</p>
+            <p className="text-2xl font-semibold text-hud-ink tabular-nums">{value}</p>
             {delta !== undefined && delta !== null && (
                 <p
                     data-testid="kpi-delta"
                     title={hint}
                     className={cn(
-                        'text-xs',
+                        'flex items-center gap-0.5 text-xs font-medium tabular-nums',
                         delta === 0
                             ? 'text-hud-muted'
                             : good
@@ -43,6 +45,8 @@ export function KpiTile({
                               : 'text-red-600 dark:text-red-400'
                     )}
                 >
+                    {delta > 0 && <ArrowUpRight aria-hidden className="size-3.5" />}
+                    {delta < 0 && <ArrowDownRight aria-hidden className="size-3.5" />}
                     {formatDelta(delta)}
                 </p>
             )}

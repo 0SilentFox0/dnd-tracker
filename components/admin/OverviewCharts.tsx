@@ -1,65 +1,16 @@
 'use client';
 
 import { useMemo } from 'react';
-import dynamic from 'next/dynamic';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
-import { HudPanel } from '@/components/hud/page';
-import type { UplotData } from '@/lib/utils/ops/uplot-data';
+import {
+    ChartPanel,
+    type ChartSeries,
+    TimeSeriesChart,
+} from '@/components/admin/charts';
 import type { AdminOverview } from '@/types/admin';
 
-const UplotChart = dynamic(() => import('@/components/ops/UplotChart'), {
-    ssr: false,
-    loading: () => <div className="h-[240px]" aria-hidden />,
-});
-
 type SeriesKey = keyof Omit<AdminOverview['series'], 'days'>;
-
-function Chart({
-    title,
-    days,
-    lines,
-    secondaryFrom,
-}: {
-    title: string;
-    days: string[];
-    lines: { label: string; values: number[] }[];
-    secondaryFrom?: number;
-}) {
-    const t = useTranslations('admin.overview.charts');
-
-    const data = useMemo<UplotData>(
-        () => [
-            days.map((d) => Math.round(Date.parse(`${d}T00:00:00Z`) / 1000)),
-            ...lines.map((l) => l.values),
-        ],
-        [days, lines]
-    );
-
-    const labels = useMemo(() => lines.map((l) => l.label), [lines]);
-
-    const empty = lines.every((l) => l.values.every((v) => v === 0));
-
-    return (
-        <HudPanel as="div" className="space-y-2">
-            <h3 className="hud-sc text-sm">{title}</h3>
-            {empty ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                    {t('noData')}
-                </p>
-            ) : (
-                <UplotChart
-                    data={data}
-                    labels={labels}
-                    unit="count"
-                    unitLabel={t('count')}
-                    timeLabel={t('time')}
-                    secondaryFrom={secondaryFrom}
-                />
-            )}
-        </HudPanel>
-    );
-}
 
 export function OverviewCharts({
     series,
@@ -68,42 +19,85 @@ export function OverviewCharts({
 }) {
     const t = useTranslations('admin.overview.charts');
 
-    const line = (key: SeriesKey, values = series[key]) => ({
+    const locale = useLocale();
+
+    const times = useMemo(
+        () => series.days.map((d) => Date.parse(`${d}T00:00:00Z`)),
+        [series.days]
+    );
+
+    const format = useMemo(() => {
+        const nf = new Intl.NumberFormat(locale, { notation: 'compact' });
+
+        return (v: number) => nf.format(Math.abs(v));
+    }, [locale]);
+
+    const line = (key: SeriesKey, values = series[key]): ChartSeries => ({
+        id: key,
         label: t(key),
         values,
     });
 
-    const growth = useMemo(
-        () => [
-            line('signups'),
-            line(
-                'deletions',
-                series.deletions.map((n) => -n)
-            ),
-            line('usersTotal'),
-        ],
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [series, t]
-    );
+    const has = (list: ChartSeries[]) =>
+        list.some((s) => s.values.some((v) => v !== 0));
+
+    const panels: {
+        id: string;
+        title: string;
+        kind: 'line' | 'area' | 'bars';
+        list: ChartSeries[];
+    }[] = [
+        {
+            id: 'total',
+            title: t('total'),
+            kind: 'area',
+            list: [line('usersTotal')],
+        },
+        {
+            id: 'growth',
+            title: t('growth'),
+            kind: 'bars',
+            list: [
+                line('signups'),
+                line(
+                    'deletions',
+                    series.deletions.map((n) => -n)
+                ),
+            ],
+        },
+        {
+            id: 'activity',
+            title: t('activity'),
+            kind: 'line',
+            list: [line('dau'), line('wau'), line('mau')],
+        },
+        {
+            id: 'content',
+            title: t('content'),
+            kind: 'line',
+            list: [line('campaigns'), line('battles'), line('characters')],
+        },
+    ];
 
     return (
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            <Chart
-                title={t('growth')}
-                days={series.days}
-                lines={growth}
-                secondaryFrom={2}
-            />
-            <Chart
-                title={t('activity')}
-                days={series.days}
-                lines={[line('dau'), line('wau'), line('mau')]}
-            />
-            <Chart
-                title={t('content')}
-                days={series.days}
-                lines={[line('campaigns'), line('battles'), line('characters')]}
-            />
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+            {panels.map((p) => (
+                <ChartPanel
+                    key={p.id}
+                    title={p.title}
+                    empty={!has(p.list)}
+                    emptyText={t('noData')}
+                >
+                    <TimeSeriesChart
+                        title={p.title}
+                        times={times}
+                        series={p.list}
+                        kind={p.kind}
+                        format={format}
+                        caption={t('perDay')}
+                    />
+                </ChartPanel>
+            ))}
         </div>
     );
 }

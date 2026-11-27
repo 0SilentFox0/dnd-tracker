@@ -1,6 +1,6 @@
 # Admin panel
 
-Owner-only `/admin`: tabs Overview, Users, Security, Ops. Access is `isAdmin` (`lib/utils/api/admin-access.ts`: `OPS_ADMIN_EMAILS` or `PLATFORM_ADMIN_USER_IDS`); a non-owner gets 404 on pages and APIs. `/ops` redirects (308) to `/admin/ops`; the header shows an admin link when `GET /api/admin/me` answers `200 { isAdmin: true }` (explicit exception to "non-admin gets 404": it never 404s and reveals only the caller's own bit; `useIsAdmin`, keyed by user id).
+Owner-only `/admin`: left sidebar (`AdminNav`; chip tabs below `md`) with Overview, Users, Security, Ops. All charts are Recharts through `components/admin/charts/` (`TimeSeriesChart`, `BarBreakdown`, `ChartPanel`). Access is `isAdmin` (`lib/utils/api/admin-access.ts`: `OPS_ADMIN_EMAILS` or `PLATFORM_ADMIN_USER_IDS`); a non-owner gets 404 on pages and APIs. `/ops` redirects (308) to `/admin/ops`; the header shows an admin link when `GET /api/admin/me` answers `200 { isAdmin: true }` (explicit exception to "non-admin gets 404": it never 404s and reveals only the caller's own bit; `useIsAdmin`, keyed by user id).
 
 ## Tables and retention
 

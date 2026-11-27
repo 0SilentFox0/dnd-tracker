@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { BreakdownTable } from '@/components/admin/BreakdownTable';
+import { BreakdownChart } from '@/components/admin/BreakdownChart';
 import { CohortTable } from '@/components/admin/CohortTable';
 import { KpiTile } from '@/components/admin/KpiTile';
 import { OverviewCharts } from '@/components/admin/OverviewCharts';
@@ -60,7 +60,7 @@ export function OverviewClient() {
                                     {t('dataSince', { date: data.dataSince })}
                                 </p>
                             )}
-                            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
                                 <KpiTile
                                     label={t('overview.tiles.usersTotal')}
                                     value={k.usersTotal}
@@ -136,15 +136,15 @@ export function OverviewClient() {
                             <OverviewCharts series={data.series} />
                             <CohortTable cohorts={data.cohorts} />
                             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                                <BreakdownTable
+                                <BreakdownChart
                                     title={t('overview.breakdowns.locale')}
                                     rows={data.breakdowns.locale}
                                 />
-                                <BreakdownTable
+                                <BreakdownChart
                                     title={t('overview.breakdowns.system')}
                                     rows={data.breakdowns.system}
                                 />
-                                <BreakdownTable
+                                <BreakdownChart
                                     title={t('overview.breakdowns.country')}
                                     rows={data.breakdowns.country}
                                 />

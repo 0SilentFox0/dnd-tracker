@@ -41,6 +41,8 @@
       "revenueNotConnected": "Not connected"
     },
     "charts": {
+      "total": "Total users",
+      "perDay": "per day",
       "growth": "Signups and deletions",
       "activity": "Active users",
       "content": "Content created",

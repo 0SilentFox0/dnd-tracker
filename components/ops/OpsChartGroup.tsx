@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { TimeSeriesChart } from './TimeSeriesChart';
+import { OpsTimeSeriesChart } from './TimeSeriesChart';
 
 import { useOpsSeries } from '@/lib/hooks/ops';
 import type { ChartGroup } from '@/lib/ops/chart-groups';
@@ -36,7 +36,7 @@ export function OpsChartGroup({
             </h3>
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 {group.charts.map((chart) => (
-                    <TimeSeriesChart
+                    <OpsTimeSeriesChart
                         key={chart.id}
                         chart={chart}
                         response={data}
