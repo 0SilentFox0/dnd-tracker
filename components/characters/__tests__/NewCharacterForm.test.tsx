@@ -2,8 +2,8 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import { NewCharacterForm } from '@/components/characters/NewCharacterForm';
+import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 
 const set = vi.fn();
 

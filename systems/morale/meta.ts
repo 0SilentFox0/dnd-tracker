@@ -9,9 +9,8 @@ export const MORALE_META = {
         { column: 'morale', path: ['ext', 'morale', 'value'] },
     ],
     i18n: {
-        packs: { battle: ['battleMorale'] },
+        packs: { battle: ['battleMorale'], characterSheet: ['rulesMorale'] },
         rules: ['rulesMorale'],
-        pages: { character: ['rulesMorale'], dmCharacter: ['rulesMorale'] },
         log: ['moraleLog'],
         legacyKeys: {
             'battleLog.morale.': 'moraleLog.check.',
