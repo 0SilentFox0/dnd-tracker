@@ -41,6 +41,7 @@ export interface GraphModel {
     sequence: GraphEdge[];
     relations: GraphEdge[];
     truncated: number;
+    collapsedLeaves: number;
     entityTotal: number;
 }
 

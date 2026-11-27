@@ -24,6 +24,7 @@ export function ScenePlayedToggle({
             type="button"
             className="toggle"
             aria-pressed={played}
+            title={t('scenePlayedHint')}
             disabled={actions.isPending}
             onClick={() =>
                 void actions

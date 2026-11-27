@@ -37,4 +37,19 @@ describe('useSlideUpload', () => {
             0.8
         );
     });
+
+    it('rejects .ico files before decoding', async () => {
+        const onError = vi.fn();
+
+        const { result } = renderHook(() => useSlideUpload('c1', onError));
+
+        await act(async () => {
+            await result.current.upload([
+                new File(['a'], 'a.ico', { type: 'image/x-icon' }),
+            ]);
+        });
+
+        expect(resizeImageToBlob).not.toHaveBeenCalled();
+        expect(onError).toHaveBeenCalledWith('show.errors.unsupportedFormat');
+    });
 });

@@ -128,7 +128,7 @@
     "up": "Move up: {title}"
   },
   "indexPage": {
-    "emptyDescription": "Create the first scene or import existing ones.",
+    "emptyDescription": "Create the first scene with the button below; pages you add appear here.",
     "emptyTitle": "The scenario is empty",
     "lead": "The DM's book: scenes to run, each on its own page.",
     "newPage": "New page"
@@ -172,7 +172,9 @@
     "playedDone": "✓ Played",
     "reveal": "Reveal to the player",
     "revealed": "✓ Revealed to the player",
-    "revealedAfterSection": "✓ Revealed (after the section)"
+    "revealedAfterSection": "✓ Revealed (after the section)",
+    "playedHint": "Marks this section as played; played sections can be collapsed",
+    "revealHint": "Shows this section to the player"
   },
   "pageBody": {
     "demoPlaybackReadOnly": "Show controls affect what every player sees, so they are disabled in the demo: bindings are visible, the show buttons are hidden.",
@@ -187,7 +189,9 @@
     "toIndex": "To the contents",
     "versions": "Versions",
     "markScenePlayed": "Mark scene as played",
-    "scenePlayed": "✓ Scene played — undo"
+    "scenePlayed": "✓ Scene played — undo",
+    "emptyEditorHint": "This page is empty. Start typing below to write the first section.",
+    "scenePlayedHint": "Marks the whole scene as played; shown in the contents and the graph."
   },
   "pageKinds": {
     "hero": "Hero",

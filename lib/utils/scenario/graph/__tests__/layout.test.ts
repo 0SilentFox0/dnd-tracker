@@ -59,6 +59,7 @@ const model: GraphModel = {
     sequence: [],
     relations: [],
     truncated: 0,
+    collapsedLeaves: 0,
     entityTotal: 0,
 };
 
@@ -88,6 +89,7 @@ describe('layoutGraph', () => {
                 sequence: [],
                 relations: [],
                 truncated: 0,
+                collapsedLeaves: 0,
                 entityTotal: 0,
             })
         ).toEqual({
