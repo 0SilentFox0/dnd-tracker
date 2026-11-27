@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type { CharacteristicKey } from '@/systems/wfrp/rules/characteristics/keys';
 import {
     type CanonPicks,
+    CAREER_SKILL_PURCHASES,
     SKILL_PURCHASE_CAP,
 } from '@/systems/wfrp/rules/creation';
 
@@ -30,10 +31,15 @@ export function useWfrpCanonPicks(careerId: string | undefined) {
         [bound, careerId]
     );
 
-    const patch = useCallback(
-        (next: Partial<CareerBound>) =>
-            setBound({ ...current, ...next, careerId }),
-        [current, careerId]
+    const update = useCallback(
+        (next: (cur: CareerBound) => Partial<CareerBound>) =>
+            setBound((prev) => {
+                const cur =
+                    prev.careerId === careerId ? prev : { ...EMPTY, careerId };
+
+                return { ...cur, ...next(cur), careerId };
+            }),
+        [careerId]
     );
 
     const toggleSpeciesSkill = useCallback(
@@ -56,26 +62,50 @@ export function useWfrpCanonPicks(careerId: string | undefined) {
         []
     );
 
-    const setSkill = useCallback(
-        (skill: string, n: number) =>
-            patch({
-                skills: {
-                    ...current.skills,
-                    [skill]: Math.max(0, Math.min(SKILL_PURCHASE_CAP, n)),
-                },
+    /** Functional steps: rapid clicks fired before a re-render must all count */
+    const stepSkill = useCallback(
+        (skill: string, delta: number, max: number) =>
+            update(({ skills }) => {
+                const own = skills[skill] ?? 0;
+
+                const others =
+                    Object.values(skills).reduce((a, b) => a + b, 0) - own;
+
+                const ceiling = Math.min(
+                    max,
+                    SKILL_PURCHASE_CAP,
+                    CAREER_SKILL_PURCHASES - others
+                );
+
+                return {
+                    skills: {
+                        ...skills,
+                        [skill]: Math.max(0, Math.min(ceiling, own + delta)),
+                    },
+                };
             }),
-        [patch, current.skills]
+        [update]
     );
 
-    const setBonus = useCallback(
-        (key: CharacteristicKey, n: number) =>
-            patch({
-                distribution: {
-                    ...current.distribution,
-                    [key]: Math.max(0, n),
-                },
+    const stepBonus = useCallback(
+        (key: CharacteristicKey, delta: number, cap: number) =>
+            update(({ distribution }) => {
+                const own = distribution[key] ?? 0;
+
+                const others =
+                    Object.values(distribution).reduce(
+                        (a, b) => a + (b ?? 0),
+                        0
+                    ) - own;
+
+                return {
+                    distribution: {
+                        ...distribution,
+                        [key]: Math.max(0, Math.min(cap - others, own + delta)),
+                    },
+                };
             }),
-        [patch, current.distribution]
+        [update]
     );
 
     const picks = useMemo<CanonPicks>(
@@ -108,11 +138,11 @@ export function useWfrpCanonPicks(careerId: string | undefined) {
         speciesTalents,
         setSpeciesTalent,
         skills: current.skills,
-        setSkill,
+        stepSkill,
         talent: current.talent,
-        setTalent: (talent: string) => patch({ talent }),
+        setTalent: (talent: string) => update(() => ({ talent })),
         distribution: current.distribution,
-        setBonus,
+        stepBonus,
         reset,
     };
 }

@@ -439,7 +439,7 @@
           "language:trade-cant",
           "language:old-script",
           "leadership",
-          "lore:local-lore",
+          "lore:local",
           "melee:basic",
           "ranged:bow"
         ]
@@ -1243,7 +1243,7 @@
           "gamble",
           "haggle",
           "intuition",
-          "lore:local-lore",
+          "lore:local",
           "perception",
           "sleight-of-hand",
           "stealth",

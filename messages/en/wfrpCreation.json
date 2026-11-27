@@ -157,7 +157,7 @@
     "speciesRolled": "I rolled the species on the Species Table and keep the first result",
     "speciesSkills": "Species skills: {picked} of {count} (each +{points})",
     "speciesTalents": "Species talent {n} of {total} (pick one)",
-    "languages": "Languages: {names}",
+    "languages": "Native languages of the species (automatic +{points}, no pick needed): {names}",
     "careerSkills": "Career skills: {spent} of {total} advances (each +{points}, at most 3 per skill)",
     "careerTalent": "Career talent (pick one)",
     "trappings": "Starting trappings",

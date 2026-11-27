@@ -15,10 +15,25 @@ export const specName = (tg: GameTermsT, key: string, spec: string) =>
         `wfrpSpecs.${key}.${spec}` as `wfrpSpecs.melee.${keyof typeof gameTerms.wfrpSpecs.melee}`
     );
 
+const humanize = (slug: string) =>
+    slug
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+
+/** Open specialisations are free text: known slugs are translated, custom ones are humanized */
+const openSpecName = (tg: GameTermsT, key: string, spec: string) => {
+    const path = `wfrpSpecs.${key}.${spec}`;
+
+    return tg.has(path as Parameters<GameTermsT['has']>[0])
+        ? tg(path as Parameters<GameTermsT>[0])
+        : humanize(spec);
+};
+
 export function skillLabel(tg: GameTermsT, key: string, spec?: string): string {
     const name = skillName(tg, key);
 
     if (!spec) return name;
 
-    return `${name} (${skillDef(key)?.spec === 'fixed' ? specName(tg, key, spec) : spec})`;
+    return `${name} (${skillDef(key)?.spec === 'fixed' ? specName(tg, key, spec) : openSpecName(tg, key, spec)})`;
 }

@@ -157,7 +157,7 @@
     "speciesRolled": "Вид визначено киданням, перший результат залишаю",
     "speciesSkills": "Навички виду: {picked} з {count} (кожна +{points})",
     "speciesTalents": "Талант виду {n} з {total} (оберіть один)",
-    "languages": "Мови: {names}",
+    "languages": "Рідні мови виду (автоматично +{points}, без вибору): {names}",
     "careerSkills": "Навички кар'єри: {spent} з {total} підвищень (кожне +{points}, не більше 3 на навичку)",
     "careerTalent": "Талант кар'єри (оберіть один)",
     "trappings": "Стартове спорядження",

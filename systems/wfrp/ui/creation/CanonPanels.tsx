@@ -8,7 +8,11 @@ import type { WfrpDraftFormState } from './types';
 
 import { Button } from '@/components/ui/button';
 import { SwitchField } from '@/components/ui/switch-field';
-import { SKILL_PURCHASE_CAP } from '@/systems/wfrp/rules/creation';
+import {
+    CAREER_SKILL_PURCHASES,
+    LANGUAGE_PURCHASES,
+    SKILL_PURCHASE_CAP,
+} from '@/systems/wfrp/rules/creation';
 import { skillLabel } from '@/systems/wfrp/ui/skill-label';
 
 type Canon = NonNullable<WfrpDraftFormState['canon']>;
@@ -21,13 +25,13 @@ const labelOf = (tg: Parameters<typeof skillLabel>[0], key: string) => {
 
 function Stepper({
     value,
-    onChange,
+    onStep,
     min,
     max,
     label,
 }: {
     value: number;
-    onChange: (v: number) => void;
+    onStep: (delta: number) => void;
     min: number;
     max: number;
     label: string;
@@ -42,7 +46,7 @@ function Stepper({
                 variant="outline"
                 aria-label={`${t('dec')}: ${label}`}
                 disabled={value <= min}
-                onClick={() => onChange(value - 1)}
+                onClick={() => onStep(-1)}
             >
                 <Minus aria-hidden />
             </Button>
@@ -53,7 +57,7 @@ function Stepper({
                 variant="outline"
                 aria-label={`${t('inc')}: ${label}`}
                 disabled={value >= max}
-                onClick={() => onChange(value + 1)}
+                onClick={() => onStep(1)}
             >
                 <Plus aria-hidden />
             </Button>
@@ -127,6 +131,7 @@ export function SpeciesCanonPanel({ canon }: { canon: Canon }) {
             {s.languages.length > 0 && (
                 <p className="text-sm text-hud-muted">
                     {t('languages', {
+                        points: LANGUAGE_PURCHASES * canon.step,
                         names: s.languages
                             .map((k) => labelOf(tg, k))
                             .join(', '),
@@ -156,7 +161,7 @@ export function CareerCanonPanel({ canon }: { canon: Canon }) {
             <h3 className="text-sm font-semibold">
                 {t('careerSkills', {
                     spent,
-                    total: 8,
+                    total: CAREER_SKILL_PURCHASES,
                     points: canon.step,
                 })}
             </h3>
@@ -174,11 +179,17 @@ export function CareerCanonPanel({ canon }: { canon: Canon }) {
                             value={c.counts[key] ?? 0}
                             min={0}
                             max={
-                                spent >= 8
+                                spent >= CAREER_SKILL_PURCHASES
                                     ? (c.counts[key] ?? 0)
                                     : SKILL_PURCHASE_CAP - taken(key)
                             }
-                            onChange={(v) => c.set(key, v)}
+                            onStep={(delta) =>
+                                c.step(
+                                    key,
+                                    delta,
+                                    SKILL_PURCHASE_CAP - taken(key)
+                                )
+                            }
                         />
                     </li>
                 ))}
@@ -226,7 +237,7 @@ export function StatsCanonPanel({
                                     value={d.values[key] ?? 0}
                                     min={0}
                                     max={(d.values[key] ?? 0) + (d.cap - spent)}
-                                    onChange={(v) => d.set(key, v)}
+                                    onStep={(delta) => d.step(key, delta, d.cap)}
                                 />
                             </li>
                         ))}

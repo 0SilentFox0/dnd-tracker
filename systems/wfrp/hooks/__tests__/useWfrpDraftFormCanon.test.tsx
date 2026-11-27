@@ -124,7 +124,10 @@ describe('useWfrpDraftForm canon5e', () => {
 
         act(() => result.current.species.select('r1'));
         act(() => result.current.career.roll());
-        act(() => result.current.canon?.careerSkills.set('x', 2));
+        act(() => {
+            result.current.canon?.careerSkills.step('x', 1, 3);
+            result.current.canon?.careerSkills.step('x', 1, 3);
+        });
         expect(result.current.canon?.careerSkills.counts.x).toBe(2);
 
         act(() => result.current.career.setMode('free'));

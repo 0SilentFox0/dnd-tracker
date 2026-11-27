@@ -296,7 +296,7 @@ export function useWfrpDraftForm({
                   careerSkills: {
                       options: canonCareer?.skills ?? [],
                       counts: draft.canon.skills,
-                      set: draft.canon.setSkill,
+                      step: draft.canon.stepSkill,
                   },
                   careerTalent: {
                       options: canonCareer?.talents ?? [],
@@ -312,7 +312,7 @@ export function useWfrpDraftForm({
                               ).includes(k)
                       ),
                       values: draft.canon.distribution,
-                      set: draft.canon.setBonus,
+                      step: draft.canon.stepBonus,
                       cap: DISTRIBUTION_CAP[draft.stats.mode],
                   },
                   fateBonus:

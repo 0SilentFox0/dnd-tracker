@@ -32,11 +32,11 @@ const makeCanon = (over: Partial<Canon> = {}): Canon => ({
     careerSkills: {
         options: ['athletics', 'cool'],
         counts: {},
-        set: vi.fn(),
+        step: vi.fn(),
     },
     careerTalent: { options: ['f0', 'f1'], picked: undefined, set: vi.fn() },
     trappings: ['Rope'],
-    distribution: { keys: ['ws', 'int'], values: {}, set: vi.fn(), cap: 6 },
+    distribution: { keys: ['ws', 'int'], values: {}, step: vi.fn(), cap: 6 },
     fateBonus: false,
     ...over,
 });
@@ -74,7 +74,7 @@ describe('canon creation panels', () => {
 
         render(<CareerCanonPanel canon={canon} />);
         fireEvent.click(screen.getAllByRole('button', { name: /Більше/ })[0]);
-        expect(canon.careerSkills.set).toHaveBeenCalledWith('athletics', 1);
+        expect(canon.careerSkills.step).toHaveBeenCalledWith('athletics', 1, 3);
     });
 
     it('stats panel shows the Fate bonus and limits the distribution', () => {
@@ -83,7 +83,7 @@ describe('canon creation panels', () => {
             distribution: {
                 keys: ['ws', 'int'],
                 values: { ws: 6 },
-                set: vi.fn(),
+                step: vi.fn(),
                 cap: 6,
             },
         });

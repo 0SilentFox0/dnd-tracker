@@ -6,6 +6,7 @@ export {
     CAREER_SKILL_PURCHASES,
     type CareerTier1,
     DISTRIBUTION_CAP,
+    LANGUAGE_PURCHASES,
     SKILL_PURCHASE_CAP,
 } from './canon';
 export type { CreationCtx, CreationPicks, PlanDraftResult } from './plan';
