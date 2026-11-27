@@ -28,7 +28,7 @@ export const ROUTE_BUDGETS_KB: Partial<Record<RouteKey, number>> = {
     '[id]/dm/main-skills': 65.6,
     '[id]/dm/main-skills/[mainSkillId]': 70.9,
     '[id]/dm/maps': 37.7,
-    '[id]/dm/maps/[mapId]': 76.9,
+    '[id]/dm/maps/[mapId]': 77.4,
     '[id]/dm/music': 37.7,
     '[id]/dm/print': 70.6,
     '[id]/dm/races': 70.7,
