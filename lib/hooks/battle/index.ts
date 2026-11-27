@@ -112,6 +112,7 @@ export {
 } from './useParticipantFace';
 export { usePlayerTurn } from './usePlayerTurn';
 export { type PrepRoster, usePrepRoster } from './usePrepRoster';
+export { type QuickAttackModel, useQuickAttack } from './useQuickAttack';
 export { type SceneDrawerKey, useSceneDrawers } from './useSceneDrawers';
 export { useScrollToCurrent } from './useScrollToCurrent';
 export {

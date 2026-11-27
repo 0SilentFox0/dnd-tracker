@@ -2,7 +2,12 @@
 
 import { useEffect, useRef } from 'react';
 
-type HotkeyItem = { key: string; run(): void; disabled: boolean };
+type HotkeyItem = {
+    key: string;
+    run(): void;
+    alt?(): void;
+    disabled: boolean;
+};
 
 const TYPING = 'input, textarea, select, [contenteditable]';
 
@@ -38,15 +43,22 @@ export function useActionHotkeys(opts: {
                 return;
             }
 
-            if (!/^[1-9]$/.test(event.key)) return;
+            const digit = /^[1-9]$/.test(event.key)
+                ? event.key
+                : /^Digit[1-9]$/.test(event.code)
+                  ? event.code.slice(5)
+                  : null;
 
-            const item = items[Number(event.key) - 1];
+            if (!digit) return;
+
+            const item = items[Number(digit) - 1];
 
             if (!item || item.disabled) return;
 
             event.preventDefault();
 
-            item.run();
+            if (event.shiftKey && item.alt) item.alt();
+            else item.run();
         };
 
         document.addEventListener('keydown', onKeyDown);

@@ -12,6 +12,7 @@ import {
     type AttackFlowState,
     type AttackMode,
     forcedFor,
+    quickAttackAllowed,
     type RollOutcome,
     rollOutcomeOf,
 } from '@/lib/utils/battle/flows';
@@ -41,6 +42,7 @@ export interface AttackActionsContext {
     mode: AttackMode;
     attackCtx: Parameters<typeof rollOutcomeOf>[3];
     serverJudged: boolean;
+    systemInput: boolean;
     dice: number;
 }
 
@@ -55,6 +57,7 @@ export function useAttackActions({
     mode: currentMode,
     attackCtx,
     serverJudged,
+    systemInput,
     dice,
 }: AttackActionsContext) {
     const order = scene.battle.initiativeOrder;
@@ -143,63 +146,132 @@ export function useAttackActions({
                   outcome: outcomeOf(d20 ?? 0, second),
               };
 
-    return {
-        open: (
-            targetId?: string,
-            attackId?: string,
-            opts: { offHand?: boolean } = {}
-        ) => {
-            const offHand = !!opts.offHand;
+    const open = (
+        targetId?: string,
+        attackId?: string,
+        opts: { offHand?: boolean } = {}
+    ) => {
+        const offHand = !!opts.offHand;
 
-            const pool = offHand ? attackPools.off : attackPools.main;
+        const pool = offHand ? attackPools.off : attackPools.main;
 
-            const first = pool[0];
+        const first = pool[0];
 
-            if (!first) return;
+        if (!first) return;
 
-            const target = targetId ? byId(targetId) : undefined;
+        const target = targetId ? byId(targetId) : undefined;
 
-            if (!target) {
-                dispatch({
-                    type: 'OPEN',
-                    weaponCount: pool.length,
-                    ...describe(first),
-                    ...(offHand && { offHand }),
-                });
-                preselectAll(first);
-
-                return;
-            }
-
-            const chosen =
-                (attackId && pool.find((a) => (a.id ?? a.name) === attackId)) ||
-                first;
-
-            const picked = pool.length === 1 || !!attackId;
-
+        if (!target) {
             dispatch({
                 type: 'OPEN',
                 weaponCount: pool.length,
-                ...describe(chosen),
-                targetIds: [target.basicInfo.id],
-                picked,
+                ...describe(first),
                 ...(offHand && { offHand }),
             });
+            preselectAll(first);
 
-            if (picked) {
-                if (pool.length > 1)
-                    dispatch({ type: 'SELECT_WEAPON', ...describe(chosen) });
+            return;
+        }
 
-                const forced = attacker
-                    ? forcedFor(attacker, target, chosen, attackCtx)
-                    : undefined;
+        const chosen =
+            (attackId && pool.find((a) => (a.id ?? a.name) === attackId)) ||
+            first;
 
-                dispatch({
-                    type: 'CONFIRM_TARGETS',
-                    forced: { [target.basicInfo.id]: forced },
-                });
-            }
-        },
+        const picked = pool.length === 1 || !!attackId;
+
+        dispatch({
+            type: 'OPEN',
+            weaponCount: pool.length,
+            ...describe(chosen),
+            targetIds: [target.basicInfo.id],
+            picked,
+            ...(offHand && { offHand }),
+        });
+
+        if (picked) {
+            if (pool.length > 1)
+                dispatch({ type: 'SELECT_WEAPON', ...describe(chosen) });
+
+            const forced = attacker
+                ? forcedFor(attacker, target, chosen, attackCtx)
+                : undefined;
+
+            dispatch({
+                type: 'CONFIRM_TARGETS',
+                forced: { [target.basicInfo.id]: forced },
+            });
+        }
+    };
+
+    const quickAllowed = (a: BattleAttack) =>
+        quickAttackAllowed({
+            maxTargets: describe(a).maxTargets,
+            hitsAllEnemies: hitsAll,
+            systemInput,
+        });
+
+    const quick = (targetId: string, attackId?: string) => {
+        const pool = attackPools.main;
+
+        const target = byId(targetId);
+
+        const chosen =
+            (attackId && pool.find((a) => (a.id ?? a.name) === attackId)) ||
+            pool[0];
+
+        if (!attacker || !target || !chosen) return;
+
+        if (!quickAllowed(chosen)) return open(targetId, attackId);
+
+        const info = describe(chosen);
+
+        const forced = forcedFor(attacker, target, chosen, attackCtx);
+
+        const rollMode = forced?.mode ?? 'normal';
+
+        dispatch({
+            type: 'OPEN',
+            weaponCount: pool.length,
+            ...info,
+            targetIds: [targetId],
+            picked: true,
+        });
+        dispatch({ type: 'CONFIRM_TARGETS', forced: { [targetId]: forced } });
+
+        const damage = info.diceSlots.map((sides) =>
+            rollDie(sides, cryptoRandom)
+        );
+
+        if (serverJudged)
+            return dispatch({
+                type: 'QUICK_ROLL',
+                outcome: 'hit',
+                judge: 'server',
+                damage,
+            });
+
+        const d20 = rollDie(dice, cryptoRandom);
+
+        const second =
+            rollMode === 'normal' ? undefined : rollDie(dice, cryptoRandom);
+
+        dispatch({
+            type: 'QUICK_ROLL',
+            d20,
+            second,
+            outcome: rollOutcomeOf(attacker, target, chosen, attackCtx, {
+                d20,
+                second,
+                mode: rollMode,
+            }),
+            damage,
+        });
+    };
+
+    return {
+        open,
+        quick,
+        quickAllowed,
         changeWeapon: () => dispatch({ type: 'CHANGE_WEAPON' }),
         selectWeapon: (a: BattleAttack) => {
             dispatch({ type: 'SELECT_WEAPON', ...describe(a) });

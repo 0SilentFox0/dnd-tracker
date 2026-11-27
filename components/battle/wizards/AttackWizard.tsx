@@ -37,7 +37,8 @@ export function AttackWizard({ wizard }: { wizard: AttackWizardModel }) {
 
     const { attack, targets } = view;
 
-    const open = state.step !== 'closed' && state.step !== 'result';
+    const open =
+        state.step !== 'closed' && state.step !== 'result' && !state.quick;
 
     const current = STEP_INDEX[state.step as keyof typeof STEP_INDEX] ?? 0;
 

@@ -61,7 +61,9 @@
     "damage": {
       "title": "Damage",
       "crit": "critical",
-      "next": "Next · summary"
+      "next": "Next · summary",
+      "rolled": "d20 {d20} → {outcome}",
+      "hit": "hit"
     },
     "summary": {
       "unknownDefense": "Target's defenses and resistances",
@@ -90,6 +92,20 @@
           "advantage": "Momentum: Advantage"
         }
       }
+    },
+    "quick": {
+      "title": "Quick attack",
+      "attack": "Attack",
+      "wizard": "Attack wizard",
+      "counter": "Attack {n}/{m}",
+      "waitingDm": "Waiting for the DM's choice",
+      "pick": "Pick a target: click an enemy on the map or choose here",
+      "noTargets": "No enemy in reach",
+      "cover": "Obstacle in the way · damage ×0.5",
+      "sending": "Attacking…",
+      "close": "Close",
+      "weapons": "Weapon",
+      "target": "Target"
     }
   },
   "spell": {

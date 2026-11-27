@@ -13,6 +13,7 @@ import { modeUiOf } from '@/components/battle/modes';
 import { useSceneSlot } from '@/components/battle/scene/layout/SceneSlots';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { AuraZonePicker } from '@/components/battle/wizards/AuraZonePicker';
+import { QuickAttackCard } from '@/components/battle/wizards/QuickAttackCard';
 import { HudToggleChip } from '@/components/hud';
 import { ParticipantSourceType } from '@/lib/constants/battle';
 import {
@@ -23,6 +24,7 @@ import {
     useBattleScene,
     useBonusSpells,
     usePlayerTurn,
+    useQuickAttack,
     useSpellBook,
 } from '@/lib/hooks/battle';
 import { coreActionsOn } from '@/lib/utils/battle/actions/access';
@@ -89,7 +91,7 @@ export function MyTurnControls({
 
     const { anyPending, battle, intents } = useBattleScene();
 
-    const { actionEconomy, tested, spells } = useBattleRules();
+    const { actionEconomy, tested, spells, serverJudged } = useBattleRules();
 
     const {
         attack: attackIntent,
@@ -101,13 +103,15 @@ export function MyTurnControls({
 
     const turn = usePlayerTurn(hero, useBonusSpells(hero));
 
-    const attack = useAttackWizard(hero, turn.actions.afterAction);
+    const systemUi = useSystemBattleUi();
+
+    const attack = useAttackWizard(hero, turn.actions.afterAction, {
+        systemInput: serverJudged && !!systemUi.RollBody,
+    });
 
     const book = useSpellBook(hero, { onDone: turn.actions.afterAction });
 
     const [channelOpen, setChannelOpen] = useState(false);
-
-    const systemUi = useSystemBattleUi();
 
     const zone = useAuraZones(hero);
 
@@ -153,8 +157,6 @@ export function MyTurnControls({
         status: { actionUsed, attackLeft, skipped },
     } = turn;
 
-    const { open: openAttack } = attack.actions;
-
     const { currentRound: round, currentTurnIndex: turnIndex } = battle;
 
     const heroId = hero.basicInfo.id;
@@ -167,6 +169,10 @@ export function MyTurnControls({
         skipped,
         attackLeft,
     });
+
+    const quick = useQuickAttack(attack, hero, attackReady);
+
+    const { begin: beginQuick } = quick;
 
     useEffect(() => {
         setAttackReady(attackReady ? heroId : null);
@@ -201,7 +207,7 @@ export function MyTurnControls({
                 attackLeft,
             })
         )
-            openAttack(attackIntent.targetId, attackIntent.attackId);
+            beginQuick(attackIntent.targetId, attackIntent.attackId);
 
         clearAttackIntent();
     }, [
@@ -213,7 +219,7 @@ export function MyTurnControls({
         actionUsed,
         attackLeft,
         skipped,
-        openAttack,
+        beginQuick,
         clearAttackIntent,
     ]);
 
@@ -261,7 +267,8 @@ export function MyTurnControls({
             }}
             actions={{
                 channel: () => run(() => setChannelOpen(true)),
-                attack: () => run(() => attack.actions.open()),
+                attack: () => run(() => quick.begin()),
+                attackWizard: () => run(() => attack.actions.open()),
                 magic: () => run(() => book.actions.open()),
                 bonus: () => run(() => setBonusOpen(true)),
                 ability: () => run(() => setAbilityOpen(true)),
@@ -356,6 +363,10 @@ export function MyTurnControls({
         <>
             {dock ? dockView : full}
             {!dock && countdown}
+            {quick.open &&
+                (dockSlot
+                    ? createPortal(<QuickAttackCard quick={quick} />, dockSlot)
+                    : <QuickAttackCard quick={quick} />)}
             <AttackWizard wizard={attack} />
             <SpellBook book={book} />
             {tested && systemUi.ChannelDialog && (

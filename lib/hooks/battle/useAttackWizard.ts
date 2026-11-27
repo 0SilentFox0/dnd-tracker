@@ -27,7 +27,8 @@ import type { BattleParticipant } from '@/types/battle';
 
 export function useAttackWizard(
     attacker: BattleParticipant | null,
-    onDone?: () => void
+    onDone?: () => void,
+    { systemInput = false }: { systemInput?: boolean } = {}
 ) {
     const scene = useBattleScene();
 
@@ -225,6 +226,7 @@ export function useAttackWizard(
         mode: currentMode,
         attackCtx,
         serverJudged,
+        systemInput,
         dice,
     });
 

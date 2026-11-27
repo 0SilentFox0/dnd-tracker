@@ -1,4 +1,8 @@
 {
+  "2026-11-27-quick-attack": {
+    "title": "Quick attack",
+    "body": "Click an enemy on your turn: a card shows the target, the default weapon, cover and an Attack button that rolls and submits in one click. The attack wizard stays one link away for manual dice."
+  },
   "2026-11-27-starting-equipment": {
     "title": "Starting equipment for new heroes",
     "body": "When you create a hero you can pick a starting equipment package of the class: weapons, armor and shield go to the inventory (and are equipped) together with the gold. A reminder shows when spells are still unpicked."

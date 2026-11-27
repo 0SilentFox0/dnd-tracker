@@ -7,10 +7,12 @@ import {
     participantAttackIntent,
     type ParticipantClickScene,
 } from '@/lib/utils/battle/flows';
+import type { LogLine } from '@/types/text';
 
 export interface ParticipantClickInput extends ParticipantClickScene {
     select(id: string | null): void;
     requestAttack(intent: AttackIntent): void;
+    notify(reason: LogLine): void;
 }
 
 export function useParticipantClick(
@@ -27,9 +29,10 @@ export function useParticipantClick(
 
         if (!l) return;
 
-        const intent = participantAttackIntent(l, id);
+        const res = participantAttackIntent(l, id);
 
-        if (intent) l.requestAttack(intent);
-        else l.select(id);
+        if (!res) l.select(id);
+        else if ('intent' in res) l.requestAttack(res.intent);
+        else l.notify(res.reason);
     }, []);
 }
