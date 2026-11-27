@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight, Images } from 'lucide-react';
 
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { SlideTrack } from '@/components/show/SlideTrack';
 import { ShowStage } from '@/components/show/stage/ShowStage';
 import { Button } from '@/components/ui/button';
 import type { ShowState, SlideDeck } from '@/types/show';
@@ -60,6 +61,13 @@ export function DemoDeckPreview({
                             readOnlyPreview
                         />
                     </div>
+                    {slide.trackId && (
+                        <SlideTrack
+                            key={slide.id}
+                            campaignId={campaignId}
+                            trackId={slide.trackId}
+                        />
+                    )}
                     <div
                         data-tour="show.nav"
                         className="flex items-center justify-between gap-3"

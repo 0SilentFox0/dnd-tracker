@@ -202,6 +202,7 @@ export function ArtPanel({
                         type="button"
                         size="sm"
                         disabled={!artSave.needsBake || artSave.isSaving}
+                        title={t('bakeHint')}
                         onClick={() => artSave.save({ bake: true })}
                     >
                         {t('bake')}

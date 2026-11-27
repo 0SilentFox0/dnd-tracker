@@ -139,8 +139,18 @@
       "erase": "Erase",
       "edge-wall": "Wall",
       "edge-bars": "Bars",
-      "edge-erase": "Erase edge",
+      "edge-erase": "Erase wall",
       "edge-door": "Door"
+    },
+    "toolHints": {
+      "blocked": "Cells that take no part in the battle at all.",
+      "wall": "Cells that cannot be walked through.",
+      "hazard": "Hazardous area: damages whoever stands in it.",
+      "erase": "Remove the mark from cells.",
+      "edge-wall": "A wall along the border between cells.",
+      "edge-bars": "Bars along the border between cells: you can see through, not pass.",
+      "edge-erase": "Remove a wall, bars or door from the border.",
+      "edge-door": "A door on the border between cells that can be opened in battle."
     },
     "hazardLabel": "Hazard label",
     "hazardDice": "Damage (dice)",

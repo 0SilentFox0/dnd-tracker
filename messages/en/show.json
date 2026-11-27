@@ -139,6 +139,7 @@
     "openShow": "Open the show",
     "preview": "Preview slides",
     "previewReadOnly": "Private read-only preview. Your selection is not shared with the campaign.",
+    "slideTrack": "Slide music:",
     "previewSlideCount": "Slide {current} of {total}",
     "previousSlide": "Previous",
     "nextSlide": "Next",
