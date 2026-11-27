@@ -63,7 +63,7 @@ describe('CatalogRow', () => {
             />
         );
 
-        fireEvent.click(screen.getByRole('button', { name: /Скелет/ }));
+        fireEvent.click(screen.getByRole('button', { name: /^С Скелет$/ }));
         expect(hero.add).toHaveBeenCalledWith(ParticipantSide.ALLY);
 
         const unit = rowActions();
@@ -77,7 +77,7 @@ describe('CatalogRow', () => {
                 actions={unit}
             />
         );
-        fireEvent.click(screen.getByRole('button', { name: /Скелет/ }));
+        fireEvent.click(screen.getByRole('button', { name: /^С Скелет$/ }));
         expect(unit.add).toHaveBeenCalledWith(ParticipantSide.ENEMY);
 
         rerender(
@@ -89,7 +89,7 @@ describe('CatalogRow', () => {
                 actions={unit}
             />
         );
-        fireEvent.click(screen.getByRole('button', { name: /Скелет/ }));
+        fireEvent.click(screen.getByRole('button', { name: /^С Скелет$/ }));
         expect(unit.remove).toHaveBeenCalledTimes(1);
     });
 

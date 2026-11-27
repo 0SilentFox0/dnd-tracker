@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import { MainSkillEditForm } from '@/systems/skilltrees/ui/content/main-skills/MainSkillEditForm';
 import type { MainSkill } from '@/types/main-skills';
 
@@ -17,6 +18,12 @@ vi.mock('@/systems/skilltrees/hooks', () => ({
         actions: { submit, cancel: vi.fn() },
     }),
 }));
+vi.mock('@/lib/hooks/compendium-import', () => ({
+    useHasSourceNotes: () => false,
+}));
+vi.mock('@/components/content-import/shared/SourceNotes', () => ({
+    SourceNotes: () => null,
+}));
 vi.mock('@/systems/skilltrees/ui/content/main-skills/MainSkillFormFields', () => ({
     MainSkillFormFields: () => <div />,
 }));
@@ -25,7 +32,7 @@ afterEach(cleanup);
 
 describe('MainSkillEditForm', () => {
     it('submits through the single save button and shows the error in the form', () => {
-        render(
+        renderWithConfirm(
             <MainSkillEditForm
                 campaignId="c"
                 mainSkill={{ id: 'm' } as MainSkill}

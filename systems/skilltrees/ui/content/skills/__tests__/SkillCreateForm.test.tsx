@@ -28,6 +28,12 @@ vi.mock('@/systems/skilltrees/hooks', () => ({
         actions: { submit: state.submit, cancel: vi.fn() },
     }),
 }));
+vi.mock('@/lib/hooks/compendium-import', () => ({
+    useHasSourceNotes: () => false,
+}));
+vi.mock('@/components/content-import/shared/SourceNotes', () => ({
+    SourceNotes: () => null,
+}));
 vi.mock('@/components/abilities', () => ({
     AbilityListEditor: () => <div />,
     withAbilityErrors: (label: string) => label,

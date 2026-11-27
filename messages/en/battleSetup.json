@@ -11,6 +11,7 @@
     },
     "sections": {
       "active": "Active battles",
+      "prepared": "Prepared battles",
       "completed": "Completed battles"
     },
     "card": {
@@ -62,7 +63,12 @@
       "prepared": "Prepared",
       "completed": "Completed"
     },
-    "filterEmpty": "No battles in this filter."
+    "filterEmpty": "No battles in this filter.",
+    "status": {
+      "active": "Active",
+      "prepared": "Prepared",
+      "completed": "Completed"
+    }
   },
   "form": {
     "loading": "Loading...",

@@ -38,9 +38,11 @@ function setup(enabled: boolean, visible = true) {
     const editor = {
         state: {
             enabled,
-            map: { cols: 20, rows: 15, background: null },
+            map: { cols: 20, rows: 12, background: null },
             tool: null,
             notice: null,
+            mode: null,
+            modeSupported: () => false,
         },
         actions: { setEnabled, replaceMapFromImport: vi.fn() },
         edgeEditing: undefined,

@@ -88,7 +88,13 @@ describe('BattleList', () => {
         render(<BattleList battles={battles} campaignId="c1" />);
 
         expect(screen.getByText('Goblins')).toBeTruthy();
-        expect(screen.queryByText('Siege')).toBeNull();
+        expect(
+            screen
+                .getByRole('button', {
+                    name: /battleSetup.list.sections.completed/,
+                })
+                .getAttribute('aria-expanded')
+        ).toBe('false');
     });
 
     it('empty list shows the empty state with create', () => {
@@ -128,9 +134,16 @@ describe('BattleList', () => {
 
         expect(screen.getByText('Dragon')).toBeTruthy();
         expect(screen.queryByText('Goblins')).toBeNull();
+
+        const clears = screen.getAllByRole('button', {
+            name: 'common.search.clear',
+        });
+
+        fireEvent.click(clears[clears.length - 1]);
+
         expect(
-            screen.getByRole('button', { name: 'common.search.clear' })
-        ).toBeTruthy();
+            (screen.getByRole('searchbox') as HTMLInputElement).value
+        ).toBe('');
     });
 
     it('marks the first card with the tour anchor', () => {

@@ -18,6 +18,7 @@ interface HudCardProps {
     link?: { href: string; label?: string };
     className?: string;
     'data-tour'?: string;
+    'data-testid'?: string;
     children: ReactNode;
 }
 
@@ -28,6 +29,7 @@ export function HudCard({
     link,
     className,
     'data-tour': dataTour,
+    'data-testid': dataTestId,
     children,
 }: HudCardProps) {
     const Comp = asChild ? Slot : 'div';
@@ -36,6 +38,7 @@ export function HudCard({
         <Comp
             data-tone={tone}
             data-tour={dataTour}
+            data-testid={dataTestId}
             data-clickable={link ? '' : undefined}
             style={accent ? { borderLeftColor: accent } : undefined}
             className={cn(

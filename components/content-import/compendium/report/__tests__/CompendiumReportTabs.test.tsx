@@ -32,7 +32,7 @@ function CompendiumReport({
 afterEach(cleanup);
 
 const openSources = () =>
-    fireEvent.click(screen.getByRole('button', { name: 'Джерела й покриття' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Джерела й редакції' }));
 
 const render = (ui: React.ReactElement, locale: 'uk' | 'en' = 'uk') =>
     renderWithIntl(ui, {
@@ -139,11 +139,11 @@ it('groups skipped categories into one info line and hides raw keys and source J
     expect(screen.getAllByText('Механіку рис налаштувати вручну')).toHaveLength(
         1
     );
-    openSources();
-    expect(container.textContent).not.toContain('_meta');
     expect(container.textContent).toContain(
         'Пропущено непідтримувані категорії: foundrySpell'
     );
+    openSources();
+    expect(container.textContent).not.toContain('_meta');
 });
 
 const base = {

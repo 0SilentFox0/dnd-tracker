@@ -25,6 +25,15 @@ vi.mock('@/lib/hooks/systems', () => ({
 vi.mock('@/components/races/RaceFormFields', () => ({
     RaceFormFields: () => <div data-testid="fields" />,
 }));
+vi.mock('@/components/races/useRaceFormTabs', () => ({
+    useRaceFormTabs: () => [
+        { id: 'basic', label: 'basic', content: <div /> },
+    ],
+}));
+vi.mock('@/components/content-import/shared/SourceNotes', () => ({
+    SourceNotes: () => null,
+}));
+vi.mock('@/components/races/RaceCard', () => ({ RaceCard: () => null }));
 vi.mock('@/components/abilities', () => ({
     withAbilityErrors: (label: string) => label,
 }));

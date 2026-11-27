@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 
+import '@/lib/utils/rules/systems/registry';
 import { mapArtSceneSchema } from '@/lib/schemas/map-art';
 import { storedRecord } from '@/lib/schemas/stored-json';
 import { assembleGeometry } from '@/lib/server/battle-maps/assemble';

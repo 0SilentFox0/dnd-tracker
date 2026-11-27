@@ -101,7 +101,9 @@ function Harness({
 
     const { select } = sections;
 
-    useEffect(() => select(initial), [select, initial]);
+    useEffect(() => {
+        if (initial !== 'grid') select(initial);
+    }, [select, initial]);
 
     return (
         <BattleMapSidebar

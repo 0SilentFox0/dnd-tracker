@@ -50,6 +50,6 @@ describe('SetupSummary', () => {
             screen.queryByText('battleSetup.form.summary.noEnemies')
         ).toBeNull();
         expect(screen.getByText('battleSetup.balance.shortEmpty')).toBeTruthy();
-        expect(screen.getByText('battleSetup.form.summary.map')).toBeTruthy();
+        expect(screen.getByText(/battleSetup.form.summary.map/)).toBeTruthy();
     });
 });
