@@ -131,31 +131,19 @@ export function ReferenceRail({ filters, counts }: ReferenceRailProps) {
                         </PopoverTrigger>
                         <PopoverContent className="w-72 space-y-3 p-3">
                             {fields}
-                            {hasActive && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={clearAll}
-                                >
-                                    {t('search.reset')}
-                                </Button>
-                            )}
                         </PopoverContent>
                     </Popover>
                 )}
             </div>
 
-            {isXl && (
-                <div className="space-y-3 pt-2">
-                    {fields}
-                    {hasActive && (
-                        <Button variant="ghost" size="sm" onClick={clearAll}>
-                            <X className="mr-1 size-4" />
-                            {t('search.reset')}
-                        </Button>
-                    )}
-                </div>
+            {hasActive && (
+                <Button variant="ghost" size="sm" onClick={clearAll}>
+                    <X className="mr-1 size-4" aria-hidden />
+                    {t('search.reset')}
+                </Button>
             )}
+
+            {isXl && <div className="space-y-3 pt-2">{fields}</div>}
         </div>
     );
 }

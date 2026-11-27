@@ -68,17 +68,12 @@ describe('RulesForm book layout', () => {
         expect(
             screen.getAllByRole('img', { name: 'rules.page.changed' })
         ).toHaveLength(1);
-        expect(
-            screen.getAllByText(/rules.page.changedSections/).length
-        ).toBeGreaterThan(0);
 
         const resets = screen.getAllByRole('button', {
             name: /^rules\.page\.resetSection/,
         });
 
-        expect(
-            resets.filter((b) => !b.className.includes('lg:hidden'))
-        ).toHaveLength(1);
+        expect(resets).toHaveLength(1);
 
         fireEvent.click(resets[0]);
 

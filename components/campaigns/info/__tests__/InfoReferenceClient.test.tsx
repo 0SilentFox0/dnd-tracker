@@ -102,4 +102,18 @@ describe('InfoReferenceClient', () => {
 
         expect(screen.getByText('Нічого не знайдено')).toBeTruthy();
     });
+
+    it('shows reset filters only while a search or filter is active', () => {
+        setup(false);
+
+        expect(screen.queryByRole('button', { name: 'Скинути фільтри' })).toBeNull();
+
+        fireEvent.change(screen.getAllByRole('searchbox')[0], {
+            target: { value: 'zzzzzz' },
+        });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Скинути фільтри' }));
+
+        expect(screen.queryByRole('button', { name: 'Скинути фільтри' })).toBeNull();
+    });
 });

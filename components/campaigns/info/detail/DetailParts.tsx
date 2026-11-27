@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
+import { HudSectionTitle } from '@/components/hud/page';
 
 export function DetailHeader({
     icon,
@@ -62,8 +63,8 @@ export function DetailSection({
 }) {
     return (
         <section>
-            <h3 className="hud-sc text-xs text-hud-ink">{title}</h3>
-            <div className="mt-1 text-sm text-hud-bone">{children}</div>
+            <HudSectionTitle>{title}</HudSectionTitle>
+            <div className="mt-2 text-sm text-hud-bone">{children}</div>
         </section>
     );
 }

@@ -133,6 +133,7 @@
     }
   },
   "pendingSubtitle": "{subtitle} · {count} awaiting approval",
+  "rulesModules": "{count, plural, one {# module} other {# modules}}",
   "page": {
     "demoDmRole": "DM · read-only",
     "demoNotice": "This is a shared read-only demo. Your battle experiments reset when you leave or reopen an encounter.",

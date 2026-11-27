@@ -10,5 +10,6 @@ export { HudPanel } from './HudPanel';
 export { HudPill } from './HudPill';
 export { HudSectionTitle } from './HudSectionTitle';
 export { HudSheetHeading } from './HudSheetHeading';
+export { HudSplit, type HudSplitAside } from './HudSplit';
 export { HudStatChip } from './HudStatChip';
 export { HudTile } from './HudTile';
