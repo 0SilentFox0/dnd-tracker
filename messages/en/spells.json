@@ -56,7 +56,9 @@
     "removeFromGroup": "Remove from group",
     "moveToGroup": "Move to group",
     "copied": "Copied",
-    "copyId": "Copy ID"
+    "copyId": "Copy ID",
+    "expand": "Expand details",
+    "collapse": "Collapse details"
   },
   "selected": {
     "empty": "The spellbook is empty. Pick spells from the list above.",
