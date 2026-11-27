@@ -16,6 +16,7 @@ export {
     useSetCampaignMemberRole,
     useUpdateCampaign,
 } from './useCampaignMutations';
+export { useCampaignNotice } from './useCampaignNotice';
 export { useCampaignRules, useUpdateCampaignRules } from './useCampaignRules';
 export { useCampaignSystemSelection } from './useCampaignSystemSelection';
 export { useBundleFilePicker, useImportCampaign } from './useImportCampaign';

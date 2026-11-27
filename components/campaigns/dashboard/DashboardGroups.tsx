@@ -8,7 +8,7 @@ import {
     type DashboardContext,
     type DashboardSection,
     DEFAULT_DASHBOARD_CONTEXT,
-    DEMO_DASHBOARD_SECTIONS,
+    demoDashboardSectionsFor,
     DM_HOSTED_SECTION_KEYS,
     dmDashboardSectionsFor,
     PLAYER_DASHBOARD_SECTIONS,
@@ -51,7 +51,7 @@ export function DashboardGroups({
     });
 
     const sections = isDemo
-        ? DEMO_DASHBOARD_SECTIONS
+        ? demoDashboardSectionsFor(context)
         : isDM
           ? dmDashboardSectionsFor(context)
           : PLAYER_DASHBOARD_SECTIONS;

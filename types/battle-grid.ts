@@ -100,6 +100,7 @@ export interface BattleMapConfig {
     backgroundCols?: number;
     backgroundRows?: number;
     artBaked?: boolean;
+    plainGrid?: true;
     gridOffset?: { x: number; y: number };
     maze?: MazeConfig | null;
     walls?: string[];

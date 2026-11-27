@@ -31,13 +31,14 @@ export function useCharacters(
         type?: CharacterTypeValue;
         status?: 'pending';
         compact?: boolean;
+        maxHp?: boolean;
         enabled?: boolean;
     }
 ) {
     return useQuery<CharacterListItem[]>({
         queryKey: characterKeys.list(
             campaignId,
-            opts?.status ?? opts?.type ?? 'all',
+            `${opts?.status ?? opts?.type ?? 'all'}${opts?.maxHp ? ':maxHp' : ''}`,
             !!opts?.compact
         ),
         queryFn: () => getCharacters(campaignId, opts),

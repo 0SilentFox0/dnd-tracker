@@ -291,5 +291,10 @@
     "title": "Preparation",
     "empty": "No prepared scenes or battles yet.",
     "create": "Open scenario"
+  },
+  "notices": {
+    "dmOnly": "This section is for the DM only.",
+    "mapLibraryDisabled": "The map library is turned off. You can enable it in the campaign settings.",
+    "demoReadOnly": "Not available in the demo."
   }
 }

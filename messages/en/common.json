@@ -47,7 +47,9 @@
   },
   "notFound": {
     "title": "Page not found",
-    "home": "Home"
+    "home": "Home",
+    "campaign": "To campaign",
+    "campaigns": "To campaigns"
   },
   "loading": {
     "battle": "Loading battle…",
@@ -170,7 +172,8 @@
       "spells": "Spell",
       "artifacts": "Artifact",
       "sets": "Set"
-    }
+    },
+    "notFound": "Page not found"
   },
   "notifications": {
     "new": "new",

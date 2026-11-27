@@ -1,7 +1,7 @@
 import { PrintSkillsPageClient } from './page-client';
 
 import { prisma } from '@/lib/db';
-import { requireCampaignDM } from '@/lib/server/campaigns/access';
+import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { withAbilitySummary } from '@/lib/utils/abilities/summary';
 
 export default async function PrintSkillsPage({
@@ -11,7 +11,7 @@ export default async function PrintSkillsPage({
 }) {
     const { id } = await params;
 
-    const { campaign } = await requireCampaignDM(id);
+    const { campaign } = await requireCampaignDMOrDemo(id);
 
     const [skills, mainSkillsRaw, skillTrees] = await Promise.all([
         prisma.skill.findMany({

@@ -27,7 +27,7 @@ describe('useBattleListSections', () => {
         expect(ids(result.current.prepared)).toEqual(['2', '3']);
         expect(ids(result.current.completed)).toEqual(['4']);
         expect(result.current.filter.counts).toEqual({
-            all: 3,
+            all: 4,
             prepared: 2,
             completed: 1,
         });

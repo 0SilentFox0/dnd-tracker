@@ -27,6 +27,8 @@ import {
     MAX_SIDE,
     paintCells,
     type SetupTool,
+    showsBackground,
+    withPlainGrid,
 } from '@/lib/utils/battle/grid';
 import {
     MAP_MODE_REGISTRY,
@@ -115,7 +117,9 @@ export function useBattleMapEditor(
         ? map.background
         : DEFAULT_MAP_BACKGROUND;
 
-    const image = useImageSize(enabled ? imageSrc : null);
+    const image = useImageSize(
+        enabled && showsBackground(map, true) ? imageSrc : null
+    );
 
     const {
         setSize,
@@ -178,9 +182,18 @@ export function useBattleMapEditor(
         []
     );
 
+    const startPlainGrid = useCallback(
+        () => setMap((m) => withPlainGrid(m)),
+        []
+    );
+
     const applyArt = useCallback(
         (patch: ArtMapPatch) =>
-            setMap((m) => ({ ...m, ...patch, sightBlocked: patch.sightBlocked })),
+            setMap((m) => ({
+                ...m,
+                ...patch,
+                sightBlocked: patch.sightBlocked,
+            })),
         []
     );
 
@@ -325,6 +338,7 @@ export function useBattleMapEditor(
             replaceBackground,
             replaceMapFromImport,
             applyArt,
+            startPlainGrid,
             setBrush,
             setMode,
             setGridType,
