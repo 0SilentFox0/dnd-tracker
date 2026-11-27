@@ -21,6 +21,7 @@ export const ART_LAYERS = [
     'wallfill',
     'edge-art',
     'effects',
+    'objects',
 ] as const;
 
 export interface DroppedLayers {

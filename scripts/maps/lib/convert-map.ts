@@ -1,13 +1,21 @@
 import { Prisma } from '@prisma/client';
 
 import '@/lib/utils/rules/systems/registry';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { mapArtSceneSchema } from '@/lib/schemas/map-art';
 import { storedRecord } from '@/lib/schemas/stored-json';
 import { assembleGeometry } from '@/lib/server/battle-maps/assemble';
+import { deriveMechanics } from '@/lib/utils/battle/map-art/derive';
+import { stampCells } from '@/lib/utils/battle/map-art/stamp-cells';
 import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import type { EdgeChunks } from '@/lib/utils/battle/map-storage/edge-chunks';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { toInputJsonObject } from '@/lib/utils/common/json';
+import {
+    countObjectCells,
+    type ObjectsConversion,
+    objectsToStamps,
+} from '@/scripts/maps/lib/objects-to-stamps';
 import {
     type ChunkTileLayers,
     convertTiles,
@@ -16,7 +24,7 @@ import {
     hasFloorLayers,
     stripArtLayers,
 } from '@/scripts/maps/lib/tiles-to-scene';
-import type { BattleMapFull, MapArtScene } from '@/types/battle-map';
+import type { BattleMapFull, MapArtScene, MapArtStamp } from '@/types/battle-map';
 
 export interface ChunkRow {
     cx: number;
@@ -25,22 +33,24 @@ export interface ChunkRow {
     tileLayers: unknown;
 }
 
+export interface ObjectsReport extends ObjectsConversion {
+    total: number;
+    newBlocked: number;
+}
+
 export interface Conversion {
     scene: MapArtScene;
     wallsClipped: number;
     dropped: DroppedLayers;
+    objects: ObjectsReport;
+    header: Record<string, unknown>;
 }
 
-/** Null when the map has no ground/wallfill to convert. */
-export function buildConversion(
-    headerJson: unknown,
-    chunks: ChunkRow[]
-): Conversion | null {
-    const tileLayers: ChunkTileLayers = {};
+const sortedUnion = (a: readonly string[] | undefined, b: Iterable<string>) =>
+    [...new Set([...(a ?? []), ...b])].sort((x, y) => x.localeCompare(y));
 
-    for (const c of chunks)
-        if (isRecord(c.tileLayers))
-            tileLayers[chunkKey(c.cx, c.cy)] = c.tileLayers;
+function tileLayersOf(chunks: ChunkRow[]): ChunkTileLayers {
+    const tileLayers = tileLayersOf(chunks);
 
     if (!hasFloorLayers(tileLayers)) return null;
 
@@ -58,13 +68,64 @@ export function buildConversion(
         bars: geometry.bars,
     });
 
-    if (!mapArtSceneSchema.safeParse(converted.scene).success)
+    const { report, header: nextHeader } = objectsReport(tileLayers, header, []);
+
+    const scene = { ...converted.scene, stamps: report.stamps };
+
+    if (!mapArtSceneSchema.safeParse(scene).success)
         throw new Error('scene failed mapArtSceneSchema');
 
-    return { ...converted, dropped: countDroppedLayers(tileLayers) };
+    return {
+        scene,
+        wallsClipped: converted.wallsClipped,
+        dropped: countDroppedLayers(tileLayers),
+        objects: report,
+        header: nextHeader,
+    };
 }
 
-function stripSnapshotLayers(payload: Record<string, unknown>) {
+export interface ObjectsAddition {
+    scene: MapArtScene;
+    objects: ObjectsReport;
+    header: Record<string, unknown>;
+}
+
+/** Null when the map has no objects layer; throws when the result would not fit the limits. */
+export function buildObjectsConversion(
+    existingScene: MapArtScene,
+    headerJson: unknown,
+    chunks: ChunkRow[]
+): ObjectsAddition | null {
+    const tileLayers = tileLayersOf(chunks);
+
+    if (countObjectCells(tileLayers) === 0) return null;
+
+    const header = storedRecord<BattleMapFull['map']>().parse(headerJson);
+
+    const { report, header: nextHeader } = objectsReport(
+        tileLayers,
+        header,
+        existingScene.stamps
+    );
+
+    const scene = {
+        ...existingScene,
+        stamps: [...existingScene.stamps, ...report.stamps],
+    };
+
+    if (!mapArtSceneSchema.safeParse(scene).success)
+        throw new Error('scene failed mapArtSceneSchema');
+
+    if (deriveMechanics(scene, header).blocked.length > MAP_LIMITS.maxTerrainCells)
+        throw new Error('too many blocked cells');
+
+    return { scene, objects: report, header: nextHeader };
+}
+
+function stripSnapshotLayers(
+    payload: Record<string, unknown>,
+    header: Record<string, unknown>
+) {
     const layers = isRecord(payload.tileLayers) ? payload.tileLayers : {};
 
     const tileLayers: Record<string, Record<string, string>> = {};
@@ -77,7 +138,7 @@ function stripSnapshotLayers(payload: Record<string, unknown>) {
         if (rest) tileLayers[key] = rest;
     }
 
-    return { ...payload, tileLayers };
+    return { ...payload, header, tileLayers };
 }
 
 /** Everything is read inside the transaction; mapVersion is bumped with a stripped snapshot. */
@@ -103,20 +164,92 @@ export async function applyConversionTx(
 
     const base = map.mapVersion;
 
+    await writeConversion(tx, {
+        mapId,
+        base,
+        chunks,
+        header: conversion.header,
+        writeArt: () =>
+            tx.battleMapArt.create({
+                data: {
+                    mapId,
+                    scene: toInputJsonObject(conversion.scene),
+                    sceneVersion: 1,
+                },
+            }),
+    });
+
+    return conversion;
+}
+
+/** Appends tile objects to an existing art scene; baked maps are skipped unless includeBaked. */
+export async function applyObjectsTx(
+    tx: Prisma.TransactionClient,
+    mapId: string,
+    options: { includeBaked?: boolean } = {}
+): Promise<ObjectsAddition | null> {
+    const art = await tx.battleMapArt.findUnique({ where: { mapId } });
+
+    if (!art || (art.bakedSceneVersion !== null && !options.includeBaked))
+        return null;
+
+    const map = await tx.battleMap.findUniqueOrThrow({
+        where: { id: mapId },
+        select: { header: true, mapVersion: true },
+    });
+
+    const chunks = await tx.battleMapChunk.findMany({
+        where: { mapId },
+        select: { cx: true, cy: true, data: true, tileLayers: true },
+    });
+
+    const addition = buildObjectsConversion(
+        mapArtSceneSchema.parse(art.scene),
+        map.header,
+        chunks
+    );
+
+    if (!addition) return null;
+
+    await writeConversion(tx, {
+        mapId,
+        base: map.mapVersion,
+        chunks,
+        header: addition.header,
+        writeArt: () =>
+            tx.battleMapArt.update({
+                where: { mapId },
+                data: {
+                    scene: toInputJsonObject(addition.scene),
+                    sceneVersion: { increment: 1 },
+                    updatedAt: new Date(),
+                },
+            }),
+    });
+
+    return addition;
+}
+
+async function writeConversion(
+    tx: Prisma.TransactionClient,
+    input: {
+        mapId: string;
+        base: number;
+        chunks: ChunkRow[];
+        header: Record<string, unknown>;
+        writeArt: () => Promise<unknown>;
+    }
+): Promise<void> {
+    const { mapId, base, chunks, header } = input;
+
     const { count } = await tx.battleMap.updateMany({
         where: { id: mapId, mapVersion: base },
-        data: { mapVersion: { increment: 1 } },
+        data: { mapVersion: { increment: 1 }, header: toInputJsonObject(header) },
     });
 
     if (count === 0) throw new Error('map changed during conversion');
 
-    await tx.battleMapArt.create({
-        data: {
-            mapId,
-            scene: toInputJsonObject(conversion.scene),
-            sceneVersion: 1,
-        },
-    });
+    await input.writeArt();
 
     for (const c of chunks) {
         if (!isRecord(c.tileLayers)) continue;
@@ -140,13 +273,13 @@ export async function applyConversionTx(
               string,
               unknown
           >)
-        : { header: map.header };
+        : { header };
 
     await tx.battleMapVersion.create({
         data: {
             mapId,
             version: base + 1,
-            payload: stripSnapshotLayers(payload) as Prisma.InputJsonObject,
+            payload: stripSnapshotLayers(payload, header) as Prisma.InputJsonObject,
         },
     });
 
@@ -155,6 +288,4 @@ export async function applyConversionTx(
     );
 
     await pruneMapVersions(tx, mapId, base + 1);
-
-    return conversion;
 }

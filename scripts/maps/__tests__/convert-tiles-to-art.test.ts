@@ -92,7 +92,7 @@ describe('hasFloorLayers', () => {
 });
 
 describe('stripArtLayers', () => {
-    it('keeps objects and returns null when nothing remains', () => {
+    it('strips every art layer including objects and returns null when nothing remains', () => {
         expect(
             stripArtLayers({
                 ground: 'a',
@@ -101,9 +101,9 @@ describe('stripArtLayers', () => {
                 effects: 'd',
                 objects: 'o',
             })
-        ).toEqual({ objects: 'o' });
+        ).toBeNull();
 
-        expect(stripArtLayers({ ground: 'a', effects: 'd' })).toBeNull();
+        expect(stripArtLayers({ ground: 'a', other: 'x' })).toEqual({ other: 'x' });
     });
 });
 
