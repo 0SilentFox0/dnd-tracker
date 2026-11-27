@@ -32,7 +32,7 @@ const VIEW_TABS: ProfileTabId[] = [
 ];
 
 export const asTab = (v: string | undefined): ProfileTabId => {
-    const id = v === 'stash' ? 'items' : v;
+    const id = v === 'stash' || v === 'inventory' ? 'items' : v;
 
     return id && (VIEW_TABS as string[]).includes(id)
         ? (id as ProfileTabId)
