@@ -5,7 +5,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import NotFound from '@/app/not-found';
 
 const back = vi.fn();
+
 const push = vi.fn();
+
 let pathname = '/nope';
 
 vi.mock('next/navigation', () => ({
@@ -36,6 +38,7 @@ describe('not-found', () => {
 
     it('goes back when history exists, else to campaigns', () => {
         render(<NotFound />);
+
         const btn = screen.getByRole('button', {
             name: 'common.notFound.back',
         });
