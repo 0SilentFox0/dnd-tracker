@@ -24,7 +24,6 @@
     "mechanics": "Механіка",
     "brief": "Коротко",
     "description": "Опис",
-    "source": "Джерело",
     "appearanceSkill": "Опис вигляду (як виглядає в грі)",
     "appearanceSpell": "Опис вигляду (як виглядає заклинання)",
     "appearancePlaceholderSkill": "Наприклад: яскрава вогняна сфера, що летить до цілі...",

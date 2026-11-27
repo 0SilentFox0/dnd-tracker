@@ -103,6 +103,8 @@
         checked = 0,
         overImage = 0;
 
+    const overImageItems = [];
+
     const walker = document.createTreeWalker(
         document.body,
         NodeFilter.SHOW_TEXT
@@ -142,6 +144,17 @@
 
         if (el.closest('[data-ux-over-image]')) {
             overImage++;
+
+            if (overImageItems.length < 30)
+                overImageItems.push({
+                    sel: `${el.tagName.toLowerCase()}${
+                        typeof el.className === 'string' && el.className
+                            ? '.' + el.className.trim().split(/\s+/)[0]
+                            : ''
+                    }`,
+                    text: txt.slice(0, 40),
+                });
+
             continue;
         }
 
@@ -243,6 +256,7 @@
         contrastWorst: fails.slice(0, 2),
         skippedGradient,
         overImage,
+        overImageItems,
         fontFamilies: share(fams),
     });
 })();

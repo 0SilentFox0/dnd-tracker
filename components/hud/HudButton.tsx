@@ -24,7 +24,7 @@ export const HudButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
             type="button"
             data-slot="hud-button"
             className={cn(
-                'ds-interactive cursor-pointer',
+                'ds-interactive cursor-pointer pointer-coarse:min-h-11',
                 DISABLED_CLASS,
                 className
             )}
@@ -46,7 +46,7 @@ export const HudIconButton = React.forwardRef<
         ref={ref}
         data-slot="hud-icon-button"
         className={cn(
-            'flex items-center justify-center pointer-coarse:min-h-11 pointer-coarse:min-w-11',
+            'flex items-center justify-center pointer-coarse:min-w-11',
             ICON_SIZES[size],
             tone && TONES[tone],
             className

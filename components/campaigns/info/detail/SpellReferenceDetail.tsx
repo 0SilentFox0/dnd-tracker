@@ -31,6 +31,8 @@ export function SpellReferenceDetail({
 }: SpellReferenceDetailProps) {
     const t = useTranslations('reference.card');
 
+    const tSpells = useTranslations('spells');
+
     const translate = useTranslator();
 
     const effects = useAbilityText().lines(item.effects);
@@ -84,7 +86,7 @@ export function SpellReferenceDetail({
                 </DetailSection>
             )}
             {item.groupName && (
-                <DetailSection title={t('source')}>
+                <DetailSection title={tSpells('groupDialog.title')}>
                     {item.groupName}
                 </DetailSection>
             )}

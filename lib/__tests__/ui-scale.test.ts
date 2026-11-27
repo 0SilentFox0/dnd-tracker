@@ -109,6 +109,17 @@ describe('ui-scale ratchet', () => {
         expect(
             countUiScale(`const PANEL = 'h-7 size-7'`)['button-height']
         ).toBe(0);
+        expect(
+            countUiScale(`const btn = 'flex h-[52px] size-7'`)['button-height']
+        ).toBe(2);
+    });
+
+    it('skips pointer-coarse heights on button tags', () => {
+        expect(
+            countUiScale(
+                `<Button className="h-[30px] pointer-coarse:h-[44px]" />`
+            )['button-height']
+        ).toBe(1);
     });
 
     it('counts disabled:opacity-40 but not 50', () => {

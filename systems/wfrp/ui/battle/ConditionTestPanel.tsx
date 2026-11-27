@@ -15,7 +15,7 @@ import { useConditionTestPanel } from '@/systems/wfrp/hooks/useConditionTestPane
 const SOURCES = ['server', 'manual'] as const;
 
 const btn =
-    'h-9 w-full border border-white/25 px-2 text-left text-sm text-[var(--bone)] disabled:opacity-50';
+    'h-10 w-full border border-white/25 px-2 text-left text-sm text-[var(--bone)] disabled:opacity-50';
 
 export function ConditionTestPanel({ hero }: ConditionTestPanelProps) {
     const t = useTranslations('battleWfrp.ui.test');

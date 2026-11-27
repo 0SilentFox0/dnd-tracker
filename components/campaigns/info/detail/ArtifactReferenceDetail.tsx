@@ -62,7 +62,7 @@ export function ArtifactReferenceDetail({
                 </DetailSection>
             )}
             {item.setName && (
-                <DetailSection title={t('card.source')}>
+                <DetailSection title={t('filters.set.label')}>
                     {item.setName}
                 </DetailSection>
             )}

@@ -194,7 +194,7 @@ export function SkillRow({
                     })
                 }
                 title={t('roll')}
-                className="motion-press flex min-h-10 w-full items-center gap-3 px-2 text-left hover:bg-hud-raised pointer-coarse:min-h-11"
+                className="motion-press flex min-h-10 w-full items-center gap-3 px-2 text-left hover:bg-hud-raised"
             >
                 {canRoll && <span className="sr-only">{t('roll')}: </span>}
                 <Mark count={level} />

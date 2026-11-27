@@ -96,7 +96,7 @@ export const ParticipantRow = memo(function ParticipantRow({
                 data-ux-tile
                 aria-label={participant.basicInfo.name}
                 onClick={() => onSelect(participant.basicInfo.id)}
-                className="absolute inset-0"
+                className="absolute inset-0 pointer-coarse:min-h-0"
             />
             <HitFrame change={change} />
             <HitFloat change={change} className="top-2 left-6 text-2xl" />

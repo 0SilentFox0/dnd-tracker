@@ -68,7 +68,7 @@ function Disclosure({
                             {!hideChevron && (
                                 <ChevronRight
                                     className={cn(
-                                        'size-3.5 shrink-0 text-hud-faint-deco transition-transform group-data-[state=open]/disclosure:rotate-90',
+                                        'size-3.5 shrink-0 text-hud-faint transition-transform group-data-[state=open]/disclosure:rotate-90',
                                         chevronClassName
                                     )}
                                 />

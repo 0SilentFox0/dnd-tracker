@@ -44,7 +44,7 @@ const CSS_FONT = /font-size:\s*(\d*\.?\d+)(px|rem)\b/g;
 const BUTTON_TAG = /<(Button|HudIconButton|HudButton)(?![\w])/g;
 
 const BUTTON_CONST =
-    /\bconst\s+\w*(?:BTN|BUTTON|Btn|Button)\w*(?:\s*:\s*[^=]+)?\s*=\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
+    /\bconst\s+\w*(?:btn|button)\w*(?:\s*:\s*[^=]+)?\s*=\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/gi;
 
 const HEIGHT_TOKEN = /^(?:min-h|h|size)-(.+)$/;
 
@@ -91,6 +91,8 @@ const countButtonHeights = (text: string): number => {
         const tokens = tag.match(/[^\s"'`{}()<>=,]+/g) ?? [];
 
         for (const token of tokens) {
+            if (token.includes('pointer-coarse:')) continue;
+
             const base = baseToken(token);
 
             const hit = base && HEIGHT_TOKEN.exec(base);

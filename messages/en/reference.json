@@ -24,7 +24,6 @@
     "mechanics": "Mechanics",
     "brief": "Brief",
     "description": "Description",
-    "source": "Source",
     "appearanceSkill": "Appearance description (how it looks in the game)",
     "appearanceSpell": "Appearance description (how the spell looks)",
     "appearancePlaceholderSkill": "For example: a bright fire orb flying at the target...",

@@ -57,7 +57,7 @@ export function ActionDock({
             onClick={on.actions}
             data-tour={panel?.open ? undefined : 'battle.turn-controls'}
             className={cn(
-                'group relative flex h-[71px] w-[82px] shrink-0 flex-col items-center justify-center gap-0.5 border-0 p-0 text-xs font-bold tracking-[.06em] uppercase [clip-path:polygon(25%_0,75%_0,100%_50%,75%_100%,25%_100%,0_50%)] focus-visible:text-white focus-visible:outline-none max-md:h-[58px] max-md:w-[66px]',
+                'group relative flex h-[71px] w-[82px] shrink-0 flex-col items-center justify-center gap-0.5 border-0 p-0 text-xs font-bold tracking-[.06em] uppercase [clip-path:polygon(25%_0,75%_0,100%_50%,75%_100%,25%_100%,0_50%)] focus-visible:text-white focus-visible:outline-none max-md:h-[58px] max-md:w-[66px] pointer-coarse:min-h-0',
                 'bg-gradient-to-br from-[#e4ca78] to-[#a9812f] focus-visible:from-[#fff1a8] focus-visible:to-[#e4ca78]',
                 exhausted ? 'text-[#211a14]' : 'text-[#ecd78d]'
             )}

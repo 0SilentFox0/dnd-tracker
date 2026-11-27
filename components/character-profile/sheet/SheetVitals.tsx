@@ -25,7 +25,7 @@ const FORM_ID = 'sheet-vitals-form';
 type Hp = { current: number; max: number; temp: number };
 
 const BTN =
-    'motion-press inline-flex min-h-10 min-w-fit flex-1 pointer-coarse:min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-sm border border-hud-line bg-hud-raised px-3 text-base font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50';
+    'motion-press inline-flex min-h-10 min-w-fit flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-sm border border-hud-line bg-hud-raised px-3 text-base font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50';
 
 const LABEL =
     'hud-title flex items-center gap-2 text-base text-hud-muted lg:text-lg';
