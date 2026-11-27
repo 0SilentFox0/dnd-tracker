@@ -6,7 +6,7 @@ import {
     defineCharacterOperation,
     memberScope,
 } from '../operation-runner';
-import { bakedMaxHpById } from './list-max-hp';
+import { bakedStatsById } from './list-baked-stats';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
@@ -140,7 +140,7 @@ export const listOperation = defineCharacterOperation({
 
         const baked =
             maxHp && access.isDM && !pending
-                ? await bakedMaxHpById(
+                ? await bakedStatsById(
                       rows.map((r) => r.id),
                       access.campaign
                   )
@@ -149,7 +149,7 @@ export const listOperation = defineCharacterOperation({
         return redactListedLedgers(
             rows.map((row) => ({
                 ...row,
-                ...(baked?.has(row.id) && { maxHp: baked.get(row.id) }),
+                ...(baked?.has(row.id) && baked.get(row.id)),
                 ...(token && {
                     inspiration:
                         readStoredColumn(

@@ -7,8 +7,8 @@ import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rule
 
 vi.mock('@/lib/utils/api/api-auth', () => ({ requireCampaignAccess: vi.fn() }));
 vi.mock('@/lib/db', () => ({ prisma: { character: { findMany: vi.fn() } } }));
-vi.mock('@/lib/server/characters/operations/list-max-hp', () => ({
-    bakedMaxHpById: vi.fn(async () => new Map([['h1', 15]])),
+vi.mock('@/lib/server/characters/operations/list-baked-stats', () => ({
+    bakedStatsById: vi.fn(async () => new Map([['h1', { maxHp: 15, armorClass: 14 }]])),
 }));
 
 const list = async (qs = '') => {
@@ -91,6 +91,7 @@ describe('listCharacters baked maxHp', () => {
         const body = await (await list('?maxHp=1')).json();
 
         expect(body[0].maxHp).toBe(15);
+        expect(body[0].armorClass).toBe(14);
         expect(body[1].maxHp).toBeUndefined();
     });
 
