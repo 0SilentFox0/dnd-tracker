@@ -5,7 +5,6 @@ import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { mapArtSceneSchema } from '@/lib/schemas/map-art';
 import { storedRecord } from '@/lib/schemas/stored-json';
 import { assembleGeometry } from '@/lib/server/battle-maps/assemble';
-import { deriveMechanics } from '@/lib/utils/battle/map-art/derive';
 import { stampCells } from '@/lib/utils/battle/map-art/stamp-cells';
 import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import type { EdgeChunks } from '@/lib/utils/battle/map-storage/edge-chunks';
@@ -17,6 +16,7 @@ import {
     objectsToStamps,
 } from '@/scripts/maps/lib/objects-to-stamps';
 import {
+    ART_LAYERS,
     type ChunkTileLayers,
     convertTiles,
     countDroppedLayers,
@@ -44,6 +44,15 @@ export interface Conversion {
     dropped: DroppedLayers;
     objects: ObjectsReport;
     header: Record<string, unknown>;
+}
+
+const OBJECTS_ONLY = ['objects'] as const;
+
+function assertBlockedLimit(header: Record<string, unknown>) {
+    const blocked = header.blocked;
+
+    if (Array.isArray(blocked) && blocked.length > MAP_LIMITS.maxTerrainCells)
+        throw new Error('too many blocked cells');
 }
 
 const sortedUnion = (a: readonly string[] | undefined, b: Iterable<string>) =>
@@ -112,6 +121,8 @@ export function buildConversion(
 
     const { report, header: nextHeader } = objectsReport(tileLayers, header, []);
 
+    assertBlockedLimit(nextHeader);
+
     const scene = { ...converted.scene, stamps: report.stamps };
 
     if (!mapArtSceneSchema.safeParse(scene).success)
@@ -132,7 +143,7 @@ export interface ObjectsAddition {
     header: Record<string, unknown>;
 }
 
-/** Null when the map has no objects layer; throws when the result would not fit the limits. */
+/** Null when there are no new objects to add; throws when the result would not fit the limits. */
 export function buildObjectsConversion(
     existingScene: MapArtScene,
     headerJson: unknown,
@@ -150,6 +161,10 @@ export function buildObjectsConversion(
         existingScene.stamps
     );
 
+    if (report.stamps.length === 0) return null;
+
+    assertBlockedLimit(nextHeader);
+
     const scene = {
         ...existingScene,
         stamps: [...existingScene.stamps, ...report.stamps],
@@ -158,15 +173,13 @@ export function buildObjectsConversion(
     if (!mapArtSceneSchema.safeParse(scene).success)
         throw new Error('scene failed mapArtSceneSchema');
 
-    if (deriveMechanics(scene, header).blocked.length > MAP_LIMITS.maxTerrainCells)
-        throw new Error('too many blocked cells');
-
     return { scene, objects: report, header: nextHeader };
 }
 
 function stripSnapshotLayers(
     payload: Record<string, unknown>,
-    header: Record<string, unknown>
+    header: Record<string, unknown>,
+    strip: readonly string[]
 ) {
     const layers = isRecord(payload.tileLayers) ? payload.tileLayers : {};
 
@@ -174,7 +187,7 @@ function stripSnapshotLayers(
 
     for (const [key, value] of Object.entries(layers)) {
         const rest = isRecord(value)
-            ? stripArtLayers(value as Record<string, string>)
+            ? stripArtLayers(value as Record<string, string>, strip)
             : null;
 
         if (rest) tileLayers[key] = rest;
@@ -258,6 +271,7 @@ export async function applyObjectsTx(
         base: map.mapVersion,
         chunks,
         header: addition.header,
+        strip: OBJECTS_ONLY,
         writeArt: () =>
             tx.battleMapArt.update({
                 where: { mapId },
@@ -279,10 +293,13 @@ async function writeConversion(
         base: number;
         chunks: ChunkRow[];
         header: Record<string, unknown>;
+        strip?: readonly string[];
         writeArt: () => Promise<unknown>;
     }
 ): Promise<void> {
     const { mapId, base, chunks, header } = input;
+
+    const strip = input.strip ?? ART_LAYERS;
 
     const { count } = await tx.battleMap.updateMany({
         where: { id: mapId, mapVersion: base },
@@ -296,7 +313,10 @@ async function writeConversion(
     for (const c of chunks) {
         if (!isRecord(c.tileLayers)) continue;
 
-        const rest = stripArtLayers(c.tileLayers as Record<string, string>);
+        const rest = stripArtLayers(
+            c.tileLayers as Record<string, string>,
+            strip
+        );
 
         await tx.battleMapChunk.update({
             where: { mapId_cx_cy: { mapId, cx: c.cx, cy: c.cy } },
@@ -321,7 +341,7 @@ async function writeConversion(
         data: {
             mapId,
             version: base + 1,
-            payload: stripSnapshotLayers(payload, header) as Prisma.InputJsonObject,
+            payload: stripSnapshotLayers(payload, header, strip) as Prisma.InputJsonObject,
         },
     });
 

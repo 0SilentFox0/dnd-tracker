@@ -25,8 +25,9 @@ import type { MapStageProps } from './map-stage-types';
 import { modeUiOf } from '@/components/battle/modes';
 import { gridMetrics, gridOf, unitOf } from '@/lib/utils/battle/grid';
 
-const ArtStampsLayer = dynamic(() =>
-    import('./art/ArtStampsLayer').then((m) => m.ArtStampsLayer)
+const ArtStampsLayer = dynamic(
+    () => import('./art/ArtStampsLayer').then((m) => m.ArtStampsLayer),
+    { ssr: false }
 );
 
 export type {

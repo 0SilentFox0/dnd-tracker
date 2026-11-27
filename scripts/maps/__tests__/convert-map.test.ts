@@ -146,6 +146,18 @@ describe('convertTiles', () => {
     });
 });
 
+describe('buildConversion limits', () => {
+    it('rejects a header whose written blocked list exceeds the limit', () => {
+        const blocked = Array.from({ length: 3601 }, (_, i) => `${i}:99`);
+
+        expect(() =>
+            buildConversion({ ...header, blocked }, [
+                { cx: 0, cy: 0, data: edgeData, tileLayers: { ground, objects } },
+            ])
+        ).toThrow('too many blocked cells');
+    });
+});
+
 describe('buildConversion with objects', () => {
     it('returns stamps that validate, and a header where a column blocks sight', () => {
         const chunks = [{ cx: 0, cy: 0, data: edgeData, tileLayers: { ground, objects } }];
@@ -181,7 +193,19 @@ describe('buildObjectsConversion', () => {
 
         const again = buildObjectsConversion(first!.scene, header, chunks);
 
-        expect(again?.scene.stamps).toHaveLength(1);
+        expect(again).toBeNull();
+    });
+
+    it('rejects a header whose written blocked list exceeds the limit', () => {
+        const blocked = Array.from({ length: 3601 }, (_, i) => `${i}:99`);
+
+        expect(() =>
+            buildObjectsConversion(
+                scene,
+                { ...header, blocked },
+                [{ cx: 0, cy: 0, data: edgeData, tileLayers: { objects } }]
+            )
+        ).toThrow('too many blocked cells');
     });
 });
 
@@ -210,6 +234,24 @@ describe('applyObjectsTx', () => {
                 }),
             })
         );
+    });
+
+    it('strips only the objects layer from chunks and the snapshot', async () => {
+        const tx = makeTx({ art: artRow(null) });
+
+        await applyObjectsTx(tx as never, 'm1');
+
+        const chunkCall = tx.battleMapChunk.update.mock.calls[0][0] as {
+            data: { tileLayers: Record<string, string> };
+        };
+
+        expect(Object.keys(chunkCall.data.tileLayers)).toEqual(['ground']);
+
+        const snap = tx.battleMapVersion.create.mock.calls[0][0] as {
+            data: { payload: { tileLayers: Record<string, Record<string, string>> } };
+        };
+
+        expect(Object.keys(snap.data.payload.tileLayers['0:0'])).toEqual(['ground']);
     });
 
     it('skips baked art unless includeBaked', async () => {

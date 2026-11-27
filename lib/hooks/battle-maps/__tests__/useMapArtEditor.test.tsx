@@ -365,6 +365,26 @@ describe('useMapArtEditor', () => {
             expect(p.y % 100 === 0).toBe(evenCols);
         });
 
+        it('re-snaps the centre when a snapped stamp is rotated', () => {
+            const { result } = setup();
+
+            act(() => result.current.start());
+            act(() => result.current.stamps.setAsset('bed'));
+            act(() => result.current.stamps.place({ x: 330, y: 340 }));
+
+            const { id } = stampsOf(result.current)[0];
+
+            const before = stampsOf(result.current)[0];
+
+            act(() => result.current.stamps.update(id, { rot: 90 }));
+
+            const after = stampsOf(result.current)[0];
+
+            expect(after.rot).toBe(90);
+            expect(after.x % 100 === 0).not.toBe(before.x % 100 === 0);
+            expect(after.y % 100 === 0).not.toBe(before.y % 100 === 0);
+        });
+
         it('renumbers z instead of growing past the schema bound', () => {
             const { result } = started();
 

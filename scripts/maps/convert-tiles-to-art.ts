@@ -6,7 +6,8 @@
  * untouched). Stamp footprints are unioned into header blocked/sightBlocked in the same transaction.
  * Maps that already have an art row are skipped, except with --objects: that mode only appends
  * tile objects as stamps to existing art scenes (baked ones are skipped as "needs re-bake" unless
- * --include-baked). Dry run by default; --apply runs one transaction per map. Back up first
+ * --include-baked). Unknown/outside objects are dropped on apply without a stamp (counted in dry-run).
+ * Dry run by default; --apply runs one transaction per map. Back up first
  * (scripts/db/backup-database.sh); remote DB needs --allow-remote.
  *
  *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/maps/convert-tiles-to-art.ts [--objects [--include-baked]] [--apply] [--allow-remote]

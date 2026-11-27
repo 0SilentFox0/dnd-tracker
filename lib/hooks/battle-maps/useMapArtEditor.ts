@@ -641,7 +641,13 @@ export function useMapArtEditor({
 
                             const def = stampDef(s.asset);
 
-                            if (snap && def && 'x' in patch && 'y' in patch)
+                            if (
+                                snap &&
+                                def &&
+                                (('x' in patch && 'y' in patch) ||
+                                    'rot' in patch ||
+                                    'scale' in patch)
+                            )
                                 Object.assign(
                                     next,
                                     snapStampCenter(

@@ -99,13 +99,14 @@ export function convertTiles(
 
 /** Layers that stay on the current chunk row; null when nothing remains. */
 export function stripArtLayers(
-    layers: Partial<Record<string, string>>
+    layers: Partial<Record<string, string>>,
+    strip: readonly string[] = ART_LAYERS
 ): Record<string, string> | null {
     const kept = Object.fromEntries(
         Object.entries(layers).filter(
             ([k, v]) =>
                 typeof v === 'string' &&
-                !(ART_LAYERS as readonly string[]).includes(k)
+                !strip.includes(k)
         )
     );
 
