@@ -17,7 +17,7 @@ const SOURCES = ['server', 'manual'] as const;
 const GRAPPLE_CHOICES = ['damage', 'entangle', 'free'] as const;
 
 const btn =
-    'h-9 w-full border border-white/25 px-2 text-left text-sm text-[var(--bone)] disabled:opacity-40';
+    'h-9 w-full border border-white/25 px-2 text-left text-sm text-[var(--bone)] disabled:opacity-50';
 
 export function MomentumPanel({ hero }: HeroPanelProps) {
     const t = useTranslations('battleWfrp.ui.momentum');

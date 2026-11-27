@@ -33,7 +33,7 @@ function IconButton({
             aria-label={label}
             disabled={disabled}
             onClick={onClick}
-            className="flex size-7 items-center justify-center rounded text-hud-muted hover:bg-white/10 hover:text-hud-bone disabled:opacity-30"
+            className="flex size-7 items-center justify-center rounded text-hud-muted hover:bg-white/10 hover:text-hud-bone disabled:opacity-50"
         >
             <Icon className="size-4" />
         </HudButton>

@@ -42,7 +42,7 @@ function SelectTrigger({
             data-slot="select-trigger"
             data-size={size}
             className={cn(
-                "hud-body flex min-w-0 items-center justify-between gap-2 whitespace-nowrap outline-none disabled:cursor-not-allowed data-[placeholder]:text-hud-muted data-[size=default]:h-10 data-[size=sm]:h-10 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-hud-muted",
+                "hud-body flex min-w-0 items-center justify-between gap-2 whitespace-nowrap outline-none data-[placeholder]:text-hud-muted data-[size=default]:h-10 data-[size=sm]:h-10 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-hud-muted",
                 FIELD_CLASS,
                 className
             )}

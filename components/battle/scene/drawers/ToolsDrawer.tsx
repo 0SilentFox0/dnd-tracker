@@ -239,7 +239,7 @@ export function ToolsContent({
                             type="button"
                             disabled={actions.nextTurn.isPending}
                             onClick={() => actions.nextTurn.mutate({})}
-                            className="hud-sc flex h-11 items-center justify-center gap-2 rounded-xl border border-white/20 text-sm tracking-[.08em] disabled:opacity-70"
+                            className="hud-sc flex h-11 items-center justify-center gap-2 rounded-xl border border-white/20 text-sm tracking-[.08em] disabled:opacity-50"
                         >
                             {actions.nextTurn.isPending ? (
                                 <Loader2

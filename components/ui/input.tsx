@@ -13,7 +13,7 @@ function Input({
             type={type}
             data-slot="input"
             className={cn(
-                'hud-body min-w-0 outline-none selection:bg-hud-accent selection:text-hud-accent-ink file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-hud-ink disabled:pointer-events-none disabled:cursor-not-allowed',
+                'hud-body min-w-0 outline-none selection:bg-hud-accent selection:text-hud-accent-ink file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-hud-ink',
                 FIELD_CLASS,
                 className
             )}

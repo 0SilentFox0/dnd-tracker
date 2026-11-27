@@ -44,11 +44,12 @@ html[data-palette] {
 
 html[data-palette="tavern"] {
   --palette-page: #0d0a08; --palette-panel: #1a140f; --palette-panel-2: #2a2218; --palette-inset: #110d0a;
-  --hud-ink: #efe5d2; --hud-text: #e6dccb; --hud-muted: #9b9080; --hud-faint: #6b6156;
+  --hud-ink: #efe5d2; --hud-text: #e6dccb; --hud-muted: #9b9080; --hud-faint: #8c8272; --hud-faint-deco: #6b6156;
   --hud-rule: rgba(201, 179, 122, .18); --hud-line: rgba(201, 179, 122, .35); --hud-hi: rgba(255, 230, 180, .06);
-  --hud-accent: #c9b37a; --hud-accent-fg: #e6c25a; --hud-accent-2: #8f7a3f; --hud-accent-ink: #1a140f;
+  --hud-accent: #c9b37a; --hud-accent-fg: #e6c25a; --hud-accent-2: #a38d4c; --hud-accent-ink: #1a140f;
   --hud-crimson: #b3312c; --hud-crimson-2: #7c1e1d; --hud-crimson-fg: #e66a58; --hud-crimson-ink: #fbefe9;
-  --hud-hp: #c8382f; --hud-hp-2: #8a211c;
+  --hud-hp: #b8352c; --hud-hp-2: #8a211c;
+  --skeleton: #2a2218; --skeleton-hi: #3a3024;
   --hud-sh: inset 0 1px 0 var(--hud-hi), 0 2px 6px -2px rgba(0, 0, 0, .5), 0 18px 40px -20px rgba(0, 0, 0, .85);
   --hud-sh-btn: 0 1px 0 rgba(0, 0, 0, .55), 0 4px 10px -4px rgba(0, 0, 0, .7);
   --grain-op: .32; --grain-mode: overlay;
@@ -59,10 +60,11 @@ html[data-palette="tavern"] {
 
 html[data-palette="parchment"] {
   --palette-page: #e9e1d1; --palette-panel: #f1ebdf; --palette-panel-2: #f8f4ec; --palette-inset: #dbd0bc;
-  --hud-ink: #1e1711; --hud-text: #3a2f25; --hud-muted: #64584b; --hud-faint: #a29482;
+  --hud-ink: #1e1711; --hud-text: #3a2f25; --hud-muted: #64584b; --hud-faint: #6b5f52; --hud-faint-deco: #a29482;
   --hud-rule: rgba(55, 38, 20, .12); --hud-line: rgba(55, 38, 20, .25); --hud-hi: rgba(255, 255, 255, .75);
   --hud-crimson: #a12b28; --hud-crimson-2: #761d1b; --hud-crimson-fg: #a12b28; --hud-crimson-ink: #fff4ef;
   --hud-hp: #b0332a; --hud-hp-2: #84231d;
+  --skeleton: #dbd0bc; --skeleton-hi: #f1ebdf;
   --hud-accent: #7a5a0e; --hud-accent-fg: #6f5110; --hud-accent-2: #5a420a; --hud-accent-ink: #fff8e6;
   --hud-sh: inset 0 1px 0 var(--hud-hi), 0 2px 6px -2px rgba(70, 45, 20, .18), 0 18px 40px -22px rgba(70, 45, 20, .4);
   --hud-sh-btn: 0 1px 0 rgba(70, 45, 20, .2), 0 4px 10px -5px rgba(70, 45, 20, .35);

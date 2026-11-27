@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 
+import { ARIA_DISABLED_CLASS } from '@/components/ui/disabled';
+
 const PILL =
     'flex h-8 items-center gap-1.5 rounded border border-hud-accent bg-hud-accent px-2.5 text-xs font-semibold tracking-[.08em] text-hud-accent-ink';
 
@@ -31,7 +33,7 @@ export function HeaderPillLink({
                 aria-disabled
                 data-slot="header-pill-link"
                 data-tour={dataTour}
-                className={`${PILL} opacity-70`}
+                className={`${PILL} ${ARIA_DISABLED_CLASS}`}
             >
                 {content}
             </span>

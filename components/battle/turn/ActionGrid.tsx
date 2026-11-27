@@ -32,7 +32,7 @@ const Tile = ({
             disabled={used}
             onClick={onClick}
             className={cn(
-                'flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-40',
+                'flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-50',
                 primary
                     ? 'border-hud-accent bg-hud-panel-2'
                     : 'border-white/25 bg-black/55'

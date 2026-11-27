@@ -11,7 +11,8 @@
   --color-hud-ink: var(--hud-ink, #efe5d2);
   --color-hud-bone: var(--hud-bone, #e6dccb);
   --color-hud-text: var(--hud-text, #e6dccb);
-  --color-hud-faint: var(--hud-faint, #6b6156);
+  --color-hud-faint: var(--hud-faint, #8c8272);
+  --color-hud-faint-deco: var(--hud-faint-deco, #6b6156);
   --color-hud-line: var(--hud-line, rgba(236, 228, 214, 0.17));
   --color-hud-field: var(--hud-field, #110d0a);
   --color-hud-rule: var(--hud-rule, rgba(236, 228, 214, 0.08));
@@ -28,7 +29,7 @@
   --color-hud-crimson-2: var(--hud-crimson-2, #7c1e1d);
   --color-hud-crimson-fg: var(--hud-crimson-fg, #e66a58);
   --color-hud-crimson-ink: var(--hud-crimson-ink, #fbefe9);
-  --color-hud-hp: var(--hud-hp, #c8382f);
+  --color-hud-hp: var(--hud-hp, #b8352c);
   --color-hud-hp-2: var(--hud-hp-2, #8a211c);
   --color-hud-panel: var(--palette-panel, #1a140f);
   --color-hud-panel-2: var(--palette-panel-2, #2a2218);

@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import type { DiceThrowSpec } from '@/lib/utils/battle/fx/dice';
 
 const stepClass =
-    'flex size-8 items-center justify-center rounded-full border border-hud-rule hover:bg-white/10 disabled:opacity-30';
+    'flex size-8 items-center justify-center rounded-full border border-hud-rule hover:bg-white/10 disabled:opacity-50';
 
 export function DiceRoller() {
     const t = useTranslations('common.dice');

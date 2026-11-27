@@ -46,7 +46,7 @@ const TOOLS = [
 const PINNABLE: readonly WorldTool[] = ['point', 'zone', 'entry', 'enemy'];
 
 const BUTTON =
-    'inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-hud-rule bg-[rgba(46,36,26,.95)] text-hud-ink transition-colors hover:bg-[rgba(70,54,38,.98)] disabled:opacity-40 disabled:hover:bg-[rgba(46,36,26,.95)] lg:size-10';
+    'inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-hud-rule bg-[rgba(46,36,26,.95)] text-hud-ink transition-colors hover:bg-[rgba(70,54,38,.98)] disabled:opacity-50 disabled:hover:bg-[rgba(46,36,26,.95)] lg:size-10';
 
 const LABELLED = 'xl:w-auto xl:gap-1.5 xl:px-3 xl:text-sm';
 

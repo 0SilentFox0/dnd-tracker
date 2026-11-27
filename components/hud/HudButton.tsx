@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { DISABLED_CLASS } from '@/components/ui/disabled';
 import { cn } from '@/lib/utils';
 
 type ButtonProps = React.ComponentProps<'button'>;
@@ -18,7 +19,7 @@ export const HudButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ref={ref}
             type="button"
             data-slot="hud-button"
-            className={cn('ds-interactive cursor-pointer', className)}
+            className={cn('ds-interactive cursor-pointer', DISABLED_CLASS, className)}
             {...props}
         />
     )
