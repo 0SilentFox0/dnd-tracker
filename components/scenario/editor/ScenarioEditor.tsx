@@ -22,6 +22,7 @@ import { PagePropertiesDialog } from './dialogs/PagePropertiesDialog';
 import { type CellColumn, ScenarioCell } from './rows/ScenarioCell';
 import { ScenarioEditorSection } from './rows/ScenarioEditorSection';
 
+import { ToastHost } from '@/components/common/shell/ToastHost';
 import { HudButton } from '@/components/hud';
 import { ScenarioLayout } from '@/components/scenario/book/ScenarioLayout';
 import { ScenarioLegend } from '@/components/scenario/book/ScenarioLegend';
@@ -30,12 +31,14 @@ import {
     type TocControl,
     tocItems,
 } from '@/components/scenario/book/ScenarioToc';
-import { useConfirm, useCssVarHeight } from '@/lib/hooks/common';
+import { useConfirm, useCssVarHeight, useToasts } from '@/lib/hooks/common';
 import {
+    useAutoMentionIndex,
     useMentionSearch,
     useScenarioDraft,
     useScenarioPage,
 } from '@/lib/hooks/scenario';
+import { autoTagContent } from '@/lib/utils/scenario/auto-mentions';
 import {
     addSection,
     updateRow,
@@ -87,6 +90,11 @@ export function ScenarioEditor({
 
     const searchMentions = useMentionSearch(campaignId);
 
+    const { index: autoMentionIndex, refresh: refreshMentionNames } =
+        useAutoMentionIndex(campaignId);
+
+    const toasts = useToasts();
+
     const confirm = useConfirm();
 
     const { data: live = page } = useScenarioPage(campaignId, page.id);
@@ -121,6 +129,22 @@ export function ScenarioEditor({
 
     const setReveal = (sectionId: string, rule: RevealRule) =>
         draft.setContent((c) => updateSection(c, sectionId, { reveal: rule }));
+
+    const tagMatches = () => {
+        if (!autoMentionIndex) return;
+
+        const { content, count } = autoTagContent(
+            draft.content,
+            autoMentionIndex
+        );
+
+        if (count) draft.setContent(() => content);
+
+        toasts.push({
+            id: `auto-tag-${Date.now()}`,
+            text: count ? t('autoTagDone', { count }) : t('autoTagNone'),
+        });
+    };
 
     const finish = async () => {
         if (
@@ -164,6 +188,7 @@ export function ScenarioEditor({
                 attrs: { id, label, type: 'acquaintance' },
             })
             .run();
+        refreshMentionNames();
     };
 
     const renderCell = (
@@ -178,7 +203,7 @@ export function ScenarioEditor({
             column={column}
             doc={doc}
             active={active?.rowId === rowId && active.column === column}
-            searchMentions={searchMentions}
+            mentions={{ search: searchMentions, autoIndex: autoMentionIndex }}
             handlers={{
                 onActivate: () => setActive({ rowId, sectionId, column }),
                 onReady,
@@ -216,6 +241,15 @@ export function ScenarioEditor({
                         onReload={() => void draft.reload()}
                         onRetain={draft.retainLocal}
                     />
+                    <HudButton
+                        type="button"
+                        className="toggle"
+                        disabled={!autoMentionIndex}
+                        title={t('autoTagHint')}
+                        onClick={tagMatches}
+                    >
+                        {t('autoTag')}
+                    </HudButton>
                     <HudButton
                         type="button"
                         className="toggle"
@@ -286,6 +320,7 @@ export function ScenarioEditor({
                     onClose={() => setAcquaintance(null)}
                 />
             )}
+            <ToastHost toasts={toasts.toasts} onDismiss={toasts.dismiss} />
             {propsOpen && (
                 <PagePropertiesDialog
                     campaignId={campaignId}

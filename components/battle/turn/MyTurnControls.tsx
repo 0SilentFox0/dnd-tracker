@@ -170,17 +170,18 @@ export function MyTurnControls({
         return () => setAttackReady(null);
     }, [attackReady, heroId, setAttackReady]);
 
-    const { open: openBook } = book.actions;
+    const { openSpell } = book.actions;
 
     useEffect(() => {
         if (spellBookIntent === null) return;
 
         if (phase !== 'acting') return;
 
-        if (!actionUsed && !skipped) openBook(spellBookIntent);
+        if (!actionUsed && !skipped)
+            openSpell(spellBookIntent.level, spellBookIntent.spellId);
 
         clearSpellBook();
-    }, [spellBookIntent, phase, actionUsed, skipped, openBook, clearSpellBook]);
+    }, [spellBookIntent, phase, actionUsed, skipped, openSpell, clearSpellBook]);
 
     useEffect(() => {
         if (attackIntent === null) return;

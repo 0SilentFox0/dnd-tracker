@@ -47,7 +47,10 @@ describe('RecommendedSpells', () => {
         rerender(<RecommendedSpells spells={spells} level={1} />);
         fireEvent.click(screen.getByRole('button', { name: 'Shield' }));
 
-        expect(requestSpellBook).toHaveBeenCalledWith(1);
+        expect(requestSpellBook).toHaveBeenCalledWith({
+            level: 1,
+            spellId: 's1',
+        });
     });
 
     it('shows at most 5 spells of the level, native and stronger first', () => {
@@ -140,6 +143,9 @@ describe('RecommendedSpells', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'High' }));
 
-        expect(requestSpellBook).toHaveBeenCalledWith(2);
+        expect(requestSpellBook).toHaveBeenCalledWith({
+            level: 2,
+            spellId: 'e',
+        });
     });
 });

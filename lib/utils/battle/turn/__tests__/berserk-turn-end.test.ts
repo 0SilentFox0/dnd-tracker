@@ -167,3 +167,33 @@ describe('berserk on a d100 system', () => {
         expect(attackOf(r.actions[0].actionDetails)?.roll).toBe(80);
     });
 });
+
+describe('berserk target on a map', () => {
+    it('attacks the nearest creature, not a random far one', () => {
+        const at = (id: string, x: number, y: number, side: ParticipantSide) =>
+            placed(id, { side, at: { x, y }, hp: 300 });
+
+        const archer = at('archer', 2, 2, ParticipantSide.ENEMY);
+
+        const r = runBerserkTurn({
+            rules: DEFAULT_RULES,
+            participants: [
+                archer,
+                at('friend', 3, 2, ParticipantSide.ENEMY),
+                at('caster', 9, 9, ParticipantSide.ALLY),
+            ],
+            restrictedBy: archer,
+            participantId: 'archer',
+            bonusPercent: 0,
+            round: 1,
+            battleId: 'x',
+            actionIndex: 0,
+            rng: seq(0.99, 0.99, 0.5),
+            map: testMap(),
+        });
+
+        expect(r.actions[0].targets.map((t) => t.participantId)).toEqual([
+            'friend',
+        ]);
+    });
+});

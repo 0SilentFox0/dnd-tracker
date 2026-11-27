@@ -48,7 +48,8 @@ export function SpellBook({ book }: { book: Book }) {
 
     const wide = useMediaQuery(DESKTOP_QUERY);
 
-    const open = state.step === 'book' || state.step === 'spell';
+    const open =
+        !view.autoPicking && (state.step === 'book' || state.step === 'spell');
 
     const widening = selected && view.wideningOf(selected);
 

@@ -16,6 +16,7 @@ export const D20_MAGIC: RuleSystemMagic = {
     attackRoll: d20SpellAttackRoll,
     saveCrit: d20SaveCrit,
     attackDice: 20,
+    saveDice: 20,
     sustain: D20_SUSTAIN,
     saveDcBase: (rules) => rules.formulas.saveDcBase,
     saveDc: d20SpellSaveDc,

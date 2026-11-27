@@ -203,7 +203,9 @@ export function DesktopBattleLayout({
                     <div className="relative min-h-0 flex-1">
                         {battle.map && viewMode === 'map' ? (
                             <main className="absolute inset-0">
-                                <MapToolsSlotContext.Provider value={toolsSlot}>
+                                <MapToolsSlotContext.Provider
+                                    value={drawer === 'tools' ? toolsSlot : null}
+                                >
                                     <MapPreviewSlotContext.Provider
                                         value={previewSlot}
                                     >

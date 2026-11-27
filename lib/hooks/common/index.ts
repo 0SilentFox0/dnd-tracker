@@ -34,6 +34,7 @@ export { DESKTOP_QUERY, useIsCompact, useIsMobile } from './useIsMobile';
 export { useLibraryList } from './useLibraryList';
 export { useMediaQuery } from './useMediaQuery';
 export { useNavigateFresh } from './useNavigateFresh';
+export { useIsNotFound, useMarkNotFound } from './useNotFoundMarker';
 export { useNotify, useOptionalNotify } from './useNotify';
 export { usePageHidden } from './usePageHidden';
 export {

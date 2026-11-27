@@ -4,26 +4,34 @@ import { useEffect, useMemo } from 'react';
 import type { Editor } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
 
+import { setAutoMentionIndex } from './auto-mention';
 import { buildExtensions } from './extensions';
+import { setContentKeepingCaret } from './keep-caret';
 
+import type { AutoMentionIndex } from '@/lib/utils/scenario/auto-mentions';
 import type { MentionOption, RichDoc } from '@/types/scenario';
+
+export type MentionSources = {
+    search: (q: string) => Promise<MentionOption[]>;
+    autoIndex: AutoMentionIndex | null;
+};
 
 export function RichTextEditor({
     doc,
     onChange,
     onReady,
-    searchMentions,
+    mentions,
     label,
 }: {
     doc: RichDoc;
     onChange: (doc: RichDoc) => void;
     onReady: (editor: Editor | null) => void;
-    searchMentions: (q: string) => Promise<MentionOption[]>;
+    mentions: MentionSources;
     label: string;
 }) {
     const extensions = useMemo(
-        () => buildExtensions(searchMentions),
-        [searchMentions]
+        () => buildExtensions(mentions.search),
+        [mentions.search]
     );
 
     const editor = useEditor({
@@ -41,8 +49,12 @@ export function RichTextEditor({
     // doc here is an accepted clean update or an explicit reload by the DM.
     useEffect(() => {
         if (editor && JSON.stringify(editor.getJSON()) !== JSON.stringify(doc))
-            editor.commands.setContent(doc, { emitUpdate: false });
+            setContentKeepingCaret(editor, doc);
     }, [editor, doc]);
+
+    useEffect(() => {
+        if (editor) setAutoMentionIndex(editor, mentions.autoIndex);
+    }, [editor, mentions.autoIndex]);
 
     useEffect(() => {
         if (!editor) return;

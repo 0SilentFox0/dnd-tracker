@@ -16,6 +16,7 @@ vi.mock('@/lib/hooks/scenario', () => ({
         reload: vi.fn(),
     }),
     useMentionSearch: () => async () => [],
+    useAutoMentionIndex: () => ({ index: null, refresh: () => {} }),
     useActiveSection: () => null,
     useScenarioPages: () => ({ data: [] }),
     useScenarioPage: () => ({ data: undefined }),

@@ -18,6 +18,7 @@ import {
     type GridWindow,
     mapSize,
     regionFillPath,
+    showsBackground,
     UNIT,
 } from '@/lib/utils/battle/grid';
 import { toMediaUrl } from '@/lib/utils/common/image-url';
@@ -78,9 +79,11 @@ export function MapMinimap({
 
     const height = Math.round(maxSide * Math.min(1, vbH / vbW));
 
+    const hasBackground = showsBackground(map, true);
+
     const src = toMediaUrl(map.background ?? DEFAULT_MAP_BACKGROUND);
 
-    const { aspect, imgProps } = useLoadedAspect(src);
+    const { aspect, imgProps } = useLoadedAspect(hasBackground ? src : null);
 
     const background = backgroundBox(map, 1, aspect, grid);
 
@@ -160,14 +163,16 @@ export function MapMinimap({
                                     : undefined
                             }
                         >
-                            <image
-                                href={src}
-                                x={background.left - win.x}
-                                y={background.top - win.y}
-                                width={background.width}
-                                height={background.height}
-                                preserveAspectRatio="none"
-                            />
+                            {hasBackground && (
+                                <image
+                                    href={src}
+                                    x={background.left - win.x}
+                                    y={background.top - win.y}
+                                    width={background.width}
+                                    height={background.height}
+                                    preserveAspectRatio="none"
+                                />
+                            )}
                             <rect
                                 x="0"
                                 y="0"

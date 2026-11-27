@@ -295,6 +295,7 @@ export const battleMapObject = z.object({
     backgroundCols: z.number().positive().max(201).optional(),
     backgroundRows: z.number().positive().max(201).optional(),
     artBaked: z.literal(true).optional(),
+    plainGrid: z.literal(true).optional(),
     gridOffset: z
         .object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) })
         .optional(),

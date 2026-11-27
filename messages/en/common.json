@@ -49,6 +49,8 @@
     "title": "Page not found",
     "description": "The page may have moved, or the link is wrong.",
     "back": "Go back",
+    "home": "Home",
+    "campaign": "To campaign",
     "campaigns": "To campaigns"
   },
   "loading": {
@@ -172,7 +174,8 @@
       "spells": "Spell",
       "artifacts": "Artifact",
       "sets": "Set"
-    }
+    },
+    "notFound": "Page not found"
   },
   "notifications": {
     "new": "new",

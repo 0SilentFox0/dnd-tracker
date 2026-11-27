@@ -2,7 +2,16 @@
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import {
+    type AutoMentionIndex,
+    buildAutoMentionIndex,
+} from '@/lib/utils/scenario/auto-mentions';
+
 vi.unmock('next-intl');
+
+const mocks = vi.hoisted(() => ({
+    autoIndex: null as AutoMentionIndex | null,
+}));
 
 const draft = vi.hoisted(() => ({
     setContent: vi.fn(),
@@ -17,6 +26,7 @@ vi.mock('@/lib/hooks/scenario', () => ({
         ...draft,
     }),
     useMentionSearch: () => async () => [],
+    useAutoMentionIndex: () => ({ index: mocks.autoIndex, refresh: () => {} }),
     useActiveSection: () => null,
     useScenarioPages: () => ({ data: [] }),
     useScenarioPage: () => ({ data: undefined }),
@@ -95,6 +105,45 @@ const apply = () => {
 const toc = { inline: true, drawer: { open: false, onOpenChange: vi.fn() } };
 
 describe('ScenarioEditor', () => {
+    it('«Тегнути збіги» перетворює назви на сторінці на згадки', async () => {
+        mocks.autoIndex = buildAutoMentionIndex([
+            { type: 'character', id: 'c1', label: 'Дзвони' },
+        ]);
+        renderWithConfirm(
+            <ScenarioEditor
+                campaignId="c"
+                page={page()}
+                onExit={vi.fn()}
+                toc={toc}
+            />
+        );
+        fireEvent.click(screen.getByRole('button', { name: 'Тегнути збіги' }));
+
+        expect(apply().sections[0].rows[0].story.content[0].content).toEqual([
+            {
+                type: 'mention',
+                attrs: { id: 'c1', label: 'Дзвони', type: 'character' },
+            },
+        ]);
+        expect(await screen.findByText('Додано 1 згадку')).toBeTruthy();
+        mocks.autoIndex = null;
+    });
+
+    it('«Тегнути збіги» вимкнена, поки індекс не завантажено', () => {
+        renderWithConfirm(
+            <ScenarioEditor
+                campaignId="c"
+                page={page()}
+                onExit={vi.fn()}
+                toc={toc}
+            />
+        );
+
+        expect(
+            screen.getByRole('button', { name: 'Тегнути збіги' })
+        ).toHaveProperty('disabled', true);
+    });
+
     it('комірка відкриває Tiptap лише по кліку; одночасно один редактор', () => {
         renderWithConfirm(
             <ScenarioEditor

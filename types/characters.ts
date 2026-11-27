@@ -198,6 +198,7 @@ export type CharacterListItem = Pick<
     experience?: number;
     inspiration?: boolean;
     resources?: CharacterResources;
+    maxHp?: number;
 };
 
 export type SheetLineSource =

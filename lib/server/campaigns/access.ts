@@ -7,6 +7,7 @@ import { getAuthUser } from '@/lib/auth';
 import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
 import { prisma } from '@/lib/db';
 import { PUBLIC_USER_SELECT } from '@/lib/server/users/db-user';
+import { campaignNoticeUrl } from '@/lib/utils/campaigns/notice';
 import type { PublicUser } from '@/types/campaigns';
 
 // aiInstructions is DM-only and always omitted from page reads
@@ -81,7 +82,11 @@ export async function requireCampaignDM(campaignId: string): Promise<{
 }> {
     const result = await requireCampaignMember(campaignId);
 
-    if (!result.isDM) redirect(`/campaigns/${campaignId}`);
+    if (!result.isDM) {
+        redirect(
+            campaignNoticeUrl(campaignId, result.isDemo ? 'demoReadOnly' : 'dmOnly')
+        );
+    }
 
     return {
         campaign: result.campaign,
@@ -95,7 +100,7 @@ export async function requireMapLibrary(campaignId: string) {
     const result = await requireCampaignDM(campaignId);
 
     if (!result.campaign.mapLibraryEnabled)
-        redirect(`/campaigns/${campaignId}`);
+        redirect(campaignNoticeUrl(campaignId, 'mapLibraryDisabled'));
 
     return result;
 }
@@ -109,7 +114,8 @@ export async function requireCampaignDMOrDemo(campaignId: string): Promise<{
 }> {
     const result = await requireCampaignMember(campaignId);
 
-    if (!result.isDM && !result.isDemo) redirect(`/campaigns/${campaignId}`);
+    if (!result.isDM && !result.isDemo)
+        redirect(campaignNoticeUrl(campaignId, 'dmOnly'));
 
     return {
         campaign: result.campaign,

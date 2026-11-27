@@ -36,8 +36,9 @@ export interface SpellBookActionsContext {
         opts?: { castLevel?: number; test?: boolean }
     ): ReturnType<typeof buildSpellPick>;
     inRange(p: BattleParticipant): boolean;
+    saveTargetIds: string[];
     bypassCost: boolean;
-    attackDice?: number;
+    dice: { attack?: number; save?: number };
     setFinishLong(value: boolean): void;
     onDone?: () => void;
 }
@@ -52,8 +53,9 @@ export function spellBookActions({
     source: { grantsOf, canSlot, slotChoices, selectedGrant },
     build,
     inRange,
+    saveTargetIds,
     bypassCost,
-    attackDice,
+    dice,
     setFinishLong,
     onDone,
 }: SpellBookActionsContext) {
@@ -217,6 +219,21 @@ export function spellBookActions({
                     value: rollDie(sides, cryptoRandom),
                 })
             );
+
+            const saveDice = dice.save;
+
+            if (saveDice)
+                saveTargetIds.forEach(
+                    (id) =>
+                        state.saves[id] === undefined &&
+                        dispatch({
+                            type: 'SET_SAVE',
+                            id,
+                            value: rollDie(saveDice, cryptoRandom),
+                        })
+                );
+
+            const attackDice = dice.attack;
 
             if (state.pick?.needsAttackRolls && attackDice)
                 state.targetIds.forEach(

@@ -35,6 +35,29 @@ class RO {
 
 vi.stubGlobal('ResizeObserver', RO);
 
+function panelTree(isDM: boolean) {
+    const scene = fakeScene({
+        isDM,
+        map: { cols: 10, rows: 5, background: null, opacity: 0.3 },
+    });
+
+    scene.me.battleData.position = { x: 0, y: 0 };
+
+    const Wrapper = scene.wrapper;
+
+    return function tree(slot?: HTMLElement | null) {
+        return (
+            <Wrapper>
+                <TooltipProvider>
+                    <MapToolsSlotContext.Provider value={slot}>
+                        <BattleMapPanel />
+                    </MapToolsSlotContext.Provider>
+                </TooltipProvider>
+            </Wrapper>
+        );
+    };
+}
+
 function panel(isDM: boolean, slot?: HTMLElement | null) {
     const scene = fakeScene({
         isDM,
@@ -58,6 +81,33 @@ function panel(isDM: boolean, slot?: HTMLElement | null) {
 }
 
 describe('BattleMapPanel', () => {
+    it('closing the tools drawer turns «Розставити» off', () => {
+        const tree = panelTree(true);
+
+        const host = document.createElement('div');
+
+        document.body.appendChild(host);
+
+        const view = render(tree(host));
+
+        fireEvent.click(view.getByRole('button', { name: 'Розставити' }));
+        expect(
+            view
+                .getByRole('button', { name: 'Розставити' })
+                .getAttribute('aria-pressed')
+        ).toBe('true');
+
+        view.rerender(tree(null));
+        view.rerender(tree(host));
+
+        expect(
+            view
+                .getByRole('button', { name: 'Розставити' })
+                .getAttribute('aria-pressed')
+        ).toBe('false');
+        host.remove();
+    });
+
     it('ДМ бачить перемикач «Розставити» з видимим активним станом', () => {
         const { getByRole } = panel(true);
 

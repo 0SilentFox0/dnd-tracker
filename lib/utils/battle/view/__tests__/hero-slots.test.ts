@@ -6,6 +6,7 @@ import {
     slotArcHeight,
     slotArcOffset,
     slotArcRadius,
+    slotLevelOpen,
     slotRingOffset,
 } from '../hero';
 
@@ -132,5 +133,21 @@ describe('slotArcOffset', () => {
 
             expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThanOrEqual(30);
         }
+    });
+});
+
+describe('slotLevelOpen', () => {
+    const v = (level: number, current: number) => ({
+        level,
+        roman: String(level),
+        current,
+        max: 2,
+    });
+
+    it('is open only while the level has slots left; no slot level is always open', () => {
+        expect(slotLevelOpen([v(1, 1), v(2, 0)], 1)).toBe(true);
+        expect(slotLevelOpen([v(1, 1), v(2, 0)], 2)).toBe(false);
+        expect(slotLevelOpen([v(1, 1)], 3)).toBe(false);
+        expect(slotLevelOpen([], null)).toBe(true);
     });
 });

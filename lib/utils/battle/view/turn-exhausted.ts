@@ -16,7 +16,8 @@ export function turnExhausted(
     {
         canReturn = false,
         coreActions = false,
-    }: { canReturn?: boolean; coreActions?: boolean } = {}
+        gear = false,
+    }: { canReturn?: boolean; coreActions?: boolean; gear?: boolean } = {}
 ): boolean {
     const bonusLeft =
         (p.battleData.resolvedAbilities ?? []).some(
@@ -29,11 +30,9 @@ export function turnExhausted(
         !bonusLeft &&
         !canOffHandAttack(p, rules) &&
         !canCastBonusSpell(p, bonusSpells) &&
+        !(gear && !p.actionFlags.hasUsedBonusAction) &&
         !canReturn &&
-        !(
-            coreActions &&
-            (actionsOf(rules).canStandUp(p, rules) ||
-                (!!p.battleData.position && remainingMovement(p, rules) > 0))
-        )
+        !(!!p.battleData.position && remainingMovement(p, rules) > 0) &&
+        !(coreActions && actionsOf(rules).canStandUp(p, rules))
     );
 }

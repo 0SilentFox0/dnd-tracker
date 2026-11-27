@@ -2,8 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import { textOf } from '@/lib/i18n/test/text';
 import { ukT } from '@/lib/utils/abilities/__tests__/describe-fixtures';
-import { makeEffect } from '@/lib/utils/abilities/__tests__/fixtures';
-import { effectSummary, mergeEffectsForDisplay } from '@/lib/utils/battle/view';
+import {
+    makeEffect,
+    makeParticipant,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import {
+    effectLines,
+    effectSummary,
+    mergeEffectsForDisplay,
+} from '@/lib/utils/battle/view';
 
 describe('effectSummary', () => {
     const tPromise = ukT();
@@ -100,5 +107,31 @@ describe('effectSummary', () => {
         expect(textOf(effectSummary(e, await tPromise)[0])).toBe(
             'Семгрун бере на себе 20% шкоди від атак'
         );
+    });
+});
+
+describe('effectLines with an owner', () => {
+    const e = makeEffect('reserve', {
+        abilityEffects: [
+            {
+                kind: 'modifyStat',
+                stat: 'spellSlots',
+                spellLevels: [3],
+                flat: { formula: 'min(1, max(0, hero_level - 3)) * 2' },
+            },
+        ],
+    });
+
+    it('shows the formula value for the owner instead of the raw formula', async () => {
+        const owner = makeParticipant({ id: 'z' });
+
+        owner.abilities.level = 5;
+
+        const [line] = effectLines(e, await ukT(), owner).map((l) =>
+            textOf(l)
+        );
+
+        expect(line).not.toContain('hero_level');
+        expect(line).toContain('+2');
     });
 });

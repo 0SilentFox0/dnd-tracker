@@ -1,4 +1,7 @@
-import { DEFAULT_BATTLE_MAP } from '@/lib/constants/battle';
+import {
+    DEFAULT_BATTLE_MAP,
+    DEFAULT_MAP_BACKGROUND,
+} from '@/lib/constants/battle';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -30,4 +33,24 @@ export function isFreshMap(map: BattleMapConfig): boolean {
         !Object.keys(map.doors ?? {}).length &&
         !map.maze
     );
+}
+
+export function withPlainGrid(map: BattleMapConfig): BattleMapConfig {
+    return { ...map, background: null, plainGrid: true };
+}
+
+/** A null background means the default image, unless the map is an explicit plain grid. */
+export function showsBackground(
+    map: Pick<BattleMapConfig, 'background' | 'plainGrid'>,
+    showDefault: boolean
+): boolean {
+    return !!map.background || (showDefault && !map.plainGrid);
+}
+
+export function backgroundForSave(
+    map: Pick<BattleMapConfig, 'background' | 'plainGrid'>
+): string | null {
+    if (map.background) return map.background;
+
+    return map.plainGrid ? null : DEFAULT_MAP_BACKGROUND;
 }

@@ -7,6 +7,7 @@ import { ChevronRight, Home } from 'lucide-react';
 
 import { DM_SECTIONS } from '@/lib/constants/campaigns';
 import { STATIC_PUBLIC_PATHS } from '@/lib/constants/site';
+import { useIsNotFound } from '@/lib/hooks/common';
 import type { Translator } from '@/lib/i18n/translator';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';
@@ -73,6 +74,8 @@ export function Breadcrumbs() {
 
     const pathname = usePathname();
 
+    const isNotFound = useIsNotFound();
+
     if (
         pathname?.startsWith('/sign-in') ||
         pathname?.startsWith('/sign-up') ||
@@ -119,6 +122,9 @@ export function Breadcrumbs() {
 
         previousDisplaySegment = segment;
     }
+
+    if (isNotFound && crumbs.length > 0)
+        crumbs[crumbs.length - 1].label = t('notFound');
 
     if (crumbs.length === 0) return null;
 

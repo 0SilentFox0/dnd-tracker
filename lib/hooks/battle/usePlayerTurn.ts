@@ -5,9 +5,10 @@ import { useTranslations } from 'next-intl';
 
 import { turnStartDue, turnStartOutcome } from './turn-start-check';
 import type { TurnGateControls } from './types';
+import { useBattleRules } from './useBattleRules';
 import { useBattleScene } from './useBattleScene';
 
-import { BattleStatus } from '@/lib/constants/battle';
+import { BattleStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import { useConfirm } from '@/lib/hooks/common';
 import { coreActionsOn } from '@/lib/utils/battle/actions/access';
 import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
@@ -32,6 +33,12 @@ export function usePlayerTurn(
     const scene = useBattleScene();
 
     const confirm = useConfirm();
+
+    const { actionEconomy } = useBattleRules();
+
+    const gear =
+        actionEconomy.bonusAction &&
+        participant.basicInfo.sourceType === ParticipantSourceType.CHARACTER;
 
     const [state, dispatch] = useReducer(turnFlow, initialTurnFlow, (s) =>
         turnFlow(s, {
@@ -122,6 +129,7 @@ export function usePlayerTurn(
                 turnExhausted(fresh(), bonusSpells, scene.battle.rules, {
                     canReturn: canReturnNow(),
                     coreActions: coreActionsOn(scene.battle.rules),
+                    gear,
                 })
             )
                 dispatch({ type: 'EXHAUSTED' });

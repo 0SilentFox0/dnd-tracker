@@ -4,7 +4,9 @@ import { describe, expect, it } from 'vitest';
 
 import {
     dashboardHiddenKeys,
+    demoDashboardSectionsFor,
     DM_DASHBOARD_SECTIONS,
+    dmDashboardSectionsFor,
     PLAYER_DASHBOARD_SECTIONS,
 } from '@/lib/constants/campaign-dashboard';
 import { matchesQuery } from '@/lib/utils/common/text-search';
@@ -98,5 +100,46 @@ describe('dashboardHiddenKeys', () => {
                 acquaintancesEnabled: true,
             })
         ).toEqual([]);
+    });
+});
+
+describe('dashboard tiles follow the DM section menu', () => {
+    const keys = (list: { key: string }[]) => list.map((s) => s.key);
+
+    const bare = {
+        isTemplate: false,
+        classesEnabled: true,
+        system: { key: 'dnd5e' },
+    };
+
+    const homm = {
+        isTemplate: false,
+        classesEnabled: false,
+        system: { key: 'homm' },
+    };
+
+    it.each([
+        ['dm', dmDashboardSectionsFor],
+        ['demo', demoDashboardSectionsFor],
+    ])('%s: a bare 5e composition has no skills/skill-trees/careers tiles', (_n, build) => {
+        const k = keys(build(bare));
+
+        for (const hidden of ['skills', 'skill-trees', 'careers'])
+            expect(k).not.toContain(hidden);
+
+        expect(k).toEqual(expect.arrayContaining(['classes', 'spells']));
+    });
+
+    it.each([
+        ['dm', dmDashboardSectionsFor],
+        ['demo', demoDashboardSectionsFor],
+    ])('%s: a skills composition keeps skills and skill-trees', (_n, build) => {
+        expect(keys(build(homm))).toEqual(
+            expect.arrayContaining(['skills', 'skill-trees'])
+        );
+    });
+
+    it('demo keeps its player-world tile', () => {
+        expect(keys(demoDashboardSectionsFor(bare))).toContain('player-world');
     });
 });

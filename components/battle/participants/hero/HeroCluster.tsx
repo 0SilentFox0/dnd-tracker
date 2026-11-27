@@ -14,6 +14,7 @@ import {
     heroSlotViews,
     slotArcHeight,
     slotArcRadius,
+    slotLevelOpen,
 } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -60,7 +61,10 @@ export const HeroCluster = memo(function HeroCluster({
         arc: true,
     };
 
-    const recommended = !phone && !viewer.readOnly && spells.length > 0 && (
+    const recommended = !phone &&
+        !viewer.readOnly &&
+        spells.length > 0 &&
+        slotLevelOpen(slots, level) && (
         <RecommendedSpells
             spells={spells}
             level={level}

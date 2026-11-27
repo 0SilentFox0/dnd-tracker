@@ -1,9 +1,11 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { Info } from 'lucide-react';
 
 import '@/components/campaigns/dashboard/dashboard.css';
 import '@/lib/server/systems/registry';
 import { CampaignCover } from '@/components/campaigns/CampaignCover';
+import { CampaignNotice } from '@/components/campaigns/CampaignNotice';
 import { CampaignRecentSession } from '@/components/campaigns/dashboard/CampaignRecentSession';
 import { CampaignSummaryPanel } from '@/components/campaigns/dashboard/CampaignSummaryPanel';
 import { CampaignWorldPreview } from '@/components/campaigns/dashboard/CampaignWorldPreview';
@@ -136,6 +138,9 @@ export default async function CampaignDetailPage({
 
     const page = (
         <HudPage className="campaign-dashboard hud-wide">
+            <Suspense fallback={null}>
+                <CampaignNotice />
+            </Suspense>
             <HudPanel
                 as="div"
                 className="dashboard-hero"

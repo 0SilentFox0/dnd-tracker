@@ -105,6 +105,13 @@ function BattleMapPanelContent({
         scene.modeTools?.toolActive
     );
 
+    const { closeTools } = scene;
+
+    // a hidden tools drawer must not leave a tool grabbing map clicks
+    useEffect(() => {
+        if (slot === null && busy) closeTools();
+    }, [slot, busy, closeTools]);
+
     useEffect(() => {
         onBusyChange?.(busy);
 

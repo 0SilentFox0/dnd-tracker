@@ -64,7 +64,10 @@ export function RecommendedSpells({
                         disabled={!canCast}
                         aria-disabled={!canCast}
                         onClick={() =>
-                            intents.requestSpellBook(level ?? s.level)
+                            intents.requestSpellBook({
+                                level: level ?? s.level,
+                                spellId: s.id,
+                            })
                         }
                         className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 text-[#e6dccb] [text-shadow:0_1px_3px_#000,0_0_2px_#000] focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
                     >

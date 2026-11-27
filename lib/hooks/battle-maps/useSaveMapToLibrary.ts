@@ -8,8 +8,10 @@ import {
     discardBattleMapBackground,
     uploadBattleMapBackground,
 } from '@/lib/api/battle-map-background';
-import { DEFAULT_MAP_BACKGROUND } from '@/lib/constants/battle';
-import { battleMapToLibraryInput } from '@/lib/utils/battle/grid';
+import {
+    backgroundForSave,
+    battleMapToLibraryInput,
+} from '@/lib/utils/battle/grid';
 import { normalizeUvttBackground } from '@/lib/utils/battle/uvtt/normalize-background';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { BattleMapBrief } from '@/types/battle-map';
@@ -26,10 +28,10 @@ export function useSaveMapToLibrary(campaignId: string) {
         let uploaded: string | undefined;
 
         try {
-            // the setup canvas shows the default image for a null background; keep what the DM saw
+            // a null background shows the default image in setup (unless plainGrid); keep what the DM saw
             let source: BattleMapConfig = {
                 ...map,
-                background: map.background ?? DEFAULT_MAP_BACKGROUND,
+                background: backgroundForSave(map),
             };
 
             if (source.background?.startsWith('data:')) {

@@ -2,7 +2,7 @@
 
 import { type SyntheticEvent, useState } from 'react';
 
-export function useLoadedAspect(src: string, onReady?: () => void) {
+export function useLoadedAspect(src: string | null, onReady?: () => void) {
     const [loaded, setLoaded] = useState<{
         src: string;
         aspect: number;
@@ -14,7 +14,7 @@ export function useLoadedAspect(src: string, onReady?: () => void) {
         onLoad: (e: SyntheticEvent<HTMLImageElement>) => {
             const img = e.currentTarget;
 
-            if (img.naturalWidth > 0)
+            if (src && img.naturalWidth > 0)
                 setLoaded({
                     src,
                     aspect: img.naturalHeight / img.naturalWidth,

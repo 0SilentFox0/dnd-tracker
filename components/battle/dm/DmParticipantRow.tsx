@@ -259,7 +259,6 @@ export function DmParticipantRow({
                                 })
                             ) {
                                 onKill(participant);
-                                close();
                             }
                         }}
                     >
@@ -282,7 +281,6 @@ export function DmParticipantRow({
                                 })
                             ) {
                                 onToReserve(participant);
-                                close();
                             }
                         }}
                     >
@@ -307,7 +305,6 @@ export function DmParticipantRow({
                             })
                         ) {
                             onRemove(participant);
-                            close();
                         }
                     }}
                 >

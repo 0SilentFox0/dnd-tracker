@@ -52,7 +52,13 @@ export function ParticipantDetails({ participant }: ParticipantDetailsProps) {
     );
 }
 
-function EffectRow({ effect: e }: { effect: ActiveEffect }) {
+function EffectRow({
+    effect: e,
+    owner,
+}: {
+    effect: ActiveEffect;
+    owner: BattleParticipant;
+}) {
     const t = useTranslations('battle.details');
 
     const text = useText();
@@ -79,7 +85,7 @@ function EffectRow({ effect: e }: { effect: ActiveEffect }) {
                               : t('rounds', { count: e.duration })}
                     </span>
                 </div>
-                {effectLines(e, abilityT)
+                {effectLines(e, abilityT, owner)
                     .map(text)
                     .map((line) => (
                         <p
@@ -188,7 +194,16 @@ function ParticipantDetailsBody({
                     </div>
                 )}
                 {effects.map((e) => (
-                    <EffectRow key={e.id} effect={e} />
+                    <EffectRow
+                        key={e.id}
+                        effect={e}
+                        owner={
+                            battle.initiativeOrder.find(
+                                (p) =>
+                                    p.basicInfo.id === e.source?.participantId
+                            ) ?? participant
+                        }
+                    />
                 ))}
             </Section>
             {traits.length > 0 && (

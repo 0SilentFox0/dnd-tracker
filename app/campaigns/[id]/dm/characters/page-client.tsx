@@ -53,6 +53,22 @@ export function DMCharactersClient({
 
     const base = `/campaigns/${campaignId}/dm/characters`;
 
+    const empty =
+        type === CharacterType.PLAYER
+            ? {
+                  title: t('emptyPlayersTitle'),
+                  description: t('emptyPlayersDescription'),
+              }
+            : type === CharacterType.NPC_HERO
+              ? {
+                    title: t('emptyNpcHeroesTitle'),
+                    description: t('emptyNpcHeroesDescription'),
+                }
+              : {
+                    title: t('emptyTitle'),
+                    description: t('emptyDescription'),
+                };
+
     const newHref = type ? `${base}/new?type=${type}` : `${base}/new`;
 
     return (
@@ -113,8 +129,8 @@ export function DMCharactersClient({
                 empty={
                     <EmptyState
                         icon={Users}
-                        title={t('emptyTitle')}
-                        description={t('emptyDescription')}
+                        title={empty.title}
+                        description={empty.description}
                         action={
                             canEdit ? (
                                 <Button asChild>

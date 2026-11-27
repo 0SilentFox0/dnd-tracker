@@ -73,13 +73,15 @@ export function DmCharacterCard({
 
     const ooc = rules?.outOfCombat;
 
-    const maxHp = rules
-        ? characterBaseHp(character, {
-              entries,
-              rules,
-              characteristics: character.characteristics,
-          }).total
-        : null;
+    const maxHp =
+        character.maxHp ??
+        (rules
+            ? characterBaseHp(character, {
+                  entries,
+                  rules,
+                  characteristics: character.characteristics,
+              }).total
+            : null);
 
     const hp =
         maxHp !== null && ooc?.persistResources && character.resources

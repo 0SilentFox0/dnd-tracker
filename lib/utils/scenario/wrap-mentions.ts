@@ -4,8 +4,12 @@ import type { MentionType, RichDoc, RichNode } from '@/types/scenario';
 
 export type MentionTarget = { id: string; type: MentionType };
 
+const cleanForms = (forms: string[]) => [
+    ...new Set(forms.map((f) => f.trim()).filter(Boolean)),
+];
+
 export function buildFormsPattern(forms: string[]): RegExp | null {
-    const parts = [...new Set(forms.map((f) => f.trim()).filter(Boolean))]
+    const parts = cleanForms(forms)
         .sort((a, b) => b.length - a.length)
         .map(escapeRe);
 
@@ -21,11 +25,25 @@ type Mark = NonNullable<RichNode['marks']>[number];
 
 type Accept = (match: string) => boolean;
 
+export type FoundMention = {
+    index: number;
+    text: string;
+    target: MentionTarget;
+};
+
+export type FindMentions = (text: string) => FoundMention[];
+
+export const UNTAGGABLE_MARKS = ['code', 'link'];
+
+const isTaggableText = (node: RichNode) =>
+    node.type === 'text' &&
+    !(node.marks ?? []).some((m) => UNTAGGABLE_MARKS.includes(m.type));
+
 const isCapital = (ch: string) => ch !== ch.toLowerCase();
 
 // a capitalised form matches only a capitalised occurrence, so a name that is also a common word does not hit the word
 function caseAccept(forms: string[]): Accept {
-    const trimmed = [...new Set(forms.map((f) => f.trim()).filter(Boolean))];
+    const trimmed = cleanForms(forms);
 
     return (match) => {
         const lower = match.toLowerCase();
@@ -52,14 +70,12 @@ function commonMarks(nodes: RichNode[]): Mark[] {
 
 function wrapRun(
     run: RichNode[],
-    re: RegExp,
-    accept: Accept,
-    target: MentionTarget,
+    find: FindMentions,
     count: { n: number }
 ): RichNode[] {
     const text = run.map((n) => n.text ?? '').join('');
 
-    const matches = Array.from(text.matchAll(re)).filter((m) => accept(m[0]));
+    const matches = find(text);
 
     if (!matches.length) return run;
 
@@ -91,14 +107,18 @@ function wrapRun(
 
             covered.push(node);
 
-            at = Math.min(ne, m.index + m[0].length);
+            at = Math.min(ne, m.index + m.text.length);
 
-            if (at === m.index + m[0].length) {
+            if (at === m.index + m.text.length) {
                 const marks = commonMarks(covered);
 
                 out.push({
                     type: 'mention',
-                    attrs: { id: target.id, label: m[0], type: target.type },
+                    attrs: {
+                        id: m.target.id,
+                        label: m.text,
+                        type: m.target.type,
+                    },
                     ...(marks.length ? { marks } : {}),
                 });
                 covered.length = 0;
@@ -115,9 +135,7 @@ function wrapRun(
 
 function wrapNodes(
     nodes: RichNode[],
-    re: RegExp,
-    accept: Accept,
-    target: MentionTarget,
+    find: FindMentions,
     count: { n: number }
 ): RichNode[] {
     const out: RichNode[] = [];
@@ -125,13 +143,13 @@ function wrapNodes(
     let run: RichNode[] = [];
 
     const flush = () => {
-        if (run.length) out.push(...wrapRun(run, re, accept, target, count));
+        if (run.length) out.push(...wrapRun(run, find, count));
 
         run = [];
     };
 
     for (const node of nodes) {
-        if (node.type === 'text') {
+        if (isTaggableText(node)) {
             run.push(node);
             continue;
         }
@@ -142,13 +160,7 @@ function wrapNodes(
                 ? node
                 : {
                       ...node,
-                      content: wrapNodes(
-                          node.content,
-                          re,
-                          accept,
-                          target,
-                          count
-                      ),
+                      content: wrapNodes(node.content, find, count),
                   }
         );
     }
@@ -159,6 +171,19 @@ function wrapNodes(
 }
 
 // existing chips are left untouched; `count` is the number of new chips
+export function wrapDoc(
+    doc: RichDoc,
+    find: FindMentions
+): { doc: RichDoc; count: number } {
+    const count = { n: 0 };
+
+    const content = wrapNodes(doc.content, find, count);
+
+    return count.n
+        ? { doc: { ...doc, content }, count: count.n }
+        : { doc, count: 0 };
+}
+
 export function wrapMentions(
     doc: RichDoc,
     forms: string[],
@@ -168,17 +193,11 @@ export function wrapMentions(
 
     if (!re) return { doc, count: 0 };
 
-    const count = { n: 0 };
+    const accept = caseAccept(forms);
 
-    const content = wrapNodes(
-        doc.content,
-        re,
-        caseAccept(forms),
-        target,
-        count
+    return wrapDoc(doc, (text) =>
+        Array.from(text.matchAll(re))
+            .filter((m) => accept(m[0]))
+            .map((m) => ({ index: m.index, text: m[0], target }))
     );
-
-    return count.n
-        ? { doc: { ...doc, content }, count: count.n }
-        : { doc, count: 0 };
 }

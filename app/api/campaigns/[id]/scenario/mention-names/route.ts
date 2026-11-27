@@ -1,0 +1,8 @@
+import { mentionNamesHandler } from './mention-names-handler';
+
+export async function GET(
+    _req: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    return mentionNamesHandler((await params).id);
+}

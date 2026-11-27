@@ -141,7 +141,7 @@ describe('DMCharactersClient tabs', () => {
 
         await screen.findByText('Борин');
 
-        expect(getCharacters).toHaveBeenCalledWith('c1', { type: 'npc_hero' });
+        expect(getCharacters).toHaveBeenCalledWith('c1', { type: 'npc_hero', maxHp: true });
         expect(
             screen.getByRole('link', { name: 'characters.list.tabs.npcHeroes' })
         ).toHaveAttribute('aria-current', 'page');
@@ -164,7 +164,7 @@ describe('DMCharactersClient tabs', () => {
 
         await screen.findByText('Арвен');
 
-        expect(getCharacters).toHaveBeenCalledWith('c1', undefined);
+        expect(getCharacters).toHaveBeenCalledWith('c1', { maxHp: true });
         expect(
             screen.getByRole('link', { name: 'characters.list.tabs.all' })
         ).toHaveAttribute('aria-current', 'page');

@@ -1,7 +1,7 @@
 import { PrintSpellsPageClient } from './page-client';
 
 import { prisma } from '@/lib/db';
-import { requireCampaignDM } from '@/lib/server/campaigns/access';
+import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import type { Spell } from '@/types/spells';
 
 export default async function PrintSpellsPage({
@@ -11,7 +11,7 @@ export default async function PrintSpellsPage({
 }) {
     const { id } = await params;
 
-    const { campaign } = await requireCampaignDM(id);
+    const { campaign } = await requireCampaignDMOrDemo(id);
 
     const [spells, spellGroups] = await Promise.all([
         prisma.spell.findMany({

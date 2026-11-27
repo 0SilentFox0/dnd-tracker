@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 import {
@@ -6,6 +7,7 @@ import {
     defineCharacterOperation,
     memberScope,
 } from '../operation-runner';
+import { bakedStatsFor } from './list-baked-stats';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
@@ -54,6 +56,8 @@ const LIST_SELECT = {
     user: { select: { displayName: true } },
 } as const;
 
+type ListRow = LedgerRow & { id: string } & Record<string, unknown>;
+
 type LedgerRow = { characteristics?: unknown; controlledBy?: string | null };
 
 export const redactListedLedgers = <T extends LedgerRow>(
@@ -83,7 +87,44 @@ const listSchema = z.object({
     type: z.string().nullish(),
     compact: z.boolean().optional(),
     status: z.string().nullish(),
+    maxHp: z.boolean().optional(),
 });
+
+async function fetchRows({
+    where,
+    select,
+    withBaked,
+    campaignId,
+}: {
+    where: Prisma.CharacterWhereInput;
+    select: Record<string, unknown>;
+    withBaked: boolean;
+    campaignId: string;
+}) {
+    const fetched = (await (withBaked
+        ? prisma.character.findMany({
+              where,
+              include: { inventory: true, user: LIST_SELECT.user },
+              orderBy: { createdAt: 'desc' },
+          })
+        : prisma.character.findMany({
+              where,
+              select,
+              orderBy: { createdAt: 'desc' },
+          }))) as unknown as ListRow[];
+
+    if (!withBaked) return { rows: fetched, baked: null };
+
+    return {
+        rows: fetched.map(
+            (row) =>
+                Object.fromEntries(
+                    Object.keys(select).map((k) => [k, row[k]])
+                ) as ListRow
+        ),
+        baked: await bakedStatsFor(campaignId, fetched as never),
+    };
+}
 
 export const listOperation = defineCharacterOperation({
     name: 'list',
@@ -97,8 +138,9 @@ export const listOperation = defineCharacterOperation({
             searchParams.get('compact') === '1' ||
             searchParams.get('compact') === 'true',
         status: searchParams.get('status'),
+        maxHp: searchParams.get('maxHp') === '1',
     }),
-    run: async ({ access, campaignId }, { type, compact, status }) => {
+    run: async ({ access, campaignId }, { type, compact, status, maxHp }) => {
         const pending = status === CharacterStatus.PENDING;
 
         if (pending && !access.isDM)
@@ -127,32 +169,36 @@ export const listOperation = defineCharacterOperation({
 
         const token = ruleSystemOf(access.campaign.rules).combat.rerollToken;
 
-        const rows = await prisma.character.findMany({
+        const { rows, baked } = await fetchRows({
             where,
             select: pending
                 ? { ...LIST_SELECT, reviewNote: true }
                 : LIST_SELECT,
-            orderBy,
+            withBaked: !!maxHp && (access.isDM || !!access.isDemo) && !pending,
+            campaignId,
         });
 
         return redactListedLedgers(
-            rows.map((row) =>
-                token
-                    ? {
-                          ...row,
-                          inspiration:
-                              readStoredColumn(
-                                  access.campaign.rules,
-                                  row,
-                                  STORED_COLUMN.inspiration,
-                                  'boolean'
-                              ) ?? false,
-                      }
-                    : row
-            ),
+            rows.map((row) => ({
+                ...row,
+                ...(token && {
+                    inspiration:
+                        readStoredColumn(
+                            access.campaign.rules,
+                            row,
+                            STORED_COLUMN.inspiration,
+                            'boolean'
+                        ) ?? false,
+                }),
+            })),
             access,
             ruleSystemOf(access.campaign.rules)
-        ).map(flattenStoredColumns);
+        )
+            .map(flattenStoredColumns)
+            .map((row) => ({
+                ...row,
+                ...(baked?.has(row.id) && baked.get(row.id)),
+            }));
     },
 });
 
@@ -180,7 +226,7 @@ export async function listCharacters(
     const compact =
         search.get('compact') === '1' || search.get('compact') === 'true';
 
-    const rows = await prisma.character.findMany({
+    const { rows, baked } = await fetchRows({
         where: {
             campaignId,
             status: CharacterStatus.ACTIVE,
@@ -189,16 +235,20 @@ export async function listCharacters(
                 : {}),
         },
         select: compact ? COMPACT_SELECT : LIST_SELECT,
-        orderBy: { createdAt: 'desc' },
+        withBaked: search.get('maxHp') === '1' && !compact,
+        campaignId,
     });
 
     return NextResponse.json(
         compact
             ? rows
             : redactListedLedgers(
-                  rows as LedgerRow[],
+                  rows,
                   access,
                   ruleSystemOf(access.campaign.rules)
-              )
+              ).map((row) => ({
+                  ...row,
+                  ...(baked?.has(row.id) && baked.get(row.id)),
+              }))
     );
 }

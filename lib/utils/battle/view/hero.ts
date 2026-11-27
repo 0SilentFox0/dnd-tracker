@@ -127,6 +127,14 @@ export function defaultSlotLevel(slots: SlotView[]): number | null {
     return (usable ?? slots.find((s) => s.max > 0))?.level ?? null;
 }
 
+/** null = the hero has no slot levels (cantrips, slotless systems). */
+export const slotLevelOpen = (
+    slots: SlotView[],
+    level: number | null
+): boolean =>
+    level === null ||
+    (slots.find((s) => s.level === level)?.current ?? 0) > 0;
+
 /** Offset from the portrait centre for slot `i` of `n`, evenly around a full circle starting at the top */
 export function slotRingOffset(
     i: number,

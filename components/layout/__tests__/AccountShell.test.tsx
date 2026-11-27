@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { accountActiveId,AccountShell } from '../AccountShell';
+import { accountActiveId, accountNavItems, AccountShell } from '../AccountShell';
 
 const nav = vi.hoisted(() => ({ path: '/settings/ai' }));
 
@@ -80,5 +80,23 @@ describe('AccountShell', () => {
 
         expect(cls).not.toContain('-mx-4');
         expect(cls).toContain('.hud-form-head>*]:!px-0');
+    });
+});
+
+describe('accountNavItems', () => {
+    const t = ((k: string) => k) as unknown as Parameters<
+        typeof accountNavItems
+    >[0];
+
+    it('hides the sound library for accounts without a DM role', () => {
+        expect(accountNavItems(t, false).map((i) => i.id)).not.toContain(
+            'soundLibrary'
+        );
+    });
+
+    it('keeps the sound library for DMs', () => {
+        expect(accountNavItems(t, true).map((i) => i.id)).toContain(
+            'soundLibrary'
+        );
     });
 });

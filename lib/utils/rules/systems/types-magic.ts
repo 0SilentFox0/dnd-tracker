@@ -272,6 +272,8 @@ export interface RuleSystemMagic {
     saveCrit?(roll: number): 'success' | 'fail' | null;
     /** Die size the client rolls for a spell attack; absent means the client rolls none */
     attackDice?: number;
+    /** Die size the client rolls for a target's saving throw against a spell; absent means the client rolls none */
+    saveDice?: number;
     sustain: RuleSystemSustain;
     /** Base of a spell save DC from the campaign rules; absent means the section default */
     saveDcBase?(rules: Ruleset): number;
