@@ -21,6 +21,8 @@
   --text-2xl--line-height: 2.125rem;
   --text-3xl: 2.5rem;
   --text-3xl--line-height: 2.875rem;
+  --text-4xl: 2.75rem;
+  --text-4xl--line-height: 3.125rem;
   --color-hud-muted: var(--hud-muted, #9b9080);
   --color-hud-ink: var(--hud-ink, #efe5d2);
   --color-hud-bone: var(--hud-bone, #e6dccb);

@@ -4,7 +4,7 @@ import { Swords } from 'lucide-react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { HeaderPillLink } from '@/components/campaigns/HeaderPillLink';
-import { HUD_CHIP_CLASS } from '@/components/hud/page/HudChipTabs';
+import { HUD_CHIP_CLASS } from '@/components/hud/page/chip-class';
 import { buttonVariants } from '@/components/ui/button';
 
 vi.mock('next/link', () => ({

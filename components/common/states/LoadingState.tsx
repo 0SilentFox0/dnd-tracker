@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 export type LoadingVariant = 'rows' | 'cards' | 'list' | 'detail' | 'form';
 
-const bar = (cls: string) => <div className={cn('ds-skeleton', cls)} />;
+const bar = (cls: string) => <div className={cn('ds-skeleton rounded-lg', cls)} />;
 
 function Body({ variant, count }: { variant: LoadingVariant; count: number }) {
     const items = Array.from({ length: count }, (_, i) => i);
@@ -91,7 +91,7 @@ function Body({ variant, count }: { variant: LoadingVariant; count: number }) {
                         <div
                             key={i}
                             data-slot="skeleton-row"
-                            className="ds-skeleton h-14"
+                            className="ds-skeleton h-14 rounded-lg"
                         />
                     ))}
                 </div>

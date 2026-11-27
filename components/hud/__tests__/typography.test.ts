@@ -20,6 +20,7 @@ const SCALE: Record<string, [string, string]> = {
     xl: ['1.375rem', '1.75rem'],
     '2xl': ['1.75rem', '2.125rem'],
     '3xl': ['2.5rem', '2.875rem'],
+    '4xl': ['2.75rem', '3.125rem'],
 };
 
 describe('typography', () => {

@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import {
     HUD_CHIP_ACTIVE_CLASS,
     HUD_CHIP_CLASS,
-} from '@/components/hud/page/HudChipTabs';
+} from '@/components/hud/page/chip-class';
 import { useRovingIndex } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 

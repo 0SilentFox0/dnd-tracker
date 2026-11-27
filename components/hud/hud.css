@@ -97,7 +97,7 @@ html[data-palette] body,
 .hud-surface [data-slot="empty-state"] { border-color: var(--hud-line, #4a3c2c); }
 .hud-surface [data-slot="empty-state"] [data-slot="empty-state-title"] { font-family: var(--font-hud-sc), serif; color: var(--hud-ink, #efe5d2); }
 .hud-surface [data-slot="error-state"] { border-color: rgba(208, 112, 92, 0.5); }
-.ds-skeleton { background: linear-gradient(90deg, var(--skeleton, #2a2218) 0%, var(--skeleton-hi, #3a3024) 50%, var(--skeleton, #2a2218) 100%); background-size: 200% 100%; animation: ds-skeleton-shimmer 1.4s ease-in-out infinite; border-radius: var(--r-md, 8px); }
+.ds-skeleton { background: linear-gradient(90deg, var(--skeleton, #2a2218) 0%, var(--skeleton-hi, #3a3024) 50%, var(--skeleton, #2a2218) 100%); background-size: 200% 100%; animation: ds-skeleton-shimmer 1.4s ease-in-out infinite; }
 @keyframes ds-skeleton-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .ds-skeleton { animation: none; background: var(--skeleton, #2a2218); } }
 .hud-page { color: var(--hud-bone, #e6dccb); }
