@@ -33,7 +33,7 @@ import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrac
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
 import { TurnDock } from '@/components/battle/turn/dock/TurnDock';
-import { HUD_GLASS, HudButton } from '@/components/hud';
+import { HUD_GLASS, HudButton, HudIconButton } from '@/components/hud';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     MAP_TAB,
@@ -205,7 +205,7 @@ export function MobileBattleLayout({
                             ref={menuRef}
                             className="absolute top-1 right-2 z-30 flex flex-row-reverse items-start gap-1.5"
                         >
-                            <HudButton
+                            <HudIconButton
                                 type="button"
                                 aria-label={td('more')}
                                 title={td('more')}
@@ -215,7 +215,7 @@ export function MobileBattleLayout({
                                 className={`${HUD_GLASS} flex size-8 items-center justify-center rounded-lg text-[var(--ink)] focus-visible:ring-2 focus-visible:outline-none`}
                             >
                                 <Ellipsis className="size-5" aria-hidden />
-                            </HudButton>
+                            </HudIconButton>
                             {menuShown && (
                                 <DrawerRail
                                     active={active}
