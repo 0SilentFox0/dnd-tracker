@@ -7,7 +7,13 @@ import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { useScenarioSearch } from '@/lib/hooks/scenario';
 
-export function ScenarioSearch({ campaignId }: { campaignId: string }) {
+export function ScenarioSearch({
+    campaignId,
+    onQueryChange,
+}: {
+    campaignId: string;
+    onQueryChange?(query: string): void;
+}) {
     const t = useTranslations('scenario.search');
 
     const [query, setQuery] = useState('');
@@ -21,7 +27,10 @@ export function ScenarioSearch({ campaignId }: { campaignId: string }) {
                 aria-label={t('label')}
                 placeholder={t('placeholder')}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                    setQuery(e.target.value);
+                    onQueryChange?.(e.target.value);
+                }}
             />
             {query.trim().length >= 2 && (
                 <ul className="sb-hits">

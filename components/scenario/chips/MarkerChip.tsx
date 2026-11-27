@@ -5,6 +5,12 @@ import { useTranslations } from 'next-intl';
 import { MapPin, X } from 'lucide-react';
 
 import { HudButton } from '@/components/hud';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useWorldMap } from '@/lib/hooks/world';
 import type { ScenarioMarkerRef } from '@/types/scenario';
 
@@ -36,9 +42,21 @@ export function MarkerChip({
                 <span className="sb-chip-name">{found.name}</span>
             ) : (
                 (isError || (!isLoading && data)) && (
-                    <span className="sb-chip-name sb-missing">
-                        {t('unavailable')}
-                    </span>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <span
+                                    className="sb-chip-name sb-missing"
+                                    tabIndex={0}
+                                >
+                                    {t('unavailable')}
+                                </span>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-64">
+                                {t('unavailableHint')}
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 )
             )}
             {action?.(available)}
