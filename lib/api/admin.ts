@@ -37,3 +37,24 @@ export const getAdminCampaign = (id: string) =>
     request<AdminCampaignSummary>(
         `/api/admin/campaigns/${encodeURIComponent(id)}`
     );
+
+const userUrl = (id: string) => `/api/admin/users/${encodeURIComponent(id)}`;
+
+const post = (url: string, body?: unknown) =>
+    request<{ ok: true }>(url, {
+        method: 'POST',
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+
+export const banAdminUser = (id: string, hours: 24 | 168 | 876000) =>
+    post(`${userUrl(id)}/ban`, { hours });
+
+export const unbanAdminUser = (id: string) => post(`${userUrl(id)}/unban`);
+
+export const signOutAdminUser = (id: string) => post(`${userUrl(id)}/signout`);
+
+export const deleteAdminUser = (id: string, email: string) =>
+    request<{ ok: true }>(userUrl(id), {
+        method: 'DELETE',
+        body: JSON.stringify({ email }),
+    });

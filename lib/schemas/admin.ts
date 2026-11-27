@@ -25,3 +25,11 @@ export const adminUsersQuerySchema = z.object({
     filter: z.enum(ADMIN_USER_FILTERS).default('all'),
     cursor: z.string().optional(),
 });
+
+export const ADMIN_BAN_HOURS = [24, 168, 876000] as const;
+
+export const banSchema = z.object({
+    hours: z.union([z.literal(24), z.literal(168), z.literal(876000)]),
+});
+
+export const adminDeleteSchema = z.object({ email: z.string().email() });

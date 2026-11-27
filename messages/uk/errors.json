@@ -628,5 +628,7 @@
   "battleMapHexSquareOnly": "Текстури недоступні на hex-картах",
   "battleMapGridLocked": "Тип сітки карти не можна змінити після створення",
   "accountDeleteBlocked": "Ваші шаблони використовують чужі кампанії, тому акаунт поки не можна видалити",
-  "accountEmailMismatch": "Email не збігається з email акаунта"
+  "accountEmailMismatch": "Email не збігається з email акаунта",
+  "adminSelfAction": "Не можна виконати цю дію над власним акаунтом",
+  "adminAuthUnavailable": "Сервіс авторизації недоступний"
 }
