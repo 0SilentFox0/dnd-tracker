@@ -143,4 +143,31 @@ describe('live auto-mentions', () => {
 
         expect(handled).toBeFalsy();
     });
+
+    it('converts on a dash, slash or opening bracket', () => {
+        for (const ch of ['—', '/', '(']) {
+            const e = mount(index);
+
+            type(e, `Зехір${ch}`);
+            expect(inline(e)[0]).toBe('[Зехір]');
+        }
+    });
+
+    it('converts on Tab and on blur', () => {
+        const e = mount(index);
+
+        type(e, 'Зехір');
+        e.view.someProp('handleKeyDown', (f) =>
+            f(e.view, new KeyboardEvent('keydown', { key: 'Tab' }))
+        );
+        expect(inline(e)).toEqual(['[Зехір]']);
+
+        const f = mount(index);
+
+        type(f, 'Зехір');
+        f.view.someProp('handleDOMEvents', (h) =>
+            h.blur?.(f.view, new FocusEvent('blur'))
+        );
+        expect(inline(f)).toEqual(['[Зехір]']);
+    });
 });

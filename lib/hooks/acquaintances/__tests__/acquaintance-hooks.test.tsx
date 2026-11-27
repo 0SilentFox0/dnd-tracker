@@ -16,6 +16,7 @@ import {
     getAcquaintances,
     saveAcquaintanceNote,
 } from '@/lib/api/acquaintances';
+import { scenarioKeys } from '@/lib/hooks/scenario';
 import type {
     AcquaintancesResponse,
     AcquaintanceView,
@@ -138,6 +139,9 @@ describe('useAcquaintanceActions', () => {
         expect(created?.id).toBe('a2');
         expect(invalidate).toHaveBeenCalledWith({
             queryKey: acquaintanceKeys.list('c1'),
+        });
+        expect(invalidate).toHaveBeenCalledWith({
+            queryKey: scenarioKeys.mentionNames('c1'),
         });
     });
 });

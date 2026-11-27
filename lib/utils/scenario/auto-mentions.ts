@@ -23,6 +23,12 @@ const DROP_MIN_WORD = 4;
 
 const DROPPABLE = /[аяоеєйь]$/u;
 
+// real Ukrainian case endings only, so a longer unrelated word is not read as a form of a short name
+const ENDINGS =
+    /(?:ами|ями|ові|еві|єві|ом|ем|єм|ою|ею|єю|ів|їв|ей|ам|ям|ах|ях|ми|[аяуюоеєіїиьймх])?/u;
+
+const CLUSTER = /\P{M}\p{M}*/gu;
+
 const WORD = /[\p{L}\p{N}_]+/gu;
 
 const WORD_CHAR = /[\p{L}\p{N}_]/u;
@@ -66,7 +72,7 @@ function wordPattern(word: string): string {
             ? Array.from(word).slice(0, -1).join('')
             : word;
 
-    return `${escapeRe(stem)}\\p{L}{0,${MAX_ENDING}}`;
+    return `${escapeRe(stem)}${ENDINGS.source}`;
 }
 
 // only the first letter of the phrase is case-insensitive
@@ -167,10 +173,47 @@ function resolve(cands: AutoEntry[], text: string): MentionOption | null {
     return top.length === 1 ? top[0].option : null;
 }
 
+// text typed with combining marks (и + U+0306) is scanned in NFC and mapped back to the original offsets
 export function findAutoMentions(
     index: AutoMentionIndex,
     text: string,
     from = 0
+): AutoMatch[] {
+    const nfc = text.normalize('NFC');
+
+    if (nfc === text) return scan(index, text, from);
+
+    const map: number[] = [];
+
+    let norm = '';
+
+    for (const m of text.matchAll(CLUSTER)) {
+        const n = m[0].normalize('NFC');
+
+        for (let k = 0; k < n.length; k++) map.push(m.index);
+        norm += n;
+    }
+
+    map.push(text.length);
+
+    const normFrom = Math.max(
+        0,
+        map.findIndex((o) => o >= from)
+    );
+
+    return scan(index, norm, normFrom).map((r) => {
+        const start = map[r.index];
+
+        const end = map[r.index + r.text.length];
+
+        return { ...r, index: start, text: text.slice(start, end) };
+    });
+}
+
+function scan(
+    index: AutoMentionIndex,
+    text: string,
+    from: number
 ): AutoMatch[] {
     const out: AutoMatch[] = [];
 

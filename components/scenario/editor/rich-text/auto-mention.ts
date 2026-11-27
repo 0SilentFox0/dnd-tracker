@@ -23,7 +23,9 @@ declare module '@tiptap/core' {
 }
 
 // apostrophes are left out: inside a Ukrainian word they belong to it
-const BOUNDARY = /^[\s.,;:!?)»"…]$/u;
+const BOUNDARY = /^[\s.,;:!?()»"…\u2013\u2014/-]$/u;
+
+const CONVERT_KEYS = new Set(['Enter', 'Tab']);
 
 type Hit = { from: number; to: number; mention: () => void };
 
@@ -122,8 +124,15 @@ export const AutoMention = Extension.create<object, AutoMentionStorage>({
 
                         return true;
                     },
+                    handleDOMEvents: {
+                        blur(view) {
+                            findHit(view, getIndex)?.mention();
+
+                            return false;
+                        },
+                    },
                     handleKeyDown(view, event) {
-                        if (event.key === 'Enter' && !event.shiftKey)
+                        if (CONVERT_KEYS.has(event.key) && !event.shiftKey)
                             findHit(view, getIndex)?.mention();
 
                         return false;

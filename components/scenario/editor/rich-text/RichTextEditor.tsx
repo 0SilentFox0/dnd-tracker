@@ -6,6 +6,7 @@ import { EditorContent, useEditor } from '@tiptap/react';
 
 import { setAutoMentionIndex } from './auto-mention';
 import { buildExtensions } from './extensions';
+import { setContentKeepingCaret } from './keep-caret';
 
 import type { AutoMentionIndex } from '@/lib/utils/scenario/auto-mentions';
 import type { MentionOption, RichDoc } from '@/types/scenario';
@@ -45,7 +46,7 @@ export function RichTextEditor({
     // doc here is an accepted clean update or an explicit reload by the DM.
     useEffect(() => {
         if (editor && JSON.stringify(editor.getJSON()) !== JSON.stringify(doc))
-            editor.commands.setContent(doc, { emitUpdate: false });
+            setContentKeepingCaret(editor, doc);
     }, [editor, doc]);
 
     useEffect(() => {

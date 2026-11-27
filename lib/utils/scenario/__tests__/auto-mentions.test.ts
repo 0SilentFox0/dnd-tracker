@@ -24,6 +24,8 @@ const options: MentionOption[] = [
     { type: 'acquaintance', id: 'a3', label: 'Лука' },
     { type: 'unit', id: 'u4', label: 'Ед' },
     { type: 'spell', id: 's1', label: 'Щит' },
+    { type: 'unit', id: 'u5', label: 'Маг' },
+    { type: 'character', id: 'c2', label: 'Кха-Белех' },
 ];
 
 const built = buildAutoMentionIndex(options);
@@ -151,6 +153,37 @@ describe('autoTagDoc', () => {
         expect(secret.content[0].content?.[0].marks).toEqual([
             { type: 'secret' },
         ]);
+    });
+});
+
+describe('case endings', () => {
+    it('accepts real case endings only', () => {
+        expect(tag('Мага, магом, магів, Магові').map((a) => a?.id)).toEqual([
+            'u5',
+            'u5',
+            'u5',
+            'u5',
+        ]);
+        expect(tag('магія')).toEqual([]);
+        expect(tag('Магнат')).toEqual([]);
+    });
+
+    it('matches hyphenated names', () => {
+        expect(tag('Кха-Белеха').map((a) => a?.id)).toEqual(['c2']);
+    });
+
+    it('matches decomposed й and ї typed as two code points', () => {
+        const nfdIndex = buildAutoMentionIndex([
+            { type: 'unit', id: 'k', label: 'Каїн' },
+        ]);
+
+        if (!nfdIndex) throw new Error('index');
+
+        const decomposed = 'Каїна'.normalize('NFD');
+
+        expect(
+            chips(autoTagDoc(p(text(`бачу ${decomposed}.`)), nfdIndex).doc)
+        ).toEqual([{ id: 'k', label: decomposed, type: 'unit' }]);
     });
 });
 
