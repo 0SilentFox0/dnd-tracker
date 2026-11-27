@@ -154,6 +154,74 @@ describe('autoTagDoc', () => {
     });
 });
 
+describe('apostrophes inside Ukrainian words', () => {
+    const apo = buildAutoMentionIndex([
+        { type: 'unit', id: 'm', label: 'Мар' },
+        { type: 'unit', id: 'y', label: 'Яна' },
+    ]);
+
+    it('does not split a word at an apostrophe', () => {
+        if (!apo) throw new Error('index');
+
+        for (const q of ["Мар'яна прийшла", 'Мар’яна прийшла'])
+            expect(chips(autoTagDoc(p(text(q)), apo).doc)).toEqual([]);
+        expect(findAutoMentionAtEnd(apo, "Мар'яна")).toBeNull();
+    });
+});
+
+describe('performance', () => {
+    const syllables = [
+        'ра',
+        'ко',
+        'лі',
+        'ве',
+        'ми',
+        'до',
+        'ту',
+        'ня',
+        'зе',
+        'хі',
+    ];
+
+    const word = (i: number) =>
+        [i % 10, Math.floor(i / 10) % 10, Math.floor(i / 100) % 10]
+            .map((d) => syllables[d])
+            .join('');
+
+    const names: MentionOption[] = Array.from({ length: 800 }, (_, i) => ({
+        type: 'unit',
+        id: `n${i}`,
+        label: i % 4 ? `Б${word(i)}` : `Б${word(i)} ${word(799 - i)}`,
+    }));
+
+    const big = buildAutoMentionIndex(names);
+
+    const longText = Array.from({ length: 1500 }, (_, i) =>
+        i % 50 ? 'слово' : names[i % 800].label
+    ).join(' ');
+
+    it('tags a long page against 800 names quickly', () => {
+        if (!big) throw new Error('index');
+
+        const t0 = performance.now();
+
+        const { count } = autoTagDoc(p(text(longText)), big);
+
+        expect(count).toBeGreaterThan(0);
+        expect(performance.now() - t0).toBeLessThan(300);
+    });
+
+    it('checks the end of a long paragraph quickly', () => {
+        if (!big) throw new Error('index');
+
+        const t0 = performance.now();
+
+        for (let i = 0; i < 20; i++)
+            findAutoMentionAtEnd(big, `${longText} ${names[5].label}`);
+        expect(performance.now() - t0).toBeLessThan(100);
+    });
+});
+
 describe('findAutoMentionAtEnd', () => {
     it('finds a match ending exactly at the end of the text', () => {
         expect(findAutoMentionAtEnd(index, 'Бачу Зехіра')).toEqual({

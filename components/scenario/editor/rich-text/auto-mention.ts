@@ -4,10 +4,13 @@ import type { Mark } from '@tiptap/pm/model';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
 
+import { MENTION_SUGGESTION_KEY } from './mention-suggestion';
+
 import {
     type AutoMentionIndex,
     findAutoMentionAtEnd,
 } from '@/lib/utils/scenario/auto-mentions';
+import { UNTAGGABLE_MARKS } from '@/lib/utils/scenario/wrap-mentions';
 
 type GetIndex = () => AutoMentionIndex | null;
 
@@ -19,9 +22,8 @@ declare module '@tiptap/core' {
     }
 }
 
-const BOUNDARY = /^[\s.,;:!?)»"'…]$/u;
-
-const UNTAGGABLE_MARKS = ['code', 'link'];
+// apostrophes are left out: inside a word they belong to it (Мар'яна)
+const BOUNDARY = /^[\s.,;:!?)»"…]$/u;
 
 type Hit = { from: number; to: number; mention: () => void };
 
@@ -32,7 +34,14 @@ function findHit(view: EditorView, getIndex: GetIndex): Hit | null {
 
     const { $from, empty } = state.selection;
 
-    if (!index || !empty || !$from.parent.isTextblock) return null;
+    if (
+        !index ||
+        !empty ||
+        view.composing ||
+        !$from.parent.isTextblock ||
+        MENTION_SUGGESTION_KEY.getState(state)?.active
+    )
+        return null;
 
     const start = $from.start();
 
@@ -95,15 +104,20 @@ export const AutoMention = Extension.create<object, AutoMentionStorage>({
             new Plugin({
                 key: new PluginKey('autoMention'),
                 props: {
-                    handleTextInput(view, _from, _to, text) {
-                        if (!BOUNDARY.test(text)) return false;
+                    handleTextInput(view, from, to, text) {
+                        if (
+                            !BOUNDARY.test(text) ||
+                            from !== to ||
+                            from !== view.state.selection.from
+                        )
+                            return false;
 
                         const hit = findHit(view, getIndex);
 
                         if (!hit) return false;
 
                         // the typed char goes in first so undo reverts only the chip
-                        view.dispatch(view.state.tr.insertText(text));
+                        view.dispatch(view.state.tr.insertText(text, from, to));
                         hit.mention();
 
                         return true;

@@ -23,17 +23,34 @@ const DROP_MIN_WORD = 4;
 
 const DROPPABLE = /[аяоеєйь]$/u;
 
-const BEFORE = '(?<![\\p{L}\\p{N}_@])';
+const WORD = /[\p{L}\p{N}_]+/gu;
 
-const AFTER = '(?![\\p{L}\\p{N}_])';
+const WORD_CHAR = /[\p{L}\p{N}_]/u;
 
-type AutoEntry = { option: MentionOption; nameLen: number; full: RegExp };
+const LETTER = /\p{L}/u;
+
+const APOSTROPHE = /['’]/u;
+
+// an apostrophe between letters is part of a Ukrainian word (Мар'яна)
+const AFTER = "(?![\\p{L}\\p{N}_]|['’]\\p{L})";
+
+const PREFIX = 3;
+
+const SPAN_SLACK = 8;
+
+type AutoEntry = {
+    option: MentionOption;
+    nameLen: number;
+    full: RegExp;
+    sticky: RegExp;
+};
 
 export interface AutoMentionIndex {
-    re: RegExp;
-    tailRe: RegExp;
-    entries: AutoEntry[];
+    byPrefix: Map<string, AutoEntry[]>;
+    maxSpan: number;
 }
+
+export type AutoMatch = { index: number; text: string; option: MentionOption };
 
 const isAutoType = (t: MentionType) =>
     (AUTO_MENTION_TYPES as readonly MentionType[]).includes(t);
@@ -65,13 +82,16 @@ function namePattern(name: string): string {
     return upper === lower ? body : `[${upper}${lower}]${rest.join('')}`;
 }
 
+const prefixKey = (s: string) =>
+    (s.match(/^[\p{L}\p{N}_]+/u)?.[0] ?? '').slice(0, PREFIX).toLowerCase();
+
 export function buildAutoMentionIndex(
     options: MentionOption[]
 ): AutoMentionIndex | null {
     const byName = new Map<string, MentionOption[]>();
 
     for (const o of options) {
-        const name = o.label.trim().replace(/\s+/gu, ' ');
+        const name = o.label.normalize('NFC').trim().replace(/\s+/gu, ' ');
 
         if (!isAutoType(o.type) || letters(name) < MIN_NAME) continue;
 
@@ -80,65 +100,145 @@ export function buildAutoMentionIndex(
         byName.set(key, [...(byName.get(key) ?? []), { ...o, label: name }]);
     }
 
-    const entries: AutoEntry[] = [...byName.values()]
-        .filter((group) => new Set(group.map((o) => o.id)).size === 1)
-        .map(([option]) => ({
-            option,
-            nameLen: letters(option.label),
-            full: new RegExp(`^(?:${namePattern(option.label)})$`, 'u'),
-        }))
-        .sort((a, b) => b.nameLen - a.nameLen);
+    const byPrefix = new Map<string, AutoEntry[]>();
 
-    if (!entries.length) return null;
+    let maxSpan = 0;
 
-    const alts = entries.map((e) => namePattern(e.option.label)).join('|');
+    for (const group of byName.values()) {
+        const option = group[0];
 
-    return {
-        re: new RegExp(`${BEFORE}(?:${alts})${AFTER}`, 'gu'),
-        tailRe: new RegExp(`${BEFORE}(?:${alts})$`, 'u'),
-        entries,
-    };
+        const key = prefixKey(option.label);
+
+        if (group.length > 1 || !key) continue;
+
+        const pattern = namePattern(option.label);
+
+        byPrefix.set(key, [
+            ...(byPrefix.get(key) ?? []),
+            {
+                option,
+                nameLen: letters(option.label),
+                full: new RegExp(`^(?:${pattern})$`, 'u'),
+                sticky: new RegExp(`(?:${pattern})${AFTER}`, 'uy'),
+            },
+        ]);
+        maxSpan = Math.max(
+            maxSpan,
+            option.label.length +
+                MAX_ENDING * option.label.split(' ').length +
+                SPAN_SLACK
+        );
+    }
+
+    return byPrefix.size ? { byPrefix, maxSpan } : null;
 }
 
-export function resolveAutoMention(
-    index: AutoMentionIndex,
-    text: string
-): MentionOption | null {
-    const hits = index.entries.filter((e) => e.full.test(text));
+function boundaryBefore(text: string, i: number): boolean {
+    const prev = text[i - 1];
+
+    if (prev === undefined) return true;
+
+    if (prev === '@' || WORD_CHAR.test(prev)) return false;
+
+    return !(APOSTROPHE.test(prev) && LETTER.test(text[i - 2] ?? ''));
+}
+
+function candidates(index: AutoMentionIndex, token: string): AutoEntry[] {
+    const lower = token.toLowerCase();
+
+    const found: AutoEntry[] = [];
+
+    for (let n = 1; n <= Math.min(PREFIX, lower.length); n++)
+        found.push(...(index.byPrefix.get(lower.slice(0, n)) ?? []));
+
+    return found.sort((a, b) => b.nameLen - a.nameLen);
+}
+
+// exact name wins; otherwise the longest name, and a tie is ambiguous
+function resolve(cands: AutoEntry[], text: string): MentionOption | null {
+    const hits = cands.filter((e) => e.full.test(text));
 
     const exact = hits.filter((e) => sameName(e.option.label, text));
 
     if (exact.length === 1) return exact[0].option;
 
-    const best = Math.max(...hits.map((e) => e.nameLen));
-
-    const top = hits.filter((e) => e.nameLen === best);
+    const top = hits.filter((e) => e.nameLen === hits[0]?.nameLen);
 
     return top.length === 1 ? top[0].option : null;
+}
+
+export function findAutoMentions(
+    index: AutoMentionIndex,
+    text: string,
+    from = 0
+): AutoMatch[] {
+    const out: AutoMatch[] = [];
+
+    const word = new RegExp(WORD.source, WORD.flags);
+
+    word.lastIndex = from;
+
+    let pos = from;
+
+    for (let m = word.exec(text); m; m = word.exec(text)) {
+        const at = m.index;
+
+        if (at < pos || !boundaryBefore(text, at)) continue;
+
+        const cands = candidates(index, m[0]);
+
+        let matched: string | null = null;
+
+        for (const c of cands) {
+            c.sticky.lastIndex = at;
+
+            const r = c.sticky.exec(text);
+
+            if (r) {
+                matched = r[0];
+                break;
+            }
+        }
+
+        if (!matched) continue;
+
+        const option = resolve(cands, matched);
+
+        if (option) out.push({ index: at, text: matched, option });
+
+        pos = at + matched.length;
+        word.lastIndex = pos;
+    }
+
+    return out;
 }
 
 export function findAutoMentionAtEnd(
     index: AutoMentionIndex,
     textBefore: string
 ): { from: number; text: string; option: MentionOption } | null {
-    const m = index.tailRe.exec(textBefore);
+    const last = findAutoMentions(
+        index,
+        textBefore,
+        Math.max(0, textBefore.length - index.maxSpan)
+    ).at(-1);
 
-    if (!m) return null;
-
-    const option = resolveAutoMention(index, m[0]);
-
-    return option ? { from: m.index, text: m[0], option } : null;
+    return last && last.index + last.text.length === textBefore.length
+        ? { from: last.index, text: last.text, option: last.option }
+        : null;
 }
 
 export function autoTagDoc(
     doc: RichDoc,
     index: AutoMentionIndex
 ): { doc: RichDoc; count: number } {
-    return wrapDoc(doc, index.re, (m) => {
-        const o = resolveAutoMention(index, m);
-
-        return o && { id: o.id, type: o.type };
-    });
+    return wrapDoc(doc, (text) =>
+        findAutoMentions(index, text).map(({ index: at, text: t, option }) => ({
+            index: at,
+            text: t,
+            target: { id: option.id, type: option.type },
+        }))
+    );
 }
 
 export function autoTagContent(

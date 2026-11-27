@@ -132,12 +132,12 @@ export function ScenarioEditor({
     const tagMatches = () => {
         if (!autoMentionIndex) return;
 
-        const { count } = autoTagContent(draft.content, autoMentionIndex);
+        const { content, count } = autoTagContent(
+            draft.content,
+            autoMentionIndex
+        );
 
-        if (count)
-            draft.setContent(
-                (c) => autoTagContent(c, autoMentionIndex).content
-            );
+        if (count) draft.setContent(() => content);
 
         toasts.push({
             id: `auto-tag-${Date.now()}`,

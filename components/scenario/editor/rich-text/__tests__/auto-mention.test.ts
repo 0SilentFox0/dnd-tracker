@@ -17,6 +17,7 @@ const index = buildAutoMentionIndex([
     { type: 'character', id: 'c1', label: 'Зехір' },
     { type: 'unit', id: 'u1', label: 'Привид' },
     { type: 'acquaintance', id: 'a1', label: 'Привид' },
+    { type: 'unit', id: 'u2', label: 'Імп' },
 ]);
 
 function mount(autoIndex: AutoMentionIndex | null) {
@@ -110,5 +111,36 @@ describe('live auto-mentions', () => {
 
         type(f, 'Привид @Зехір ');
         expect(inline(f).some((s) => s?.startsWith('['))).toBe(false);
+    });
+
+    it('does not convert while the @ suggestion is open', () => {
+        const e = mount(index);
+
+        type(e, 'x @Old-Імп');
+        pressEnter(e);
+
+        expect(
+            (e.getJSON() as RichDoc).content
+                .flatMap((b) => b.content ?? [])
+                .some((n) => n.type === 'mention' && n.attrs?.id === 'u2')
+        ).toBe(false);
+    });
+
+    it('leaves composition input to the browser', () => {
+        const e = mount(index);
+
+        type(e, 'Зехір');
+
+        const { view } = e;
+
+        Object.defineProperty(view, 'composing', { value: true });
+
+        const { from, to } = view.state.selection;
+
+        const handled = view.someProp('handleTextInput', (f) =>
+            f(view, from, to, ' ', () => view.state.tr)
+        );
+
+        expect(handled).toBeFalsy();
     });
 });

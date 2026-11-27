@@ -21,13 +21,19 @@ type Mark = NonNullable<RichNode['marks']>[number];
 
 type Accept = (match: string) => boolean;
 
-export type ResolveMatch = (match: string) => MentionTarget | null;
+export type FoundMention = {
+    index: number;
+    text: string;
+    target: MentionTarget;
+};
 
-const UNTAGGABLE_MARKS = new Set(['code', 'link']);
+export type FindMentions = (text: string) => FoundMention[];
+
+export const UNTAGGABLE_MARKS = ['code', 'link'];
 
 const isTaggableText = (node: RichNode) =>
     node.type === 'text' &&
-    !(node.marks ?? []).some((m) => UNTAGGABLE_MARKS.has(m.type));
+    !(node.marks ?? []).some((m) => UNTAGGABLE_MARKS.includes(m.type));
 
 const isCapital = (ch: string) => ch !== ch.toLowerCase();
 
@@ -60,17 +66,12 @@ function commonMarks(nodes: RichNode[]): Mark[] {
 
 function wrapRun(
     run: RichNode[],
-    re: RegExp,
-    resolve: ResolveMatch,
+    find: FindMentions,
     count: { n: number }
 ): RichNode[] {
     const text = run.map((n) => n.text ?? '').join('');
 
-    const matches = Array.from(text.matchAll(re)).flatMap((m) => {
-        const target = resolve(m[0]);
-
-        return target ? [{ m, target }] : [];
-    });
+    const matches = find(text);
 
     if (!matches.length) return run;
 
@@ -88,11 +89,9 @@ function wrapRun(
         let at = ns;
 
         while (at < ne) {
-            const hit = matches[mi];
+            const m = matches[mi];
 
-            const m = hit?.m;
-
-            if (!hit || !m || m.index >= ne) {
+            if (!m || m.index >= ne) {
                 out.push({ ...node, text: text.slice(at, ne) });
                 break;
             }
@@ -104,17 +103,17 @@ function wrapRun(
 
             covered.push(node);
 
-            at = Math.min(ne, m.index + m[0].length);
+            at = Math.min(ne, m.index + m.text.length);
 
-            if (at === m.index + m[0].length) {
+            if (at === m.index + m.text.length) {
                 const marks = commonMarks(covered);
 
                 out.push({
                     type: 'mention',
                     attrs: {
-                        id: hit.target.id,
-                        label: m[0],
-                        type: hit.target.type,
+                        id: m.target.id,
+                        label: m.text,
+                        type: m.target.type,
                     },
                     ...(marks.length ? { marks } : {}),
                 });
@@ -132,8 +131,7 @@ function wrapRun(
 
 function wrapNodes(
     nodes: RichNode[],
-    re: RegExp,
-    resolve: ResolveMatch,
+    find: FindMentions,
     count: { n: number }
 ): RichNode[] {
     const out: RichNode[] = [];
@@ -141,7 +139,7 @@ function wrapNodes(
     let run: RichNode[] = [];
 
     const flush = () => {
-        if (run.length) out.push(...wrapRun(run, re, resolve, count));
+        if (run.length) out.push(...wrapRun(run, find, count));
 
         run = [];
     };
@@ -158,7 +156,7 @@ function wrapNodes(
                 ? node
                 : {
                       ...node,
-                      content: wrapNodes(node.content, re, resolve, count),
+                      content: wrapNodes(node.content, find, count),
                   }
         );
     }
@@ -171,12 +169,11 @@ function wrapNodes(
 // existing chips are left untouched; `count` is the number of new chips
 export function wrapDoc(
     doc: RichDoc,
-    re: RegExp,
-    resolve: ResolveMatch
+    find: FindMentions
 ): { doc: RichDoc; count: number } {
     const count = { n: 0 };
 
-    const content = wrapNodes(doc.content, re, resolve, count);
+    const content = wrapNodes(doc.content, find, count);
 
     return count.n
         ? { doc: { ...doc, content }, count: count.n }
@@ -194,5 +191,9 @@ export function wrapMentions(
 
     const accept = caseAccept(forms);
 
-    return wrapDoc(doc, re, (m) => (accept(m) ? target : null));
+    return wrapDoc(doc, (text) =>
+        Array.from(text.matchAll(re))
+            .filter((m) => accept(m[0]))
+            .map((m) => ({ index: m.index, text: m[0], target }))
+    );
 }
