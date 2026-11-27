@@ -21,6 +21,14 @@ type Mark = NonNullable<RichNode['marks']>[number];
 
 type Accept = (match: string) => boolean;
 
+export type ResolveMatch = (match: string) => MentionTarget | null;
+
+const UNTAGGABLE_MARKS = new Set(['code', 'link']);
+
+const isTaggableText = (node: RichNode) =>
+    node.type === 'text' &&
+    !(node.marks ?? []).some((m) => UNTAGGABLE_MARKS.has(m.type));
+
 const isCapital = (ch: string) => ch !== ch.toLowerCase();
 
 // a capitalised form matches only a capitalised occurrence, so a name that is also a common word does not hit the word
@@ -53,13 +61,16 @@ function commonMarks(nodes: RichNode[]): Mark[] {
 function wrapRun(
     run: RichNode[],
     re: RegExp,
-    accept: Accept,
-    target: MentionTarget,
+    resolve: ResolveMatch,
     count: { n: number }
 ): RichNode[] {
     const text = run.map((n) => n.text ?? '').join('');
 
-    const matches = Array.from(text.matchAll(re)).filter((m) => accept(m[0]));
+    const matches = Array.from(text.matchAll(re)).flatMap((m) => {
+        const target = resolve(m[0]);
+
+        return target ? [{ m, target }] : [];
+    });
 
     if (!matches.length) return run;
 
@@ -77,9 +88,11 @@ function wrapRun(
         let at = ns;
 
         while (at < ne) {
-            const m = matches[mi];
+            const hit = matches[mi];
 
-            if (!m || m.index >= ne) {
+            const m = hit?.m;
+
+            if (!hit || !m || m.index >= ne) {
                 out.push({ ...node, text: text.slice(at, ne) });
                 break;
             }
@@ -98,7 +111,11 @@ function wrapRun(
 
                 out.push({
                     type: 'mention',
-                    attrs: { id: target.id, label: m[0], type: target.type },
+                    attrs: {
+                        id: hit.target.id,
+                        label: m[0],
+                        type: hit.target.type,
+                    },
                     ...(marks.length ? { marks } : {}),
                 });
                 covered.length = 0;
@@ -116,8 +133,7 @@ function wrapRun(
 function wrapNodes(
     nodes: RichNode[],
     re: RegExp,
-    accept: Accept,
-    target: MentionTarget,
+    resolve: ResolveMatch,
     count: { n: number }
 ): RichNode[] {
     const out: RichNode[] = [];
@@ -125,13 +141,13 @@ function wrapNodes(
     let run: RichNode[] = [];
 
     const flush = () => {
-        if (run.length) out.push(...wrapRun(run, re, accept, target, count));
+        if (run.length) out.push(...wrapRun(run, re, resolve, count));
 
         run = [];
     };
 
     for (const node of nodes) {
-        if (node.type === 'text') {
+        if (isTaggableText(node)) {
             run.push(node);
             continue;
         }
@@ -142,13 +158,7 @@ function wrapNodes(
                 ? node
                 : {
                       ...node,
-                      content: wrapNodes(
-                          node.content,
-                          re,
-                          accept,
-                          target,
-                          count
-                      ),
+                      content: wrapNodes(node.content, re, resolve, count),
                   }
         );
     }
@@ -159,6 +169,20 @@ function wrapNodes(
 }
 
 // existing chips are left untouched; `count` is the number of new chips
+export function wrapDoc(
+    doc: RichDoc,
+    re: RegExp,
+    resolve: ResolveMatch
+): { doc: RichDoc; count: number } {
+    const count = { n: 0 };
+
+    const content = wrapNodes(doc.content, re, resolve, count);
+
+    return count.n
+        ? { doc: { ...doc, content }, count: count.n }
+        : { doc, count: 0 };
+}
+
 export function wrapMentions(
     doc: RichDoc,
     forms: string[],
@@ -168,17 +192,7 @@ export function wrapMentions(
 
     if (!re) return { doc, count: 0 };
 
-    const count = { n: 0 };
+    const accept = caseAccept(forms);
 
-    const content = wrapNodes(
-        doc.content,
-        re,
-        caseAccept(forms),
-        target,
-        count
-    );
-
-    return count.n
-        ? { doc: { ...doc, content }, count: count.n }
-        : { doc, count: 0 };
+    return wrapDoc(doc, re, (m) => (accept(m) ? target : null));
 }
