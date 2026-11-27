@@ -7,6 +7,7 @@ import { BookOpen } from 'lucide-react';
 import { ProfileSpellBook } from '../hero/ProfileSpellBook';
 import { SpellPicksNudge } from '../path';
 import { useProfile } from '../ProfileContext';
+import { SlotPips } from './SlotPips';
 
 import { NewPill } from '@/components/common/entity/NewPill';
 import { spellLevelMetal } from '@/components/hud';
@@ -21,7 +22,10 @@ import { cn } from '@/lib/utils';
 import { signed } from '@/lib/utils/common/format';
 
 export function MagicTab() {
-    const { sheet, campaignId } = useProfile();
+    const { sheet, campaignId, characterId } = useProfile();
+
+    const canEdit =
+        !!sheet.rest?.persist && (sheet.viewer.isOwner || sheet.viewer.isDM);
 
     const t = useTranslations('characterProfile.magic');
 
@@ -61,51 +65,80 @@ export function MagicTab() {
             )}
             {sheet.pact && (
                 <HudSection title={t('pact')}>
-                    <span
-                        aria-label={t('pactSlots', {
-                            current: sheet.pact.current,
-                            max: sheet.pact.max,
-                            level: spellLevelRoman(sheet.pact.level),
-                        })}
-                        className={cn(
-                            'hud-sc metal-fill inline-block rounded-md px-3 py-1.5 text-sm',
-                            spellLevelMetal(sheet.pact.level)
-                        )}
-                    >
-                        {spellLevelRoman(sheet.pact.level)} ·{' '}
-                        {sheet.pact.current}/{sheet.pact.max}
-                    </span>
+                    {canEdit ? (
+                        <SlotPips
+                            campaignId={campaignId}
+                            characterId={characterId}
+                            slotKey="pact"
+                            level={sheet.pact.level}
+                            max={sheet.pact.max}
+                            current={sheet.pact.current}
+                        />
+                    ) : (
+                        <span
+                            aria-label={t('pactSlots', {
+                                current: sheet.pact.current,
+                                max: sheet.pact.max,
+                                level: spellLevelRoman(sheet.pact.level),
+                            })}
+                            className={cn(
+                                'hud-sc metal-fill inline-block rounded-md px-3 py-1.5 text-sm',
+                                spellLevelMetal(sheet.pact.level)
+                            )}
+                        >
+                            {spellLevelRoman(sheet.pact.level)} ·{' '}
+                            {sheet.pact.current}/{sheet.pact.max}
+                        </span>
+                    )}
                 </HudSection>
             )}
             {sheet.slots.length > 0 && (
                 <HudSection title={t('slots')}>
                     <div className="flex flex-wrap gap-1.5">
-                        {sheet.slots.map((s) => (
-                            <span
-                                key={s.level}
-                                aria-label={
-                                    sheet.rest?.persist
-                                        ? t('slotsLeft', {
-                                              level: spellLevelRoman(s.level),
-                                              current: s.current,
-                                              count: s.count,
-                                          })
-                                        : t('slotsTotal', {
-                                              level: spellLevelRoman(s.level),
-                                              count: s.count,
-                                          })
-                                }
-                                className={cn(
-                                    'hud-sc metal-fill rounded-md px-3 py-1.5 text-sm',
-                                    spellLevelMetal(s.level)
-                                )}
-                            >
-                                {spellLevelRoman(s.level)} ·{' '}
-                                {sheet.rest?.persist
-                                    ? `${s.current}/${s.count}`
-                                    : s.count}
-                            </span>
-                        ))}
+                        {sheet.slots.map((s) =>
+                            canEdit ? (
+                                s.count > 0 && (
+                                    <SlotPips
+                                        key={s.level}
+                                        campaignId={campaignId}
+                                        characterId={characterId}
+                                        slotKey={String(s.level)}
+                                        level={s.level}
+                                        max={s.count}
+                                        current={s.current}
+                                    />
+                                )
+                            ) : (
+                                <span
+                                    key={s.level}
+                                    aria-label={
+                                        sheet.rest?.persist
+                                            ? t('slotsLeft', {
+                                                  level: spellLevelRoman(
+                                                      s.level
+                                                  ),
+                                                  current: s.current,
+                                                  count: s.count,
+                                              })
+                                            : t('slotsTotal', {
+                                                  level: spellLevelRoman(
+                                                      s.level
+                                                  ),
+                                                  count: s.count,
+                                              })
+                                    }
+                                    className={cn(
+                                        'hud-sc metal-fill rounded-md px-3 py-1.5 text-sm',
+                                        spellLevelMetal(s.level)
+                                    )}
+                                >
+                                    {spellLevelRoman(s.level)} ·{' '}
+                                    {sheet.rest?.persist
+                                        ? `${s.current}/${s.count}`
+                                        : s.count}
+                                </span>
+                            )
+                        )}
                     </div>
                 </HudSection>
             )}

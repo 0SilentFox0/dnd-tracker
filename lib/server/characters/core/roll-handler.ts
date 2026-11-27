@@ -52,6 +52,16 @@ function logData(result: SheetRollResult, inspired: boolean) {
         };
     }
 
+    if (result.kind === 'damage') {
+        return {
+            label: result.label,
+            rolls: result.dice.map((d) => d.value),
+            total: result.total,
+            mode: 'normal',
+            ...(result.flat && { flat: result.flat }),
+        };
+    }
+
     return {
         label: result.label,
         rolls: result.rolls,
@@ -73,7 +83,8 @@ export async function rollForSheet(
     if (!system.sheetTest.accepts(body))
         throw new ContentError(API_ERRORS.ROLL_KIND_MISMATCH, 400);
 
-    const inspired = body.kind !== 'test' && !!body.useInspiration;
+    const inspired =
+        body.kind !== 'test' && body.kind !== 'damage' && !!body.useInspiration;
 
     const spends = body.kind === 'test' && !!body.fortune;
 

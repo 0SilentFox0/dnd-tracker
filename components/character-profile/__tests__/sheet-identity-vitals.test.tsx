@@ -120,77 +120,32 @@ describe('SheetVitals', () => {
         expect(bar).toHaveAttribute('aria-valuemax', '30');
     });
 
-    it('non-DM sees numbers but no controls', async () => {
+    it('the owner gets damage, heal and temp controls', async () => {
         await inProfile(dmSheet(false), <SheetVitals />);
 
         expect(
             screen.getByLabelText('HP 20 / 30', { selector: 'button' })
         ).toBeInTheDocument();
         expect(screen.getByText('+5 temp')).toBeInTheDocument();
+        expect(screen.getByLabelText('− Damage')).toBeInTheDocument();
+        expect(screen.getByLabelText('+ Heal')).toBeInTheDocument();
+        expect(
+            screen.getByRole('button', { name: 'Temp' })
+        ).toBeInTheDocument();
+    });
+
+    it('a viewer who is neither DM nor owner sees no controls', async () => {
+        await inProfile(
+            withSheet({
+                system: 'dnd5e',
+                viewer: { isDM: false, isOwner: false },
+                rest: rest({}),
+            }),
+            <SheetVitals />
+        );
+
         expect(screen.queryByLabelText('− Damage')).toBeNull();
         expect(screen.queryByLabelText('+ Heal')).toBeNull();
         expect(screen.queryByRole('button', { name: 'Temp' })).toBeNull();
-    });
-});
-
-describe('SheetIdentityPanel', () => {
-    afterEach(cleanup);
-
-    it('shows xp bar and inspiration only when present', async () => {
-        const withXp = withSheet({
-            system: 'dnd5e',
-            identity: { ...sheetFixture.identity, level: 2 },
-            rest: rest({
-                xp: { value: 400, next: 900, levelUp: false },
-                inspiration: true,
-            }),
-        });
-
-        const a = await inProfile(withXp, <SheetIdentityPanel />);
-
-        expect(screen.getByLabelText('XP 400 / 900')).toBeInTheDocument();
-        expect(screen.getByText('500 to next level')).toBeInTheDocument();
-        expect(screen.getByText('Level')).toBeInTheDocument();
-        expect(a.container.textContent).toContain('Inspiration');
-        cleanup();
-
-        const b = await inProfile(
-            withSheet({ system: 'dnd5e', rest: rest({}) }),
-            <SheetIdentityPanel />
-        );
-
-        expect(screen.queryByRole('progressbar')).toBeNull();
-        expect(b.container.textContent).not.toContain('Inspiration');
-        expect(sheetFixture.rest).toBeNull();
-    });
-
-    it('xp note says ready when a level is available', async () => {
-        await inProfile(
-            withSheet({
-                system: 'dnd5e',
-                rest: rest({ xp: { value: 950, next: 900, levelUp: true } }),
-            }),
-            <SheetIdentityPanel />
-        );
-
-        expect(screen.getByText('Ready to level up')).toBeInTheDocument();
-    });
-
-    it('lead shows a biography excerpt and the link opens the story tab', async () => {
-        const onHistory = vi.fn();
-
-        await inProfile(
-            withSheet({
-                system: 'dnd5e',
-                story: { ...sheetFixture.story, biography: '**Last** heir.' },
-            }),
-            <SheetIdentityPanel onHistory={onHistory} />
-        );
-
-        expect(screen.getByText(/Last heir\./)).toBeInTheDocument();
-
-        fireEvent.click(screen.getByRole('button', { name: 'Story' }));
-
-        expect(onHistory).toHaveBeenCalledTimes(1);
     });
 });

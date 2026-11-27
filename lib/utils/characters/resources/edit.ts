@@ -12,7 +12,11 @@ export function editResources(
         string,
         Pick<AbilityPool, 'max' | 'rest'> & { regain?: number }
     > = {},
-    opts?: { fateMax?: number; fateLimit?: number }
+    opts?: {
+        fateMax?: number;
+        fateLimit?: number;
+        slotMax?: Record<string, number>;
+    }
 ): CharacterResources {
     if (patch.reset)
         return opts?.fateMax === undefined
@@ -46,6 +50,23 @@ export function editResources(
 
     if (patch.dead === false)
         next = { ...next, dead: undefined, ...(next.hp === 0 && { hp: 1 }) };
+
+    if (patch.slotsSpent && opts?.slotMax) {
+        const slotsSpent = { ...next.slotsSpent };
+
+        for (const [key, spent] of Object.entries(patch.slotsSpent)) {
+            const max = opts.slotMax[key];
+
+            if (max === undefined) continue;
+
+            const n = Math.min(max, Math.max(0, spent));
+
+            if (n === 0) delete slotsSpent[key];
+            else slotsSpent[key] = n;
+        }
+
+        next = { ...next, slotsSpent };
+    }
 
     if (patch.charges) {
         const charges = { ...next.charges };

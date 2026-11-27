@@ -53,6 +53,7 @@ export {
     useEditResources,
     useRest,
     useSheetRoll,
+    useSlotToggle,
     useSpendHitDie,
 } from './useOutOfCombat';
 export {

@@ -425,7 +425,8 @@ export type SheetRollSubject =
     | { kind: 'check'; skill: DndSkill }
     | { kind: 'check'; ability: AbilityKey }
     | { kind: 'save'; ability: AbilityKey }
-    | { kind: 'attack'; attackId: string };
+    | { kind: 'attack'; attackId: string }
+    | { kind: 'damage'; attackId: string; crit?: boolean };
 
 export type SheetTestSubject =
     | { kind: 'test'; characteristic: string }
@@ -442,7 +443,19 @@ export interface SheetRollExtra {
     critical?: boolean;
 }
 
-export type SheetRollResult = SheetD20RollResult | SheetPercentileRollResult;
+export type SheetRollResult =
+    | SheetD20RollResult
+    | SheetDamageRollResult
+    | SheetPercentileRollResult;
+
+export interface SheetDamageRollResult {
+    kind: 'damage';
+    label: string;
+    dice: { sides: number; value: number }[];
+    flat: number;
+    total: number;
+    crit: boolean;
+}
 
 export interface SheetPercentileRollResult {
     kind: 'percentile';
@@ -498,6 +511,7 @@ export type ResourcesEditBody = {
     dead?: boolean;
     reset?: true;
     charges?: Record<string, number>;
+    slotsSpent?: Record<string, number>;
 };
 
 export interface SheetRest {

@@ -327,5 +327,18 @@
   "attackRoll": {
     "roll": "Roll attack: {name}",
     "title": "Attack: {name}"
+  },
+  "slots": {
+    "failed": "Could not update the spell slot",
+    "pip": "Level {level}, slot {n}: {state}",
+    "used": "used",
+    "available": "available"
+  },
+  "damageRoll": {
+    "roll": "Roll damage: {name}",
+    "title": "Damage: {name}",
+    "crit": "Critical hit (double dice)",
+    "detail": "Dice {dice} · bonus {flat}",
+    "critLabel": "Critical hit"
   }
 }

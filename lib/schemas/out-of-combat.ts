@@ -54,6 +54,12 @@ export const sheetRollSchema = z.union([
         attackId: z.string().min(1).max(200),
         useInspiration,
     }),
+    z.object({
+        kind: z.literal('damage'),
+        attackId: z.string().min(1).max(200),
+        crit: z.boolean().optional(),
+        useInspiration,
+    }),
     z
         .object({
             kind: z.literal('test'),
@@ -107,6 +113,12 @@ export const resourcesEditSchema = z
             .record(
                 z.string().min(1).max(300),
                 z.number().int().min(0).max(999)
+            )
+            .optional(),
+        slotsSpent: z
+            .record(
+                z.string().regex(/^([1-9]|pact)$/),
+                z.number().int().min(0).max(99)
             )
             .optional(),
     })

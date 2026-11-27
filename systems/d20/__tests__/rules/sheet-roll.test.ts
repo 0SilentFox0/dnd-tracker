@@ -156,4 +156,57 @@ describe('rollFromSheet', () => {
             )
         ).toThrow();
     });
+
+    describe('damage', () => {
+        const sword: BattleAttack = {
+            id: 'sword',
+            name: 'Sword',
+            type: AttackType.MELEE,
+            damageDice: '1d6',
+            damageType: 'slashing',
+        };
+
+        const armed = () => {
+            const base = rogue();
+
+            return {
+                ...base,
+                battleData: { ...base.battleData, attacks: [sword] },
+            };
+        };
+
+        it('rolls the weapon dice and adds the sheet modifiers', () => {
+            const r = rollFromSheet(
+                armed(),
+                { kind: 'damage', attackId: 'sword' },
+                opts(false)
+            );
+
+            expect(r).toMatchObject({ kind: 'damage', crit: false });
+            expect(r.kind === 'damage' && r.dice).toEqual([
+                { sides: 6, value: 4 },
+            ]);
+            expect(r.kind === 'damage' && r.total).toBeGreaterThanOrEqual(1);
+        });
+
+        it('crit doubles the dice', () => {
+            const r = rollFromSheet(
+                armed(),
+                { kind: 'damage', attackId: 'sword', crit: true },
+                opts(false)
+            );
+
+            expect(r.kind === 'damage' && r.dice).toHaveLength(2);
+        });
+
+        it('unknown attack is a 404', () => {
+            expect(() =>
+                rollFromSheet(
+                    armed(),
+                    { kind: 'damage', attackId: 'nope' },
+                    opts(false)
+                )
+            ).toThrow();
+        });
+    });
 });

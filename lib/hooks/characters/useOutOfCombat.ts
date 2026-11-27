@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 
 import { characterKeys } from './keys';
 
@@ -17,6 +17,7 @@ import { useCrudMutation } from '@/lib/hooks/common';
 import { ENTITY_STALE_MS } from '@/lib/providers/query-provider';
 import type {
     AwardXpBody,
+    CharacterSheet,
     ResourcesEditBody,
     RestBody,
     SheetRollBody,
@@ -83,6 +84,60 @@ export function useEditResources(campaignId: string, characterId: string) {
         invalidateKeys: heroKeys(campaignId, characterId),
         errorText: t('resourcesFailed'),
     });
+}
+
+export function useSlotToggle(campaignId: string, characterId: string) {
+    const t = useTranslations('characterProfile.slots');
+
+    const queryClient = useQueryClient();
+
+    const key = characterKeys.sheet(campaignId, characterId);
+
+    const mutation = useCrudMutation({
+        mutationFn: (body: ResourcesEditBody) =>
+            patchResources(campaignId, characterId, body),
+        invalidateKeys: heroKeys(campaignId, characterId),
+        errorText: t('failed'),
+        onMutate: async ({ slotsSpent }) => {
+            await queryClient.cancelQueries({ queryKey: key });
+
+            const previous = queryClient.getQueryData<CharacterSheet>(key);
+
+            queryClient.setQueryData<CharacterSheet>(key, (old) =>
+                old ? withSlotsSpent(old, slotsSpent ?? {}) : old
+            );
+
+            return { previous };
+        },
+        onError: (_e, _v, context) =>
+            queryClient.setQueryData(key, context?.previous),
+    });
+
+    return {
+        setCurrent: (slot: string, max: number, current: number) =>
+            mutation.mutateOk({ slotsSpent: { [slot]: max - current } }),
+        isPending: mutation.isPending,
+    };
+}
+
+function withSlotsSpent(
+    sheet: CharacterSheet,
+    spent: Record<string, number>
+): CharacterSheet {
+    const current = (max: number, key: string, now: number) =>
+        key in spent ? Math.max(0, max - spent[key]) : now;
+
+    return {
+        ...sheet,
+        slots: sheet.slots.map((s) => ({
+            ...s,
+            current: current(s.count, String(s.level), s.current),
+        })),
+        pact: sheet.pact && {
+            ...sheet.pact,
+            current: current(sheet.pact.max, 'pact', sheet.pact.current),
+        },
+    };
 }
 
 export function useCharacterLog(

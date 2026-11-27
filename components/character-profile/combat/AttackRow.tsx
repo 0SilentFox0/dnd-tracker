@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Crosshair, Dices, Swords } from 'lucide-react';
+import { Crosshair, Dices, Flame, Swords } from 'lucide-react';
 
 import { useProfile } from '../ProfileContext';
 import { useSheetRoll } from '../sheet/SheetRollProvider';
@@ -59,6 +59,8 @@ export function AttackRow({
 
     const tr = useTranslations('characterProfile.attackRoll');
 
+    const td = useTranslations('characterProfile.damageRoll');
+
     const { campaignId, sheet } = useProfile();
 
     const { def: system } = useCampaignSystem(campaignId, sheet.system);
@@ -107,6 +109,20 @@ export function AttackRow({
                         className="motion-press flex min-h-11 min-w-11 items-center justify-center rounded-[4px] border border-hud-line text-hud-accent-fg hover:bg-hud-raised"
                     >
                         <Dices aria-hidden className="size-5" />
+                    </HudButton>
+                )}
+                {rollable && (
+                    <HudButton
+                        aria-label={td('roll', { name: a.name })}
+                        onClick={() =>
+                            onRoll({
+                                label: td('title', { name: a.name }),
+                                subject: { kind: 'damage', attackId: a.id },
+                            })
+                        }
+                        className="motion-press flex min-h-11 min-w-11 items-center justify-center rounded-[4px] border border-hud-line text-hud-danger hover:bg-hud-raised"
+                    >
+                        <Flame aria-hidden className="size-5" />
                     </HudButton>
                 )}
                 <StatButton
