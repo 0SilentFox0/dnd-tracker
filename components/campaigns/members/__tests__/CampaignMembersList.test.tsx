@@ -12,7 +12,10 @@ vi.mock('@/lib/hooks/campaigns', () => ({
 
 const writeText = vi.fn(async () => undefined);
 
-Object.assign(navigator, { clipboard: { writeText } });
+Object.defineProperty(navigator, 'clipboard', {
+    value: { writeText },
+    configurable: true,
+});
 
 afterEach(() => {
     cleanup();

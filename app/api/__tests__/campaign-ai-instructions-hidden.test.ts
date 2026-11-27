@@ -99,7 +99,7 @@ describe('aiInstructions never reaches members', () => {
     });
 
     it('POST /api/campaigns/join', async () => {
-        vi.mocked(prisma.campaign.findFirst).mockImplementation(
+        vi.mocked(prisma.campaign.findUnique).mockImplementation(
             honoringOmit({ ...campaignRow, members: [] }) as never
         );
         vi.mocked(prisma.campaignMember.create).mockImplementation(

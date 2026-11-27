@@ -70,7 +70,12 @@ export function templateDisplayName(
     source: TemplateIdentity & { name: string },
     locale: string
 ): string {
-    if (!isCanonicalTemplate(source)) return source.name;
+    if (
+        source.kind !== CampaignKind.TEMPLATE ||
+        source.visibility !== CampaignVisibility.OFFICIAL ||
+        (source.locale != null && source.locale !== 'en')
+    )
+        return source.name;
 
     const key = templateKeyOf(source);
 
