@@ -90,7 +90,8 @@ export function ScenarioEditor({
 
     const searchMentions = useMentionSearch(campaignId);
 
-    const autoMentionIndex = useAutoMentionIndex(campaignId);
+    const { index: autoMentionIndex, refresh: refreshMentionNames } =
+        useAutoMentionIndex(campaignId);
 
     const toasts = useToasts();
 
@@ -187,6 +188,7 @@ export function ScenarioEditor({
                 attrs: { id, label, type: 'acquaintance' },
             })
             .run();
+        refreshMentionNames();
     };
 
     const renderCell = (

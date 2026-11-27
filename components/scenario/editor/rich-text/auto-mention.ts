@@ -45,7 +45,8 @@ function findHit(view: EditorView, getIndex: GetIndex): Hit | null {
     )
         return null;
 
-    const start = $from.start();
+    // inline content maps 1:1 to chars, so only the tail a name can span is read (+1 char for the boundary check)
+    const start = Math.max($from.start(), $from.pos - index.maxSpan - 1);
 
     const hit = findAutoMentionAtEnd(
         index,
@@ -54,15 +55,18 @@ function findHit(view: EditorView, getIndex: GetIndex): Hit | null {
 
     if (!hit) return null;
 
-    const from = start + hit.from;
+    const from = start + hit.index;
 
     const to = $from.pos;
 
-    const blocked = UNTAGGABLE_MARKS.map((n) => state.schema.marks[n]).filter(
-        Boolean
-    );
+    if (
+        UNTAGGABLE_MARKS.some((n) => {
+            const mark = state.schema.marks[n];
 
-    if (blocked.some((m) => state.doc.rangeHasMark(from, to, m))) return null;
+            return mark && state.doc.rangeHasMark(from, to, mark);
+        })
+    )
+        return null;
 
     return {
         from,
@@ -76,8 +80,10 @@ function findHit(view: EditorView, getIndex: GetIndex): Hit | null {
                 if (n.isText) nodeMarks.push(n.marks);
             });
 
-            const common = nodeMarks.reduce((acc, ms) =>
-                acc.filter((m) => ms.some((x) => x.eq(m)))
+            const [first = [], ...rest] = nodeMarks;
+
+            const common = first.filter((m) =>
+                rest.every((ms) => m.isInSet(ms))
             );
 
             const node = current.schema.nodes.mention.create(

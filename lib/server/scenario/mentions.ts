@@ -3,6 +3,13 @@ import { ACTIVE_CHARACTER } from '@/lib/constants/characters';
 import { SCENARIO_MENTION_LIMIT } from '@/lib/constants/scenario';
 import { prisma } from '@/lib/db';
 import type { MentionOption, MentionType } from '@/types/scenario';
+type Group = [MentionType, { id: string; name: string }[]];
+
+const toOptions = (groups: Group[]): MentionOption[] =>
+    groups.flatMap(([type, rows]) =>
+        rows.map((r) => ({ type, id: r.id, label: r.name }))
+    );
+
 export async function searchScenarioMentions(
     campaignId: string,
     q: string
@@ -37,7 +44,7 @@ export async function searchScenarioMentions(
             prisma.acquaintance.findMany(args),
         ]);
 
-    const groups: [MentionType, { id: string; name: string }[]][] = [
+    return toOptions([
         ['unit', unit],
         ['artifact', artifact],
         ['character', character],
@@ -45,13 +52,7 @@ export async function searchScenarioMentions(
         ['battle', battle],
         ['marker', marker],
         ['acquaintance', acquaintance],
-    ];
-
-    const options: MentionOption[] = groups.flatMap(([type, rows]) =>
-        rows.map((r) => ({ type, id: r.id, label: r.name }))
-    );
-
-    return options;
+    ]);
 }
 
 export async function listScenarioMentionNames(
@@ -72,14 +73,10 @@ export async function listScenarioMentionNames(
         prisma.acquaintance.findMany(args),
     ]);
 
-    const groups: [MentionType, { id: string; name: string }[]][] = [
+    return toOptions([
         ['unit', unit],
         ['artifact', artifact],
         ['character', character],
         ['acquaintance', acquaintance],
-    ];
-
-    return groups.flatMap(([type, rows]) =>
-        rows.map((r) => ({ type, id: r.id, label: r.name }))
-    );
+    ]);
 }

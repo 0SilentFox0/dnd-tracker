@@ -22,7 +22,7 @@ describe('RichTextEditor external doc updates', () => {
             onReady: (e: Editor | null) => {
                 editor = e;
             },
-            searchMentions: async () => [],
+            mentions: { search: async () => [], autoIndex: null },
             label: 'story',
         };
 

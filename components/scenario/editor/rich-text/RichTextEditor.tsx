@@ -11,24 +11,27 @@ import { setContentKeepingCaret } from './keep-caret';
 import type { AutoMentionIndex } from '@/lib/utils/scenario/auto-mentions';
 import type { MentionOption, RichDoc } from '@/types/scenario';
 
+export type MentionSources = {
+    search: (q: string) => Promise<MentionOption[]>;
+    autoIndex: AutoMentionIndex | null;
+};
+
 export function RichTextEditor({
     doc,
     onChange,
     onReady,
-    searchMentions,
-    autoMentionIndex = null,
+    mentions,
     label,
 }: {
     doc: RichDoc;
     onChange: (doc: RichDoc) => void;
     onReady: (editor: Editor | null) => void;
-    searchMentions: (q: string) => Promise<MentionOption[]>;
-    autoMentionIndex?: AutoMentionIndex | null;
+    mentions: MentionSources;
     label: string;
 }) {
     const extensions = useMemo(
-        () => buildExtensions(searchMentions),
-        [searchMentions]
+        () => buildExtensions(mentions.search),
+        [mentions.search]
     );
 
     const editor = useEditor({
@@ -50,8 +53,8 @@ export function RichTextEditor({
     }, [editor, doc]);
 
     useEffect(() => {
-        if (editor) setAutoMentionIndex(editor, autoMentionIndex);
-    }, [editor, autoMentionIndex]);
+        if (editor) setAutoMentionIndex(editor, mentions.autoIndex);
+    }, [editor, mentions.autoIndex]);
 
     useEffect(() => {
         if (!editor) return;

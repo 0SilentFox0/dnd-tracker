@@ -1,4 +1,4 @@
-import { escapeRe } from './mentions';
+import { escapeRe, MAX_ENDING } from './mentions';
 import { wrapDoc } from './wrap-mentions';
 
 import type {
@@ -8,16 +8,14 @@ import type {
     ScenarioContent,
 } from '@/types/scenario';
 
-export const AUTO_MENTION_TYPES = [
+const AUTO_TYPES = new Set<MentionType>([
     'unit',
     'artifact',
     'character',
     'acquaintance',
-] as const satisfies readonly MentionType[];
+]);
 
 const MIN_NAME = 3;
-
-const MAX_ENDING = 3;
 
 const DROP_MIN_WORD = 4;
 
@@ -53,13 +51,12 @@ type AutoEntry = {
 
 export interface AutoMentionIndex {
     byPrefix: Map<string, AutoEntry[]>;
+    // candidates per token prefix, merged and sorted longest first on first use
+    merged: Map<string, AutoEntry[]>;
     maxSpan: number;
 }
 
 export type AutoMatch = { index: number; text: string; option: MentionOption };
-
-const isAutoType = (t: MentionType) =>
-    (AUTO_MENTION_TYPES as readonly MentionType[]).includes(t);
 
 const letters = (s: string) => Array.from(s).length;
 
@@ -99,7 +96,7 @@ export function buildAutoMentionIndex(
     for (const o of options) {
         const name = o.label.normalize('NFC').trim().replace(/\s+/gu, ' ');
 
-        if (!isAutoType(o.type) || letters(name) < MIN_NAME) continue;
+        if (!AUTO_TYPES.has(o.type) || letters(name) < MIN_NAME) continue;
 
         const key = name.toLowerCase();
 
@@ -136,7 +133,7 @@ export function buildAutoMentionIndex(
         );
     }
 
-    return byPrefix.size ? { byPrefix, maxSpan } : null;
+    return byPrefix.size ? { byPrefix, merged: new Map(), maxSpan } : null;
 }
 
 function boundaryBefore(text: string, i: number): boolean {
@@ -150,14 +147,21 @@ function boundaryBefore(text: string, i: number): boolean {
 }
 
 function candidates(index: AutoMentionIndex, token: string): AutoEntry[] {
-    const lower = token.toLowerCase();
+    const key = token.slice(0, PREFIX).toLowerCase();
+
+    const cached = index.merged.get(key);
+
+    if (cached) return cached;
 
     const found: AutoEntry[] = [];
 
-    for (let n = 1; n <= Math.min(PREFIX, lower.length); n++)
-        found.push(...(index.byPrefix.get(lower.slice(0, n)) ?? []));
+    for (let n = 1; n <= key.length; n++)
+        found.push(...(index.byPrefix.get(key.slice(0, n)) ?? []));
 
-    return found.sort((a, b) => b.nameLen - a.nameLen);
+    found.sort((a, b) => b.nameLen - a.nameLen);
+    index.merged.set(key, found);
+
+    return found;
 }
 
 // exact name wins; otherwise the longest name, and a tie is ambiguous
@@ -217,7 +221,7 @@ function scan(
 ): AutoMatch[] {
     const out: AutoMatch[] = [];
 
-    const word = new RegExp(WORD.source, WORD.flags);
+    const word = WORD;
 
     word.lastIndex = from;
 
@@ -259,7 +263,7 @@ function scan(
 export function findAutoMentionAtEnd(
     index: AutoMentionIndex,
     textBefore: string
-): { from: number; text: string; option: MentionOption } | null {
+): AutoMatch | null {
     const last = findAutoMentions(
         index,
         textBefore,
@@ -267,7 +271,7 @@ export function findAutoMentionAtEnd(
     ).at(-1);
 
     return last && last.index + last.text.length === textBefore.length
-        ? { from: last.index, text: last.text, option: last.option }
+        ? last
         : null;
 }
 
@@ -298,14 +302,20 @@ export function autoTagContent(
         return r.doc;
     };
 
-    const sections = content.sections.map((s) => ({
-        ...s,
-        rows: s.rows.map((r) => ({
-            ...r,
-            story: tagged(r.story),
-            notes: tagged(r.notes),
-        })),
-    }));
+    // untouched rows and sections keep their identity
+    const sections = content.sections.map((s) => {
+        const rows = s.rows.map((r) => {
+            const story = tagged(r.story);
+
+            const notes = tagged(r.notes);
+
+            return story === r.story && notes === r.notes
+                ? r
+                : { ...r, story, notes };
+        });
+
+        return rows.every((r, i) => r === s.rows[i]) ? s : { ...s, rows };
+    });
 
     return count
         ? { content: { ...content, sections }, count }

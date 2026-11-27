@@ -26,7 +26,7 @@ vi.mock('@/lib/hooks/scenario', () => ({
         ...draft,
     }),
     useMentionSearch: () => async () => [],
-    useAutoMentionIndex: () => mocks.autoIndex,
+    useAutoMentionIndex: () => ({ index: mocks.autoIndex, refresh: () => {} }),
     useActiveSection: () => null,
     useScenarioPages: () => ({ data: [] }),
     useScenarioPage: () => ({ data: undefined }),

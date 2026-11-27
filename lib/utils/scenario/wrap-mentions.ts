@@ -4,8 +4,12 @@ import type { MentionType, RichDoc, RichNode } from '@/types/scenario';
 
 export type MentionTarget = { id: string; type: MentionType };
 
+const cleanForms = (forms: string[]) => [
+    ...new Set(forms.map((f) => f.trim()).filter(Boolean)),
+];
+
 export function buildFormsPattern(forms: string[]): RegExp | null {
-    const parts = [...new Set(forms.map((f) => f.trim()).filter(Boolean))]
+    const parts = cleanForms(forms)
         .sort((a, b) => b.length - a.length)
         .map(escapeRe);
 
@@ -39,7 +43,7 @@ const isCapital = (ch: string) => ch !== ch.toLowerCase();
 
 // a capitalised form matches only a capitalised occurrence, so a name that is also a common word does not hit the word
 function caseAccept(forms: string[]): Accept {
-    const trimmed = [...new Set(forms.map((f) => f.trim()).filter(Boolean))];
+    const trimmed = cleanForms(forms);
 
     return (match) => {
         const lower = match.toLowerCase();

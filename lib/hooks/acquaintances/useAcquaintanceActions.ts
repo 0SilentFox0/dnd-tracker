@@ -13,7 +13,6 @@ import {
     updateAcquaintanceEntry,
 } from '@/lib/api/acquaintances';
 import { useCrudMutation } from '@/lib/hooks/common';
-import { scenarioKeys } from '@/lib/hooks/scenario';
 import type {
     CreateAcquaintanceData,
     CreateAcquaintanceEntryData,
@@ -24,10 +23,7 @@ import type {
 export function useAcquaintanceActions(campaignId: string) {
     const t = useTranslations('acquaintances');
 
-    const invalidateKeys = [
-        acquaintanceKeys.list(campaignId),
-        scenarioKeys.mentionNames(campaignId),
-    ];
+    const invalidateKeys = [acquaintanceKeys.list(campaignId)];
 
     const create = useCrudMutation({
         mutationFn: (data: CreateAcquaintanceData) =>

@@ -258,7 +258,7 @@ describe('performance', () => {
 describe('findAutoMentionAtEnd', () => {
     it('finds a match ending exactly at the end of the text', () => {
         expect(findAutoMentionAtEnd(index, 'Бачу Зехіра')).toEqual({
-            from: 5,
+            index: 5,
             text: 'Зехіра',
             option: { type: 'character', id: 'c1', label: 'Зехір' },
         });
