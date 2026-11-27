@@ -1,10 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { cn } from '@/lib/utils';
+import { HudChipTabs } from '@/components/hud/page';
 
 const ITEMS = [
     { key: 'overview', href: '/admin' },
@@ -19,29 +18,18 @@ export function AdminTabs() {
     const pathname = usePathname();
 
     return (
-        <nav aria-label={t('label')} className="flex flex-wrap gap-2">
-            {ITEMS.map(({ key, href }) => {
-                const active =
+        <HudChipTabs
+            ariaLabel={t('label')}
+            size="lg"
+            items={ITEMS.map(({ key, href }) => ({
+                key,
+                href,
+                label: t(key),
+                active:
                     href === '/admin'
                         ? pathname === href
-                        : pathname.startsWith(href);
-
-                return (
-                    <Link
-                        key={key}
-                        href={href}
-                        aria-current={active ? 'page' : undefined}
-                        className={cn(
-                            'hud-sc flex min-h-10 items-center rounded px-3 text-sm',
-                            active
-                                ? 'bg-accent'
-                                : 'opacity-70 hover:opacity-100'
-                        )}
-                    >
-                        {t(key)}
-                    </Link>
-                );
-            })}
-        </nav>
+                        : pathname.startsWith(href),
+            }))}
+        />
     );
 }
