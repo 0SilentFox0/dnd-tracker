@@ -30,4 +30,4 @@
 
 ## Назви
 
-Кожен новий рядок має `maps.editor.stamps.name.<id>` в `messages/{uk,en}/maps.json`, нова категорія — `maps.editor.stamps.category.<cat>`.
+Кожен новий рядок має `name.<id>` у `messages/{uk,en}/mapStamps.json`, нова категорія — `category.<cat>` там само (окремий неймспейс `mapStamps`, лише для маршруту редактора мап).
