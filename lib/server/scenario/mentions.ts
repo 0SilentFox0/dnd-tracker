@@ -53,3 +53,33 @@ export async function searchScenarioMentions(
 
     return options;
 }
+
+export async function listScenarioMentionNames(
+    campaignId: string
+): Promise<MentionOption[]> {
+    const args = {
+        where: { campaignId },
+        select: { id: true, name: true },
+    };
+
+    const [unit, artifact, character, acquaintance] = await Promise.all([
+        prisma.unit.findMany(args),
+        prisma.artifact.findMany(args),
+        prisma.character.findMany({
+            ...args,
+            where: { campaignId, ...ACTIVE_CHARACTER },
+        }),
+        prisma.acquaintance.findMany(args),
+    ]);
+
+    const groups: [MentionType, { id: string; name: string }[]][] = [
+        ['unit', unit],
+        ['artifact', artifact],
+        ['character', character],
+        ['acquaintance', acquaintance],
+    ];
+
+    return groups.flatMap(([type, rows]) =>
+        rows.map((r) => ({ type, id: r.id, label: r.name }))
+    );
+}

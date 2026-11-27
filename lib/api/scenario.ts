@@ -86,6 +86,9 @@ export const searchMentions = (campaignId: string, q: string) =>
         `/scenario/mentions?q=${encodeURIComponent(q)}`
     );
 
+export const getMentionNames = (campaignId: string) =>
+    campaignGet<MentionOption[]>(campaignId, '/scenario/mention-names');
+
 export const getScenarioIndex = (campaignId: string) =>
     campaignGet<ScenarioIndex>(campaignId, '/scenario/index', {
         cache: 'no-store',
