@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { alphaHit, type AlphaMask } from '../alpha-mask';
-import { pickStamp } from '@/lib/hooks/battle-maps/useStampSelection';
+
 import type { StampDef } from '@/lib/constants/map-art/stamps';
+import { pickStamp } from '@/lib/hooks/battle-maps/useStampSelection';
 import type { MapArtStamp } from '@/types/battle-map';
 
 const mask = (rows: number[][]): AlphaMask => ({

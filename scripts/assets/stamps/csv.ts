@@ -1,11 +1,10 @@
-import { STAMP_BIOMES } from '@/lib/constants/map-art/stamps';
-
 import type {
     StampBiome,
     StampBlocks,
     StampDef,
     StampLayer,
 } from '@/lib/constants/map-art/stamp-types';
+import { STAMP_BIOMES } from '@/lib/constants/map-art/stamps';
 
 export interface StampRow {
     file: string;
@@ -47,9 +46,13 @@ function splitRecords(text: string): { line: number; cells: string[] }[] {
     const records: { line: number; cells: string[] }[] = [];
 
     let cells: string[] = [];
+
     let cell = '';
+
     let quoted = false;
+
     let line = 1;
+
     let start = 1;
 
     const endCell = () => {
@@ -104,6 +107,7 @@ export function parseBlocks(v: string): StampBlocks | null {
     if (!m) throw new Error(`Invalid blocks "${v}"`);
 
     const w = Number(m[2]);
+
     const h = Number(m[3]);
 
     if (!(w > 0) || !(h > 0)) throw new Error(`Invalid blocks "${v}"`);
@@ -172,6 +176,7 @@ export function parseStampsCsv(text: string): StampRow[] {
 
 export function rowToDef(row: StampRow): StampDef {
     const legacy = LEGACY_FILE.exec(row.file);
+
     const id = legacy ? legacy[1] : row.file.replace(/\.webp$/, '');
 
     return {

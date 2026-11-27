@@ -8,13 +8,13 @@ import {
 } from 'node:fs';
 import { basename, join } from 'node:path';
 
+import type { StampRow } from './csv';
 import { parseStampsCsv, rowToDef } from './csv';
 import { renderStampsMd, sheetsOf } from './prompts';
 import { sliceSheet } from './slice';
 import { validateStampAsset, validateStampBytes } from './validate';
 
 import type { StampBiome } from '@/lib/constants/map-art/stamp-types';
-import type { StampRow } from './csv';
 
 const ROOT = process.cwd();
 
@@ -48,13 +48,18 @@ function walk(dir: string): string[] {
 
 async function validateAll(dir: string): Promise<number> {
     const rows = loadRows();
+
     const byKey = new Map(rows.map((r) => [`${r.biome}/${idOf(r)}`, r]));
+
     const seen = new Map<string, string>();
+
     let failed = 0;
 
     for (const file of walk(dir).filter((f) => !f.endsWith('.DS_Store'))) {
         const biome = basename(join(file, '..'));
+
         const id = basename(file).replace(/\.[^.]+$/, '');
+
         const errors = await validateStampAsset(
             file,
             byKey.get(`${biome}/${id}`),
@@ -74,10 +79,15 @@ async function validateAll(dir: string): Promise<number> {
 
 async function slice(args: string[]): Promise<number> {
     const [sheetFile] = args;
+
     const biome = flag(args, '--biome') as StampBiome | undefined;
+
     const priority = Number(flag(args, '--priority'));
+
     const n = Number(flag(args, '--sheet') ?? 1);
+
     const map = flag(args, '--map')?.split(',').map(Number);
+
     const write = args.includes('--write');
 
     if (!sheetFile || !biome || (priority !== 1 && priority !== 2))
@@ -92,11 +102,14 @@ async function slice(args: string[]): Promise<number> {
     if (!sheet) throw new Error(`no sheet ${biome} P${priority} #${n}`);
 
     const parts = await sliceSheet(sheetFile, sheet.rows, map);
+
     const seen = new Map<string, string>();
+
     let failed = 0;
 
     for (const { row, webp } of parts) {
         const id = idOf(row);
+
         const errors = await validateStampBytes(webp, row, seen, id);
 
         if (errors.length) failed++;

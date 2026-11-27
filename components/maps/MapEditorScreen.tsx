@@ -10,6 +10,7 @@ import { BattleMap } from '@/components/battle/map';
 import { QueryState } from '@/components/common/states';
 import {
     type EditorPanel,
+    isStampTool,
     useBattleMap,
     useBattleMapTiles,
     useMapArt,
@@ -17,7 +18,6 @@ import {
     useMapArtSave,
     useMapEditorDraft,
     useMapEditorWorkspace,
-    isStampTool,
     useTileSave,
     useUvttImport,
 } from '@/lib/hooks/battle-maps';

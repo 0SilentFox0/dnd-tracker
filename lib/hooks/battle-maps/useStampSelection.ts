@@ -4,7 +4,7 @@ import { useCallback, useRef } from 'react';
 
 import type { EditorStamps } from './useMapArtEditor';
 
-import { stampDef, type StampDef, type StampLayer } from '@/lib/constants/map-art/stamps';
+import { type StampDef, stampDef, type StampLayer } from '@/lib/constants/map-art/stamps';
 import { stampBox, toStampLocal } from '@/lib/utils/battle/map-art/stamp-geometry';
 import { alphaHit, type AlphaMask, buildAlphaMask } from '@/lib/utils/canvas/map-art/alpha-mask';
 import { loadedImage } from '@/lib/utils/canvas/map-art/assets';

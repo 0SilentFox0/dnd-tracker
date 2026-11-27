@@ -1,7 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 import { SearchInput } from '@/components/common/fields/SearchInput';
 import { HudToggleChip } from '@/components/hud';

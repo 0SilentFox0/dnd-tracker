@@ -1,20 +1,19 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-
 import { describe, expect, it } from 'vitest';
 
-import { STAMPS, stampDef } from '../stamps';
+import { stampDef,STAMPS } from '../stamps';
 
-import {
-    buildDefs,
-    parseStampsCsv,
-    renderStampsData,
-} from '@/scripts/assets/stamps/csv';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
 import enMaps from '@/messages/en/maps.json';
 import enNames from '@/messages/en/tileLabels.json';
 import ukMaps from '@/messages/uk/maps.json';
 import ukNames from '@/messages/uk/tileLabels.json';
+import {
+    buildDefs,
+    parseStampsCsv,
+    renderStampsData,
+} from '@/scripts/assets/stamps/csv';
 
 const ROOT = process.cwd();
 
@@ -27,6 +26,7 @@ const LEGACY = /^\/assets\/battle-tiles\/objects\/tiles_(.+)\.png$/;
 describe('stamp registry', () => {
     it('stamps-data.ts matches the CSV', () => {
         const rows = parseStampsCsv(read('docs/assets/stamp-prompts/stamps.csv'));
+
         const defs = buildDefs(rows, (f) => existsSync(join(ROOT, 'public', f)));
 
         expect(renderStampsData(defs)).toBe(
@@ -60,7 +60,7 @@ describe('stamp registry', () => {
             expect(tile, d.id).toBeDefined();
             expect(!!d.blocks, d.id).toBe(tile!.blocks);
             expect(!!d.sight, d.id).toBe(tile!.blocksSight);
-            expect({ cols: d.cols, rows: d.rows }).toEqual(tile!.footprint);
+            expect({ cols: d.cols, rows: d.rows }, d.id).toEqual(tile!.footprint);
 
             if (d.blocks)
                 expect({ w: d.blocks.w, h: d.blocks.h }).toEqual({

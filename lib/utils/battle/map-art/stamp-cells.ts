@@ -1,14 +1,14 @@
 import {
-    stampDef,
     type StampBlocks,
     type StampDef,
+    stampDef,
 } from '@/lib/constants/map-art/stamps';
 import { cellKey, gridOf } from '@/lib/utils/battle/grid/geometry';
 import {
-    UNIT,
     cellAtUnitPoint,
     cellCenter,
     gridMetrics,
+    UNIT,
 } from '@/lib/utils/battle/grid/layout';
 import type { MapDims } from '@/lib/utils/battle/map-art/scene';
 import {

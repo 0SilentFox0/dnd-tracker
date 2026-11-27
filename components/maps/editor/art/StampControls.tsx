@@ -2,10 +2,10 @@
 
 import { useTranslations } from 'next-intl';
 
-import { SwitchField } from '@/components/ui/switch-field';
-import { Button } from '@/components/ui/button';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { SwitchField } from '@/components/ui/switch-field';
 import { type EditorStamps, STAMP_SCALE } from '@/lib/hooks/battle-maps';
 import type { MapArtStamp } from '@/types/battle-map';
 

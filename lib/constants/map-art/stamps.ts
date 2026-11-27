@@ -1,6 +1,5 @@
-import { STAMP_DATA } from './stamps-data';
-
 import type { StampBiome, StampDef } from './stamp-types';
+import { STAMP_DATA } from './stamps-data';
 
 export type {
     StampBiome,

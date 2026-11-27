@@ -22,7 +22,7 @@ tiles_chest-closed.png,"Chest closed",building,chest-closed,object,1,1,soft,rect
 tiles_chest-open.png,"Chest open",building,chest-open,object,1,1,soft,rect:1x1,1,"an open wooden chest with gold coins and gems visible inside.",1
 tiles_crate.png,"Crate",building,crate,object,1,1,soft,rect:1x1,1,"a wooden shipping crate with plank lid and rope handles.",1
 tiles_stool.png,"Stool",building,stool,object,1,1,soft,rect:1x1,1,"a small round wooden stool.",1
-tiles_table-long.png,"Table long",building,table-long,object,1,1,soft,rect:1x1,1,"a long rectangular wooden table, footprint 2x1 cells, wide side horizontal.",1
+tiles_table-long.png,"Table long",building,table-long,object,2,1,soft,rect:2x1,1,"a long rectangular wooden table, footprint 2x1 cells, wide side horizontal.",1
 tiles_table-round.png,"Table round",building,table-round,object,1,1,soft,rect:1x1,1,"a round wooden tavern table, 1x1 cell footprint.",1
 tiles_boulder.png,"Boulder",nature,boulder,object,1,1,hard,rect:1x1,1,"a large grey boulder with moss, 1x1 cell footprint.",1
 tiles_bush.png,"Bush",nature,bush,object,1,1,soft,rect:1x1,1,"a round leafy green bush, 1x1 cell footprint.",1

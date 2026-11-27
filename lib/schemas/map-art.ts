@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { MAP_ART_LIMITS } from '@/lib/constants/map-art/limits';
 import {
     BLOCKED_MATERIALS,
     isFloorCode,
@@ -20,12 +21,7 @@ import { CHUNK_SIDE } from '@/lib/utils/battle/map-storage/chunk-key';
 import { decodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import type { MapArtScene } from '@/types/battle-map';
 
-export const MAP_ART_LIMITS = {
-    lights: 64,
-    floorChunkChars: 2_000,
-    stamps: 2000,
-    bodyBytes: 2 * 1024 * 1024,
-} as const;
+export { MAP_ART_LIMITS };
 
 const ids = (list: readonly { id: string }[]) =>
     z.enum(list.map((m) => m.id) as [string, ...string[]]);

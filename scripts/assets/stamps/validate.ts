@@ -1,12 +1,10 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-
 import sharp from 'sharp';
 
 import { TILE_ASSET_MAX_BYTES } from '../tiles/validate';
-import { STAMP_UNIT } from './slice';
-
 import type { StampRow } from './csv';
+import { STAMP_UNIT } from './slice';
 
 export type StampAssetError =
     | 'not-webp'
@@ -60,6 +58,7 @@ export async function validateStampBytes(
             .toBuffer({ resolveWithObject: true });
 
         let opaque = 0;
+
         let fringe = 0;
 
         for (let i = 0; i < data.length; i += 4) {

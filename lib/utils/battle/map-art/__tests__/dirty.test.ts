@@ -65,8 +65,10 @@ describe('dirtyChunks', () => {
             ...over,
         });
 
+        const base = emptyScene();
+
         const withStamps = (stamps: MapArtStamp[]) => ({
-            ...emptyScene(),
+            ...base,
             stamps,
         });
 

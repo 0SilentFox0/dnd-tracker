@@ -4,8 +4,8 @@ import {
     buildDefs,
     parseBlocks,
     parseStampsCsv,
-    rowToDef,
     renderStampsData,
+    rowToDef,
 } from '../csv';
 
 const HEADER =
@@ -89,6 +89,7 @@ describe('rowToDef', () => {
         const [r] = parseStampsCsv(
             `${HEADER}\n${row({ file: 'mossy-altar.webp', blocks: '', sight: '' })}\n`
         );
+
         const def = rowToDef(r);
 
         expect(def).toMatchObject({

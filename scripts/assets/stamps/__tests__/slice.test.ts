@@ -1,14 +1,12 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { components, keyMagenta, normalize, sliceSheet } from '../slice';
-
 import type { StampRow } from '../csv';
 import type { Rgba } from '../slice';
+import { components, keyMagenta, normalize, sliceSheet } from '../slice';
 
 const MAGENTA = { r: 255, g: 0, b: 255, alpha: 1 };
 
@@ -73,6 +71,7 @@ const SEPARATE = [
 describe('keyMagenta + components', () => {
     it('finds three components in reading order', async () => {
         const keyed = keyMagenta(await decode(await sheet(SEPARATE)));
+
         const boxes = components(keyed);
 
         expect(boxes).toHaveLength(3);
@@ -82,6 +81,7 @@ describe('keyMagenta + components', () => {
 
     it('leaves no magenta fringe pixels', async () => {
         const { data } = keyMagenta(await decode(await sheet(SEPARATE)));
+
         let fringe = 0;
 
         for (let i = 0; i < data.length; i += 4)
@@ -139,10 +139,13 @@ describe('sliceSheet', () => {
 describe('normalize', () => {
     it('fits a 2x1 stamp into 512x256', async () => {
         const w = 100;
+
         const h = 40;
+
         const data = new Uint8Array(w * h * 4).fill(200);
 
         const webp = await normalize({ width: w, height: h, data }, 2, 1);
+
         const meta = await sharp(webp).metadata();
 
         expect([meta.format, meta.width, meta.height]).toEqual([

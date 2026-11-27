@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { MAP_ART_LIMITS } from '@/lib/constants/map-art/limits';
 import { DEFAULT_ART } from '@/lib/constants/map-art/materials';
-import { MAP_ART_LIMITS } from '@/lib/schemas/map-art';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { EdgeEditing } from '@/lib/hooks/battle/useEdgeStroke';
 import { cellKey, gridOf } from '@/lib/utils/battle/grid/geometry';
@@ -630,7 +630,7 @@ export function useMapArtEditor({
                     all.map((s) => (s.id === id ? { ...s, z: s.z + dir } : s))
                 ),
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, [stampAsset, snap, showAllBlocking, ghost, selectedStamp, commit]);
 
     const setAmbient = useCallback(

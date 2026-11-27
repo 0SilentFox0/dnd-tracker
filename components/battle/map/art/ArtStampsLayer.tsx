@@ -7,11 +7,11 @@ import { svgPoint } from './svg-point';
 
 import { stampDef } from '@/lib/constants/map-art/stamps';
 import { useStampSelection } from '@/lib/hooks/battle-maps';
-import { gridOf, mapSize, UNIT } from '@/lib/utils/battle/grid';
+import { gridOf, mapSize, unitOf } from '@/lib/utils/battle/grid';
 import { parseCellKey } from '@/lib/utils/battle/grid/geometry';
 import { cellPolygon } from '@/lib/utils/battle/grid/layout';
-import { stampCorners, stampBox } from '@/lib/utils/battle/map-art/stamp-geometry';
 import { stampBlockedCells } from '@/lib/utils/battle/map-art/stamp-cells';
+import { stampBox,stampCorners } from '@/lib/utils/battle/map-art/stamp-geometry';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { MapArtStamp } from '@/types/battle-map';
 
@@ -21,9 +21,9 @@ interface Props {
     editing: NonNullable<ArtPreviewState['stamps']>;
 }
 
-const HANDLE_R = UNIT * 0.14;
+const HANDLE_R = unitOf(0.14);
 
-const ROTATE_OFFSET = UNIT * 0.6;
+const ROTATE_OFFSET = unitOf(0.6);
 
 const ACCENT = '#f5c542';
 
@@ -190,10 +190,10 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
                 <image
                     data-art-stamp-ghost=""
                     href={ghostDef.file}
-                    x={-(ghostDef.cols * UNIT) / 2}
-                    y={-(ghostDef.rows * UNIT) / 2}
-                    width={ghostDef.cols * UNIT}
-                    height={ghostDef.rows * UNIT}
+                    x={-unitOf(ghostDef.cols) / 2}
+                    y={-unitOf(ghostDef.rows) / 2}
+                    width={unitOf(ghostDef.cols)}
+                    height={unitOf(ghostDef.rows)}
                     opacity={0.6}
                     pointerEvents="none"
                     transform={`translate(${hover.x} ${hover.y}) rotate(${api.ghost.rot})${

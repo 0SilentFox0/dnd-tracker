@@ -2,6 +2,7 @@ import type { TileRenderState } from './tiles/TileCanvas';
 
 import type { EdgeEditing, MapDoorsTool, ModeTools } from '@/lib/hooks/battle';
 import type { FogBrush } from '@/lib/hooks/battle';
+import type { EditorStamps } from '@/lib/hooks/battle-maps';
 import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapActions,
@@ -10,7 +11,6 @@ import type {
     GridPoint,
     RevealedRun,
 } from '@/types/battle-grid';
-import type { EditorStamps } from '@/lib/hooks/battle-maps';
 import type { MapArtScene } from '@/types/battle-map';
 
 export interface BattleMapProps {

@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { ArtAssets, ArtCtx } from '../assets';
-import { orderedStamps } from '../paint-stamps';
 import { paintScene } from '../paint-scene';
+import { orderedStamps } from '../paint-stamps';
 
 import { UNIT } from '@/lib/utils/battle/grid/layout';
 import { emptyScene } from '@/lib/utils/battle/map-art/scene';

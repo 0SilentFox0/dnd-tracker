@@ -87,8 +87,11 @@ export function dirtyChunks(
             const a = stampAabb(stampBox(s, def ?? { cols: 1, rows: 1 }));
 
             const c0 = Math.floor(a.x0 / colStep / CHUNK_SIDE);
+
             const c1 = Math.floor(a.x1 / colStep / CHUNK_SIDE);
+
             const r0 = Math.floor(a.y0 / rowStep / CHUNK_SIDE);
+
             const r1 = Math.floor(a.y1 / rowStep / CHUNK_SIDE);
 
             for (let cy = r0; cy <= r1; cy++)

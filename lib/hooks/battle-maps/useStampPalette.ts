@@ -4,9 +4,9 @@ import { useMemo, useState } from 'react';
 
 import {
     STAMP_BIOMES,
-    STAMPS,
     type StampBiome,
     type StampDef,
+    STAMPS,
 } from '@/lib/constants/map-art/stamps';
 
 export const ALL_CATEGORIES = 'all';

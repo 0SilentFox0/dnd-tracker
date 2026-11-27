@@ -27,10 +27,12 @@ export function keyMagenta(
     { threshold = 90, soft = 40 }: { threshold?: number; soft?: number } = {}
 ): Rgba {
     const { width, height } = img;
+
     const data = new Uint8Array(img.data);
 
     for (let p = 0; p < width * height; p++) {
         const i = p * 4;
+
         const dist = Math.hypot(
             data[i] - MAGENTA[0],
             data[i + 1] - MAGENTA[1],
@@ -48,6 +50,7 @@ export function keyMagenta(
             : data[(y * width + x) * 4 + 3];
 
     const edge: number[] = [];
+
     const transparent: number[] = [];
 
     for (let y = 0; y < height; y++)
@@ -81,13 +84,16 @@ export function keyMagenta(
 
 export function components(img: Rgba, minArea = 64): Box[] {
     const { width, height, data } = img;
+
     const seen = new Uint8Array(width * height);
+
     const boxes: Box[] = [];
 
     for (let start = 0; start < width * height; start++) {
         if (seen[start] || data[start * 4 + 3] === 0) continue;
 
         const stack = [start];
+
         const box: Box = {
             x0: width,
             y0: height,
@@ -100,7 +106,9 @@ export function components(img: Rgba, minArea = 64): Box[] {
 
         while (stack.length) {
             const p = stack.pop()!;
+
             const x = p % width;
+
             const y = (p - x) / width;
 
             box.area++;
@@ -112,6 +120,7 @@ export function components(img: Rgba, minArea = 64): Box[] {
             for (let dy = -1; dy <= 1; dy++)
                 for (let dx = -1; dx <= 1; dx++) {
                     const nx = x + dx;
+
                     const ny = y + dy;
 
                     if (nx < 0 || ny < 0 || nx >= width || ny >= height)
@@ -130,8 +139,11 @@ export function components(img: Rgba, minArea = 64): Box[] {
     }
 
     const centre = (b: Box) => (b.y0 + b.y1) / 2;
+
     const tolerance = height / 6;
+
     const sorted = [...boxes].sort((a, b) => centre(a) - centre(b));
+
     const lines: Box[][] = [];
 
     for (const b of sorted) {
@@ -146,11 +158,17 @@ export function components(img: Rgba, minArea = 64): Box[] {
 
 export function crop(img: Rgba, box: Box, pad: number): Rgba {
     const x0 = Math.max(0, box.x0 - pad);
+
     const y0 = Math.max(0, box.y0 - pad);
+
     const x1 = Math.min(img.width - 1, box.x1 + pad);
+
     const y1 = Math.min(img.height - 1, box.y1 + pad);
+
     const width = x1 - x0 + 1;
+
     const height = y1 - y0 + 1;
+
     const data = new Uint8Array(width * height * 4);
 
     for (let y = 0; y < height; y++) {
@@ -164,8 +182,11 @@ export function crop(img: Rgba, box: Box, pad: number): Rgba {
 
 function alphaBounds(img: Rgba): Box | null {
     let x0 = img.width;
+
     let y0 = img.height;
+
     let x1 = -1;
+
     let y1 = -1;
 
     for (let y = 0; y < img.height; y++)

@@ -1,7 +1,7 @@
-import { STAMP_BIOMES } from '@/lib/constants/map-art/stamps';
+import type { StampRow } from './csv';
 
 import type { StampBiome } from '@/lib/constants/map-art/stamp-types';
-import type { StampRow } from './csv';
+import { STAMP_BIOMES } from '@/lib/constants/map-art/stamps';
 
 export const STAMP_STYLE_CORE =
     'Painterly fantasy game art in the spirit of classic fantasy RPG maps, rich but natural colours, no text, no letters, no watermark, no border, no frame. Strictly top-down orthographic view straight from above, no perspective, only a soft contact shadow directly under each object and no long directional shadows. The background is one flat solid pure magenta #FF00FF with no gradient, and no object may contain magenta.';
@@ -58,6 +58,7 @@ const isLegacy = (r: StampRow) => /^tiles_.+\.png$/.test(r.file);
 
 export function renderStampsMd(rows: readonly StampRow[]): string {
     const fresh = rows.filter((r) => !isLegacy(r));
+
     const parts = [
         '# Промпти для штампів карти',
         '',
@@ -70,6 +71,7 @@ export function renderStampsMd(rows: readonly StampRow[]): string {
 
     for (const sheet of sheetsOf(fresh)) {
         const key = `${sheet.biome}-${sheet.priority}`;
+
         const n = (counters.get(key) ?? 0) + 1;
 
         counters.set(key, n);

@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { sheetPrompt, sheetsOf, STAMP_STYLE_CORE } from '../prompts';
-
 import type { StampRow } from '../csv';
+import { sheetPrompt, sheetsOf, STAMP_STYLE_CORE } from '../prompts';
 
 const mk = (
     i: number,

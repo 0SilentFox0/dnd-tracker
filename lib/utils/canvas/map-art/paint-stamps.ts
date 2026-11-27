@@ -1,6 +1,6 @@
 import { type PaintEnv, touchesBox } from './assets';
 
-import { stampDef, type StampDef, type StampLayer } from '@/lib/constants/map-art/stamps';
+import { type StampDef, stampDef, type StampLayer } from '@/lib/constants/map-art/stamps';
 import { stampAabb, stampBox } from '@/lib/utils/battle/map-art/stamp-geometry';
 import type { MapArtStamp } from '@/types/battle-map';
 
