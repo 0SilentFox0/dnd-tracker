@@ -3,6 +3,7 @@ import Mention from '@tiptap/extension-mention';
 import { TableKit } from '@tiptap/extension-table';
 import StarterKit from '@tiptap/starter-kit';
 
+import { AutoMention } from './auto-mention';
 import { mentionSuggestion } from './mention-suggestion';
 
 import type { MentionOption } from '@/types/scenario';
@@ -150,5 +151,6 @@ export function buildExtensions(
             HTMLAttributes: { class: 'mention' },
             suggestion: mentionSuggestion(searchMentions),
         }),
+        AutoMention,
     ];
 }

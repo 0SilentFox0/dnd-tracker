@@ -2,7 +2,13 @@
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import type { AutoMentionIndex } from '@/lib/utils/scenario/auto-mentions';
+
 vi.unmock('next-intl');
+
+const mocks = vi.hoisted(() => ({
+    autoIndex: null as AutoMentionIndex | null,
+}));
 
 const draft = vi.hoisted(() => ({
     setContent: vi.fn(),
@@ -17,6 +23,7 @@ vi.mock('@/lib/hooks/scenario', () => ({
         ...draft,
     }),
     useMentionSearch: () => async () => [],
+    useAutoMentionIndex: () => mocks.autoIndex,
     useActiveSection: () => null,
     useScenarioPages: () => ({ data: [] }),
     useScenarioPage: () => ({ data: undefined }),

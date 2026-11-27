@@ -4,8 +4,10 @@ import { useEffect, useMemo } from 'react';
 import type { Editor } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
 
+import { setAutoMentionIndex } from './auto-mention';
 import { buildExtensions } from './extensions';
 
+import type { AutoMentionIndex } from '@/lib/utils/scenario/auto-mentions';
 import type { MentionOption, RichDoc } from '@/types/scenario';
 
 export function RichTextEditor({
@@ -13,12 +15,14 @@ export function RichTextEditor({
     onChange,
     onReady,
     searchMentions,
+    autoMentionIndex = null,
     label,
 }: {
     doc: RichDoc;
     onChange: (doc: RichDoc) => void;
     onReady: (editor: Editor | null) => void;
     searchMentions: (q: string) => Promise<MentionOption[]>;
+    autoMentionIndex?: AutoMentionIndex | null;
     label: string;
 }) {
     const extensions = useMemo(
@@ -43,6 +47,10 @@ export function RichTextEditor({
         if (editor && JSON.stringify(editor.getJSON()) !== JSON.stringify(doc))
             editor.commands.setContent(doc, { emitUpdate: false });
     }, [editor, doc]);
+
+    useEffect(() => {
+        if (editor) setAutoMentionIndex(editor, autoMentionIndex);
+    }, [editor, autoMentionIndex]);
 
     useEffect(() => {
         if (!editor) return;

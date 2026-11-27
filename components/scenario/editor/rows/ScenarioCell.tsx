@@ -6,6 +6,7 @@ import type { Editor } from '@tiptap/core';
 import { RichTextEditor } from '../rich-text/RichTextEditor';
 
 import { ScenarioRichText } from '@/components/scenario/page/ScenarioRichText';
+import type { AutoMentionIndex } from '@/lib/utils/scenario/auto-mentions';
 import { isDocEmpty } from '@/lib/utils/scenario/doc';
 import type { MentionOption, RichDoc } from '@/types/scenario';
 
@@ -24,6 +25,7 @@ export function ScenarioCell({
     doc,
     active,
     searchMentions,
+    autoMentionIndex,
     handlers,
 }: {
     campaignId: string;
@@ -32,6 +34,7 @@ export function ScenarioCell({
     doc: RichDoc;
     active: boolean;
     searchMentions: (query: string) => Promise<MentionOption[]>;
+    autoMentionIndex: AutoMentionIndex | null;
     handlers: Handlers;
 }) {
     const t = useTranslations('scenario.cell');
@@ -44,6 +47,7 @@ export function ScenarioCell({
                     doc={doc}
                     label={column === 'story' ? t('story') : t('notes')}
                     searchMentions={searchMentions}
+                    autoMentionIndex={autoMentionIndex}
                     onReady={handlers.onReady}
                     onChange={handlers.onChange}
                 />

@@ -32,6 +32,7 @@ import {
 } from '@/components/scenario/book/ScenarioToc';
 import { useConfirm, useCssVarHeight } from '@/lib/hooks/common';
 import {
+    useAutoMentionIndex,
     useMentionSearch,
     useScenarioDraft,
     useScenarioPage,
@@ -86,6 +87,8 @@ export function ScenarioEditor({
     }, [onDraftReady, draft.flush, draft.hasUnsavedChanges]);
 
     const searchMentions = useMentionSearch(campaignId);
+
+    const autoMentionIndex = useAutoMentionIndex(campaignId);
 
     const confirm = useConfirm();
 
@@ -179,6 +182,7 @@ export function ScenarioEditor({
             doc={doc}
             active={active?.rowId === rowId && active.column === column}
             searchMentions={searchMentions}
+            autoMentionIndex={autoMentionIndex}
             handlers={{
                 onActivate: () => setActive({ rowId, sectionId, column }),
                 onReady,
