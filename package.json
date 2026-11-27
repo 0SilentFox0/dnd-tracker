@@ -51,6 +51,7 @@
     "template:i18n": "pnpm template i18n",
     "template:validate": "pnpm template validate",
     "srd:build": "pnpm template build srd-5.2",
+    "admin:seed": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/admin/seed-fake-activity.ts",
     "seed-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-library.ts",
     "seed-world-map": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-world-map.ts",
     "seed:example-demo": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-example-demo.ts",
