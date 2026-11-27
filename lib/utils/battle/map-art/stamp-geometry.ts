@@ -25,11 +25,19 @@ export function stampBox(
     };
 }
 
-export function stampCorners(b: StampBox): [number, number][] {
+export function fromStampLocal(
+    b: StampBox,
+    u: number,
+    v: number
+): { x: number; y: number } {
     const cos = Math.cos(rad(b.rot));
 
     const sin = Math.sin(rad(b.rot));
 
+    return { x: b.cx + u * cos - v * sin, y: b.cy + u * sin + v * cos };
+}
+
+export function stampCorners(b: StampBox): [number, number][] {
     const hw = b.w / 2;
 
     const hh = b.h / 2;
@@ -41,10 +49,11 @@ export function stampCorners(b: StampBox): [number, number][] {
             [hw, hh],
             [-hw, hh],
         ] as const
-    ).map(([u, v]): [number, number] => [
-        b.cx + u * cos - v * sin,
-        b.cy + u * sin + v * cos,
-    ]);
+    ).map(([u, v]): [number, number] => {
+        const p = fromStampLocal(b, u, v);
+
+        return [p.x, p.y];
+    });
 }
 
 export function stampAabb(b: StampBox): {

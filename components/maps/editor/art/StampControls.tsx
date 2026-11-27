@@ -18,6 +18,24 @@ export function StampControls({
 }) {
     const t = useTranslations('maps.editor.stamps');
 
+    const actions: {
+        key: 'flip' | 'forward' | 'backward' | 'duplicate' | 'delete';
+        pressed?: boolean;
+        onClick: () => void;
+    }[] = selected
+        ? [
+              {
+                  key: 'flip',
+                  pressed: selected.flip,
+                  onClick: () => api.update(selected.id, { flip: !selected.flip }),
+              },
+              { key: 'forward', onClick: () => api.reorder(selected.id, 1) },
+              { key: 'backward', onClick: () => api.reorder(selected.id, -1) },
+              { key: 'duplicate', onClick: () => api.duplicate(selected.id) },
+              { key: 'delete', onClick: () => api.remove(selected.id) },
+          ]
+        : [];
+
     return (
         <div className="space-y-3">
             <SwitchField
@@ -62,47 +80,18 @@ export function StampControls({
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            aria-pressed={selected.flip}
-                            onClick={() => api.update(selected.id, { flip: !selected.flip })}
-                        >
-                            {t('flip')}
-                        </Button>
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => api.reorder(selected.id, 1)}
-                        >
-                            {t('forward')}
-                        </Button>
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => api.reorder(selected.id, -1)}
-                        >
-                            {t('backward')}
-                        </Button>
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => api.duplicate(selected.id)}
-                        >
-                            {t('duplicate')}
-                        </Button>
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => api.remove(selected.id)}
-                        >
-                            {t('delete')}
-                        </Button>
+                        {actions.map(({ key, onClick, pressed }) => (
+                            <Button
+                                key={key}
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                aria-pressed={pressed}
+                                onClick={onClick}
+                            >
+                                {t(key)}
+                            </Button>
+                        ))}
                     </div>
                 </div>
             )}

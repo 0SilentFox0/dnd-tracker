@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { stampBlockedCells,stampCells } from '../stamp-cells';
-
 import type { MapDims } from '../scene';
+import { stampCells } from '../stamp-cells';
+
 import type { StampDef } from '@/lib/constants/map-art/stamps';
 import { cellKey } from '@/lib/utils/battle/grid/geometry';
 import { hexCenter, hexNeighbors } from '@/lib/utils/battle/grid/hex';
@@ -47,9 +47,9 @@ const sq = { cols: 10, rows: 10, gridType: 'square' as const };
 const hex = { cols: 10, rows: 10, gridType: 'hex' as const };
 
 const cells = (stamps: MapArtStamp[], map: MapDims = sq) =>
-    [...stampBlockedCells(stamps, map, lookup)].sort();
+    [...stampCells(stamps, map, lookup).blocked].sort();
 
-describe('stampBlockedCells square', () => {
+describe('stampCells blocked square', () => {
     it('blocks cells whose centre is strictly inside a rect', () => {
         expect(cells([stamp('rect21', 300, 250)])).toEqual(['2:2', '3:2']);
     });
@@ -88,7 +88,7 @@ describe('stampBlockedCells square', () => {
     });
 });
 
-describe('stampBlockedCells hex', () => {
+describe('stampCells blocked hex', () => {
     const c = hexCenter({ x: 3, y: 3 });
 
     it('blocks one cell for a 1x1 rect on a cell centre', () => {

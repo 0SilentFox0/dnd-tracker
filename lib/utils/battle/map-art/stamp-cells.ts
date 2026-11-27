@@ -63,8 +63,6 @@ export function stampCells(
 
         if (!def || !blocks) continue;
 
-        const own = new Set<string>();
-
         const box = stampBox(s, {
             cols: blocks.w,
             rows: blocks.h,
@@ -80,36 +78,22 @@ export function stampCells(
 
         const cy1 = Math.min(map.rows - 1, Math.ceil(y1 / rowStep) + 1);
 
+        const add = (k: string) => {
+            blocked.add(k);
+
+            if (def.sight) sight.add(k);
+        };
+
         for (let y = cy0; y <= cy1; y++)
             for (let x = cx0; x <= cx1; x++)
-                if (
-                    stampFootprintContains(
-                        s,
-                        blocks,
-                        cellCenter({ x, y }, grid)
-                    )
-                )
-                    own.add(cellKey({ x, y }));
+                if (stampFootprintContains(s, blocks, cellCenter({ x, y }, grid)))
+                    add(cellKey({ x, y }));
 
         const home = cellAtUnitPoint(s, grid);
 
         if (home.x >= 0 && home.y >= 0 && home.x < map.cols && home.y < map.rows)
-            own.add(cellKey(home));
-
-        for (const k of own) {
-            blocked.add(k);
-
-            if (def.sight) sight.add(k);
-        }
+            add(cellKey(home));
     }
 
     return { blocked, sight };
-}
-
-export function stampBlockedCells(
-    stamps: readonly MapArtStamp[],
-    map: MapDims,
-    lookup?: Lookup
-): Set<string> {
-    return stampCells(stamps, map, lookup).blocked;
 }

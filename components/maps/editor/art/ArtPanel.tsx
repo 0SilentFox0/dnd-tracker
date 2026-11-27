@@ -19,6 +19,7 @@ import {
 } from '@/lib/constants/map-art/lights';
 import { BLOCKED_MATERIALS } from '@/lib/constants/map-art/materials';
 import {
+    isStampTool,
     useDeleteMapArt,
     type useMapArtEditor,
     type useMapArtSave,
@@ -173,7 +174,7 @@ export function ArtPanel({
                     <LightControls art={art} />
                 </section>
             )}
-            {(tool === 'stamp' || tool === 'stamp-select') && (
+            {isStampTool(tool) && (
                 <section className={SECTION}>
                     <h3 className={HEADING}>{ts('tool')}</h3>
                     {tool === 'stamp' && (

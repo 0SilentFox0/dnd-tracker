@@ -48,7 +48,9 @@ export type ArtTool =
     | 'stamp'
     | 'stamp-select';
 
-export const isStampTool = (tool: string | null): boolean =>
+export const isStampTool = (
+    tool: string | null
+): tool is 'stamp' | 'stamp-select' =>
     tool === 'stamp' || tool === 'stamp-select';
 
 export interface EditorStamps {
@@ -630,7 +632,6 @@ export function useMapArtEditor({
                     all.map((s) => (s.id === id ? { ...s, z: s.z + dir } : s))
                 ),
         };
-         
     }, [stampAsset, snap, showAllBlocking, ghost, selectedStamp, commit]);
 
     const setAmbient = useCallback(

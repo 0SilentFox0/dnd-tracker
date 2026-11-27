@@ -10,8 +10,8 @@ import { useStampSelection } from '@/lib/hooks/battle-maps';
 import { gridOf, mapSize, unitOf } from '@/lib/utils/battle/grid';
 import { parseCellKey } from '@/lib/utils/battle/grid/geometry';
 import { cellPolygon } from '@/lib/utils/battle/grid/layout';
-import { stampBlockedCells } from '@/lib/utils/battle/map-art/stamp-cells';
-import { stampBox,stampCorners } from '@/lib/utils/battle/map-art/stamp-geometry';
+import { stampCells } from '@/lib/utils/battle/map-art/stamp-cells';
+import { fromStampLocal, stampBox, stampCorners } from '@/lib/utils/battle/map-art/stamp-geometry';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { MapArtStamp } from '@/types/battle-map';
 
@@ -26,8 +26,6 @@ const HANDLE_R = unitOf(0.14);
 const ROTATE_OFFSET = unitOf(0.6);
 
 const ACCENT = '#f5c542';
-
-const rad = (deg: number) => (deg * Math.PI) / 180;
 
 export const ArtStampsLayer = memo(function ArtStampsLayer({
     stamps,
@@ -53,9 +51,7 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
     const onKey = sel.onKey;
 
     useEffect(() => {
-        const handler = (e: KeyboardEvent) => {
-            onKey(e);
-        };
+        const handler = (e: KeyboardEvent) => void onKey(e);
 
         window.addEventListener('keydown', handler);
 
@@ -84,10 +80,10 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
 
     const blocking = useMemo(
         () =>
-            stampBlockedCells(
+            stampCells(
                 api.showAllBlocking ? stamps : selected ? [selected] : [],
                 map
-            ),
+            ).blocked,
         [api.showAllBlocking, stamps, selected, map]
     );
 
@@ -99,19 +95,9 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
 
     const corners = box ? stampCorners(box) : null;
 
-    const local = (u: number, v: number) => {
-        if (!box) return { x: 0, y: 0 };
+    const rotHandle = box ? fromStampLocal(box, 0, -box.h / 2 - ROTATE_OFFSET) : null;
 
-        const cos = Math.cos(rad(box.rot));
-
-        const sin = Math.sin(rad(box.rot));
-
-        return { x: box.cx + u * cos - v * sin, y: box.cy + u * sin + v * cos };
-    };
-
-    const rotHandle = box ? local(0, -box.h / 2 - ROTATE_OFFSET) : null;
-
-    const topMid = box ? local(0, -box.h / 2) : null;
+    const topMid = box ? fromStampLocal(box, 0, -box.h / 2) : null;
 
     const handleProps = (onMove: (at: { x: number; y: number }, shift: boolean) => void) => ({
         style: { cursor: 'grab', touchAction: 'none' as const },

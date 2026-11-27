@@ -228,7 +228,7 @@ function EditorContent({
                       scene: artScene,
                       revision: artRevision,
                       ...(artTool === 'light' && { lights }),
-                      ...((artTool === 'stamp' || artTool === 'stamp-select') && {
+                      ...(isStampTool(artTool) && {
                           stamps: { mode: artTool, api: stampsApi },
                       }),
                   }
