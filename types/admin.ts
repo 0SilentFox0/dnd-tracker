@@ -1,6 +1,9 @@
 import type { z } from 'zod';
 
-import type { adminRangeSchema } from '@/lib/schemas/admin';
+import type {
+    adminRangeSchema,
+    adminUsersQuerySchema,
+} from '@/lib/schemas/admin';
 import type { CohortRow } from '@/lib/utils/admin/cohorts';
 
 export type AdminRange = z.infer<typeof adminRangeSchema>;
@@ -42,4 +45,30 @@ export type AdminOverview = {
     };
     cohorts: CohortRow[];
     breakdowns: { locale: Row[]; system: Row[]; country: Row[] };
+};
+
+export type AdminUsersQuery = z.infer<typeof adminUsersQuerySchema>;
+
+export type AdminUserRow = {
+    id: string;
+    email: string;
+    displayName: string;
+    avatar: string | null;
+    createdAt: string;
+    lastActiveAt: string | null;
+    lastSignInAt: string | null;
+    bannedUntil: string | null;
+    campaignsDm: number;
+    templates: number;
+    memberships: number;
+    characters: number;
+    country: string | null;
+    sharedIp: boolean;
+    subscription: null;
+};
+
+export type AdminUsersPage = {
+    rows: AdminUserRow[];
+    next: string | null;
+    authMetaAvailable: boolean;
 };
