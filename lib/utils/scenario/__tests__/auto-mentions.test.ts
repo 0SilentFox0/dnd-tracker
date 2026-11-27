@@ -168,6 +168,27 @@ describe('case endings', () => {
         expect(tag('Магнат')).toEqual([]);
     });
 
+    it('handles a doubled consonant and a fleeting vowel', () => {
+        const morph = buildAutoMentionIndex([
+            { type: 'character', id: 'i', label: 'Ізабель' },
+            { type: 'unit', id: 'm', label: 'Мисливець' },
+            { type: 'unit', id: 'v', label: 'Ватажок' },
+        ]);
+
+        if (!morph) throw new Error('index');
+
+        const ids = (s: string) =>
+            chips(autoTagDoc(p(text(s)), morph).doc).map((a) => a?.id);
+
+        expect(ids('Ізабеллю, Ізабеллі, Ізабелі')).toEqual(['i', 'i', 'i']);
+        expect(ids('Мисливця, Мисливцем, Мисливець')).toEqual(['m', 'm', 'm']);
+        expect(ids('Ватажка, Ватажок')).toEqual(['v', 'v']);
+    });
+
+    it('does not tag a part of a hyphenated compound word', () => {
+        expect(tag('Маг-ілюзіоніст і напів-Маг')).toEqual([]);
+    });
+
     it('matches hyphenated names', () => {
         expect(tag('Кха-Белеха').map((a) => a?.id)).toEqual(['c2']);
     });

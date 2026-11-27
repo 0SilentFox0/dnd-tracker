@@ -27,16 +27,24 @@ const ENDINGS =
 
 const CLUSTER = /\P{M}\p{M}*/gu;
 
+// fleeting vowel: the vowel drops in the oblique cases (-ець -> -ця, -ок -> -ка)
+const FLEETING: [RegExp, RegExp][] = [
+    [/ець$/u, /(?:ець|ц)/u],
+    [/ок$/u, /(?:ок|к)/u],
+];
+
+const SOFT_SIGN = /ь$/u;
+
 const WORD = /[\p{L}\p{N}_]+/gu;
 
 const WORD_CHAR = /[\p{L}\p{N}_]/u;
 
 const LETTER = /\p{L}/u;
 
-const APOSTROPHE = /['’]/u;
+const JOINER = /['’-]/u;
 
-// an apostrophe between letters belongs to the word (Ukrainian spelling)
-const AFTER = "(?![\\p{L}\\p{N}_]|['’]\\p{L})";
+// an apostrophe or hyphen between letters joins one word (Ukrainian spelling, compounds)
+const AFTER = "(?![\\p{L}\\p{N}_]|['’-]\\p{L})";
 
 const PREFIX = 3;
 
@@ -64,12 +72,27 @@ const sameName = (name: string, text: string) =>
     name.toLowerCase() === text.replace(/[\s\u00a0]+/gu, ' ').toLowerCase();
 
 function wordPattern(word: string): string {
-    const stem =
-        letters(word) >= DROP_MIN_WORD && DROPPABLE.test(word)
-            ? Array.from(word).slice(0, -1).join('')
-            : word;
+    const chars = Array.from(word);
 
-    return `${escapeRe(stem)}${ENDINGS.source}`;
+    if (chars.length < DROP_MIN_WORD) return escapeRe(word) + ENDINGS.source;
+
+    for (const [suffix, alt] of FLEETING) {
+        const m = suffix.exec(word);
+
+        if (m)
+            return `${escapeRe(word.slice(0, m.index))}${alt.source}${ENDINGS.source}`;
+    }
+
+    if (!DROPPABLE.test(word)) return escapeRe(word) + ENDINGS.source;
+
+    const stem = chars.slice(0, -1);
+
+    // a soft consonant doubles before -ю/-і in the instrumental/locative (Ізабель -> Ізабеллю)
+    const doubled = SOFT_SIGN.test(word)
+        ? `${escapeRe(stem.at(-1) ?? '')}?`
+        : '';
+
+    return escapeRe(stem.join('')) + doubled + ENDINGS.source;
 }
 
 // only the first letter of the phrase is case-insensitive
@@ -143,7 +166,7 @@ function boundaryBefore(text: string, i: number): boolean {
 
     if (prev === '@' || WORD_CHAR.test(prev)) return false;
 
-    return !(APOSTROPHE.test(prev) && LETTER.test(text[i - 2] ?? ''));
+    return !(JOINER.test(prev) && LETTER.test(text[i - 2] ?? ''));
 }
 
 function candidates(index: AutoMentionIndex, token: string): AutoEntry[] {

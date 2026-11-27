@@ -18,6 +18,7 @@ const index = buildAutoMentionIndex([
     { type: 'unit', id: 'u1', label: 'Привид' },
     { type: 'acquaintance', id: 'a1', label: 'Привид' },
     { type: 'unit', id: 'u2', label: 'Імп' },
+    { type: 'character', id: 'k1', label: 'Кха' },
 ]);
 
 function mount(autoIndex: AutoMentionIndex | null) {
@@ -145,7 +146,7 @@ describe('live auto-mentions', () => {
     });
 
     it('converts on a dash, slash or opening bracket', () => {
-        for (const ch of ['—', '/', '(']) {
+        for (const ch of ['—', '/', '(', '”']) {
             const e = mount(index);
 
             type(e, `Зехір${ch}`);
@@ -169,5 +170,38 @@ describe('live auto-mentions', () => {
             h.blur?.(f.view, new FocusEvent('blur'))
         );
         expect(inline(f)).toEqual(['[Зехір]']);
+    });
+
+    it('does not convert on a hyphen inside a word', () => {
+        const e = mount(index);
+
+        type(e, 'Кха-Белех ');
+
+        expect(inline(e).some((s) => s?.startsWith('['))).toBe(false);
+    });
+
+    it('after Enter, undo first removes the new text, then the chip', () => {
+        const e = mount(index);
+
+        type(e, 'Зехір');
+        pressEnter(e);
+        type(e, 'далі');
+
+        const blocks = () =>
+            (e.getJSON() as RichDoc).content.map((b) =>
+                (b.content ?? [])
+                    .map((n) =>
+                        n.type === 'mention'
+                            ? `[${String(n.attrs?.label)}]`
+                            : n.text
+                    )
+                    .join('')
+            );
+
+        expect(blocks()).toEqual(['[Зехір]', 'далі']);
+        e.commands.undo();
+        expect(blocks()).toEqual(['[Зехір]', '']);
+        e.commands.undo();
+        expect(blocks()[0]).toBe('Зехір');
     });
 });

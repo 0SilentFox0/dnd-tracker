@@ -56,4 +56,47 @@ describe('RichTextEditor external doc updates', () => {
         );
         expect(e.state.selection.from).toBe(8);
     });
+
+    it('keeps the caret right after a hard break', async () => {
+        let editor: Editor | null = null;
+
+        const props = {
+            onChange: () => {},
+            onReady: (e: Editor | null) => {
+                editor = e;
+            },
+            mentions: { search: async () => [], autoIndex: null },
+            label: 'story',
+        };
+
+        const content = doc(
+            { type: 'text', text: 'abc' },
+            { type: 'hardBreak' },
+            { type: 'text', text: 'def' }
+        );
+
+        const { rerender } = render(
+            <RichTextEditor doc={content} {...props} />
+        );
+
+        await waitFor(() => expect(editor).not.toBeNull());
+
+        const e = editor as unknown as Editor;
+
+        e.commands.setTextSelection(5);
+
+        rerender(
+            <RichTextEditor
+                doc={doc(
+                    { type: 'text', text: 'abc' },
+                    { type: 'hardBreak' },
+                    { type: 'text', text: 'deff' }
+                )}
+                {...props}
+            />
+        );
+
+        await waitFor(() => expect(e.state.doc.textContent).toBe('abcdeff'));
+        expect(e.state.selection.from).toBe(5);
+    });
 });

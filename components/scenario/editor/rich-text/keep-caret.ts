@@ -2,7 +2,9 @@ import type { Editor } from '@tiptap/core';
 import type { Node as PMNode } from '@tiptap/pm/model';
 import { TextSelection } from '@tiptap/pm/state';
 
-const leafText = (node: PMNode) => String(node.attrs.label ?? '');
+// every leaf counts as at least one char, so a caret right after a hard break or token keeps its place
+const leafText = (node: PMNode) =>
+    node.type.name === 'mention' ? String(node.attrs.label ?? '') : '\ufffc';
 
 const textBefore = (doc: PMNode, pos: number) =>
     doc.textBetween(0, pos, '\n', leafText).length;

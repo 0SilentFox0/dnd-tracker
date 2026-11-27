@@ -1,7 +1,12 @@
 import { type Editor, Extension } from '@tiptap/core';
 import { closeHistory } from '@tiptap/pm/history';
 import type { Mark } from '@tiptap/pm/model';
-import { Plugin, PluginKey } from '@tiptap/pm/state';
+import {
+    type EditorState,
+    Plugin,
+    PluginKey,
+    type Transaction,
+} from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
 
 import { MENTION_SUGGESTION_KEY } from './mention-suggestion';
@@ -11,6 +16,7 @@ import {
     findAutoMentionAtEnd,
 } from '@/lib/utils/scenario/auto-mentions';
 import { UNTAGGABLE_MARKS } from '@/lib/utils/scenario/wrap-mentions';
+import type { MentionOption } from '@/types/scenario';
 
 type GetIndex = () => AutoMentionIndex | null;
 
@@ -22,12 +28,10 @@ declare module '@tiptap/core' {
     }
 }
 
-// apostrophes are left out: inside a Ukrainian word they belong to it
-const BOUNDARY = /^[\s.,;:!?()»"…\u2013\u2014/-]$/u;
+// apostrophes and hyphens are left out: inside a Ukrainian word or a compound they belong to it
+const BOUNDARY = /^[\s.,;:!?()»“”"…\u2013\u2014/]$/u;
 
-const CONVERT_KEYS = new Set(['Enter', 'Tab']);
-
-type Hit = { from: number; to: number; mention: () => void };
+type Hit = { from: number; to: number; text: string; option: MentionOption };
 
 function findHit(view: EditorView, getIndex: GetIndex): Hit | null {
     const index = getIndex();
@@ -68,37 +72,44 @@ function findHit(view: EditorView, getIndex: GetIndex): Hit | null {
     )
         return null;
 
-    return {
-        from,
-        to,
-        mention: () => {
-            const current = view.state;
+    return { from, to, text: hit.text, option: hit.option };
+}
 
-            const nodeMarks: (readonly Mark[])[] = [];
+// null when the range no longer holds the matched text
+function chipTransaction(
+    state: EditorState,
+    hit: Hit,
+    from: number,
+    to: number
+): Transaction | null {
+    if (state.doc.textBetween(from, to) !== hit.text) return null;
 
-            current.doc.nodesBetween(from, to, (n) => {
-                if (n.isText) nodeMarks.push(n.marks);
-            });
+    const nodeMarks: (readonly Mark[])[] = [];
 
-            const [first = [], ...rest] = nodeMarks;
+    state.doc.nodesBetween(from, to, (n) => {
+        if (n.isText) nodeMarks.push(n.marks);
+    });
 
-            const common = first.filter((m) =>
-                rest.every((ms) => m.isInSet(ms))
-            );
+    const [first = [], ...rest] = nodeMarks;
 
-            const node = current.schema.nodes.mention.create(
-                {
-                    id: hit.option.id,
-                    label: hit.text,
-                    type: hit.option.type,
-                },
-                null,
-                common
-            );
+    const common = first.filter((m) => rest.every((ms) => m.isInSet(ms)));
 
-            view.dispatch(closeHistory(current.tr.replaceWith(from, to, node)));
-        },
-    };
+    const node = state.schema.nodes.mention.create(
+        { id: hit.option.id, label: hit.text, type: hit.option.type },
+        null,
+        common
+    );
+
+    // its own undo step, so Ctrl+Z turns the chip back into text
+    return closeHistory(state.tr.replaceWith(from, to, node));
+}
+
+function convertNow(view: EditorView, getIndex: GetIndex) {
+    const hit = findHit(view, getIndex);
+
+    const tr = hit && chipTransaction(view.state, hit, hit.from, hit.to);
+
+    if (tr) view.dispatch(tr);
 }
 
 // the index arrives async; it lives in storage so the editor is not rebuilt when it loads
@@ -108,11 +119,35 @@ export const AutoMention = Extension.create<object, AutoMentionStorage>({
     addProseMirrorPlugins() {
         const getIndex: GetIndex = () => this.storage.index;
 
+        // on Enter the chip is made after the split, so text typed on the new line is a separate undo step
+        let afterEnter: Hit | null = null;
+
         return [
             new Plugin({
                 key: new PluginKey('autoMention'),
+                appendTransaction(trs, _old, state) {
+                    const hit = afterEnter;
+
+                    if (!hit || !trs.some((tr) => tr.docChanged)) return null;
+
+                    afterEnter = null;
+
+                    const from = trs.reduce(
+                        (pos, tr) => tr.mapping.map(pos, 1),
+                        hit.from
+                    );
+
+                    const to = trs.reduce(
+                        (pos, tr) => tr.mapping.map(pos, -1),
+                        hit.to
+                    );
+
+                    return chipTransaction(state, hit, from, to);
+                },
                 props: {
                     handleTextInput(view, from, to, text) {
+                        afterEnter = null;
+
                         if (
                             !BOUNDARY.test(text) ||
                             from !== to ||
@@ -126,20 +161,34 @@ export const AutoMention = Extension.create<object, AutoMentionStorage>({
 
                         // the typed char goes in first so undo reverts only the chip
                         view.dispatch(view.state.tr.insertText(text, from, to));
-                        hit.mention();
+
+                        const chip = chipTransaction(
+                            view.state,
+                            hit,
+                            hit.from,
+                            hit.to
+                        );
+
+                        if (chip) view.dispatch(chip);
 
                         return true;
                     },
                     handleDOMEvents: {
                         blur(view) {
-                            findHit(view, getIndex)?.mention();
+                            convertNow(view, getIndex);
 
                             return false;
                         },
                     },
                     handleKeyDown(view, event) {
-                        if (CONVERT_KEYS.has(event.key) && !event.shiftKey)
-                            findHit(view, getIndex)?.mention();
+                        afterEnter = null;
+
+                        if (event.shiftKey) return false;
+
+                        if (event.key === 'Enter')
+                            afterEnter = findHit(view, getIndex);
+                        else if (event.key === 'Tab')
+                            convertNow(view, getIndex);
 
                         return false;
                     },
