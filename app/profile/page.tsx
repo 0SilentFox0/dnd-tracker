@@ -4,7 +4,6 @@ import { ProfileClient } from './page-client';
 
 import { getAuthUserOptional } from '@/lib/auth';
 import { getProfileSummary } from '@/lib/server/profile/summary';
-import { isAdmin } from '@/lib/utils/api/admin-access';
 
 const nowMs = () => Date.now();
 
@@ -18,7 +17,6 @@ export default async function ProfilePage() {
     return (
         <ProfileClient
             profile={{
-                showOpsLink: isAdmin(user),
                 summary,
                 now: nowMs(),
             }}

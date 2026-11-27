@@ -7,14 +7,8 @@ import { LocaleSwitcher } from '@/components/common/shell/LocaleSwitcher';
 import { PaletteSwitcher } from '@/components/layout/PaletteSwitcher';
 import { ProfileSectionCard } from '@/components/profile/ProfileSectionCard';
 
-export function ProfileQuickSettings({
-    showOpsLink,
-}: {
-    showOpsLink: boolean;
-}) {
+export function ProfileQuickSettings() {
     const t = useTranslations('auth.profileSummary');
-
-    const tProfile = useTranslations('common.profile');
 
     return (
         <ProfileSectionCard title={t('quickSettings')}>
@@ -32,14 +26,6 @@ export function ProfileQuickSettings({
                 >
                     {t('allSettings')}
                 </Link>
-                {showOpsLink && (
-                    <Link
-                        href="/admin"
-                        className="flex min-h-10 items-center text-sm underline"
-                    >
-                        {tProfile('adminLink')}
-                    </Link>
-                )}
             </div>
         </ProfileSectionCard>
     );

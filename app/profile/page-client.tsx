@@ -11,7 +11,7 @@ import { ProfileQuickSettings } from '@/components/profile/ProfileQuickSettings'
 import { useSessionUser } from '@/lib/hooks/auth';
 import type { ProfileSummary } from '@/types/profile';
 
-type Profile = { showOpsLink: boolean; summary: ProfileSummary; now: number };
+type Profile = { summary: ProfileSummary; now: number };
 
 export function ProfileClient({ profile }: { profile: Profile }) {
     const user = useSessionUser();
@@ -33,7 +33,7 @@ export function ProfileClient({ profile }: { profile: Profile }) {
                     <ProfileHeroes heroes={summary.recentCharacters} />
                 </div>
                 <div className="min-w-0 space-y-4">
-                    <ProfileQuickSettings showOpsLink={profile.showOpsLink} />
+                    <ProfileQuickSettings />
                     <ProfileAccountActions />
                     {user.email ? (
                         <DeleteAccountSection email={user.email} />

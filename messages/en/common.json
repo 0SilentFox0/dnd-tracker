@@ -102,6 +102,7 @@
     "campaignOverview": "Campaign overview",
     "npcHeroes": "NPC Heroes",
     "myCharacter": "My character",
+    "adminLink": "Admin panel",
     "profile": "Profile",
     "help": "Help",
     "password": "Password",
@@ -267,7 +268,6 @@
       "tooLarge": "The image is larger than 15 MB",
       "failed": "Couldn't update the photo"
     },
-    "adminLink": "Admin panel",
     "sections": {
       "account": "Account"
     }
