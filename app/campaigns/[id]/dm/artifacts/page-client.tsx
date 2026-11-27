@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Gem } from 'lucide-react';
 
 import { ArtifactCard } from '@/components/artifacts/ArtifactCard';
 import { DeleteAllArtifactsButton } from '@/components/artifacts/DeleteAllArtifactsButton';
 import { SearchInput } from '@/components/common/fields/SearchInput';
+import { BlankTome } from '@/components/common/illustrations';
 import { EmptyState, LoadingState } from '@/components/common/states';
 import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
@@ -86,7 +86,7 @@ export function DMArtifactsPageClient({
             ) : catalog.isEmpty ? (
                 <EmptyState
                     className="bg-hud-panel"
-                    icon={Gem}
+                    illustration={<BlankTome />}
                     title={t('page.emptyTitle')}
                     action={
                         canEdit ? (

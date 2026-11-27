@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Swords } from 'lucide-react';
 
 import { ActiveBattleBanner } from './ActiveBattleBanner';
 import { BattleCard } from './BattleCard';
 import { BattleRow } from './BattleRow';
 
 import { SearchInput } from '@/components/common/fields/SearchInput';
+import { SheathedSwords } from '@/components/common/illustrations';
 import { EmptyState } from '@/components/common/states';
 import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { HudChipTabs, HudPill } from '@/components/hud/page';
@@ -43,7 +43,7 @@ export function BattleList({
         return (
             <EmptyState
                 className="bg-hud-panel"
-                icon={Swords}
+                illustration={<SheathedSwords />}
                 title={t('empty.title')}
                 description={t('empty.description')}
                 action={

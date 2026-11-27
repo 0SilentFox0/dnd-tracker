@@ -55,14 +55,13 @@ export function SpellReferenceDetail({
                         <DetailChip>
                             {t('levelShort', { level: item.level })}
                         </DetailChip>
-                        {item.groupName && (
-                            <DetailChip>{item.groupName}</DetailChip>
-                        )}
                     </>
                 }
             />
             {item.description && (
-                <p className="text-sm text-hud-bone">{item.description}</p>
+                <DetailSection title={t('description')}>
+                    {item.description}
+                </DetailSection>
             )}
             <AppearanceBlock
                 text={isDM ? appearance : (item.appearanceDescription ?? '')}
@@ -82,6 +81,11 @@ export function SpellReferenceDetail({
                             <li key={i}>{e}</li>
                         ))}
                     </ul>
+                </DetailSection>
+            )}
+            {item.groupName && (
+                <DetailSection title={t('source')}>
+                    {item.groupName}
                 </DetailSection>
             )}
             {item.rules && (

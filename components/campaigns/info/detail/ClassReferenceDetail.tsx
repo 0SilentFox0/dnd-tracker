@@ -70,11 +70,13 @@ export function ClassReferenceDetail({ item }: ClassReferenceDetailProps) {
                 fallback={<GraduationCap className="size-7" />}
             />
             {summary.length > 0 && (
-                <ul className="list-inside list-disc space-y-0.5 text-sm text-hud-bone">
-                    {summary.map((line) => (
-                        <li key={line}>{line}</li>
-                    ))}
-                </ul>
+                <DetailSection title={t('brief')}>
+                    <ul className="list-inside list-disc space-y-0.5">
+                        {summary.map((line) => (
+                            <li key={line}>{line}</li>
+                        ))}
+                    </ul>
+                </DetailSection>
             )}
             {item.features.length > 0 && (
                 <DetailSection title={t('featuresByLevel')}>

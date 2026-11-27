@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Printer, Wand2 } from 'lucide-react';
+import { Printer } from 'lucide-react';
 
 import { DeleteAllButton } from '@/components/common/dialogs/DeleteAllButton';
 import { SearchInput } from '@/components/common/fields/SearchInput';
+import { BlankTome } from '@/components/common/illustrations';
 import { EmptyState, LoadingState } from '@/components/common/states';
 import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
@@ -120,7 +121,7 @@ export function DMSpellsPageClient({
                 <LoadingState count={6} label={t('page.loading')} />
             ) : count === 0 ? (
                 <EmptyState
-                    icon={Wand2}
+                    illustration={<BlankTome />}
                     title={t('page.emptyTitle')}
                     description={t('page.emptyDescription')}
                 />

@@ -1,10 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Dna, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import { DmCardGrid, DmListBody } from '@/components/common/entity/DmListBody';
 import { SearchInput } from '@/components/common/fields/SearchInput';
+import { BlankTome } from '@/components/common/illustrations';
 import { EmptyState } from '@/components/common/states';
 import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
@@ -70,7 +71,7 @@ export function DMRacesPageClient({
                 loadingLabel={t('page.loading')}
                 empty={
                     <EmptyState
-                        icon={Dna}
+                        illustration={<BlankTome />}
                         title={t('page.emptyTitle')}
                         description={t('page.emptyDescription')}
                     />
