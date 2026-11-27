@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { systemServerOf } from '@/lib/server/systems/registry';
+import { campaignNoticeUrl } from '@/lib/utils/campaigns/notice';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { dmSectionsOf } from '@/lib/utils/rules/systems/catalog';
 
@@ -35,7 +36,7 @@ export default async function DMSystemSectionPage({
     if (page === null) notFound();
 
     if (page && page.view.type !== 'list' && isDemo)
-        redirect(`/campaigns/${id}`);
+        redirect(campaignNoticeUrl(id, 'demoReadOnly'));
 
     return (
         <SystemDmPage
