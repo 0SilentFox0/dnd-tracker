@@ -26,6 +26,15 @@ const onSelectedToken = (target: EventTarget | null, id: string) =>
     target instanceof Element &&
     !!target.closest(`[data-fx-participant="${id}"][data-fx-anchor="map"]`);
 
+const bubbleSide = ({ left, width }: { left: number; width: number }) =>
+    typeof window !== 'undefined' && left + width / 2 > window.innerWidth / 2
+        ? 'left'
+        : 'right';
+
+// leaves the cells next to the token visible
+const bubbleGap = (tokenWidth: number) =>
+    Math.round(Math.min(Math.max(tokenWidth, 0), 96)) + 10;
+
 export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
     const t = useTranslations('battle.bubble');
 
@@ -148,9 +157,11 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
         <Popover open onOpenChange={close}>
             <PopoverAnchor virtualRef={virtualRef} />
             <PopoverContent
-                side="right"
+                side={bubbleSide(anchor.box)}
                 align="start"
-                sideOffset={anchor.inView ? 10 : 6}
+                sideOffset={
+                    anchor.inView ? bubbleGap(anchor.box.width) : 6
+                }
                 collisionPadding={12}
                 aria-label={title}
                 data-token-bubble

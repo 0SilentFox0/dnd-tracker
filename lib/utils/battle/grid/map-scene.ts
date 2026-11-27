@@ -673,7 +673,41 @@ function cellClickOf(s: SceneState, p: GridPoint): MapClick {
         if (occupant) return tokenClickOf(s, occupant.basicInfo.id);
     }
 
-    return { kind: 'none' };
+    return invalidMoveClick(s, p, key);
+}
+
+function invalidMoveClick(s: SceneState, p: GridPoint, key: string): MapClick {
+    const { current, canAct, isDM, viewer } = s.actor;
+
+    if (!current || !inBounds(s.map, p)) return { kind: 'none' };
+
+    if (canAct) {
+        if (!s.steps || s.marks.has(key)) return { kind: 'none' };
+
+        const occupied = s.participants.some(
+            (x) =>
+                isOnMap(x) &&
+                cellsOf(x, gridOf(s.map)).some((c) => cellKey(c) === key)
+        );
+
+        return {
+            kind: 'reject',
+            reason: textRef(
+                occupied ? REJECT.mapOccupied : REJECT.moveOutOfReach
+            ),
+        };
+    }
+
+    const owns =
+        !isDM &&
+        !!viewer.userId &&
+        s.participants.some(
+            (x) => isOnMap(x) && x.basicInfo.controlledBy === viewer.userId
+        );
+
+    return owns
+        ? { kind: 'reject', reason: textRef(REJECT.moveNotYourTurn) }
+        : { kind: 'none' };
 }
 
 export function deriveMapScene(input: MapSceneInput): MapScene {

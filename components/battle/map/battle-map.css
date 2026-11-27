@@ -274,6 +274,25 @@
 [data-dimmed] { opacity: 0.55; transition: opacity 160ms ease-out; }
 @media (prefers-reduced-motion: reduce) { [data-dimmed] { transition: none; } }
 
+@keyframes map-token-active {
+  0%, 100% { transform: scale(1); opacity: 0.95; }
+  50% { transform: scale(1.14); opacity: 0.45; }
+}
+
+.map-token-active {
+  position: absolute;
+  inset: -5px;
+  border-radius: 9999px;
+  pointer-events: none;
+  border: 3px solid var(--hud-accent, #f2c14e);
+  box-shadow: 0 0 10px var(--hud-accent, #f2c14e), 0 0 0 1px #000;
+  animation: map-token-active 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-token-active { animation: none; }
+}
+
 .map-token-z {
   position: absolute;
   top: 0;
