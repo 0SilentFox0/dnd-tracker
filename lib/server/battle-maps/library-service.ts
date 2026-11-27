@@ -193,7 +193,8 @@ function chunkRowsWithTiles(chunks: EdgeChunks, tileLayers: TileSnapshot) {
 export async function createMap(
     campaignId: string,
     input: BattleMapInput,
-    tileLayers: TileSnapshot = {}
+    tileLayers: TileSnapshot = {},
+    art?: Prisma.BattleMapArtUncheckedCreateWithoutMapInput
 ): Promise<BattleMapBrief> {
     const { header, chunks, headerJson, payloadJson } = payloadOf(input);
 
@@ -213,7 +214,7 @@ export async function createMap(
                 }
             );
 
-        return tx.battleMap.create({
+        const created = await tx.battleMap.create({
             data: {
                 campaignId,
                 name: input.name,
@@ -232,6 +233,13 @@ export async function createMap(
                 },
             },
         });
+
+        if (art)
+            await tx.battleMapArt.create({
+                data: { ...art, mapId: created.id },
+            });
+
+        return created;
     });
 
     return toBrief(row);
@@ -606,7 +614,7 @@ export async function cloneMap(
         prisma.battleMapArt.findUnique({ where: { mapId: map.id } }),
     ]);
 
-    const brief = await createMap(
+    return createMap(
         map.campaignId,
         {
             name: name ?? `${map.name} (copy)`.slice(0, 80),
@@ -614,20 +622,15 @@ export async function cloneMap(
             walls: map.walls,
             bars: map.bars,
         },
-        tileLayersFromRows(rows)
+        tileLayersFromRows(rows),
+        art
+            ? {
+                  scene: art.scene as Prisma.InputJsonValue,
+                  sceneVersion: 1,
+                  bakedUrl: art.bakedUrl,
+                  bakedAt: art.bakedUrl ? new Date() : null,
+                  bakedSceneVersion: art.bakedUrl ? 1 : null,
+              }
+            : undefined
     );
-
-    if (art)
-        await prisma.battleMapArt.create({
-            data: {
-                mapId: brief.id,
-                scene: art.scene as Prisma.InputJsonValue,
-                sceneVersion: 1,
-                bakedUrl: art.bakedUrl,
-                bakedAt: art.bakedUrl ? new Date() : null,
-                bakedSceneVersion: art.bakedUrl ? 1 : null,
-            },
-        });
-
-    return brief;
 }

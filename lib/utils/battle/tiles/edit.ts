@@ -112,6 +112,36 @@ function fillPoints(
     return result;
 }
 
+export function brushFootprint(
+    points: readonly GridPoint[],
+    brushSize: number,
+    mapSize: { cols: number; rows: number },
+    grid: GridKind
+): Map<string, GridPoint> {
+    const targets = new Map<string, GridPoint>();
+
+    const offset = Math.floor((brushSize - 1) / 2);
+
+    const addTarget = (x: number, y: number) => {
+        if (x >= 0 && y >= 0 && x < mapSize.cols && y < mapSize.rows)
+            targets.set(cellKey({ x, y }), { x, y });
+    };
+
+    for (const point of points) {
+        if (grid === 'hex') {
+            for (const c of hexDisk(point, brushSize - 1)) addTarget(c.x, c.y);
+
+            continue;
+        }
+
+        for (let by = 0; by < brushSize; by++)
+            for (let bx = 0; bx < brushSize; bx++)
+                addTarget(point.x + bx - offset, point.y + by - offset);
+    }
+
+    return targets;
+}
+
 export function applyTileStroke(input: {
     chunks: TileLayerChunks;
     layer: TileLayer;
@@ -136,26 +166,7 @@ export function applyTileStroke(input: {
             ? fillPoints(chunks, layer, startPoints[0], mapSize, grid)
             : operationPoints(tool, startPoints, grid);
 
-    const targets = new Map<string, GridPoint>();
-
-    const offset = Math.floor((brushSize - 1) / 2);
-
-    const addTarget = (x: number, y: number) => {
-        if (x >= 0 && y >= 0 && x < mapSize.cols && y < mapSize.rows)
-            targets.set(cellKey({ x, y }), { x, y });
-    };
-
-    for (const point of points) {
-        if (grid === 'hex') {
-            for (const c of hexDisk(point, brushSize - 1)) addTarget(c.x, c.y);
-
-            continue;
-        }
-
-        for (let by = 0; by < brushSize; by++)
-            for (let bx = 0; bx < brushSize; bx++)
-                addTarget(point.x + bx - offset, point.y + by - offset);
-    }
+    const targets = brushFootprint(points, brushSize, mapSize, grid);
 
     const layerChunks = { ...(chunks[layer] ?? {}) };
 

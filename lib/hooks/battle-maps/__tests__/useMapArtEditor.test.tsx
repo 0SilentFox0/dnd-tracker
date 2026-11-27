@@ -142,6 +142,34 @@ describe('useMapArtEditor', () => {
         expect(countFloor(sceneOf(result.current).floors)).toBe(7);
     });
 
+    it('floor erase also removes a scene-blocked cell', () => {
+        const { result } = setup();
+
+        act(() => result.current.start());
+        act(() => result.current.setTool('blocked'));
+        act(() => result.current.onCellStroke([{ x: 4, y: 4 }]));
+        expect(Object.keys(sceneOf(result.current).blocked)).toEqual(['4:4']);
+
+        act(() => result.current.setTool('floor-erase'));
+        act(() => result.current.onCellStroke([{ x: 4, y: 4 }]));
+        expect(sceneOf(result.current).blocked).toEqual({});
+    });
+
+    it('floor erase with a 3x3 brush clears the whole blocked footprint', () => {
+        const { result } = setup();
+
+        act(() => result.current.start());
+        act(() => result.current.setTool('blocked'));
+        act(() => result.current.onCellStroke([{ x: 3, y: 4 }]));
+        act(() => result.current.onCellStroke([{ x: 5, y: 4 }]));
+        expect(Object.keys(sceneOf(result.current).blocked).sort()).toEqual(['3:4', '5:4']);
+
+        act(() => result.current.brush.setSize(3));
+        act(() => result.current.setTool('floor-erase'));
+        act(() => result.current.onCellStroke([{ x: 4, y: 4 }]));
+        expect(sceneOf(result.current).blocked).toEqual({});
+    });
+
     it('coalesces consecutive moves of one light into a single undo step', () => {
         const { result } = setup();
 
@@ -214,6 +242,7 @@ describe('useMapArtEditor', () => {
         it('normalises rotation, clamps scale and position', () => {
             const { result } = started();
 
+            act(() => result.current.stamps.setSnap(false));
             act(() => result.current.stamps.place({ x: 50, y: 50 }));
 
             const { id } = stampsOf(result.current)[0];
@@ -229,6 +258,17 @@ describe('useMapArtEditor', () => {
             });
             act(() => result.current.stamps.update(id, { rot: -30 }));
             expect(stampsOf(result.current)[0].rot).toBe(330);
+        });
+
+        it('snaps a position update that carries both coordinates', () => {
+            const { result } = started();
+
+            act(() => result.current.stamps.place({ x: 50, y: 50 }));
+
+            const { id } = stampsOf(result.current)[0];
+
+            act(() => result.current.stamps.update(id, { x: 230, y: 370 }));
+            expect(stampsOf(result.current)[0]).toMatchObject({ x: 250, y: 350 });
         });
 
         it('coalesces moves with one key into a single undo step', () => {
@@ -323,6 +363,26 @@ describe('useMapArtEditor', () => {
 
             expect(p.x % 100 === 0).toBe(!evenCols);
             expect(p.y % 100 === 0).toBe(evenCols);
+        });
+
+        it('re-snaps the centre when a snapped stamp is rotated', () => {
+            const { result } = setup();
+
+            act(() => result.current.start());
+            act(() => result.current.stamps.setAsset('bed'));
+            act(() => result.current.stamps.place({ x: 330, y: 340 }));
+
+            const { id } = stampsOf(result.current)[0];
+
+            const before = stampsOf(result.current)[0];
+
+            act(() => result.current.stamps.update(id, { rot: 90 }));
+
+            const after = stampsOf(result.current)[0];
+
+            expect(after.rot).toBe(90);
+            expect(after.x % 100 === 0).not.toBe(before.x % 100 === 0);
+            expect(after.y % 100 === 0).not.toBe(before.y % 100 === 0);
         });
 
         it('renumbers z instead of growing past the schema bound', () => {

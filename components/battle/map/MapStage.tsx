@@ -1,10 +1,10 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { memo, useMemo } from 'react';
 
 import { ArtCanvas } from './art/ArtCanvas';
 import { ArtLightsLayer } from './art/ArtLightsLayer';
-import { ArtStampsLayer } from './art/ArtStampsLayer';
 import { DoorMenu } from './edges/DoorMenu';
 import { EdgeEditor } from './edges/EdgeEditor';
 import { FogWindowContext } from './fog/fog-window-context';
@@ -24,6 +24,11 @@ import type { MapStageProps } from './map-stage-types';
 
 import { modeUiOf } from '@/components/battle/modes';
 import { gridMetrics, gridOf, unitOf } from '@/lib/utils/battle/grid';
+
+const ArtStampsLayer = dynamic(
+    () => import('./art/ArtStampsLayer').then((m) => m.ArtStampsLayer),
+    { ssr: false }
+);
 
 export type {
     MapStageEditing,
@@ -206,6 +211,7 @@ function MapStageImpl({
                         stamps={art.scene.stamps}
                         map={map}
                         editing={art.stamps}
+                        wasDragged={wasDragged}
                     />
                 )}
                 {ui?.MapLayers && (

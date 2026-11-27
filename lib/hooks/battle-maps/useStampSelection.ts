@@ -74,7 +74,13 @@ export function useStampSelection({
         [masks]
     );
 
-    const drag = useRef<{ id: string; dx: number; dy: number } | null>(null);
+    const drag = useRef<{ id: string; dx: number; dy: number; key: string } | null>(
+        null
+    );
+
+    const dragCount = useRef(0);
+
+    const gesture = useRef(0);
 
     const scaleStart = useRef<{ id: string; dist: number; scale: number } | null>(
         null
@@ -84,6 +90,7 @@ export function useStampSelection({
 
     const onPointerDown = (at: Point): string | null => {
         scaleStart.current = null;
+        gesture.current++;
 
         const id = pickStamp(stamps, at, maskOf);
 
@@ -91,7 +98,14 @@ export function useStampSelection({
 
         const hit = stamps.find((s) => s.id === id);
 
-        drag.current = hit ? { id: hit.id, dx: hit.x - at.x, dy: hit.y - at.y } : null;
+        drag.current = hit
+            ? {
+                  id: hit.id,
+                  dx: hit.x - at.x,
+                  dy: hit.y - at.y,
+                  key: `stamp-move:${hit.id}:${dragCount.current++}`,
+              }
+            : null;
 
         return hit?.id ?? null;
     };
@@ -99,12 +113,13 @@ export function useStampSelection({
     const onPointerMove = (at: Point) => {
         const d = drag.current;
 
-        if (d) api.update(d.id, { x: at.x + d.dx, y: at.y + d.dy }, `stamp-move:${d.id}`);
+        if (d) api.update(d.id, { x: at.x + d.dx, y: at.y + d.dy }, d.key);
     };
 
     const onPointerUp = () => {
         drag.current = null;
         scaleStart.current = null;
+        gesture.current++;
     };
 
     const onRotateHandle = (at: Point, mods: Mods = {}) => {
@@ -116,7 +131,7 @@ export function useStampSelection({
 
         if (mods.shiftKey) rot = Math.round(rot / ROT_STEP) * ROT_STEP;
 
-        api.update(s.id, { rot }, `stamp-rot:${s.id}`);
+        api.update(s.id, { rot }, `stamp-rot:${s.id}:${gesture.current}`);
     };
 
     const onScaleHandle = (at: Point) => {
@@ -134,7 +149,7 @@ export function useStampSelection({
         api.update(
             s.id,
             { scale: start.scale * (dist / start.dist) },
-            `stamp-scale:${s.id}`
+            `stamp-scale:${s.id}:${gesture.current}`
         );
     };
 
@@ -146,7 +161,7 @@ export function useStampSelection({
         api.update(
             s.id,
             { scale: s.scale * WHEEL_STEP ** (deltaY < 0 ? 1 : -1) },
-            `stamp-wheel:${s.id}`
+            `stamp-wheel:${s.id}:${gesture.current}`
         );
     };
 

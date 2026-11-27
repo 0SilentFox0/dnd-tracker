@@ -5,9 +5,16 @@ vi.mock('@/lib/server/battle-maps/library-service', () => ({
 }));
 
 import { FLOOR_MATERIALS } from '@/lib/constants/map-art/materials';
+import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
+import { visibleFrom } from '@/lib/utils/battle/vision/shadowcast';
 import { encodeEdges } from '@/lib/utils/battle/map-storage/edge-chunks';
 import { encodeTileChunk } from '@/lib/utils/battle/tiles/rle';
-import { applyConversionTx } from '@/scripts/maps/lib/convert-map';
+import {
+    applyConversionTx,
+    applyObjectsTx,
+    buildConversion,
+    buildObjectsConversion,
+} from '@/scripts/maps/lib/convert-map';
 import { convertTiles } from '@/scripts/maps/lib/tiles-to-scene';
 
 const [A] = FLOOR_MATERIALS.map((m) => m.code);
@@ -20,15 +27,28 @@ const ground = (() => {
     return encodeTileChunk(arr);
 })();
 
+const BARREL = TILE_CATALOG.find((t) => t.key === 'barrel' && t.layer === 'objects')!.id;
+
+const objects = (() => {
+    const arr = new Uint16Array(256);
+
+    arr[5 * 16 + 4] = BARREL;
+
+    return encodeTileChunk(arr);
+})();
+
 const header = { cols: 10, rows: 10 };
 
 const edgeData = encodeEdges({ walls: ['2:2:e'] }, 10, 10)['0:0'];
 
 function makeTx(over: { count?: number; art?: unknown } = {}) {
+    const update = vi.fn();
+
     return {
         battleMapArt: {
             findUnique: vi.fn(async () => over.art ?? null),
             create: vi.fn(),
+            update,
         },
         battleMap: {
             findUniqueOrThrow: vi.fn(async () => ({ header, mapVersion: 4 })),
@@ -40,7 +60,7 @@ function makeTx(over: { count?: number; art?: unknown } = {}) {
                     cx: 0,
                     cy: 0,
                     data: edgeData,
-                    tileLayers: { ground, objects: 'o' },
+                    tileLayers: { ground, objects },
                 },
             ]),
             update: vi.fn(),
@@ -49,7 +69,7 @@ function makeTx(over: { count?: number; art?: unknown } = {}) {
             findUnique: vi.fn(async () => ({
                 payload: {
                     header,
-                    tileLayers: { '0:0': { ground, objects: 'o' } },
+                    tileLayers: { '0:0': { ground, objects } },
                 },
             })),
             create: vi.fn(),
@@ -71,10 +91,30 @@ describe('applyConversionTx', () => {
             data: {
                 mapId: 'm1',
                 version: 5,
-                payload: { header, tileLayers: { '0:0': { objects: 'o' } } },
+                payload: {
+                    header: { ...header, blocked: ['4:5'], sightBlocked: ['4:5'] },
+                    tileLayers: {},
+                },
             },
         });
         expect(tx.battleMapArt.create).toHaveBeenCalled();
+    });
+
+    it('writes the stamp footprint into the header in the same transaction', async () => {
+        const tx = makeTx();
+
+        await applyConversionTx(tx as never, 'm1');
+
+        expect(tx.battleMap.updateMany).toHaveBeenCalledWith({
+            where: { id: 'm1', mapVersion: 4 },
+            data: {
+                mapVersion: { increment: 1 },
+                header: { ...header, blocked: ['4:5'], sightBlocked: ['4:5'] },
+            },
+        });
+        expect(tx.battleMapChunk.update).toHaveBeenCalledWith(
+            expect.objectContaining({ data: { tileLayers: expect.anything() } })
+        );
     });
 
     it('fails when the map version moved during the transaction', async () => {
@@ -103,5 +143,122 @@ describe('convertTiles', () => {
 
         expect(wallsClipped).toBe(1);
         expect(Object.keys(scene.walls)).toEqual(['2:2:e']);
+    });
+});
+
+describe('buildConversion limits', () => {
+    it('rejects a header whose written blocked list exceeds the limit', () => {
+        const blocked = Array.from({ length: 3601 }, (_, i) => `${i}:99`);
+
+        expect(() =>
+            buildConversion({ ...header, blocked }, [
+                { cx: 0, cy: 0, data: edgeData, tileLayers: { ground, objects } },
+            ])
+        ).toThrow('too many blocked cells');
+    });
+});
+
+describe('buildConversion with objects', () => {
+    it('returns stamps that validate, and a header where a column blocks sight', () => {
+        const chunks = [{ cx: 0, cy: 0, data: edgeData, tileLayers: { ground, objects } }];
+
+        const conversion = buildConversion(header, chunks);
+
+        expect(conversion?.scene.stamps).toHaveLength(1);
+        expect(conversion?.objects).toMatchObject({ total: 1, newBlocked: 1 });
+
+        const map = conversion!.header as never;
+
+        expect(visibleFrom(map, { x: 1, y: 5 }, 9).has('7:5')).toBe(false);
+    });
+});
+
+describe('buildObjectsConversion', () => {
+    const scene = convertTiles({ '0:0': { ground } }, { cols: 10, rows: 10 }).scene;
+
+    it('is null when the map has no objects layer', () => {
+        expect(
+            buildObjectsConversion(scene, header, [
+                { cx: 0, cy: 0, data: edgeData, tileLayers: { ground } },
+            ])
+        ).toBeNull();
+    });
+
+    it('appends stamps to the existing scene and is idempotent', () => {
+        const chunks = [{ cx: 0, cy: 0, data: edgeData, tileLayers: { objects } }];
+
+        const first = buildObjectsConversion(scene, header, chunks);
+
+        expect(first?.scene.stamps).toHaveLength(1);
+
+        const again = buildObjectsConversion(first!.scene, header, chunks);
+
+        expect(again).toBeNull();
+    });
+
+    it('rejects a header whose written blocked list exceeds the limit', () => {
+        const blocked = Array.from({ length: 3601 }, (_, i) => `${i}:99`);
+
+        expect(() =>
+            buildObjectsConversion(
+                scene,
+                { ...header, blocked },
+                [{ cx: 0, cy: 0, data: edgeData, tileLayers: { objects } }]
+            )
+        ).toThrow('too many blocked cells');
+    });
+});
+
+describe('applyObjectsTx', () => {
+    const artRow = (baked: number | null) => ({
+        scene: convertTiles({ '0:0': { ground } }, { cols: 10, rows: 10 }).scene,
+        sceneVersion: 2,
+        bakedSceneVersion: baked,
+    });
+
+    it('bumps sceneVersion, strips objects and writes header mechanics', async () => {
+        const tx = makeTx({ art: artRow(null) });
+
+        const done = await applyObjectsTx(tx as never, 'm1');
+
+        expect(done?.objects.stamps).toHaveLength(1);
+        expect(tx.battleMapArt.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({ sceneVersion: { increment: 1 } }),
+            })
+        );
+        expect(tx.battleMap.updateMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    header: expect.objectContaining({ blocked: ['4:5'] }),
+                }),
+            })
+        );
+    });
+
+    it('strips only the objects layer from chunks and the snapshot', async () => {
+        const tx = makeTx({ art: artRow(null) });
+
+        await applyObjectsTx(tx as never, 'm1');
+
+        const chunkCall = tx.battleMapChunk.update.mock.calls[0][0] as {
+            data: { tileLayers: Record<string, string> };
+        };
+
+        expect(Object.keys(chunkCall.data.tileLayers)).toEqual(['ground']);
+
+        const snap = tx.battleMapVersion.create.mock.calls[0][0] as {
+            data: { payload: { tileLayers: Record<string, Record<string, string>> } };
+        };
+
+        expect(Object.keys(snap.data.payload.tileLayers['0:0'])).toEqual(['ground']);
+    });
+
+    it('skips baked art unless includeBaked', async () => {
+        const tx = makeTx({ art: artRow(2) });
+
+        expect(await applyObjectsTx(tx as never, 'm1')).toBeNull();
+        expect(tx.battleMap.updateMany).not.toHaveBeenCalled();
+        expect(await applyObjectsTx(tx as never, 'm1', { includeBaked: true })).not.toBeNull();
     });
 });

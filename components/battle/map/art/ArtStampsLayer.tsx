@@ -19,6 +19,7 @@ interface Props {
     stamps: MapArtStamp[];
     map: BattleMapConfig;
     editing: NonNullable<ArtPreviewState['stamps']>;
+    wasDragged?: () => boolean;
 }
 
 const HANDLE_R = unitOf(0.14);
@@ -31,6 +32,7 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
     stamps,
     map,
     editing,
+    wasDragged,
 }: Props) {
     const { mode, api } = editing;
 
@@ -48,15 +50,17 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
 
     const selected = stamps.find((s) => s.id === api.selectedId);
 
-    const onKey = sel.onKey;
+    const keyRef = useRef<(e: KeyboardEvent) => void>(() => undefined);
+
+    keyRef.current = (e) => void sel.onKey(e, selectMode ? 'stamp-select' : 'stamp');
 
     useEffect(() => {
-        const handler = (e: KeyboardEvent) => void onKey(e, selectMode ? 'stamp-select' : 'stamp');
+        const handler = (e: KeyboardEvent) => keyRef.current(e);
 
         window.addEventListener('keydown', handler);
 
         return () => window.removeEventListener('keydown', handler);
-    });
+    }, []);
 
     const onWheel = sel.onWheel;
 
@@ -166,7 +170,7 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
                     sel.onPointerUp();
                 }}
                 onClick={(e) => {
-                    if (selectMode) return;
+                    if (selectMode || wasDragged?.()) return;
 
                     const at = svgPoint(e);
 

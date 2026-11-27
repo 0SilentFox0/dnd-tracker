@@ -763,4 +763,43 @@ describe('battle map library service', () => {
             bakedSceneVersion: 1,
         });
     });
+
+    it('clone creates the art row inside the createMap transaction', async () => {
+        const { id } = await createMap('c1', input());
+
+        db.arts.set(id, { mapId: id, scene: { v: 1 }, bakedUrl: null });
+
+        const source = await getMap(id);
+
+        if (!source) throw new Error('expected source map');
+
+        let inTx = false;
+
+        const seen: boolean[] = [];
+
+        db.api.$transaction.mockImplementationOnce(
+            async (fn: (tx: unknown) => unknown) => {
+                inTx = true;
+
+                try {
+                    return await fn(db.api);
+                } finally {
+                    inTx = false;
+                }
+            }
+        );
+
+        db.api.battleMapArt.create.mockImplementationOnce(
+            async ({ data }: { data: { mapId: string } }) => {
+                seen.push(inTx);
+                db.arts.set(data.mapId, data);
+
+                return data;
+            }
+        );
+
+        await cloneMap(source, undefined);
+
+        expect(seen).toEqual([true]);
+    });
 });

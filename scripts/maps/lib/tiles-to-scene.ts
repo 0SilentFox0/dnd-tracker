@@ -21,7 +21,32 @@ export const ART_LAYERS = [
     'wallfill',
     'edge-art',
     'effects',
+    'objects',
 ] as const;
+
+export interface DroppedLayers {
+    edgeArt: number;
+    effects: number;
+}
+
+/** Painted cells in the layers that conversion discards without a replacement. */
+export function countDroppedLayers(tileLayers: ChunkTileLayers): DroppedLayers {
+    const dropped: DroppedLayers = { edgeArt: 0, effects: 0 };
+
+    for (const layers of Object.values(tileLayers)) {
+        if (layers['edge-art'])
+            dropped.edgeArt += decodeTileChunk(layers['edge-art']).filter(
+                Boolean
+            ).length;
+
+        if (layers.effects)
+            dropped.effects += decodeTileChunk(layers.effects).filter(
+                Boolean
+            ).length;
+    }
+
+    return dropped;
+}
 
 export const hasFloorLayers = (tileLayers: ChunkTileLayers): boolean =>
     Object.values(tileLayers).some((l) => l.ground || l.wallfill);
@@ -74,13 +99,14 @@ export function convertTiles(
 
 /** Layers that stay on the current chunk row; null when nothing remains. */
 export function stripArtLayers(
-    layers: Partial<Record<string, string>>
+    layers: Partial<Record<string, string>>,
+    strip: readonly string[] = ART_LAYERS
 ): Record<string, string> | null {
     const kept = Object.fromEntries(
         Object.entries(layers).filter(
             ([k, v]) =>
                 typeof v === 'string' &&
-                !(ART_LAYERS as readonly string[]).includes(k)
+                !strip.includes(k)
         )
     );
 

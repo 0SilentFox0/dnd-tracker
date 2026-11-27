@@ -9,7 +9,13 @@ import {
     useState,
 } from 'react';
 
-import { edgeAtScreenPoint, screenToUnit, UNIT } from '@/lib/utils/battle/grid';
+import {
+    connectedEdgePath,
+    edgeAtScreenPoint,
+    gridOf,
+    screenToUnit,
+    UNIT,
+} from '@/lib/utils/battle/grid';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface EdgeEditing {
@@ -23,6 +29,7 @@ export interface EdgeEditing {
 interface Stroke {
     pointerId: number;
     remove: boolean;
+    sampled: string[];
     edges: Set<string>;
     last: { x: number; y: number };
 }
@@ -109,6 +116,7 @@ export function useEdgeStroke(map: Dims, editing: EdgeEditing) {
             strokeRef.current = {
                 pointerId: e.pointerId,
                 remove: isRemove,
+                sampled: [edge],
                 edges: new Set([edge]),
                 last: point,
             };
@@ -129,14 +137,25 @@ export function useEdgeStroke(map: Dims, editing: EdgeEditing) {
 
             if (!point) return;
 
-            const before = s.edges.size;
+            const dims = { cols, rows, gridType };
 
-            for (const edge of edgesBetween({ cols, rows, gridType }, s.last, point))
-                s.edges.add(edge);
+            const added = edgesBetween(dims, s.last, point);
 
             s.last = point;
 
-            if (s.edges.size !== before) setPending(new Set(s.edges));
+            if (!added.length) return;
+
+            s.sampled.push(...added);
+
+            const next = new Set(connectedEdgePath(gridOf(dims), s.sampled));
+
+            const changed =
+                next.size !== s.edges.size ||
+                [...next].some((edge) => !s.edges.has(edge));
+
+            s.edges = next;
+
+            if (changed) setPending(next);
         },
         [cols, rows, gridType]
     );

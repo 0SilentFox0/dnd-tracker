@@ -74,7 +74,7 @@ describe('bakeScene layer failures', () => {
 
 describe('bakeScene', () => {
     it('shrinks the cell size when the first blob is too large', async () => {
-        const { deps: d, sizesCalled } = deps([5 * MB, 3 * MB]);
+        const { deps: d, sizesCalled } = deps([9 * MB, 5 * MB]);
 
         const result = await bakeScene(input, d);
 

@@ -69,6 +69,32 @@ describe('useEdgeStroke', () => {
         expect(view.result.current.pending.size).toBe(0);
     });
 
+    it('протяг уздовж лінії через вершину не дає перпендикулярних ребер', () => {
+        const { view, onCommit } = setup();
+
+        const y = 2 * UNIT;
+
+        act(() =>
+            view.result.current.handlers.onPointerDown(ev(UNIT * 1.5, y))
+        );
+
+        for (const [x, dy] of [
+            [UNIT * 1.9, 3],
+            [UNIT * 2, -1],
+            [UNIT * 2.1, 2],
+            [UNIT * 2.5, 0],
+        ])
+            act(() =>
+                view.result.current.handlers.onPointerMove(ev(x, y + dy))
+            );
+
+        act(() => view.result.current.handlers.onPointerUp(ev(UNIT * 2.5, y)));
+
+        const [add] = onCommit.mock.calls[0];
+
+        expect([...add].sort()).toEqual(['1:1:s', '2:1:s']);
+    });
+
     it('перше ребро існуюче — штрих знімає лише існуючі', () => {
         const { view, onCommit } = setup({
             existing: new Set(['1:1:s', '3:1:s']),

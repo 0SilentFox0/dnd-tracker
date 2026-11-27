@@ -132,7 +132,7 @@ describe('useStampSelection handles', () => {
 
         expect(id).toBe('s1');
         expect(patch.rot % 15).toBeCloseTo(0, 6);
-        expect(coalesce).toBe('stamp-rot:s1');
+        expect(coalesce).toBe('stamp-rot:s1:0');
     });
 
     it('scales relative to the first handle distance', () => {
@@ -141,7 +141,7 @@ describe('useStampSelection handles', () => {
         sel.onScaleHandle({ x: 200, y: 100 });
         sel.onScaleHandle({ x: 300, y: 100 });
 
-        expect(api.update).toHaveBeenLastCalledWith('s1', { scale: 2 }, 'stamp-scale:s1');
+        expect(api.update).toHaveBeenLastCalledWith('s1', { scale: 2 }, 'stamp-scale:s1:0');
     });
 
     it('drags with the pointer offset and a move coalesce key', () => {
@@ -150,10 +150,42 @@ describe('useStampSelection handles', () => {
         expect(sel.onPointerDown({ x: 110, y: 110 })).toBe('s1');
         expect(api.select).toHaveBeenCalledWith('s1');
         sel.onPointerMove({ x: 150, y: 130 });
-        expect(api.update).toHaveBeenLastCalledWith('s1', { x: 140, y: 120 }, 'stamp-move:s1');
+        expect(api.update).toHaveBeenLastCalledWith('s1', { x: 140, y: 120 }, 'stamp-move:s1:0');
         sel.onPointerUp();
         sel.onPointerMove({ x: 0, y: 0 });
         expect(api.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses a fresh coalesce key for each drag', () => {
+        const { api, sel } = setup();
+
+        sel.onPointerDown({ x: 110, y: 110 });
+        sel.onPointerMove({ x: 120, y: 110 });
+        sel.onPointerUp();
+        sel.onPointerDown({ x: 110, y: 110 });
+        sel.onPointerMove({ x: 120, y: 110 });
+
+        const keys = (api.update as unknown as Mock).mock.calls.map((c: unknown[]) => c[2]);
+
+        expect(new Set(keys).size).toBe(2);
+    });
+
+    it('uses separate coalesce keys for separate rotate, scale and wheel gestures', () => {
+        const { api, sel } = setup();
+
+        sel.onRotateHandle({ x: 200, y: 100 });
+        sel.onPointerUp();
+        sel.onRotateHandle({ x: 200, y: 150 });
+        sel.onScaleHandle({ x: 200, y: 100 });
+        sel.onPointerUp();
+        sel.onScaleHandle({ x: 200, y: 100 });
+        sel.onWheel(-1);
+        sel.onPointerUp();
+        sel.onWheel(-1);
+
+        const keys = (api.update as unknown as Mock).mock.calls.map((c: unknown[]) => c[2]);
+
+        expect(new Set(keys).size).toBe(6);
     });
 
     it('reports no hit on empty space so the pan can take the gesture', () => {

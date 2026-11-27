@@ -4,6 +4,7 @@ import { FLOOR_MATERIALS } from '@/lib/constants/map-art/materials';
 import { mapArtSaveSchema } from '@/lib/schemas/map-art';
 import { decodeTileChunk, encodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import {
+    countDroppedLayers,
     countFloorCells,
     hasFloorLayers,
     stripArtLayers,
@@ -91,7 +92,7 @@ describe('hasFloorLayers', () => {
 });
 
 describe('stripArtLayers', () => {
-    it('keeps objects and returns null when nothing remains', () => {
+    it('strips every art layer including objects and returns null when nothing remains', () => {
         expect(
             stripArtLayers({
                 ground: 'a',
@@ -100,8 +101,30 @@ describe('stripArtLayers', () => {
                 effects: 'd',
                 objects: 'o',
             })
-        ).toEqual({ objects: 'o' });
+        ).toBeNull();
 
-        expect(stripArtLayers({ ground: 'a', effects: 'd' })).toBeNull();
+        expect(stripArtLayers({ ground: 'a', other: 'x' })).toEqual({ other: 'x' });
+    });
+});
+
+describe('countDroppedLayers', () => {
+    it('counts painted edge-art and effects cells across chunks', () => {
+        expect(
+            countDroppedLayers({
+                '0:0': {
+                    ground: chunk({ 0: A }),
+                    'edge-art': chunk({ 0: A, 1: A }),
+                    effects: chunk({ 2: B }),
+                },
+                '1:0': { effects: chunk({ 0: B, 1: B }) },
+            })
+        ).toEqual({ edgeArt: 2, effects: 3 });
+    });
+
+    it('is zero when none of the layers exist', () => {
+        expect(countDroppedLayers({ '0:0': { ground: chunk({ 0: A }) } })).toEqual({
+            edgeArt: 0,
+            effects: 0,
+        });
     });
 });

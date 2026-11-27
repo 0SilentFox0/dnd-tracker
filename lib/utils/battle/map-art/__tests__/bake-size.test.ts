@@ -36,7 +36,7 @@ describe('bake size', () => {
     });
 
     it('shrinks the cell size for an oversized file', () => {
-        const next = nextBakeCellPx(81, 8 * 1024 * 1024);
+        const next = nextBakeCellPx(81, 12 * 1024 * 1024);
 
         expect(next).toBeLessThan(81);
         expect(next).toBeGreaterThanOrEqual(BAKE.minCellPx);
