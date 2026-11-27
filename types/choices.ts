@@ -31,6 +31,11 @@ export interface SelectedSpellGrant {
     grantPolicy: SpellGrantPolicy;
 }
 
+export interface StartingKit {
+    items: { artifact: string; quantity: number }[];
+    gp: number;
+}
+
 export interface ChoiceOption {
     id: string;
     name: string;
@@ -39,6 +44,11 @@ export interface ChoiceOption {
     requires?: string[];
     abilities: Ability[];
     spells?: { level: number; spellId: string; grant?: SpellGrantPolicy }[];
+    kit?: StartingKit;
+}
+
+export interface StartingKitResult {
+    kitSkipped?: string[];
 }
 
 export interface Choice {
@@ -48,6 +58,7 @@ export interface Choice {
     level: number;
     count: number | { scale: string };
     lineage?: true;
+    atCreation?: true;
     kind: ChoiceKind;
     options?: ChoiceOption[];
     featTypes?: FeatType[];

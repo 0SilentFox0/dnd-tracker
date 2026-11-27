@@ -90,7 +90,8 @@
     "featTaken": "already taken",
     "available": "Available",
     "unavailable": "Not available yet",
-    "details": "Details"
+    "details": "Details",
+    "featList": "Spell list: {list}"
   },
   "editor": {
     "loading": "Loading choices…",
@@ -120,7 +121,9 @@
     "singleLineage": "A race has at most one lineage",
     "tableCountClassOnly": "Count “from class table” is only for a class",
     "featInFeat": "A feat cannot contain a feat choice",
-    "nothingToSave": "No choices to save"
+    "nothingToSave": "No choices to save",
+    "atCreationOptionOnly": "Starting choices must be an option list",
+    "atCreationClassOnly": "Starting choices are only for a class"
   },
   "requirement": {
     "level": "from level {need}, now {have}",
@@ -187,5 +190,13 @@
     "expertise": "The player doubles proficiency in a skill they already know.",
     "abilityScore": "The player spreads +1 points across abilities.",
     "spell": "The player picks spells by the rules below."
+  },
+  "kit": {
+    "title": "Starting equipment",
+    "optional": "Optional: you can skip it",
+    "none": "No package",
+    "skipped": "Not found in this campaign, not granted: {names}",
+    "hint": "Pick a starting equipment package; weapons, armor and shields go to the inventory with the gold. The rest is a description only.",
+    "openSpells": "Spells are not chosen yet: {count} left. You can pick them later in the Choices tab."
   }
 }

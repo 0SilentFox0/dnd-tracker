@@ -907,6 +907,45 @@
                 ]
               }
             ]
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Greataxe, 4 Handaxes, Explorer's Pack, and 15 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_greataxe",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_handaxe",
+                      "quantity": 4
+                    }
+                  ],
+                  "gp": 15
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "75 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 75
+                }
+              }
+            ]
           }
         ]
       },
@@ -1729,6 +1768,45 @@
               "minLevel": 1,
               "maxLevel": "slots"
             }
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Leather Armor, 2 Daggers, Musical Instrument of your choice, Entertainer's Pack, and 19 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_leather-armor",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_dagger",
+                      "quantity": 2
+                    }
+                  ],
+                  "gp": 19
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "90 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 90
+                }
+              }
+            ]
           }
         ]
       },
@@ -2282,6 +2360,49 @@
               "minLevel": 1,
               "maxLevel": "slots"
             }
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Chain Shirt, Shield, Mace, Holy Symbol, Priest's Pack, and 7 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_chain-shirt",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_shield",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_mace",
+                      "quantity": 1
+                    }
+                  ],
+                  "gp": 7
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "110 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 110
+                }
+              }
+            ]
           }
         ]
       },
@@ -2964,6 +3085,53 @@
               "minLevel": 1,
               "maxLevel": "slots"
             }
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Leather Armor, Shield, Sickle, Druidic Focus (Quarterstaff), Explorer's Pack, Herbalism Kit, and 9 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_leather-armor",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_shield",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_sickle",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_quarterstaff",
+                      "quantity": 1
+                    }
+                  ],
+                  "gp": 9
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "50 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 50
+                }
+              }
+            ]
           }
         ]
       },
@@ -4545,6 +4713,80 @@
                 ]
               }
             ]
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Chain Mail, Greatsword, Flail, 8 Javelins, Dungeoneer's Pack, and 4 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_chain-mail",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_greatsword",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_flail",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_javelin",
+                      "quantity": 8
+                    }
+                  ],
+                  "gp": 4
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Dungeoneer's Pack, and 11 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_studded-leather-armor",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_scimitar",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_shortsword",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_longbow",
+                      "quantity": 1
+                    }
+                  ],
+                  "gp": 11
+                }
+              },
+              {
+                "id": "c",
+                "name": "Package C",
+                "description": "155 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 155
+                }
+              }
+            ]
           }
         ]
       },
@@ -5182,6 +5424,47 @@
               ],
               "shield": "without"
             }
+          }
+        ],
+        "choices": [
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Spear, 5 Daggers, Artisan's Tools or Musical Instrument chosen for the tool proficiency above, Explorer's Pack, and 11 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_spear",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_dagger",
+                      "quantity": 5
+                    }
+                  ],
+                  "gp": 11
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "50 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 50
+                }
+              }
+            ]
           }
         ]
       },
@@ -7111,6 +7394,53 @@
               "minLevel": 1,
               "maxLevel": "slots"
             }
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Chain Mail, Shield, Longsword, 6 Javelins, Holy Symbol, Priest's Pack, and 9 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_chain-mail",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_shield",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_longsword",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_javelin",
+                      "quantity": 6
+                    }
+                  ],
+                  "gp": 9
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "150 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 150
+                }
+              }
+            ]
           }
         ]
       },
@@ -8767,6 +9097,53 @@
               "minLevel": 1,
               "maxLevel": "slots"
             }
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Druidic Focus (sprig of mistletoe), Explorer's Pack, and 7 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_studded-leather-armor",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_scimitar",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_shortsword",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_longbow",
+                      "quantity": 1
+                    }
+                  ],
+                  "gp": 7
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "150 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 150
+                }
+              }
+            ]
           }
         ]
       },
@@ -10509,6 +10886,53 @@
                 ]
               }
             ]
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Leather Armor, 2 Daggers, Shortsword, Shortbow, 20 Arrows, Quiver, Thieves' Tools, Burglar's Pack, and 8 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_leather-armor",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_dagger",
+                      "quantity": 2
+                    },
+                    {
+                      "artifact": "srd-2024_shortsword",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_shortbow",
+                      "quantity": 1
+                    }
+                  ],
+                  "gp": 8
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "100 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 100
+                }
+              }
+            ]
           }
         ]
       },
@@ -11140,6 +11564,45 @@
               "minLevel": 1,
               "maxLevel": "slots"
             }
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Spear, 2 Daggers, Arcane Focus (crystal), Dungeoneer's Pack, and 28 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_spear",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_dagger",
+                      "quantity": 2
+                    }
+                  ],
+                  "gp": 28
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "50 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 50
+                }
+              }
+            ]
           }
         ]
       },
@@ -12620,6 +13083,49 @@
               "minLevel": 1,
               "maxLevel": "slots"
             }
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "Leather Armor, Sickle, 2 Daggers, Arcane Focus (orb), Book (occult lore), Scholar's Pack, and 15 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_leather-armor",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_sickle",
+                      "quantity": 1
+                    },
+                    {
+                      "artifact": "srd-2024_dagger",
+                      "quantity": 2
+                    }
+                  ],
+                  "gp": 15
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "100 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 100
+                }
+              }
+            ]
           }
         ]
       },
@@ -13512,6 +14018,45 @@
               "minLevel": 1,
               "maxLevel": "slots"
             }
+          },
+          {
+            "id": "starting-equipment",
+            "label": "Starting Equipment",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "atCreation": true,
+            "options": [
+              {
+                "id": "a",
+                "name": "Package A",
+                "description": "2 Daggers, Arcane Focus (Quarterstaff), Robe, Spellbook, Scholar's Pack, and 5 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [
+                    {
+                      "artifact": "srd-2024_dagger",
+                      "quantity": 2
+                    },
+                    {
+                      "artifact": "srd-2024_quarterstaff",
+                      "quantity": 1
+                    }
+                  ],
+                  "gp": 5
+                }
+              },
+              {
+                "id": "b",
+                "name": "Package B",
+                "description": "55 GP",
+                "abilities": [],
+                "kit": {
+                  "items": [],
+                  "gp": 55
+                }
+              }
+            ]
           }
         ]
       },

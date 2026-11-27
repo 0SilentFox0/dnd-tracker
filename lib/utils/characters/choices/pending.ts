@@ -113,6 +113,14 @@ export const pendingIssues = (
         .filter((v) => missing(v, refs, true) > 0)
         .map((v) => choiceIssue(v.path, 'CHOICE_INCOMPLETE', v.choice.label));
 
+export const pendingSpellCount = (
+    visits: readonly PickVisit[],
+    refs: PendingRefs
+): number =>
+    visits
+        .filter((v) => v.choice.kind === 'spell')
+        .reduce((sum, v) => sum + missing(v, refs, true), 0);
+
 const isBackgroundVisit = (v: PickVisit): boolean =>
     v.path.startsWith('backgroundChoices.') ||
     v.path.startsWith('backgroundFeatPicks.');

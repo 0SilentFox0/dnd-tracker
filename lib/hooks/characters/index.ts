@@ -47,6 +47,7 @@ export {
     type InventorySelection,
     useInventory,
 } from './useInventory';
+export { useOpenSpellPicks } from './useOpenSpellPicks';
 export {
     useAwardXp,
     useCharacterLog,

@@ -1,4 +1,8 @@
 {
+  "2026-11-27-starting-equipment": {
+    "title": "Starting equipment for new heroes",
+    "body": "When you create a hero you can pick a starting equipment package of the class: weapons, armor and shield go to the inventory (and are equipped) together with the gold. A reminder shows when spells are still unpicked."
+  },
   "2026-11-27-invite-links": {
     "title": "Invite players with a link",
     "body": "Copy the invite link next to the code in the campaign header and send it. The player signs in or registers and lands straight on the join page. Codes no longer use 0, O, 1 and I."

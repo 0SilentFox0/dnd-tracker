@@ -14,17 +14,56 @@ import {
     spells,
 } from '@/lib/utils/characters/choices/__tests__/fixtures';
 import type { ChoicesState } from '@/types/choices';
+import type { GameClassData } from '@/types/classes';
 
 const view = { ...refs, ready: true, feats: Object.values(featsById), spells };
+
+const kitClass: GameClassData = {
+    ...sorcerer,
+    id: 'cls-kit',
+    features: [
+        {
+            level: 1,
+            abilities: [],
+            choices: [
+                {
+                    id: 'starting-equipment',
+                    label: 'Starting Equipment',
+                    level: 1,
+                    count: 1,
+                    kind: 'option',
+                    atCreation: true,
+                    options: [
+                        {
+                            id: 'a',
+                            name: 'Package A',
+                            abilities: [],
+                            kit: { items: [], gp: 5 },
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+};
+
+const kitView = {
+    ...view,
+    classesById: { ...view.classesById, [kitClass.id]: kitClass },
+};
 
 function Harness({
     initial,
     classMode,
     level = 1,
+    creation,
+    refs: harnessRefs = view,
 }: {
     initial: ChoicesState;
     classMode: boolean;
     level?: number;
+    creation?: boolean;
+    refs?: typeof view;
 }) {
     const [data, set] = useState<ChoicesState>(initial);
 
@@ -32,7 +71,8 @@ function Harness({
         <>
             <ChoicesEditor
                 state={{ data, set }}
-                refs={view}
+                refs={harnessRefs}
+                creation={creation}
                 hero={{ level, scores, skills: {}, classMode }}
                 issues={[
                     {
@@ -89,5 +129,53 @@ describe('ChoicesEditor', () => {
         expect(
             screen.getByRole('heading', { name: 'Sorcerer 1' })
         ).toBeTruthy();
+    });
+
+    describe('starting equipment', () => {
+        const initial = {
+            ...empty,
+            classes: [{ classId: kitClass.id, level: 1 }],
+        };
+
+        it('only in the creation form; "No package" clears the pick', () => {
+            const { unmount } = render(
+                <Harness initial={initial} classMode refs={kitView} />
+            );
+
+            expect(screen.queryByText('choices.kit.title')).toBeNull();
+            unmount();
+
+            render(
+                <Harness initial={initial} classMode creation refs={kitView} />
+            );
+
+            expect(screen.getByText('choices.kit.title')).toBeTruthy();
+            fireEvent.click(screen.getByRole('radio', { name: /Package A/ }));
+            expect(json().classes[0].choices).toEqual({
+                'starting-equipment': [{ id: 'a' }],
+            });
+
+            fireEvent.click(
+                screen.getByRole('button', { name: 'choices.kit.none' })
+            );
+            expect(json().classes[0].choices).toEqual({
+                'starting-equipment': [],
+            });
+        });
+
+        it('a class without the group has no section', () => {
+            render(
+                <Harness
+                    initial={{
+                        ...empty,
+                        classes: [{ classId: sorcerer.id, level: 1 }],
+                    }}
+                    classMode
+                    creation
+                />
+            );
+
+            expect(screen.queryByText('choices.kit.title')).toBeNull();
+        });
     });
 });
