@@ -26,28 +26,8 @@ function resolveClient(deps: Deps) {
     }
 }
 
-function adminClient() {
-    try {
-        return createAdminClient();
-    } catch {
-        throw new AdminAuthUnavailableError();
-    }
-}
-
 export function assertAuthAdminAvailable(): void {
-    adminClient();
-}
-
-export async function deleteAuthUser(id: string): Promise<void> {
-    const { error } = await adminClient().auth.admin.deleteUser(id);
-
-    if (!error) return;
-
-    const e = error as { status?: number; code?: string };
-
-    if (e.status === 404 || e.code === 'user_not_found') return;
-
-    throw error;
+    resolveClient({});
 }
 
 async function setBanDuration(id: string, duration: string, deps: Deps) {

@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { adminDeleteSchema } from '@/lib/schemas/admin';
-import { deleteAccount } from '@/lib/server/account/delete-account';
+import {
+    deleteAccount,
+    removeAuthUserById,
+} from '@/lib/server/account/delete-account';
 import { AccountDeleteBlockedError } from '@/lib/server/account/template-guard';
 import { logAdminAction } from '@/lib/server/admin/admin-actions';
-import {
-    assertAuthAdminAvailable,
-    deleteAuthUser,
-} from '@/lib/server/admin/auth-admin';
+import { assertAuthAdminAvailable } from '@/lib/server/admin/auth-admin';
 import { runUserAction } from '@/lib/server/admin/run-user-action';
 import { getAdminUserDetail } from '@/lib/server/admin/user-detail';
 import { errorResponse, privateJson } from '@/lib/utils/api/api-response';
@@ -59,7 +59,7 @@ export async function DELETE(
                     {
                         removeAuthUser: async (userId) => {
                             try {
-                                await deleteAuthUser(userId);
+                                await removeAuthUserById(userId);
                             } catch {
                                 authRemoved = false;
                             }

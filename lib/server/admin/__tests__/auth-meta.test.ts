@@ -46,6 +46,20 @@ describe('readAuthMeta', () => {
         });
     });
 
+    it('maps an expired ban (nulled by the query) to bannedUntil null', async () => {
+        queryRaw.mockResolvedValueOnce([{ ok: true }]).mockResolvedValueOnce([
+            {
+                id: UUID,
+                banned_until: null,
+                last_sign_in_at: new Date('2030-01-01T00:00:00Z'),
+            },
+        ]);
+
+        const readAuthMeta = await load();
+
+        expect((await readAuthMeta([UUID])).get(UUID)?.bannedUntil).toBeNull();
+    });
+
     it('selects banned_until only while the ban is still active', async () => {
         queryRaw.mockResolvedValueOnce([{ ok: true }]).mockResolvedValueOnce([]);
 

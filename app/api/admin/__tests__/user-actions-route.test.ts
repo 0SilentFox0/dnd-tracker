@@ -28,12 +28,12 @@ vi.mock('@/lib/server/admin/auth-admin', () => {
         banUser: m.banUser,
         unbanUser: m.unbanUser,
         signOutUser: m.signOutUser,
-        deleteAuthUser: m.deleteAuthUser,
         assertAuthAdminAvailable: m.assertAuth,
     };
 });
 vi.mock('@/lib/server/account/delete-account', () => ({
     deleteAccount: m.deleteAccount,
+    removeAuthUserById: m.deleteAuthUser,
 }));
 vi.mock('@/lib/utils/api/translate-error', async () => {
     const { NextResponse: R } = await import('next/server');

@@ -29,7 +29,7 @@ type Deps = {
 
 const TX_OPTIONS = { timeout: 60_000, maxWait: 10_000 };
 
-async function removeAuthUserById(id: string): Promise<void> {
+export async function removeAuthUserById(id: string): Promise<void> {
     const { error } = await createAdminClient().auth.admin.deleteUser(id);
 
     if (!error) return;

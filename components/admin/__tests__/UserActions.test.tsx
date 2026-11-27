@@ -18,6 +18,7 @@ const m = vi.hoisted(() => {
     });
 
     return {
+        confirm: vi.fn(),
         actions: {
             blockedTemplateIds: [] as string[],
             ban: mutation(),
@@ -34,7 +35,7 @@ vi.mock('@/lib/hooks/admin', () => ({
 }));
 vi.mock('@/lib/hooks/common', async (importOriginal) => ({
     ...(await importOriginal<typeof import('@/lib/hooks/common')>()),
-    useConfirm: () => vi.fn(),
+    useConfirm: () => m.confirm,
 }));
 vi.mock('@/components/ui/responsive-dialog', () => ({
     ResponsiveDialog: ({
@@ -61,11 +62,11 @@ const user = {
     bannedUntil: null,
 } as AdminUserDetail['user'];
 
-const render = (selfId = 'owner') =>
-    renderWithIntl(<UserActions user={user} templates={[]} selfId={selfId} />, {
-        locale: 'en',
-        namespaces: ['common', 'admin'],
-    });
+const render = (selfId = 'owner', target = user) =>
+    renderWithIntl(
+        <UserActions user={target} templates={[]} selfId={selfId} />,
+        { locale: 'en', namespaces: ['common', 'admin'] }
+    );
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -101,6 +102,35 @@ describe('UserActions', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Ban' }));
 
         expect(screen.getByText(/Takes effect within an hour/)).toBeTruthy();
+    });
+
+    it('offers Ban, not Unban, when the ban has expired (bannedUntil null)', async () => {
+        await render();
+
+        expect(screen.getByRole('button', { name: 'Ban' })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Unban' })).toBeNull();
+    });
+
+    it('unbans only after the confirmation is accepted', async () => {
+        const banned = {
+            ...user,
+            bannedUntil: '2030-01-01T00:00:00.000Z',
+        } as AdminUserDetail['user'];
+
+        m.confirm.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+        await render('owner', banned);
+
+        expect(screen.queryByRole('button', { name: 'Ban' })).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Unban' }));
+        await vi.waitFor(() => expect(m.confirm).toHaveBeenCalledTimes(1));
+        expect(m.actions.unban.mutate).not.toHaveBeenCalled();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Unban' }));
+        await vi.waitFor(() =>
+            expect(m.actions.unban.mutate).toHaveBeenCalledTimes(1)
+        );
     });
 
     it('renders no action buttons for the own account', async () => {
