@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 import { Minus, Plus, Shield, Swords, X } from 'lucide-react';
 
-import { DprBreakdownTip } from './DprBreakdownTip';
 import { SideToggle } from './SideToggle';
 
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
@@ -49,7 +48,7 @@ function AddButtons({
                 onClick={() => add(ParticipantSide.ALLY)}
             >
                 <Shield className="text-hud-accent-fg" aria-hidden />
-                <span className="max-xl:sr-only">{t('ally')}</span>
+                <span className="sr-only">{t('ally')}</span>
             </Button>
             <Button
                 type="button"
@@ -59,7 +58,7 @@ function AddButtons({
                 onClick={() => add(ParticipantSide.ENEMY)}
             >
                 <Swords className="text-hud-crimson-fg" aria-hidden />
-                <span className="max-xl:sr-only">{t('enemy')}</span>
+                <span className="sr-only">{t('enemy')}</span>
             </Button>
         </>
     );
@@ -124,7 +123,7 @@ export function CatalogRow({
         <div
             data-selected={state ? 'true' : undefined}
             className={cn(
-                'relative flex min-h-[52px] min-w-0 flex-wrap items-center gap-x-2 rounded-lg pr-2 pl-3 transition-colors hover:bg-hud-panel-2/70',
+                'relative flex min-w-0 flex-col items-center gap-1.5 rounded-lg p-2 transition-colors hover:bg-hud-panel-2/70',
                 state && 'bg-hud-panel-2'
             )}
         >
@@ -132,7 +131,7 @@ export function CatalogRow({
                 <span
                     aria-hidden
                     className={cn(
-                        'absolute inset-y-1.5 left-0 w-[3px] rounded-full',
+                        'absolute inset-x-3 top-0 h-[3px] rounded-full',
                         isEnemy ? 'bg-hud-crimson' : 'bg-hud-accent'
                     )}
                 />
@@ -142,31 +141,27 @@ export function CatalogRow({
                 onClick={() =>
                     state ? actions.remove() : actions.add(defaultSide)
                 }
-                className="flex min-w-0 flex-1 basis-40 items-center gap-2.5 rounded-lg py-2 text-left"
+                className="flex w-full min-w-0 flex-col items-center gap-1.5 rounded-lg text-center"
             >
                 <EntityIcon
                     src={entity.avatar}
                     name={entity.name}
                     alt=""
-                    size={36}
-                    className="size-9 rounded-md"
+                    size={72}
+                    className="size-[72px] rounded-lg"
                 />
-                <span className="min-w-0 flex-1">
+                <span className="block w-full min-w-0">
                     <span className="block truncate text-sm font-medium">
                         {entity.name}
                     </span>
                     {stats && (
                         <span className="hud-num block truncate text-xs text-hud-muted tabular-nums">
-                            DPR {round1(stats.dpr)} · HP {stats.hp} · KPI{' '}
-                            {stats.kpi}
+                            {round1(stats.dpr)} · {stats.hp} · {stats.kpi}
                         </span>
                     )}
                 </span>
             </HudButton>
-            {kind === 'hero' && stats?.dprBreakdown && (
-                <DprBreakdownTip breakdown={stats.dprBreakdown} />
-            )}
-            <div className="flex shrink-0 items-center gap-1 max-sm:basis-full max-sm:justify-end max-sm:pb-2">
+            <div className="flex flex-wrap items-center justify-center gap-1">
                 {state ? (
                     <>
                         <SideToggle

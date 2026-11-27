@@ -36,33 +36,35 @@ export function SetupParticipantRow({
     return (
         <div
             className={cn(
-                'relative flex min-w-0 items-center justify-between gap-2 rounded-lg bg-hud-panel-2 py-1.5 pr-1.5 pl-3',
+                'relative flex min-w-0 flex-col items-center gap-1.5 rounded-lg bg-hud-panel-2 p-2',
                 reserved > 0 && 'opacity-60'
             )}
         >
             <span
                 aria-hidden
                 className={cn(
-                    'absolute inset-y-1.5 left-0 w-[3px] rounded-full',
+                    'absolute inset-x-3 top-0 h-[3px] rounded-full',
                     isAlly ? 'bg-hud-accent' : 'bg-hud-crimson'
                 )}
             />
-            <div className="flex min-w-0 flex-1 items-center gap-2">
+            <div className="flex w-full min-w-0 flex-col items-center gap-1">
                 <EntityIcon
                     src={avatar}
                     name={name}
                     alt=""
-                    size={32}
-                    className="size-8 rounded-md"
+                    size={72}
+                    className="size-[72px] rounded-lg"
                 />
-                <span className="truncate text-sm font-medium">{name}</span>
-                {quantity != null && quantity > 1 && (
-                    <span className="shrink-0 text-xs text-muted-foreground">
-                        ×{quantity}
-                    </span>
-                )}
+                <span className="w-full truncate text-center text-sm font-medium">
+                    {name}
+                    {quantity != null && quantity > 1 && (
+                        <span className="ml-1 text-xs text-muted-foreground">
+                            ×{quantity}
+                        </span>
+                    )}
+                </span>
             </div>
-            <div className="flex shrink-0 items-center gap-1">
+            <div className="flex flex-wrap items-center justify-center gap-1">
                 {reserved > 0 && (quantity ?? 1) > 1 && (
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Button

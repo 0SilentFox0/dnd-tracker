@@ -362,14 +362,14 @@
     "quantityLess": "Менше: {name}",
     "quantityMore": "Більше: {name}",
     "remove": "Прибрати {name}",
-    "dprHow": "Як рахується DPR",
-    "dprTitle": "Розрахунок DPR",
-    "dprSummary": "Фізика: {physical} · Магія: {spell} · Навички: {nonMagic}",
     "emptyAllies": "Додайте союзників із каталогу",
     "emptyEnemies": "Додайте ворогів із каталогу",
     "autopick": "Автопідбір ворогів",
     "roster": "Склад",
     "rosterTitle": "Склад сторін",
-    "versus": "{ally} VS {enemy}"
+    "versus": "{ally} VS {enemy}",
+    "dprHelpAria": "Про DPR, HP і KPI",
+    "dprHelpTitle": "Що означають числа",
+    "dprHelpBody": "Під кожним іменем: DPR · HP · KPI. DPR — очікувана шкода за раунд: атаки (шанс влучання × середня шкода), а для героїв ще школа магії найвищого рівня та немагічні основні навички. HP — здоров'я, KPI — загальна бойова оцінка для балансу."
   }
 }

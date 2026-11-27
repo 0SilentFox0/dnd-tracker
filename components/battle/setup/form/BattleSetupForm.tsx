@@ -20,11 +20,7 @@ import {
     type BattleFormTabId,
 } from '@/components/battle/setup/form/battle-form-tabs';
 import { HudFormMenu } from '@/components/hud';
-import {
-    HudForm,
-    HudFormPage,
-    type HudTab,
-} from '@/components/hud/form';
+import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +32,13 @@ import {
 } from '@/lib/hooks/battles';
 
 // two submit buttons share one row on phones: zero basis keeps flex-wrap from wrapping them
-const PAGE_CLASS = 'max-w-page';
+const PAGE_CLASS = [
+    'max-w-page max-sm:[--hud-form-footer-h:4.75rem]',
+    'max-sm:[&>.hud-form-actions]:sticky max-sm:[&>.hud-form-actions]:bottom-0 max-sm:[&>.hud-form-actions]:z-30',
+    'max-sm:[&>.hud-form-actions]:!mt-0 max-sm:[&>.hud-form-actions]:border-t max-sm:[&>.hud-form-actions]:border-hud-rule',
+    'max-sm:[&>.hud-form-actions]:bg-hud-panel max-sm:[&>.hud-form-actions]:py-3',
+    'max-sm:[&>.hud-form-actions]:pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]',
+].join(' ');
 
 const SUBMIT_FIT =
     'min-w-0 flex-1 basis-0 truncate px-3 sm:flex-none sm:basis-auto';

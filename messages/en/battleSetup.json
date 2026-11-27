@@ -362,14 +362,14 @@
     "quantityLess": "Fewer: {name}",
     "quantityMore": "More: {name}",
     "remove": "Remove {name}",
-    "dprHow": "How DPR is calculated",
-    "dprTitle": "DPR breakdown",
-    "dprSummary": "Physical: {physical} · Magic: {spell} · Skills: {nonMagic}",
     "emptyAllies": "Add allies from the catalog",
     "emptyEnemies": "Add enemies from the catalog",
     "autopick": "Enemy autopick",
     "roster": "Roster",
     "rosterTitle": "Sides roster",
-    "versus": "{ally} VS {enemy}"
+    "versus": "{ally} VS {enemy}",
+    "dprHelpAria": "About DPR, HP and KPI",
+    "dprHelpTitle": "What the numbers mean",
+    "dprHelpBody": "Under each name: DPR · HP · KPI. DPR is expected damage per round: attacks (hit chance × average damage), plus the highest-level spell school and non-magic main skills for heroes. HP is hit points, KPI is the overall combat rating used for balance."
   }
 }

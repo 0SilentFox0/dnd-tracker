@@ -2,13 +2,19 @@
 
 import type { ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { CircleHelp } from 'lucide-react';
 
 import { CatalogRow } from './CatalogRow';
 
 import { SearchInput } from '@/components/common/fields/SearchInput';
-import { HudSegmented } from '@/components/hud';
+import { HudIconButton, HudSegmented } from '@/components/hud';
 import { HudChipTabs } from '@/components/hud/page';
 import { Disclosure } from '@/components/ui/disclosure';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 import { ParticipantSourceType } from '@/lib/constants/battle';
 import { groupDisplayName } from '@/lib/constants/ungrouped';
 import {
@@ -73,7 +79,9 @@ function CatalogGroup({
             triggerClassName="hud-sc min-h-9 py-1 text-[13px] tracking-[.06em] text-hud-muted"
             className="border-b-0"
         >
-            <div className="space-y-0.5 pb-2">{children}</div>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-1.5 pb-2">
+                {children}
+            </div>
         </Disclosure>
     );
 }
@@ -173,11 +181,34 @@ export function ParticipantCatalog({
                     },
                 ]}
             />
-            <SearchInput
-                value={filter.query.value}
-                onChange={filter.query.set}
-                label={t('search')}
-            />
+            <div className="flex items-center gap-2">
+                <SearchInput
+                    className="min-w-0 flex-1"
+                    value={filter.query.value}
+                    onChange={filter.query.set}
+                    label={t('search')}
+                />
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <HudIconButton
+                            size="md"
+                            tone="muted"
+                            aria-label={t('dprHelpAria')}
+                        >
+                            <CircleHelp className="size-4" aria-hidden />
+                        </HudIconButton>
+                    </PopoverTrigger>
+                    <PopoverContent
+                        align="end"
+                        className="w-[min(92vw,22rem)] space-y-1.5 p-3 text-sm"
+                    >
+                        <div className="font-medium">{t('dprHelpTitle')}</div>
+                        <p className="text-xs text-hud-muted">
+                            {t('dprHelpBody')}
+                        </p>
+                    </PopoverContent>
+                </Popover>
+            </div>
             {tab === 'units' && chips.length > 1 && (
                 <HudChipTabs
                     ariaLabel={t('raceFilter')}
