@@ -255,7 +255,7 @@ export default async function CampaignDetailPage({
                     )}
                     {isDM && !isTemplate && !hasDmParty && (
                         <HudPanel data-tour="dashboard.party-empty">
-                            <h2 className="hud-sc mb-2 text-[13px] tracking-[.06em] text-hud-ink">
+                            <h2 className="hud-sc mb-2 text-sm tracking-[.06em] text-hud-ink">
                                 {t('party.title')}
                             </h2>
                             <p className="text-sm text-hud-muted">
@@ -321,7 +321,7 @@ export default async function CampaignDetailPage({
                             data-tour="dashboard.members"
                         >
                             <div className="mb-2 flex items-baseline justify-between gap-2">
-                                <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-ink">
+                                <h2 className="hud-sc text-sm tracking-[.06em] text-hud-ink">
                                     {t('page.members.title')}
                                 </h2>
                                 <span
