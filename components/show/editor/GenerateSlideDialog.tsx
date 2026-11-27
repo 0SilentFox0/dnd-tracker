@@ -214,7 +214,7 @@ export function GenerateSlideDialog({
                         height={0}
                         sizes="100vw"
                         unoptimized
-                        className="h-auto max-h-80 w-full rounded-md object-contain"
+                        className="h-auto max-h-80 w-full rounded-lg object-contain"
                     />
                 )}
             </form>

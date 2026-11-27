@@ -98,7 +98,7 @@ export function CampaignMembersList({
                             {member.user.displayName}
                         </p>
                         <HudPill
-                            tone={member.role === CampaignRole.DM ? 'gold' : 'bone'}
+                            tone={member.role === CampaignRole.DM ? 'role' : 'meta'}
                             className="mt-1"
                         >
                             {member.role === CampaignRole.DM

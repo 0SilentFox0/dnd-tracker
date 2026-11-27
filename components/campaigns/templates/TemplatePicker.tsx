@@ -196,7 +196,7 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
                         />
                     )}
                     {selected?.system && (
-                        <HudPill tone="silver">
+                        <HudPill tone="npc">
                             {tg(ruleSystemLabelKey(selected.system))}
                         </HudPill>
                     )}

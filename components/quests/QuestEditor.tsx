@@ -207,7 +207,7 @@ export function QuestEditor({
                     {data.objectives.map((o, index) => (
                         <div
                             key={index}
-                            className="space-y-2 rounded border border-hud-line p-3"
+                            className="space-y-2 rounded-sm border border-hud-line p-3"
                         >
                             <Input
                                 aria-label={`${t('objective')} ${index + 1}`}

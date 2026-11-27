@@ -60,7 +60,7 @@ export function ArtifactStatsEditor(props: ArtifactStatsEditorProps) {
                 <Button
                     type="button"
                     variant="outline"
-                    className="min-h-11"
+                    
                     onClick={clear}
                 >
                     {t('clear')}

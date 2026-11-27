@@ -15,13 +15,13 @@ export function RestBadges({ sheet }: RestBadgesProps) {
 
     return (
         <>
-            <HudPill tone="gold">
+            <HudPill tone="accent">
                 {t('fortune', {
                     current: block.fortune,
                     max: block.fortuneMax,
                 })}
             </HudPill>
-            <HudPill tone="gold">
+            <HudPill tone="accent">
                 {t('fate', { current: block.fateLeft ?? block.fate })}
             </HudPill>
         </>

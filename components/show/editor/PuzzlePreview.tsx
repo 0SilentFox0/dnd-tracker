@@ -25,7 +25,7 @@ export function PuzzlePreview({
             role="img"
             aria-label={t('puzzle.preview')}
             viewBox={`0 0 ${spec.imageWidth} ${spec.imageHeight}`}
-            className="max-h-72 w-full rounded bg-black"
+            className="max-h-72 w-full rounded-sm bg-black"
         >
             <image
                 href={toMediaUrl(imageUrl)}

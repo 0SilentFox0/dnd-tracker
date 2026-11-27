@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 
 import { HudCard } from '@/components/hud/page';
+import { HudPill } from '@/components/hud/page';
 import { SpellIcon } from '@/components/spells/SpellIcon';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useSpellMechanics } from '@/lib/hooks/spells/useSpellMechanics';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -70,20 +70,18 @@ export function SelectedSpellsList({
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-1">
-                                        <Badge
-                                            variant="secondary"
+                                        <HudPill
                                             className="max-w-full whitespace-normal break-words text-left text-xs"
                                         >
                                             {tg(`spellLevels.${spell.level}`)}
-                                        </Badge>
+                                        </HudPill>
                                         {mechanics(spell).map((label) => (
-                                            <Badge
+                                            <HudPill
                                                 key={label}
-                                                variant="outline"
                                                 className="max-w-full whitespace-normal break-words text-left text-xs"
                                             >
                                                 {label}
-                                            </Badge>
+                                            </HudPill>
                                         ))}
                                     </div>
                                 </div>

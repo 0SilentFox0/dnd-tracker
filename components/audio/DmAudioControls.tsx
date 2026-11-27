@@ -29,7 +29,7 @@ function IconButton({
             title={label}
             onClick={onClick}
             disabled={disabled}
-            className="rounded border border-hud-rule hover:bg-white/10 disabled:opacity-50"
+            className="rounded-sm border border-hud-rule hover:bg-white/10 disabled:opacity-50"
         >
             {children}
         </HudIconButton>

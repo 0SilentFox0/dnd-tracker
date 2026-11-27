@@ -33,7 +33,7 @@ export function HeaderActions({ mode = 'all' }: { mode?: 'all' | 'primary' | 'se
                     asChild
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
+                    className="w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
                 >
                     <Link href="/admin">
                         <ShieldCheck className="size-5" />
@@ -45,7 +45,7 @@ export function HeaderActions({ mode = 'all' }: { mode?: 'all' | 'primary' | 'se
                 asChild
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
+                className="w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
             >
                 <Link href="/profile">
                     <UserAvatar user={sessionUser} className="size-7" />

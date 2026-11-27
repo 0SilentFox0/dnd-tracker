@@ -66,7 +66,7 @@ export function BattleRow({
                     {battle.result && (
                         <HudPill
                             tone={
-                                battle.result === 'victory' ? 'accent' : 'muted'
+                                battle.result === 'victory' ? 'accent' : 'meta'
                             }
                         >
                             {t(`result.${battle.result}`)}

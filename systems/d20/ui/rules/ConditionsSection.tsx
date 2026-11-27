@@ -80,7 +80,7 @@ export function ConditionsSection({ form }: { form: RulesFormState }) {
                         {custom.map((c) => (
                             <li
                                 key={c.key}
-                                className="rounded border border-hud-line/50 p-2 text-sm"
+                                className="rounded-sm border border-hud-line/50 p-2 text-sm"
                             >
                                 <div className="flex items-center justify-between gap-2">
                                     <div className="font-medium">{c.name}</div>

@@ -49,9 +49,9 @@ export default async function CampaignInfoPage({
                     classes ? 'info.subtitleClasses' : 'info.subtitleSkills'
                 )}
                 actions={
-                    <Button
+                    <Button size="sm"
                         variant="outline"
-                        className="min-h-11 shrink-0 touch-manipulation sm:min-h-9"
+                        className="shrink-0 touch-manipulation "
                         asChild
                     >
                         <Link href={`/campaigns/${campaignId}`}>

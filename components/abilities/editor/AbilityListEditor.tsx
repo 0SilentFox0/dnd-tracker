@@ -127,7 +127,7 @@ export function AbilityListEditor({
                 }
             >
                 {issues.length > 0 && (
-                    <div className="mb-2 rounded-md border border-[#c9a04a]/50 bg-[#c9a04a]/10 p-2 text-xs text-hud-ink">
+                    <div className="mb-2 rounded-lg border border-[#c9a04a]/50 bg-[#c9a04a]/10 p-2 text-xs text-hud-ink">
                         <p className="font-medium">{t('storedInvalid')}</p>
                         <ul className="list-disc pl-4">
                             {issues.map((i, idx) => (

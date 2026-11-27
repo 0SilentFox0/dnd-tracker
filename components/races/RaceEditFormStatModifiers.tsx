@@ -69,7 +69,7 @@ export function RaceEditFormStatModifiers({
         }));
 
     return (
-        <div className="max-h-96 space-y-4 overflow-y-auto rounded-md border p-3">
+        <div className="max-h-96 space-y-4 overflow-y-auto rounded-lg border p-3">
             {ABILITY_SCORES.map((ability) => {
                 const modifiers: StatModifier =
                     formData.passiveAbility?.statModifiers?.[ability.key] || {};

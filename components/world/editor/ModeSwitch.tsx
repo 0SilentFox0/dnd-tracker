@@ -26,7 +26,6 @@ export function ModeSwitch({
             {MODES.map((m) => (
                 <HudToggleChip
                     key={m}
-                    tall
                     active={value === m}
                     onClick={() => {
                         if (value !== m) onChange(m);

@@ -15,7 +15,7 @@ import { mapPath } from '@/lib/utils/world/tree';
 import type { ShowState } from '@/types/show';
 
 const SELECT =
-    'h-7 min-w-0 max-w-48 rounded border-0 bg-transparent px-1 py-0 text-xs opacity-75 shadow-none hover:opacity-100 data-[size=default]:h-7 dark:bg-transparent dark:hover:bg-transparent';
+    'h-7 min-w-0 max-w-48 rounded-sm border-0 bg-transparent px-1 py-0 text-xs opacity-75 shadow-none hover:opacity-100 data-[size=default]:h-7 dark:bg-transparent dark:hover:bg-transparent';
 
 interface Pick {
     base: string | undefined;

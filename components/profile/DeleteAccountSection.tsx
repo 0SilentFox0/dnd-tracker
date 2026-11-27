@@ -36,7 +36,7 @@ export function DeleteAccountSection({ email }: { email: string }) {
             <Button
                 type="button"
                 variant="destructive"
-                className="min-h-10"
+                
                 onClick={() => setOpen(true)}
             >
                 {t('open')}
@@ -52,7 +52,7 @@ export function DeleteAccountSection({ email }: { email: string }) {
                         <Button
                             type="button"
                             variant="ghost"
-                            className="min-h-10"
+                            
                             disabled={isPending}
                             onClick={() => close(false)}
                         >
@@ -61,7 +61,7 @@ export function DeleteAccountSection({ email }: { email: string }) {
                         <Button
                             type="button"
                             variant="destructive"
-                            className="min-h-10"
+                            
                             disabled={!sameEmail(typed, email) || isPending}
                             onClick={() => void remove(email)}
                         >

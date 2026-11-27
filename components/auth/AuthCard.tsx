@@ -42,7 +42,7 @@ export function AuthCard({
                 {error && (
                     <div
                         role="alert"
-                        className="rounded-md border border-hud-danger bg-[rgba(208,112,92,.1)] p-3 text-sm text-hud-danger"
+                        className="rounded-lg border border-hud-danger bg-[rgba(208,112,92,.1)] p-3 text-sm text-hud-danger"
                     >
                         {t('common.errorPrefix', { message: error })}
                     </div>

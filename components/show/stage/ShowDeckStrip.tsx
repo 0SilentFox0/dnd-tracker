@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import type { ShowState, SlideDeckSummary } from '@/types/show';
 
 const SELECT =
-    'h-7 min-w-0 max-w-56 rounded border-0 bg-transparent px-1 py-0 text-xs opacity-75 shadow-none hover:opacity-100 data-[size=default]:h-7 dark:bg-transparent dark:hover:bg-transparent';
+    'h-7 min-w-0 max-w-56 rounded-sm border-0 bg-transparent px-1 py-0 text-xs opacity-75 shadow-none hover:opacity-100 data-[size=default]:h-7 dark:bg-transparent dark:hover:bg-transparent';
 
 const inScene = (sceneId?: string) => (d: SlideDeckSummary) =>
     !!sceneId && d.scenarioPageId === sceneId;
@@ -170,7 +170,7 @@ export function ShowDeckStrip({
                                     }
                                     title={slide.title}
                                     className={cn(
-                                        'relative block w-full overflow-hidden rounded transition',
+                                        'relative block w-full overflow-hidden rounded-sm transition',
                                         current
                                             ? SHOW_TONE.accent
                                             : 'opacity-60 hover:opacity-100'
@@ -228,7 +228,7 @@ export function ShowDeckStrip({
                                             )
                                         }
                                         className={cn(
-                                            'absolute top-0.5 left-0.5 rounded p-0.5 text-amber-300 drop-shadow transition',
+                                            'absolute top-0.5 left-0.5 rounded-sm p-0.5 text-amber-300 drop-shadow transition',
                                             !isCover &&
                                                 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
                                         )}

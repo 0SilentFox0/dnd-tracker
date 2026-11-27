@@ -196,7 +196,7 @@ export function QualityListEditor({
                                 type="button"
                                 size="icon"
                                 variant="ghost"
-                                className="size-11"
+                                
                                 aria-label={t('removeQuality', {
                                     name: tq(r.key),
                                 })}
@@ -224,7 +224,7 @@ export function QualityListEditor({
                 <Button
                     type="button"
                     variant="outline"
-                    className="min-h-11"
+                    
                     onClick={add}
                     disabled={!pick}
                 >

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import type { AdminUserRow } from '@/types/admin';
 
 export const formatDay = (iso: string | null) => (iso ? iso.slice(0, 10) : '—');
@@ -84,17 +84,17 @@ export function UsersTable({
                                 <span className="flex gap-1">
                                     {authMetaAvailable ? (
                                         r.bannedUntil && (
-                                            <Badge variant="destructive">
+                                            <HudPill tone="danger">
                                                 {t('banned')}
-                                            </Badge>
+                                            </HudPill>
                                         )
                                     ) : (
                                         <span>{na}</span>
                                     )}
                                     {r.sharedIp && (
-                                        <Badge variant="outline">
+                                        <HudPill>
                                             {t('sharedIp')}
-                                        </Badge>
+                                        </HudPill>
                                     )}
                                 </span>
                             </td>

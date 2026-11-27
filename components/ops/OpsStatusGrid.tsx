@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 import { HudPanel } from '@/components/hud/page';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import { PROVIDER_DASHBOARD_URLS } from '@/lib/ops/chart-groups';
 import type { AlertStatus } from '@/lib/utils/ops/alert-state';
 import { splitAge } from '@/lib/utils/ops/format';
@@ -82,9 +82,9 @@ export function OpsStatusGrid({ summary }: { summary: OpsSummary }) {
                                     <span className="font-medium">
                                         {t(`providers.${p.name}`)}
                                     </span>
-                                    <Badge variant="outline">
+                                    <HudPill>
                                         {t(`tier.${p.tier}`)}
-                                    </Badge>
+                                    </HudPill>
                                 </div>
                                 <div
                                     className={`flex items-center gap-1.5 text-sm ${STATE_TONE[state]}`}

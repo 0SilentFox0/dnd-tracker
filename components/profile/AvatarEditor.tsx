@@ -42,7 +42,7 @@ export function AvatarEditor({
             <div className="ds-inset border border-hud-line p-1.5">
                 <UserAvatar
                     user={user}
-                    className="hud-sc size-28 rounded-[var(--r)] border-0 text-4xl sm:size-32"
+                    className="hud-sc size-28 rounded-xl border-0 text-4xl sm:size-32"
                     sizes="128px"
                 />
             </div>

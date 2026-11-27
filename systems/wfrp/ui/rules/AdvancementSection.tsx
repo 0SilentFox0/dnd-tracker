@@ -74,7 +74,7 @@ function TrackFields({
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="min-h-11 min-w-11"
+                            className="min-w-11"
                             disabled={track.brackets.length < 2}
                             aria-label={t('removeBracket', { n: i + 1 })}
                             onClick={() =>
@@ -95,7 +95,7 @@ function TrackFields({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="min-h-11"
+                
                 onClick={() =>
                     onChange({
                         ...track,

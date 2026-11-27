@@ -62,7 +62,7 @@ export function MapTree({ maps, activeId, onOpen, footer }: MapTreeProps) {
                         aria-current={m.id === activeId ? 'true' : undefined}
                         tabIndex={m.id === focusable ? 0 : -1}
                         className={cn(
-                            'truncate rounded px-2 py-1 text-left text-sm hover:bg-white/10',
+                            'truncate rounded-sm px-2 py-1 text-left text-sm hover:bg-white/10',
                             m.id === activeId
                                 ? 'text-hud-ink'
                                 : 'text-hud-ink'

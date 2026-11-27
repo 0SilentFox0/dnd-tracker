@@ -75,7 +75,7 @@ export function UnitKnownSpells({
                         {knownSpells.map((spell) => (
                             <div
                                 key={spell.id}
-                                className="flex items-center gap-2 rounded-md bg-muted px-3 py-1"
+                                className="flex items-center gap-2 rounded-lg bg-muted px-3 py-1"
                             >
                                 <span className="text-sm">
                                     {spell.name}

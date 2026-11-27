@@ -25,7 +25,7 @@ const FORM_ID = 'sheet-vitals-form';
 type Hp = { current: number; max: number; temp: number };
 
 const BTN =
-    'motion-press inline-flex min-h-11 min-w-fit flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-hud-line bg-hud-raised px-3 text-base font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50';
+    'motion-press inline-flex min-h-11 min-w-fit flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-sm border border-hud-line bg-hud-raised px-3 text-base font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50';
 
 const LABEL =
     'hud-title flex items-center gap-2 text-base text-hud-muted lg:text-lg';
@@ -116,9 +116,9 @@ function HpReadout({
                 aria-valuemin={0}
                 aria-valuemax={hp.max}
                 aria-valuenow={hp.current}
-                className="absolute inset-0 overflow-hidden rounded-[4px] bg-(--sheet-hp-track) p-[3px] shadow-[0_0_0_1px_var(--color-hud-line)]"
+                className="absolute inset-0 overflow-hidden rounded-sm bg-(--sheet-hp-track) p-[3px] shadow-[0_0_0_1px_var(--color-hud-line)]"
             >
-                <div className="relative size-full overflow-hidden rounded-[2px]">
+                <div className="relative size-full overflow-hidden rounded-sm">
                     <ScaleFill
                         ratio={ratio(ghost)}
                         className="bg-(--sheet-hp-ghost)"
@@ -188,7 +188,7 @@ function HpControls({ hp }: { hp: Hp }) {
                 min={1}
                 value={amount}
                 onChange={setAmount}
-                className="hud-num h-11 w-16 rounded-[4px] text-center text-xl"
+                className="hud-num h-11 w-16 rounded-sm text-center text-xl"
             />
             <HudButton
                 type="button"
@@ -225,7 +225,7 @@ function TempButton({ hp }: { hp: Hp }) {
                 type="button"
                 aria-label={tv('temp')}
                 className={cn(
-                    'motion-press inline-flex min-h-10 min-w-10 cursor-pointer items-center justify-center gap-1 rounded-[4px] border border-hud-line px-2 text-base text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:outline-none',
+                    'motion-press inline-flex min-h-10 min-w-10 cursor-pointer items-center justify-center gap-1 rounded-sm border border-hud-line px-2 text-base text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:outline-none',
                     !hp.temp && 'ml-auto'
                 )}
                 onClick={() => setTempOpen(true)}

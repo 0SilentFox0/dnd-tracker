@@ -75,7 +75,7 @@ export function AdvancementEditor({
                         <Button
                             type="button"
                             variant="outline"
-                            className="min-h-11"
+                            
                             onClick={() => set('career', undefined)}
                         >
                             {t('clear')}
@@ -108,7 +108,7 @@ export function AdvancementEditor({
                                     type="button"
                                     variant="ghost"
                                     size="icon"
-                                    className="min-h-11 min-w-11"
+                                    className="min-w-11"
                                     aria-label={t('remove', { name })}
                                     onClick={() =>
                                         set(

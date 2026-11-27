@@ -27,7 +27,7 @@ export function SpellGrantEditor({
         value && onChange({ ...value, ...patch });
 
     return (
-        <fieldset className="space-y-2 rounded border border-hud-line p-2">
+        <fieldset className="space-y-2 rounded-sm border border-hud-line p-2">
             <label className="flex items-center gap-2 text-sm">
                 <Checkbox
                     checked={!!value}

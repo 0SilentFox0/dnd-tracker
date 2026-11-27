@@ -48,7 +48,7 @@ export function MapCameraControls({
                 variant="ghost"
                 aria-label={t('zoomOut')}
                 onClick={onZoomOut}
-                className={cn(phone && 'size-8')}
+                className={cn(phone && '')}
             >
                 <Minus />
             </Button>
@@ -68,7 +68,7 @@ export function MapCameraControls({
                 variant="ghost"
                 aria-label={t('zoomIn')}
                 onClick={onZoomIn}
-                className={cn(phone && 'size-8')}
+                className={cn(phone && '')}
             >
                 <Plus />
             </Button>
@@ -81,7 +81,7 @@ export function MapCameraControls({
                     aria-pressed={userMoved}
                     onClick={onRecenter}
                     className={cn(
-                        phone && 'size-8',
+                        phone && '',
                         userMoved && 'text-hud-accent-fg'
                     )}
                 >

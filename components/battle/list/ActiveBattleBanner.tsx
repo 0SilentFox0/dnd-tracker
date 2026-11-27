@@ -65,7 +65,7 @@ export function ActiveBattleBanner({
                     <h2 className="hud-sc min-w-0 truncate text-xl text-hud-ink">
                         {battle.name}
                     </h2>
-                    <HudPill tone="gold">{t('active')}</HudPill>
+                    <HudPill tone="accent">{t('active')}</HudPill>
                 </div>
                 <p className="text-sm text-hud-muted">
                     {t('roundN', { round: battle.currentRound })}

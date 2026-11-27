@@ -52,7 +52,7 @@ export function DemoTourMenu() {
                                 type="button"
                                 variant="ghost"
                                 size="sm"
-                                className="h-auto min-h-9 w-full justify-start gap-2 px-2 py-1.5 text-left whitespace-normal"
+                                className="h-auto w-full justify-start gap-2 px-2 py-1.5 text-left whitespace-normal"
                                 onClick={() => startTour(tour.id)}
                                 aria-label={`${t(tour.titleKey)} — ${completed ? t('restart') : t('start')}`}
                             >

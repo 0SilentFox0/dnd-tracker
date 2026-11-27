@@ -78,22 +78,22 @@ export function BalanceSummary({
                             )}
                         </div>
                         <div className="flex flex-wrap items-center gap-2 text-xs">
-                            <span className="rounded border border-border bg-card px-2 py-0.5">
+                            <span className="rounded-sm border border-border bg-card px-2 py-0.5">
                                 {mult(scaling.hpScale)} HP
                             </span>
-                            <span className="rounded border border-border bg-card px-2 py-0.5">
+                            <span className="rounded-sm border border-border bg-card px-2 py-0.5">
                                 {t('damage', { value: mult(scaling.dmgScale) })}
                             </span>
                             {scaling.verdict === 'even' ? (
                                 <span
-                                    className="rounded border border-[#6f8f4e] bg-[#1d2615] px-2 py-0.5 text-[#b7d68f]"
+                                    className="rounded-sm border border-[#6f8f4e] bg-[#1d2615] px-2 py-0.5 text-[#b7d68f]"
                                     data-testid="balance-verdict"
                                 >
                                     {t('even')}
                                 </span>
                             ) : (
                                 <span
-                                    className="rounded border border-destructive/70 bg-secondary px-2 py-0.5 text-destructive"
+                                    className="rounded-sm border border-destructive/70 bg-secondary px-2 py-0.5 text-destructive"
                                     data-testid="balance-verdict"
                                 >
                                     {scaling.hint

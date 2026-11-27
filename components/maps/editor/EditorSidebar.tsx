@@ -68,7 +68,7 @@ export function EditorSidebar({
         >
             <TabsList
                 aria-label={t('sidebar')}
-                className="sticky top-0 z-20 grid h-auto w-full grid-cols-2 gap-1 rounded-md border border-hud-rule bg-background p-1 shadow-sm"
+                className="sticky top-0 z-20 grid h-auto w-full grid-cols-2 gap-1 rounded-lg border border-hud-rule bg-background p-1 shadow-sm"
             >
                 <span className={GROUP_LABEL}>{t('groups.map')}</span>
                 {panels.map((p) => {
@@ -85,7 +85,7 @@ export function EditorSidebar({
                                 type="button"
                                 value={p}
                                 title={t(`panels.${p}`)}
-                                className="flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-md border border-hud-rule bg-black/20 px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-hud-accent data-[state=active]:bg-hud-panel-2 data-[state=active]:text-hud-ink"
+                                className="flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-lg border border-hud-rule bg-black/20 px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-hud-accent data-[state=active]:bg-hud-panel-2 data-[state=active]:text-hud-ink"
                             >
                                 <Icon
                                     aria-hidden="true"
@@ -102,7 +102,7 @@ export function EditorSidebar({
             {hex && (
                 <p className="mt-2 text-xs text-hud-muted">{t('hexHint')}</p>
             )}
-            <div className="my-3 rounded-md border border-hud-rule bg-black/20 px-3 py-2">
+            <div className="my-3 rounded-lg border border-hud-rule bg-black/20 px-3 py-2">
                 <h2 className="text-sm font-semibold text-hud-ink">
                     {t(`panels.${panel}`)}
                 </h2>

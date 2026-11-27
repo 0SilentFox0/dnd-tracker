@@ -23,7 +23,7 @@ export function PerformSection({
     if (!ability.limits?.legendaryCost && !ability.limits?.lair) return null;
 
     const fieldClass =
-        'h-9 w-auto rounded-md border border-hud-line bg-hud-field px-2 text-sm';
+        'h-9 w-auto rounded-lg border border-hud-line bg-hud-field px-2 text-sm';
 
     const changeKind = (kind: string) => {
         const { perform: _p, ...rest } = ability;

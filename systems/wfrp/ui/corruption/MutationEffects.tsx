@@ -15,7 +15,7 @@ export function MutationEffects({ effects }: { effects: MutationEffect[] }) {
             {effects.map((e, i) => (
                 <li
                     key={i}
-                    className="border-hud-border rounded border px-1.5 py-0.5 text-hud-bone"
+                    className="border-hud-border rounded-sm border px-1.5 py-0.5 text-hud-bone"
                 >
                     {e.type === 'characteristic'
                         ? t('characteristic', {

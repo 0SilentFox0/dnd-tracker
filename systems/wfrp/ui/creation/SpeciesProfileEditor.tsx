@@ -238,7 +238,7 @@ export function SpeciesProfileEditor({
                                 type="button"
                                 size="icon"
                                 variant="ghost"
-                                className="size-11"
+                                
                                 aria-label={`${t('removeTalent')}: ${feats.data?.find((f) => f.id === id)?.name ?? id}`}
                                 onClick={() =>
                                     edit({
@@ -320,7 +320,7 @@ export function SpeciesProfileEditor({
             <div className="flex items-center gap-3">
                 <Button
                     type="button"
-                    className="min-h-11"
+                    
                     onClick={submit}
                     disabled={!parsed.success || save.isPending}
                 >

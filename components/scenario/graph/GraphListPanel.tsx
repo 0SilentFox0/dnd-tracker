@@ -91,7 +91,7 @@ export function GraphListPanel({
                                                     ? 'true'
                                                     : undefined
                                             }
-                                            className={`flex w-full items-center gap-2 rounded px-1.5 py-1 text-left text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none ${item.id === selectedId ? 'bg-accent font-medium' : ''}`}
+                                            className={`flex w-full items-center gap-2 rounded-sm px-1.5 py-1 text-left text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none ${item.id === selectedId ? 'bg-accent font-medium' : ''}`}
                                             onClick={() => onPick(item.id)}
                                         >
                                             {item.image ? (

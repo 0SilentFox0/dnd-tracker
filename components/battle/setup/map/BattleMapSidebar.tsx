@@ -140,7 +140,7 @@ export function BattleMapSidebar({
                                         title={t(`panels.${id}`)}
                                         aria-disabled={muted || undefined}
                                         className={cn(
-                                            'flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-md border border-hud-rule px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-hud-accent data-[state=active]:bg-hud-panel-2 data-[state=active]:text-hud-ink',
+                                            'flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-lg border border-hud-rule px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-hud-accent data-[state=active]:bg-hud-panel-2 data-[state=active]:text-hud-ink',
                                             muted && 'opacity-60'
                                         )}
                                     >

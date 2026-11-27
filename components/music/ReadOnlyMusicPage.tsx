@@ -98,7 +98,7 @@ export function ReadOnlyMusicPage({ tracks }: { tracks: CampaignTrack[] }) {
                                             aria-valuenow={Math.round(
                                                 preview.progress * 100
                                             )}
-                                            className="mt-1 h-1 overflow-hidden rounded bg-white/10"
+                                            className="mt-1 h-1 overflow-hidden rounded-sm bg-white/10"
                                         >
                                             <div
                                                 className="h-full bg-hud-accent"

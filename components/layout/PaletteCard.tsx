@@ -36,7 +36,7 @@ export function PaletteCard({
         >
             <span
                 aria-hidden
-                className="flex flex-col gap-1.5 rounded-[4px] p-2"
+                className="flex flex-col gap-1.5 rounded-sm p-2"
                 style={{ background: p.page }}
             >
                 <span

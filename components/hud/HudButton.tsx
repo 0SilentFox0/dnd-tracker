@@ -11,7 +11,11 @@ const TONES = {
     gold: 'text-hud-accent-fg',
 } as const;
 
-const ICON_SIZES = { sm: 'size-8', md: 'size-10' } as const;
+const ICON_SIZES = {
+    sm: 'size-8',
+    md: 'size-10',
+    lg: 'size-12',
+} as const;
 
 export const HudButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, ...props }, ref) => (
@@ -38,7 +42,7 @@ export const HudIconButton = React.forwardRef<
         ref={ref}
         data-slot="hud-icon-button"
         className={cn(
-            'flex items-center justify-center',
+            'flex items-center justify-center pointer-coarse:min-h-11 pointer-coarse:min-w-11',
             ICON_SIZES[size],
             tone && TONES[tone],
             className

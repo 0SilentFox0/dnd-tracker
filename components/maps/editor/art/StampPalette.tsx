@@ -75,7 +75,7 @@ export function StampPalette({
                             variant={selected === def.id ? 'default' : 'outline'}
                             onClick={() => onSelect(def.id)}
                         >
-                            <span className="flex h-12 w-full items-center justify-center overflow-hidden rounded bg-black/30 p-1">
+                            <span className="flex h-12 w-full items-center justify-center overflow-hidden rounded-sm bg-black/30 p-1">
                                 <Image
                                     src={def.file}
                                     alt=""
@@ -94,7 +94,7 @@ export function StampPalette({
                 })}
             </div>
             {palette.items.length === 0 && (
-                <p className="rounded-md border border-dashed border-hud-rule p-3 text-center text-xs text-hud-muted">
+                <p className="rounded-lg border border-dashed border-hud-rule p-3 text-center text-xs text-hud-muted">
                     {t('empty')}
                 </p>
             )}

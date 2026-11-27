@@ -28,7 +28,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
         return (
             <section
                 aria-label={t('abilities')}
-                className="overflow-hidden rounded-[4px] border border-hud-line bg-hud-rule shadow-sm"
+                className="overflow-hidden rounded-sm border border-hud-line bg-hud-rule shadow-sm"
             >
                 <div className="grid grid-cols-3 gap-px lg:grid-cols-6">
                     {sheet.abilities.map((a, i) => (
@@ -61,7 +61,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
     ].filter(Boolean);
 
     const panel =
-        'overflow-hidden rounded-[4px] border border-hud-line bg-hud-panel shadow-sm';
+        'overflow-hidden rounded-sm border border-hud-line bg-hud-panel shadow-sm';
 
     return (
         <div className="flex flex-col gap-6">

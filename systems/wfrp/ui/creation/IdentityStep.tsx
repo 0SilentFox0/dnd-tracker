@@ -121,7 +121,7 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
                                     type="button"
                                     size="icon"
                                     variant="ghost"
-                                    className="size-11"
+                                    
                                     aria-label={t('removeGoal')}
                                     onClick={() =>
                                         set({
@@ -149,7 +149,7 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
                     <Button
                         type="button"
                         variant="outline"
-                        className="min-h-11"
+                        
                         onClick={addGoal}
                         disabled={!goal.trim()}
                     >

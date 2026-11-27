@@ -71,7 +71,7 @@ export function StepIndicator({
                     >
                         {onSelect && reachable ? (
                             <HudButton
-                                className="flex items-center gap-1.5 rounded-md px-1 py-0.5 hover:bg-hud-raised"
+                                className="flex items-center gap-1.5 rounded-lg px-1 py-0.5 hover:bg-hud-raised"
                                 onClick={() => onSelect(i)}
                             >
                                 {body}

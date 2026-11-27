@@ -76,7 +76,7 @@ export function ConditionEditor({
     const isGroup = condition.type === 'all' || condition.type === 'any';
 
     return (
-        <div className="space-y-2 rounded-md border border-dashed p-2">
+        <div className="space-y-2 rounded-lg border border-dashed p-2">
             <div className="flex items-start gap-2">
                 <div className="flex-1">
                     <SelectField

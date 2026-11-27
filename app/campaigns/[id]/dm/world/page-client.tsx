@@ -272,7 +272,6 @@ export function WorldEditorPageClient({
                                                             className='world-editor-sections'
                                                         >
                                                             <HudToggleChip
-                                                                tall
                                                                 active={
                                                                     treeShown
                                                                 }
@@ -290,7 +289,6 @@ export function WorldEditorPageClient({
                                                                 'build' &&
                                                             !eyes.asHeroId ? (
                                                                 <HudToggleChip
-                                                                    tall
                                                                     active={
                                                                         layers
                                                                             .panel
@@ -471,7 +469,7 @@ mode: 'own',
                                                                                     hint: (
                                                                                         <p
                                                                                             role="status"
-                                                                                            className="pointer-events-none rounded-md border border-hud-line bg-black/80 px-3 py-1.5 text-xs text-hud-ink"
+                                                                                            className="pointer-events-none rounded-lg border border-hud-line bg-black/80 px-3 py-1.5 text-xs text-hud-ink"
                                                                                         >
                                                                                             {t(
                                                                                                 'eyes.player'

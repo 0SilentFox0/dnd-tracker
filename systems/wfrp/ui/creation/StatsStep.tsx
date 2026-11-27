@@ -66,7 +66,7 @@ export function StatsStep({ form }: { form: WfrpDraftFormState }) {
                         <>
                             <Button
                                 type="button"
-                                className="min-h-11 w-full sm:w-auto"
+                                className="w-full sm:w-auto"
                                 onClick={roll}
                             >
                                 {t('roll')}
@@ -133,7 +133,7 @@ export function StatsStep({ form }: { form: WfrpDraftFormState }) {
                                         type="button"
                                         size="icon"
                                         variant="outline"
-                                        className="size-11"
+                                        
                                         aria-label={`${t('up')}: ${tg(`${key}.label`)}`}
                                         disabled={i === 0}
                                         onClick={() => swap(i, i - 1)}
@@ -144,7 +144,7 @@ export function StatsStep({ form }: { form: WfrpDraftFormState }) {
                                         type="button"
                                         size="icon"
                                         variant="outline"
-                                        className="size-11"
+                                        
                                         aria-label={`${t('down')}: ${tg(`${key}.label`)}`}
                                         disabled={
                                             i === CHARACTERISTIC_KEYS.length - 1

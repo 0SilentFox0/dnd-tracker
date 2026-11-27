@@ -35,7 +35,7 @@ export function PlayerHeroCard({
             >
                 <div className="border-hud-rule bg-hud-page/35 rounded-lg border border-dashed p-4 sm:p-5">
                     <p className="text-hud-ink">{t('none')}</p>
-                    <Button asChild className="mt-3 min-h-11 w-full sm:w-auto">
+                    <Button asChild className="mt-3 w-full sm:w-auto">
                         <Link href={`${base}/character`}>{t('create')}</Link>
                     </Button>
                 </div>
@@ -95,13 +95,13 @@ export function PlayerHeroCard({
             </div>
             <div className="mt-2 flex flex-wrap gap-1.5">
                 {pending && !hero.reviewNote && (
-                    <HudPill tone="muted">{t('pending')}</HudPill>
+                    <HudPill tone="meta">{t('pending')}</HudPill>
                 )}
                 {pending && hero.reviewNote && (
                     <HudPill tone="accent">{t('returned')}</HudPill>
                 )}
                 {hero.seenLevel != null && hero.seenLevel < hero.level && (
-                    <HudPill tone="gold">{t('newLevel')}</HudPill>
+                    <HudPill tone="accent">{t('newLevel')}</HudPill>
                 )}
             </div>
             {pending && hero.reviewNote && (
@@ -114,7 +114,7 @@ export function PlayerHeroCard({
                     <div className="min-w-0 flex-1">
                         <HeroHp hp={activeBattle.hp} />
                     </div>
-                    <Button asChild className="min-h-11 w-full sm:w-auto">
+                    <Button asChild className="w-full sm:w-auto">
                         <Link href={`${base}/battles/${activeBattle.battleId}`}>
                             {t('toBattle')}
                         </Link>
@@ -124,7 +124,7 @@ export function PlayerHeroCard({
             <Button
                 asChild
                 variant="outline"
-                className="mt-3 min-h-11 w-full sm:w-auto"
+                className="mt-3 w-full sm:w-auto"
             >
                 <Link href={`${base}/character`}>{t('open')}</Link>
             </Button>

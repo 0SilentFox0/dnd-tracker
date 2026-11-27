@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import type { AdminUserDetail } from '@/types/admin';
 
 const link = 'text-hud-ink underline-offset-2 hover:underline';
@@ -32,9 +32,9 @@ export function UserCampaigns({
                                 >
                                     {c.name}
                                 </Link>
-                                <Badge variant="outline">{c.kind}</Badge>
+                                <HudPill>{c.kind}</HudPill>
                                 {c.system && (
-                                    <Badge variant="outline">{c.system}</Badge>
+                                    <HudPill>{c.system}</HudPill>
                                 )}
                                 <span className="text-hud-muted">
                                     {t('players', { n: c.players })}
@@ -91,9 +91,9 @@ export function UserCampaigns({
                                     {t('clones', { n: x.clones })}
                                 </span>
                                 {x.blocksDeletion && (
-                                    <Badge variant="destructive">
+                                    <HudPill tone="danger">
                                         {t('blocksDeletion')}
-                                    </Badge>
+                                    </HudPill>
                                 )}
                             </li>
                         ))}

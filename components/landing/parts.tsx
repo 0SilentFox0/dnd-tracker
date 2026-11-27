@@ -13,7 +13,7 @@ export function BrandMark({ className }: { className?: string }) {
             alt=""
             width={32}
             height={32}
-            className={cn('size-8 rounded-md', className)}
+            className={cn('size-8 rounded-lg', className)}
         />
     );
 }

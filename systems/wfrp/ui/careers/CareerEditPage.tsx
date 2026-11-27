@@ -81,7 +81,7 @@ export function CareerEditPage({
                     <Button
                         type="button"
                         variant="outline"
-                        className="min-h-11"
+                        
                         onClick={() => router.push(listHref)}
                     >
                         {tc('actions.cancel')}
@@ -89,7 +89,7 @@ export function CareerEditPage({
                     <Button
                         type="submit"
                         form={FORM_ID}
-                        className="min-h-11"
+                        
                         disabled={saving}
                     >
                         {tc('actions.save')}

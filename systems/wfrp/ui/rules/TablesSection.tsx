@@ -56,7 +56,7 @@ function DefaultRows({ slot }: { slot: TableSlot }) {
             {DEFAULT_TABLES[slot].map((row, i, rows) => (
                 <li
                     key={row.max}
-                    className="border-hud-border rounded border p-2"
+                    className="border-hud-border rounded-sm border p-2"
                 >
                     <span className="text-hud-muted">{`${i === 0 ? 1 : rows[i - 1].max + 1}-${row.max}`}</span>{' '}
                     {row.textKey ? tt(row.textKey) : row.text}
@@ -143,7 +143,7 @@ export function TablesSection({ form }: { form: RulesFormState }) {
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="min-h-11"
+                            
                             disabled={
                                 rows.length >= MAX_ROWS || secondLast >= 99
                             }
@@ -165,7 +165,7 @@ export function TablesSection({ form }: { form: RulesFormState }) {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="min-h-11"
+                            
                             onClick={() => setRows(null)}
                         >
                             {t('reset')}
@@ -180,7 +180,7 @@ export function TablesSection({ form }: { form: RulesFormState }) {
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="min-h-11"
+                        
                         onClick={customize}
                     >
                         {t('customize')}

@@ -21,7 +21,6 @@ export function OpeningOptions({ materials }: { materials: Materials }) {
                 {OPENING_MATERIALS.map(({ id, kind }) => (
                     <HudToggleChip
                         key={id}
-                        tall
                         active={opening.material === id && opening.kind === kind}
                         onClick={() =>
                             materials.set({ opening: { kind, material: id } })
@@ -33,7 +32,6 @@ export function OpeningOptions({ materials }: { materials: Materials }) {
             </div>
             {opening.kind === 'door' && (
                 <HudToggleChip
-                    tall
                     active={opening.locked}
                     onClick={() =>
                         materials.set({ opening: { locked: !opening.locked } })

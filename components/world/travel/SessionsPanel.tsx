@@ -8,7 +8,7 @@ import { SessionFormDialog } from './SessionFormDialog';
 
 import { HudIconButton } from '@/components/hud';
 import { HudPanel } from '@/components/hud/page';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/lib/hooks/common';
 import { useWorldSessions } from '@/lib/hooks/world';
@@ -72,7 +72,7 @@ export function SessionsPanel({ campaignId }: { campaignId: string }) {
                                     {t('entryCount', { count: s.entryCount })}
                                 </span>
                             )}
-                            {s.active ? <Badge>{t('active')}</Badge> : null}
+                            {s.active ? <HudPill>{t('active')}</HudPill> : null}
                             <HudIconButton
                                 aria-label={`${t('edit')}: ${s.name}`}
                                 onClick={() => setForm({ session: s })}

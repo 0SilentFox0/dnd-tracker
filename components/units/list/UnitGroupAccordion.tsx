@@ -99,7 +99,7 @@ export const UnitGroupAccordion = memo(function UnitGroupAccordion({
             <div className="relative">
                 <AccordionTrigger className="pr-16 pl-4 sm:pr-20 sm:pl-6">
                     <div
-                        className={`flex w-full items-center gap-3 rounded-md text-left transition-colors sm:gap-4 ${highlight('race')}`}
+                        className={`flex w-full items-center gap-3 rounded-lg text-left transition-colors sm:gap-4 ${highlight('race')}`}
                         onDragOver={canEdit && raceDrop ? allowDrop : undefined}
                         onDragEnter={(e) =>
                             canEdit &&
@@ -170,7 +170,7 @@ export const UnitGroupAccordion = memo(function UnitGroupAccordion({
                                 >
                                     <AccordionTrigger className="px-2 py-2 text-sm font-semibold">
                                         <div
-                                            className={`-mx-1 w-full rounded px-1 text-left transition-colors ${highlight(`level-${tier.level}`)}`}
+                                            className={`-mx-1 w-full rounded-sm px-1 text-left transition-colors ${highlight(`level-${tier.level}`)}`}
                                             onDragOver={
                                                 canEdit ? allowDrop : undefined
                                             }

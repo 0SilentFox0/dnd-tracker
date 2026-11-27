@@ -28,10 +28,10 @@ export function RestBadges() {
 
     return (
         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
-            {rest.dead && <HudPill tone="silver">{t('dead')}</HudPill>}
+            {rest.dead && <HudPill tone="npc">{t('dead')}</HudPill>}
             {Badges && <Badges sheet={sheet} />}
             {system.rest.kinds && rest.shortRestOpen && (
-                <HudPill tone="gold">{t('shortRest')}</HudPill>
+                <HudPill tone="accent">{t('shortRest')}</HudPill>
             )}
             {rest.xp && Ui.hideProgression && (
                 <span className="text-hud-muted">

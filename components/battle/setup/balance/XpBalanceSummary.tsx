@@ -33,7 +33,7 @@ export function XpBalanceSummary({ xp, units }: XpBalanceSummaryProps) {
                     <>
                         <div className="flex flex-wrap items-center gap-2 text-sm">
                             <span
-                                className="rounded border border-border bg-card px-2 py-0.5"
+                                className="rounded-sm border border-border bg-card px-2 py-0.5"
                                 data-testid="xp-difficulty"
                             >
                                 {t('difficulty', {

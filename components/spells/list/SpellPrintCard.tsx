@@ -2,9 +2,9 @@
 
 import { Sparkles } from 'lucide-react';
 
+import { HudPill } from '@/components/hud/page';
 import { SpellComponentsLine } from '@/components/spells/SpellComponentsLine';
 import { SpellIcon } from '@/components/spells/SpellIcon';
-import { Badge } from '@/components/ui/badge';
 import {
     Card,
     CardContent,
@@ -42,10 +42,8 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
                             <CardTitle className="min-w-0 flex-1 truncate text-sm sm:text-base">
                                 {spell.name}
                             </CardTitle>
-                            <Badge
-                                variant={
-                                    spell.level === 0 ? 'secondary' : 'default'
-                                }
+                            <HudPill
+                                tone={spell.level === 0 ? 'meta' : 'accent'}
                                 className="flex shrink-0 items-center gap-1 text-xs"
                             >
                                 <Sparkles className="h-3 w-3" />
@@ -55,13 +53,12 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
                                 <span className="sm:hidden">
                                     {spellLevelRoman(spell.level)}
                                 </span>
-                            </Badge>
+                            </HudPill>
                         </div>
                     </div>
                 </div>
                 <CardDescription className="mt-2 flex flex-wrap gap-1 sm:gap-2">
-                    <Badge
-                        variant="outline"
+                    <HudPill
                         className="flex items-center gap-1 text-xs"
                     >
                         <SpellGroupIcon className="h-3 w-3" />
@@ -72,15 +69,14 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
                         <span className="max-w-[60px] truncate sm:hidden">
                             {spell.spellGroup?.name?.[0] || '-'}
                         </span>
-                    </Badge>
+                    </HudPill>
                     {mechanics(spell).map((label) => (
-                        <Badge
+                        <HudPill
                             key={label}
-                            variant="outline"
                             className="text-xs"
                         >
                             {label}
-                        </Badge>
+                        </HudPill>
                     ))}
                 </CardDescription>
             </CardHeader>

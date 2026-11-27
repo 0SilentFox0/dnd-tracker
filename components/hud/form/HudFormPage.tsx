@@ -41,7 +41,7 @@ export function HudFormPage({
         <div
             className={cn(
                 HUD_SURFACE,
-                'hud-form hud-form-page ornate mx-auto w-full sm:my-4 sm:rounded-[var(--r)] sm:bg-hud-panel sm:p-6 sm:shadow-[var(--hud-sh)]',
+                'hud-form hud-form-page ornate mx-auto w-full sm:my-4 sm:rounded-xl sm:bg-hud-panel sm:p-6 sm:shadow-[var(--hud-sh)]',
                 wide
                     ? 'hud-form-wide min-h-dvh max-w-[1680px] sm:min-h-0'
                     : 'flex min-h-dvh max-w-3xl flex-col sm:min-h-0',

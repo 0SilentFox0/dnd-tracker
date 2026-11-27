@@ -277,7 +277,7 @@ export default async function CampaignsPage({
                                         level: demoCampaign.maxLevel,
                                     })}
                                 </p>
-                                <span className="mt-auto flex min-h-10 items-center justify-center rounded border border-hud-line px-4 text-sm font-medium text-hud-ink">
+                                <span className="mt-auto flex min-h-10 items-center justify-center rounded-sm border border-hud-line px-4 text-sm font-medium text-hud-ink">
                                     {t('card.continue')}
                                 </span>
                             </div>
@@ -336,13 +336,13 @@ export default async function CampaignsPage({
                                         {isDM && (
                                             <p>
                                                 {t('card.inviteCode')}{' '}
-                                                <code className="rounded bg-hud-field px-1.5 font-mono text-hud-bone">
+                                                <code className="rounded-sm bg-hud-field px-1.5 font-mono text-hud-bone">
                                                     {campaign.inviteCode}
                                                 </code>
                                             </p>
                                         )}
                                     </div>
-                                    <span className="mt-auto flex min-h-11 items-center justify-center rounded border border-hud-accent bg-hud-field px-4 text-sm font-medium text-hud-ink">
+                                    <span className="mt-auto flex min-h-11 items-center justify-center rounded-sm border border-hud-accent bg-hud-field px-4 text-sm font-medium text-hud-ink">
                                         {t('card.continue')}
                                     </span>
                                 </div>

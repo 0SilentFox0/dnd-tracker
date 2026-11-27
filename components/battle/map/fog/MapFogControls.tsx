@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import type { BattleParticipant } from '@/types/battle';
 
 const CHIP =
-    'flex min-w-0 items-center gap-1 rounded-md border border-hud-rule bg-black/70 px-2 py-1 text-hud-muted';
+    'flex min-w-0 items-center gap-1 rounded-lg border border-hud-rule bg-black/70 px-2 py-1 text-hud-muted';
 
 export function MapFogControls({
     fog,

@@ -62,7 +62,7 @@ export function DiceRoller() {
                                 aria-pressed={s === sides}
                                 onClick={() => pick.set({ sides: s })}
                                 className={cn(
-                                    'h-9 rounded border border-hud-rule text-sm font-semibold hover:bg-white/10',
+                                    'h-9 rounded-sm border border-hud-rule text-sm font-semibold hover:bg-white/10',
                                     s === sides &&
                                         'border-hud-accent bg-hud-panel-2 text-hud-ink'
                                 )}
@@ -103,7 +103,7 @@ export function DiceRoller() {
                         type="button"
                         disabled={isRolling}
                         onClick={() => void roll()}
-                        className="h-10 w-full rounded border-2 border-hud-accent bg-hud-panel-2 font-semibold text-hud-ink hover:bg-hud-panel-2 disabled:opacity-50"
+                        className="h-10 w-full rounded-sm border-2 border-hud-accent bg-hud-panel-2 font-semibold text-hud-ink hover:bg-hud-panel-2 disabled:opacity-50"
                     >
                         {t('roll', { count, sides })}
                     </HudButton>

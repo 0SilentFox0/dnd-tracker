@@ -114,7 +114,7 @@ export function SetupHeader({
         <div className="flex min-w-0 flex-col gap-2 px-4 pt-2 pb-3">
             <Link
                 href={`/campaigns/${campaignId}/dm/battles`}
-                className="ds-interactive inline-flex w-fit items-center gap-1.5 rounded-md text-sm text-hud-muted hover:text-hud-ink"
+                className="ds-interactive inline-flex w-fit items-center gap-1.5 rounded-lg text-sm text-hud-muted hover:text-hud-ink"
             >
                 <ArrowLeft className="size-4" aria-hidden />
                 {t('backToList')}

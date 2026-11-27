@@ -138,7 +138,7 @@ export function MarkerPickerDialog({
                 <Button
                     key={m.id}
                     type="button"
-                    variant={m.id === mapId ? 'secondary' : 'ghost'}
+                    variant={m.id === mapId ? 'outline' : 'ghost'}
                     className="justify-start"
                     style={{ paddingLeft: 12 + treeDepth(maps, m.id) * 14 }}
                     onClick={() => setMapId(m.id)}

@@ -46,7 +46,7 @@ function ToolButton({
             onClick={onClick}
             className={cn(
                 tall ? 'h-8' : 'h-7',
-                'shrink-0 rounded-md border bg-black/60 px-2 text-xs hover:bg-black/80',
+                'shrink-0 rounded-lg border bg-black/60 px-2 text-xs hover:bg-black/80',
                 active
                     ? 'border-hud-accent text-hud-ink'
                     : 'border-hud-rule text-hud-muted'
@@ -189,7 +189,7 @@ export function MazeEditPalette({ tools }: { tools: MazeTools }) {
           : '';
 
     return (
-        <div className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs">
+        <div className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-lg border border-hud-rule bg-black/70 p-1.5 text-xs">
             {isEditTool(tool) &&
                 !awaitingExit &&
                 EDIT_TOOLS.map((value) => (

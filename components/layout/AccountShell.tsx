@@ -54,7 +54,6 @@ export function AccountShell({ children }: { children: ReactNode }) {
         >
             <div className="hud-surface mx-auto w-full max-w-[1400px] overflow-x-clip px-4 pt-3 md:hidden">
                 <HudChipTabs
-                    size="lg"
                     ariaLabel={t('profile')}
                     items={items.map((i) => ({
                         key: i.id,

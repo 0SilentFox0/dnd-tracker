@@ -10,7 +10,7 @@ export function AiMock({ t }: { t: Translator }) {
                     {t('ai.mock.pageTitle')}
                 </p>
                 <p>{t('ai.mock.pageText')}</p>
-                <p className="ld-msg ld-msg-4 rounded border-l-2 border-[#8a5cc9] bg-[#8a5cc9]/10 px-2 py-1">
+                <p className="ld-msg ld-msg-4 rounded-sm border-l-2 border-[#8a5cc9] bg-[#8a5cc9]/10 px-2 py-1">
                     <span className="text-[#c9a8f0]">
                         {t('ai.mock.newSceneLabel')}
                     </span>
@@ -34,11 +34,11 @@ export function AiMock({ t }: { t: Translator }) {
                         {t('ai.mock.proposal')}
                     </p>
                     <div className="flex gap-1.5">
-                        <span className="metal-gold metal-fill flex items-center gap-1 rounded px-2 py-0.5">
+                        <span className="metal-gold metal-fill flex items-center gap-1 rounded-sm px-2 py-0.5">
                             <Check aria-hidden className="size-3" />
                             {t('ai.mock.accept')}
                         </span>
-                        <span className="flex items-center gap-1 rounded border border-hud-line px-2 py-0.5 text-hud-bone">
+                        <span className="flex items-center gap-1 rounded-sm border border-hud-line px-2 py-0.5 text-hud-bone">
                             <X aria-hidden className="size-3" />
                             {t('ai.mock.reject')}
                         </span>

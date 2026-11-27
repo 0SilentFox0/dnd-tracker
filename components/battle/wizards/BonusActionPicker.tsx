@@ -115,7 +115,7 @@ export function BonusActionPicker({
                                             alt=""
                                             width={40}
                                             height={40}
-                                            className="size-10 shrink-0 rounded object-cover"
+                                            className="size-10 shrink-0 rounded-sm object-cover"
                                         />
                                     ) : (
                                         <Zap className="size-10 shrink-0 p-2 text-hud-accent-fg" />

@@ -243,7 +243,7 @@ export function AbilityPoints({
                                     )
                                 )
                             }
-                            className="rounded border border-hud-line/50 px-2 disabled:opacity-50"
+                            className="rounded-sm border border-hud-line/50 px-2 disabled:opacity-50"
                         >
                             −
                         </HudButton>
@@ -257,7 +257,7 @@ export function AbilityPoints({
                                     added >= choice.maxPerAbility)
                             }
                             onClick={() => onChange([...value, { id: a }])}
-                            className="rounded border border-hud-line/50 px-2 disabled:opacity-50"
+                            className="rounded-sm border border-hud-line/50 px-2 disabled:opacity-50"
                         >
                             +
                         </HudButton>

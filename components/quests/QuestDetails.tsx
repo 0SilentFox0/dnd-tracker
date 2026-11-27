@@ -39,7 +39,7 @@ export function QuestDetails({
                         {quest.title}
                     </h2>
                 </div>
-                <span className="rounded border border-hud-line px-2 py-1 text-xs text-hud-muted">
+                <span className="rounded-sm border border-hud-line px-2 py-1 text-xs text-hud-muted">
                     {t(quest.status)}
                 </span>
             </div>
@@ -54,7 +54,7 @@ export function QuestDetails({
                 {quest.objectives.map((o, index) => (
                     <div
                         key={o.hidden ? `hidden-${index}` : o.id}
-                        className={`flex items-start gap-3 rounded border p-3 text-sm ${o.hidden || !o.visible ? 'border-dashed border-hud-line text-hud-muted' : 'border-hud-edge text-hud-bone'}`}
+                        className={`flex items-start gap-3 rounded-sm border p-3 text-sm ${o.hidden || !o.visible ? 'border-dashed border-hud-line text-hud-muted' : 'border-hud-edge text-hud-bone'}`}
                     >
                         {o.hidden ? (
                             <HelpCircle className="size-5 shrink-0" />
@@ -82,7 +82,7 @@ export function QuestDetails({
                         <section key={field} className="space-y-2">
                             <h3 className="hud-sc text-hud-ink">{t(field)}</h3>
                             <p
-                                className={`text-sm break-words whitespace-pre-wrap text-hud-bone ${field === 'reward' ? 'inline-block rounded-md border border-hud-line bg-hud-field px-2 py-1' : ''}`}
+                                className={`text-sm break-words whitespace-pre-wrap text-hud-bone ${field === 'reward' ? 'inline-block rounded-lg border border-hud-line bg-hud-field px-2 py-1' : ''}`}
                             >
                                 {quest[field]}
                             </p>
@@ -94,7 +94,7 @@ export function QuestDetails({
                     <Button
                         asChild
                         variant="outline"
-                        className="min-h-10 border-hud-accent text-hud-accent-fg"
+                        className="border-hud-accent text-hud-accent-fg"
                     >
                         <Link
                             href={`/campaigns/${campaignId}/${isDM ? 'dm/' : ''}world?map=${encodeURIComponent(quest.marker.mapId)}&marker=${encodeURIComponent(quest.marker.id)}`}
@@ -107,7 +107,7 @@ export function QuestDetails({
                 {!actions.readOnly && (
                     <Button
                         variant="outline"
-                        className="min-h-10"
+                        
                         disabled={actions.pending}
                         onClick={actions.track}
                     >
@@ -117,7 +117,7 @@ export function QuestDetails({
                 {isDM && (
                     <Button
                         variant="outline"
-                        className="min-h-10"
+                        
                         onClick={actions.edit}
                     >
                         {t('edit')}

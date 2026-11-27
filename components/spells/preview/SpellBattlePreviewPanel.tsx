@@ -129,7 +129,7 @@ export default function SpellBattlePreviewPanel({
                 <div
                     className={cn(
                         book &&
-                            'spell-book-border mb-2 rounded-[2px] border p-[3px]'
+                            'spell-book-border mb-2 rounded-sm border p-[3px]'
                     )}
                 >
                     <div

@@ -17,7 +17,7 @@ export function GraphLegend({ showSequence }: { showSequence: boolean }) {
 
     return (
         <div
-            className="pointer-events-none absolute bottom-2 left-2 flex max-w-[calc(100%-1rem)] flex-col gap-1 rounded-md border bg-card/85 px-3 py-2 text-sm text-muted-foreground backdrop-blur-sm"
+            className="pointer-events-none absolute bottom-2 left-2 flex max-w-[calc(100%-1rem)] flex-col gap-1 rounded-lg border bg-card/85 px-3 py-2 text-sm text-muted-foreground backdrop-blur-sm"
             aria-label={t('title')}
             role="group"
         >

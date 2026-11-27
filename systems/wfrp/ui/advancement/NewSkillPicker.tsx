@@ -93,7 +93,7 @@ export function NewSkillPicker({ cost, available, pending, onBuy }: Props) {
                 type="button"
                 size="sm"
                 variant="outline"
-                className="min-h-11"
+                
                 disabled={
                     !advanceKey ||
                     price === null ||

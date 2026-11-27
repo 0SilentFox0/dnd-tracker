@@ -4,7 +4,9 @@ import { useTranslations } from 'next-intl';
 import { PagerNav } from '@/components/common/shell/PagerNav';
 import { Button } from '@/components/ui/button';
 import { ASSISTANT_PAGE_SIZES } from '@/lib/constants/ai';
+import { cn } from '@/lib/utils';
 import type { IntentSummary } from '@/types/assistant';
+
 export function AssistantQueue({
     items,
     selectedId,
@@ -38,8 +40,12 @@ export function AssistantQueue({
             </p>
             {items.map((item) => (
                 <Button
-                    className="h-auto w-full justify-start text-left break-words whitespace-normal"
-                    variant={selectedId === item.id ? 'secondary' : 'outline'}
+                    className={cn(
+                        'h-auto w-full justify-start text-left break-words whitespace-normal',
+                        selectedId === item.id &&
+                            'border-hud-accent text-hud-accent-fg'
+                    )}
+                    variant="outline"
                     key={item.id}
                     onClick={() => onSelect(item.id)}
                 >

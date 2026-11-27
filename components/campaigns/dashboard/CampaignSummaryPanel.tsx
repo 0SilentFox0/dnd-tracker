@@ -29,8 +29,8 @@ export function CampaignSummaryPanel({
                 <HudPill
                     tone={
                         campaign.status === CampaignStatus.ACTIVE
-                            ? 'gold'
-                            : 'muted'
+                            ? 'accent'
+                            : 'meta'
                     }
                 >
                     {t('status')} ·{' '}
@@ -38,10 +38,10 @@ export function CampaignSummaryPanel({
                         ? t('active')
                         : t('archived')}
                 </HudPill>
-                <HudPill tone="bone">
+                <HudPill tone="meta">
                     {t('maxLevel')} · {campaign.maxLevel}
                 </HudPill>
-                {memberCount && <HudPill tone="muted">{memberCount}</HudPill>}
+                {memberCount && <HudPill tone="meta">{memberCount}</HudPill>}
                 {isDM && campaign.inviteCode && (
                     <div
                         id="invite"

@@ -17,13 +17,13 @@ export function SkillTreePanel({ manage }: PathPanelProps) {
     return (
         <>
             {personal && (
-                <section className="mb-3 flex gap-3 rounded-[10px] border border-hud-line bg-hud-field p-3">
+                <section className="mb-3 flex gap-3 rounded-xl border border-hud-line bg-hud-field p-3">
                     <EntityIcon
                         src={sheet.identity.avatar || personal.icon}
                         name={personal.name}
                         alt={sheet.identity.name}
                         size={48}
-                        className="hud-sc size-12 rounded-md border border-hud-line bg-hud-raised text-inherit"
+                        className="hud-sc size-12 rounded-lg border border-hud-line bg-hud-raised text-inherit"
                     />
                     <div className="min-w-0">
                         <p className="text-sm text-hud-ink uppercase">

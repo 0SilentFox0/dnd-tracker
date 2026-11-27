@@ -97,7 +97,7 @@ function CareerPicker({
                 type="button"
                 size="sm"
                 variant="outline"
-                className="min-h-11"
+                
                 disabled={!pick || pending}
                 onClick={() => void assign()}
             >
@@ -232,7 +232,7 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
                         {state.ticks.map((tick) => (
                             <li
                                 key={tick}
-                                className="rounded border border-hud-line px-1.5 py-0.5"
+                                className="rounded-sm border border-hud-line px-1.5 py-0.5"
                             >
                                 {tickLabel(tick)}
                             </li>
@@ -243,7 +243,7 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
                     <Button
                         type="button"
                         size="sm"
-                        className="min-h-11"
+                        
                         disabled={ops.isPending}
                         onClick={() => void advance()}
                     >

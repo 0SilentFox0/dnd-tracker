@@ -115,14 +115,14 @@ export function TilePalettePanel({
                     </span>
                 </div>
                 {selectedTile && (
-                    <div className="overflow-hidden rounded-md border border-hud-rule bg-black/20 p-2">
+                    <div className="overflow-hidden rounded-lg border border-hud-rule bg-black/20 p-2">
                         <p
                             className="mb-1 truncate text-xs font-medium"
                             aria-live="polite"
                         >
                             {tileLabel(selectedTile.key)}
                         </p>
-                        <div className="flex h-16 items-center justify-center rounded bg-black/30 p-1">
+                        <div className="flex h-16 items-center justify-center rounded-sm bg-black/30 p-1">
                             <TileAssetImage
                                 tile={selectedTile}
                                 alt={tileLabel(selectedTile.key)}
@@ -154,7 +154,7 @@ export function TilePalettePanel({
                             }
                             onClick={() => tileEditor.setSelectedTile(tile.id)}
                         >
-                            <span className="flex h-12 w-full items-center justify-center overflow-hidden rounded bg-black/30 p-1">
+                            <span className="flex h-12 w-full items-center justify-center overflow-hidden rounded-sm bg-black/30 p-1">
                                 <TileAssetImage
                                     tile={tile}
                                     alt=""
@@ -168,7 +168,7 @@ export function TilePalettePanel({
                     ))}
                 </div>
                 {visibleTiles.length === 0 && (
-                    <p className="rounded-md border border-dashed border-hud-rule p-4 text-center text-xs text-hud-muted">
+                    <p className="rounded-lg border border-dashed border-hud-rule p-4 text-center text-xs text-hud-muted">
                         {t('noResults')}
                     </p>
                 )}

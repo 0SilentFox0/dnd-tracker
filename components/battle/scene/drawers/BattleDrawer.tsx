@@ -99,7 +99,7 @@ function SideSheet({
             hidden={!open}
             className={cn(
                 HUD_GLASS,
-                'absolute inset-y-0 right-0 z-40 flex w-[min(340px,100%)] flex-col rounded-none rounded-l-2xl border-r-0 pt-14'
+                'absolute inset-y-0 right-0 z-40 flex w-[min(340px,100%)] flex-col rounded-none rounded-l-xl border-r-0 pt-14'
             )}
         >
             <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-y border-white/15 pr-2 pl-4">

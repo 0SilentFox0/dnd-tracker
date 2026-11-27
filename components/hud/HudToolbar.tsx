@@ -15,7 +15,7 @@ export function HudToolbar({
             role={label ? 'toolbar' : undefined}
             aria-label={label}
             className={cn(
-                'flex max-w-full flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs',
+                'flex max-w-full flex-wrap items-center gap-1.5 rounded-lg border border-hud-rule bg-black/70 p-1.5 text-xs',
                 className
             )}
             {...props}

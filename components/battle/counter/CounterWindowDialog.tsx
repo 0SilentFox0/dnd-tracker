@@ -36,7 +36,7 @@ function OfferRow({ row, view }: { row: CounterOfferView; view: View }) {
     const [level, setLevel] = useState(String(offer.slotLevels[0] ?? ''));
 
     return (
-        <li className="space-y-2 rounded border border-white/15 p-2">
+        <li className="space-y-2 rounded-sm border border-white/15 p-2">
             <div className="font-semibold">{name}</div>
             {canCounter && offer.slotLevels.length > 0 && (
                 <SelectField

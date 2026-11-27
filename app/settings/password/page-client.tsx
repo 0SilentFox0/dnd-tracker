@@ -28,7 +28,7 @@ export function PasswordSettingsClient() {
                         {done && (
                             <p
                                 role="status"
-                                className="rounded-md border border-hud-good-dim bg-[rgba(127,168,106,.1)] p-2 text-sm text-hud-good"
+                                className="rounded-lg border border-hud-good-dim bg-[rgba(127,168,106,.1)] p-2 text-sm text-hud-good"
                             >
                                 {t('saved')}
                             </p>

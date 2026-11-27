@@ -11,12 +11,12 @@ import type { TravelKind, WorldTravelEntry } from '@/types/world';
 
 const KIND_BADGE: Record<
     TravelKind,
-    { tone: 'accent' | 'muted' | 'bone'; icon: ReactNode }
+    { tone: 'accent' | 'meta'; icon: ReactNode }
 > = {
     travel: { tone: 'accent', icon: <Route className="size-3" aria-hidden /> },
-    enter: { tone: 'bone', icon: <DoorOpen className="size-3" aria-hidden /> },
-    rest: { tone: 'muted', icon: <Moon className="size-3" aria-hidden /> },
-    exit: { tone: 'muted', icon: <LogOut className="size-3" aria-hidden /> },
+    enter: { tone: 'meta', icon: <DoorOpen className="size-3" aria-hidden /> },
+    rest: { tone: 'meta', icon: <Moon className="size-3" aria-hidden /> },
+    exit: { tone: 'meta', icon: <LogOut className="size-3" aria-hidden /> },
 };
 
 const WHEN_FORMAT = {
@@ -49,7 +49,7 @@ function TravelEntry({ e }: { e: WorldTravelEntry }) {
                 </HudPill>
                 {e.rest !== 'none' ? (
                     <HudPill
-                        tone="muted"
+                        tone="meta"
                         icon={<Moon className="size-3" aria-hidden />}
                     >
                         {t(`logRest.${e.rest}`)}

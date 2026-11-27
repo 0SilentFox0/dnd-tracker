@@ -79,7 +79,7 @@ export function ReferenceRail({ filters, counts }: ReferenceRailProps) {
                 {search.value && (
                     <HudButton
                         onClick={() => search.set('')}
-                        className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-1 text-hud-muted hover:text-hud-ink"
+                        className="absolute top-1/2 right-3 -translate-y-1/2 rounded-sm p-1 text-hud-muted hover:text-hud-ink"
                         aria-label={t('search.clear')}
                     >
                         <X className="size-4" />

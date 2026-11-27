@@ -26,7 +26,7 @@ function ItemLabel({ item }: { item: ProgressionItem }) {
                     src={item.icon}
                     name={item.name}
                     size={20}
-                    className="mr-1 inline-flex size-5 rounded align-middle"
+                    className="mr-1 inline-flex size-5 rounded-sm align-middle"
                 />
             ) : null}
             {item.name}

@@ -72,7 +72,7 @@ export function MainSkillCard({
                         </span>
                         <div className="mt-1 flex items-center gap-2">
                             <div
-                                className="h-8 w-8 rounded border-2 border-hud-line"
+                                className="h-8 w-8 rounded-sm border-2 border-hud-line"
                                 style={{ backgroundColor: mainSkill.color }}
                             />
                             <span
@@ -95,7 +95,7 @@ export function MainSkillCard({
                                 name={mainSkill.name}
                                 size={96}
                                 emoji
-                                className="mt-1 size-20 rounded bg-hud-field text-3xl text-inherit"
+                                className="mt-1 size-20 rounded-sm bg-hud-field text-3xl text-inherit"
                             />
                         </div>
                     )}

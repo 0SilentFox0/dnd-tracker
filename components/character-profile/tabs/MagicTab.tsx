@@ -68,7 +68,7 @@ export function MagicTab() {
                             level: spellLevelRoman(sheet.pact.level),
                         })}
                         className={cn(
-                            'hud-sc metal-fill inline-block rounded-md px-3 py-1.5 text-sm',
+                            'hud-sc metal-fill inline-block rounded-lg px-3 py-1.5 text-sm',
                             spellLevelMetal(sheet.pact.level)
                         )}
                     >
@@ -96,7 +96,7 @@ export function MagicTab() {
                                           })
                                 }
                                 className={cn(
-                                    'hud-sc metal-fill rounded-md px-3 py-1.5 text-sm',
+                                    'hud-sc metal-fill rounded-lg px-3 py-1.5 text-sm',
                                     spellLevelMetal(s.level)
                                 )}
                             >
@@ -138,9 +138,9 @@ export function MagicTab() {
                 )}
             {sheet.spells.length > 0 ? (
                 <>
-                    <Button
+                    <Button size="lg"
                         type="button"
-                        className="mt-4 h-12 w-full gap-2"
+                        className="mt-4 w-full gap-2"
                         onClick={() => setOpen(true)}
                     >
                         <BookOpen className="size-5" />

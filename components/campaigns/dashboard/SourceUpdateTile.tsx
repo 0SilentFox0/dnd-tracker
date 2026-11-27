@@ -22,7 +22,7 @@ export function SourceUpdateTile({
     const safe = useApplySafeSourceChanges(campaignId);
 
     return (
-        <div className="text-hud-ink mb-3 flex flex-wrap items-center gap-2 rounded-md px-2 py-1.5 text-sm shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
+        <div className="text-hud-ink mb-3 flex flex-wrap items-center gap-2 rounded-lg px-2 py-1.5 text-sm shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
             <RefreshCw className="text-hud-muted size-4 shrink-0" aria-hidden />
             <span className="min-w-0 flex-1">
                 {t('sourceUpdate.text', { version })}

@@ -112,7 +112,7 @@ export function DemoBattleSandbox({ scene }: { scene: BattleScene }) {
                             actions.onTokenClick?.(participant.basicInfo.id)
                         }
                         aria-pressed={participant.basicInfo.id === activeId}
-                        className="rounded border border-hud-line bg-hud-panel p-3 text-left text-sm"
+                        className="rounded-sm border border-hud-line bg-hud-panel p-3 text-left text-sm"
                     >
                         <strong>{participant.basicInfo.name}</strong>
                         <span className="ml-2 text-hud-muted">

@@ -87,14 +87,14 @@ export function MapCatalogDialog({
                 <QueryState query={query}>
                     {() => (
                         <div className="grid min-h-[22rem] gap-4 md:grid-cols-[minmax(14rem,0.8fr)_2fr]">
-                            <div className="max-h-[55vh] space-y-1 overflow-y-auto rounded border p-1">
+                            <div className="max-h-[55vh] space-y-1 overflow-y-auto rounded-sm border p-1">
                                 {filtered.map((entry) => (
                                     <Button
                                         key={entry.id}
                                         variant="ghost"
                                         aria-pressed={selected?.id === entry.id}
                                         onClick={() => setSelectedId(entry.id)}
-                                        className={`block h-auto w-full rounded p-2 text-left text-sm font-normal whitespace-normal ${selected?.id === entry.id ? 'bg-hud-panel-2 text-hud-ink' : 'hover:bg-muted'}`}
+                                        className={`block h-auto w-full rounded-sm p-2 text-left text-sm font-normal whitespace-normal ${selected?.id === entry.id ? 'bg-hud-panel-2 text-hud-ink' : 'hover:bg-muted'}`}
                                     >
                                         {entry.previewUrl ? (
                                             <Image
@@ -103,7 +103,7 @@ export function MapCatalogDialog({
                                                 width={160}
                                                 height={100}
                                                 unoptimized
-                                                className="mb-2 h-20 w-full rounded object-cover"
+                                                className="mb-2 h-20 w-full rounded-sm object-cover"
                                             />
                                         ) : null}
                                         <span className="block font-medium">
@@ -133,7 +133,7 @@ export function MapCatalogDialog({
                                                 width={640}
                                                 height={640}
                                                 unoptimized
-                                                className="max-h-[38vh] w-full rounded border object-contain"
+                                                className="max-h-[38vh] w-full rounded-sm border object-contain"
                                             />
                                         ) : null}
                                         {selected.importable === false ? (

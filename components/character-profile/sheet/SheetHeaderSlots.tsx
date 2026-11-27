@@ -41,7 +41,7 @@ export function SheetDmActions({ onEdit }: { onEdit: () => void }) {
                 type="button"
                 size="sm"
                 variant="outline"
-                className="min-h-10"
+                
                 onClick={onEdit}
             >
                 <Pencil aria-hidden className="size-4" />

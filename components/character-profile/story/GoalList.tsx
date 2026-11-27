@@ -161,7 +161,7 @@ export function GoalList() {
                                     {g.kind && (
                                         <span
                                             className={cn(
-                                                'rounded border px-1.5 text-xs tracking-[.06em] uppercase',
+                                                'rounded-sm border px-1.5 text-xs tracking-[.06em] uppercase',
                                                 g.kind === GoalKind.SECRET
                                                     ? 'border-hud-danger text-hud-danger'
                                                     : 'border-hud-line text-hud-ink'
@@ -171,7 +171,7 @@ export function GoalList() {
                                         </span>
                                     )}
                                     {g.author === GoalAuthor.PLAYER && (
-                                        <span className="inline-block rounded border border-hud-info px-1 text-xs text-hud-info">
+                                        <span className="inline-block rounded-sm border border-hud-info px-1 text-xs text-hud-info">
                                             {t('fromPlayer')}
                                         </span>
                                     )}
@@ -196,7 +196,7 @@ export function GoalList() {
                                     type="button"
                                     size="icon"
                                     variant="ghost"
-                                    className="size-8"
+                                    
                                     aria-label={t('editLabel', {
                                         name: goalName(g),
                                     })}
@@ -214,7 +214,7 @@ export function GoalList() {
                                     type="button"
                                     size="icon"
                                     variant="ghost"
-                                    className="size-8"
+                                    
                                     aria-label={t('deleteLabel', {
                                         name: goalName(g),
                                     })}
@@ -258,7 +258,7 @@ export function GoalList() {
                     </div>
                     <Button
                         type="button"
-                        className="h-11"
+                        
                         aria-label={t('save')}
                         disabled={isPending || !draft.text.trim()}
                         onClick={() => void commit()}
@@ -268,7 +268,7 @@ export function GoalList() {
                     <Button
                         type="button"
                         variant="ghost"
-                        className="h-11"
+                        
                         aria-label={tc('cancel')}
                         onClick={() => setDraft(null)}
                     >
@@ -280,7 +280,7 @@ export function GoalList() {
                     <Button
                         type="button"
                         variant="ghost"
-                        className="mt-1 h-11 gap-1 px-0 text-hud-ink"
+                        className="mt-1 gap-1 px-0 text-hud-ink"
                         onClick={() =>
                             setDraft({ id: null, title: '', text: '' })
                         }

@@ -36,7 +36,7 @@ function FeatureList({ features }: { features: ClassFeatureForReference[] }) {
                                     src={f.icon}
                                     name={f.name}
                                     size={20}
-                                    className="size-5 rounded text-xs"
+                                    className="size-5 rounded-sm text-xs"
                                 />
                             )}
                             {f.name}
@@ -91,7 +91,7 @@ export function ClassReferenceDetail({ item }: ClassReferenceDetailProps) {
                                     src={s.icon}
                                     name={s.name}
                                     size={20}
-                                    className="size-5 rounded text-xs"
+                                    className="size-5 rounded-sm text-xs"
                                 />
                             )}
                             {t('subclass', { name: s.name })}

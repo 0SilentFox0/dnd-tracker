@@ -34,7 +34,7 @@ export function RowFields({
     const { index, from, isLast } = position;
 
     return (
-        <li className="border-hud-border space-y-2 rounded border p-2">
+        <li className="border-hud-border space-y-2 rounded-sm border p-2">
             <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
                 <span className="text-sm text-hud-muted">
                     {t('from', { n: from })}
@@ -52,7 +52,7 @@ export function RowFields({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="min-h-11 min-w-11"
+                    className="min-w-11"
                     disabled={!canRemove}
                     aria-label={t('removeRow', { n: index + 1 })}
                     onClick={onRemove}
@@ -94,7 +94,7 @@ export function RowFields({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="min-h-11"
+                
                 disabled={row.effects.length >= effectsMax(slot)}
                 onClick={() =>
                     onChange({

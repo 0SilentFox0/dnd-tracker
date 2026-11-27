@@ -34,7 +34,7 @@ export function SharedIpGroups({
                         <span className="font-mono font-semibold text-hud-ink">
                             {g.ip}
                         </span>
-                        <HudPill tone="muted">{g.country ?? '—'}</HudPill>
+                        <HudPill tone="meta">{g.country ?? '—'}</HudPill>
                         {g.crowd && (
                             <HudPill tone="accent">{t('crowd')}</HudPill>
                         )}

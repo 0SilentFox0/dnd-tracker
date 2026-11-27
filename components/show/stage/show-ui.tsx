@@ -19,7 +19,7 @@ export function ShowButton({
             type="button"
             {...props}
             className={cn(
-                'inline-flex h-8 min-w-8 shrink-0 items-center justify-center gap-1.5 rounded px-1.5 text-sm opacity-75 transition hover:bg-[color-mix(in_srgb,currentColor_10%,transparent)] hover:opacity-100 disabled:pointer-events-none disabled:opacity-50 aria-pressed:bg-[color-mix(in_srgb,var(--show-accent,var(--color-hud-accent))_15%,transparent)] aria-pressed:text-[var(--show-accent,var(--color-hud-accent))] aria-pressed:opacity-100',
+                'inline-flex h-8 min-w-8 shrink-0 items-center justify-center gap-1.5 rounded-sm px-1.5 text-sm opacity-75 transition hover:bg-[color-mix(in_srgb,currentColor_10%,transparent)] hover:opacity-100 disabled:pointer-events-none disabled:opacity-50 aria-pressed:bg-[color-mix(in_srgb,var(--show-accent,var(--color-hud-accent))_15%,transparent)] aria-pressed:text-[var(--show-accent,var(--color-hud-accent))] aria-pressed:opacity-100',
                 tone === 'danger' && 'hover:text-red-400',
                 className
             )}

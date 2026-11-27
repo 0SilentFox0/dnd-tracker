@@ -58,7 +58,6 @@ function BlockedMaterialPicker({ materials }: { materials: Art['materials'] }) {
             {options.map(({ id, label }) => (
                 <HudToggleChip
                     key={label}
-                    tall
                     active={materials.blocked === id}
                     onClick={() => materials.set({ blocked: id })}
                 >

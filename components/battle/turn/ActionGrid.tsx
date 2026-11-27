@@ -49,7 +49,7 @@ const Tile = ({
             {hotkey !== undefined && (
                 <kbd
                     aria-hidden
-                    className="shrink-0 rounded border border-white/25 px-1.5 text-xs text-hud-soft"
+                    className="shrink-0 rounded-sm border border-white/25 px-1.5 text-xs text-hud-soft"
                 >
                     {hotkey}
                 </kbd>

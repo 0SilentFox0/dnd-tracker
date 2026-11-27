@@ -31,7 +31,7 @@ function StatButton({
             aria-pressed={pressed}
             onClick={onClick}
             className={cn(
-                'motion-press flex min-h-11 min-w-20 flex-col items-center justify-center rounded-[4px] border px-3 text-center hover:bg-hud-raised',
+                'motion-press flex min-h-11 min-w-20 flex-col items-center justify-center rounded-sm border px-3 text-center hover:bg-hud-raised',
                 pressed ? 'border-hud-accent' : 'border-hud-line'
             )}
         >

@@ -112,7 +112,7 @@ export function EffectLine({
                             : t('showAll', { count: effects.length })
                     }
                     onClick={() => setExpanded((v) => !v)}
-                    className="relative cursor-pointer rounded px-1 text-sm leading-5 whitespace-nowrap text-[var(--hud-muted)] hover:bg-white/10 hover:text-hud-text"
+                    className="relative cursor-pointer rounded-sm px-1 text-sm leading-5 whitespace-nowrap text-[var(--hud-muted)] hover:bg-white/10 hover:text-hud-text"
                 >
                     {open ? t('less') : `+${effects.length - max}`}
                 </HudButton>

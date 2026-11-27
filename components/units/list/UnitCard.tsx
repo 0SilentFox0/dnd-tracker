@@ -10,7 +10,7 @@ import { UnitQuickStatsEditor } from './UnitQuickStatsEditor';
 import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
 import { ZoomableEntityIcon } from '@/components/common/entity/ZoomableEntityIcon';
 import { HudCard } from '@/components/hud/page';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { MonsterStatblock } from '@/components/units/MonsterStatblock';
 import { AttackType } from '@/lib/constants/battle';
@@ -105,12 +105,11 @@ export const UnitCard = memo(function UnitCard({
                         <h3 className="text-base font-semibold text-hud-ink">
                             {unit.name}
                             {unit.cr != null && (
-                                <Badge
-                                    variant="outline"
+                                <HudPill
                                     className="ml-2 align-middle text-xs"
                                 >
                                     {`CR ${challengeLabel(unit.cr)}`}
-                                </Badge>
+                                </HudPill>
                             )}
                         </h3>
                         <div className="space-y-1 text-sm text-muted-foreground">
@@ -172,18 +171,17 @@ export const UnitCard = memo(function UnitCard({
                         </div>
                         <div className="flex flex-wrap gap-1">
                             {allImmunities.slice(0, 3).map((immunity, idx) => (
-                                <Badge
+                                <HudPill
                                     key={idx}
-                                    variant="outline"
                                     className="text-xs"
                                 >
                                     {immunity}
-                                </Badge>
+                                </HudPill>
                             ))}
                             {allImmunities.length > 3 && (
-                                <Badge variant="outline" className="text-xs">
+                                <HudPill className="text-xs">
                                     +{allImmunities.length - 3}
-                                </Badge>
+                                </HudPill>
                             )}
                         </div>
                     </div>

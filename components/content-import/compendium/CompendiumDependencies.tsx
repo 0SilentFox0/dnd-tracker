@@ -185,7 +185,7 @@ export function CompendiumDependencies({
                                         {t('dependencies.needsBinding')}
                                     </HudPill>
                                 ) : (
-                                    <HudPill tone="muted">
+                                    <HudPill tone="meta">
                                         {t(
                                             row.refs.length > 0
                                                 ? 'dependencies.matched'

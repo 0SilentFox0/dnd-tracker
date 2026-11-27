@@ -129,7 +129,7 @@ export function ItemCastingFields({
             {spells.map((spell, index) => (
                 <fieldset
                     key={spell.spellId}
-                    className="space-y-2 rounded border border-hud-line p-2"
+                    className="space-y-2 rounded-sm border border-hud-line p-2"
                 >
                     <SelectField
                         aria-label={t('spellAria')}

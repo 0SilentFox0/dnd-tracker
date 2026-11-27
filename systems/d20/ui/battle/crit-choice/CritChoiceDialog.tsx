@@ -126,7 +126,7 @@ function CritChoiceForm({
                         {options.map((o) => (
                             <label
                                 key={o.id}
-                                className="flex cursor-pointer items-start gap-2 rounded px-2 py-1 text-sm hover:bg-white/5"
+                                className="flex cursor-pointer items-start gap-2 rounded-sm px-2 py-1 text-sm hover:bg-white/5"
                             >
                                 <Radio
                                     name={trigger.key}

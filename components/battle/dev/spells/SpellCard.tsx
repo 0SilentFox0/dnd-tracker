@@ -76,7 +76,7 @@ export function SpellCard({
                     <p className="text-sm text-hud-bone">{spell.description}</p>
                     <div className="flex flex-wrap gap-1">
                         {effects.map((e) => (
-                            <HudPill key={e} tone="muted">
+                            <HudPill key={e} tone="meta">
                                 {e}
                             </HudPill>
                         ))}

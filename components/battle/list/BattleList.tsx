@@ -150,7 +150,7 @@ export function BattleList({
                             <span className="hud-sc text-lg text-hud-ink">
                                 {t('sections.completed')}
                             </span>
-                            <HudPill tone="muted">{completed.length}</HudPill>
+                            <HudPill tone="meta">{completed.length}</HudPill>
                         </span>
                     }
                 >

@@ -30,7 +30,7 @@ export function ArtifactSetBonusDisplay({
     return (
         <div
             className={cn(
-                'rounded-md bg-hud-field p-3 shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
+                'rounded-lg bg-hud-field p-3 shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
                 className
             )}
         >

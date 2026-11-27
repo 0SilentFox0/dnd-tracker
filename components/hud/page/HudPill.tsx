@@ -3,31 +3,33 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 const TONE = {
-    gold: 'metal-gold metal-fill font-semibold',
-    silver: 'metal-silver metal-fill font-semibold',
-    bone: 'text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
-    accent: 'text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-accent)]',
-    muted: 'text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
-    fact: 'text-hud-soft shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
+    role: 'metal-gold metal-fill',
+    meta: 'text-hud-soft shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
+    npc: 'bg-hud-muted/15 text-hud-muted',
+    accent: 'text-hud-accent-fg shadow-[inset_0_0_0_1px_var(--color-hud-accent)]',
+    danger: 'text-hud-crimson-fg shadow-[inset_0_0_0_1px_var(--color-hud-crimson)]',
 } as const;
 
+type HudPillTone = keyof typeof TONE;
+
 interface HudPillProps {
-    tone?: keyof typeof TONE;
+    tone?: HudPillTone;
     icon?: ReactNode;
     className?: string;
     children: ReactNode;
 }
 
 export function HudPill({
-    tone = 'fact',
+    tone = 'meta',
     icon,
     className,
     children,
 }: HudPillProps) {
     return (
         <span
+            data-tone={tone}
             className={cn(
-                'inline-flex shrink-0 items-center gap-1 rounded-full px-2 text-xs leading-5',
+                'hud-body inline-flex h-6 shrink-0 items-center gap-1 rounded-sm px-2 text-xs leading-none font-semibold whitespace-nowrap [&>svg]:size-3',
                 TONE[tone],
                 className
             )}

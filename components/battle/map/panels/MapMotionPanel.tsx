@@ -58,7 +58,7 @@ export function MapMotionPanel({ tool }: { tool: MapMotionTool }) {
         <div
             role="group"
             aria-label={t('tools.motion')}
-            className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs text-hud-bone"
+            className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-lg border border-hud-rule bg-black/70 p-1.5 text-xs text-hud-bone"
         >
             {(['x', 'y'] as const).map((axis) => (
                 <HudToggleChip

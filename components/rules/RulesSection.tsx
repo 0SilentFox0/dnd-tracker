@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useMechanicText } from './mechanic-text';
 import { useRulesChanges } from './RulesChanges';
 
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import type { MECHANIC_REGISTRY } from '@/lib/utils/rules';
 
@@ -31,7 +31,7 @@ export function RulesSection({
                 </h2>
                 {changed && (
                     <span className="flex items-center gap-2">
-                        <Badge variant="outline">{t('changed')}</Badge>
+                        <HudPill>{t('changed')}</HudPill>
                         <Button
                             type="button"
                             variant="ghost"

@@ -36,13 +36,13 @@ function Chip({
     onRemove: () => void;
 }) {
     return (
-        <li className="flex items-center gap-1 rounded border border-hud-line py-0.5 pl-2 text-xs">
+        <li className="flex items-center gap-1 rounded-sm border border-hud-line py-0.5 pl-2 text-xs">
             {label}
             <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="size-8"
+                
                 aria-label={removeLabel}
                 onClick={onRemove}
             >
@@ -110,7 +110,7 @@ export function CareerTierFields({ index, tier, feats, onChange }: Props) {
                                     ? 'default'
                                     : 'outline'
                             }
-                            className="min-h-11 min-w-11"
+                            className="min-w-11"
                             aria-pressed={tier.characteristics.includes(key)}
                             onClick={() => toggle(key)}
                         >

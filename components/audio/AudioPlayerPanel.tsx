@@ -53,7 +53,7 @@ export function AudioPlayerPanel({
                         aria-pressed={prefs.video.shown}
                         onClick={() => prefs.video.set(!prefs.video.shown)}
                         className={cn(
-                            'flex items-center gap-1 rounded px-1 hover:text-hud-bone',
+                            'flex items-center gap-1 rounded-sm px-1 hover:text-hud-bone',
                             prefs.video.shown
                                 ? 'text-hud-accent-fg'
                                 : 'text-hud-muted'

@@ -55,7 +55,7 @@ function TrackRow({
                     track={track}
                     onRename={actions.rename}
                     onClose={() => setEditing(false)}
-                    className="h-auto rounded border-hud-rule bg-black/60 px-1.5 py-1 text-xs text-hud-bone md:text-xs"
+                    className="h-auto rounded-sm border-hud-rule bg-black/60 px-1.5 py-1 text-xs text-hud-bone md:text-xs"
                 />
             ) : (
                 <HudButton
@@ -65,7 +65,7 @@ function TrackRow({
                     onClick={actions.play}
                     title={track.title}
                     className={cn(
-                        'min-w-0 flex-1 truncate rounded px-1.5 py-1 text-left hover:bg-white/10',
+                        'min-w-0 flex-1 truncate rounded-sm px-1.5 py-1 text-left hover:bg-white/10',
                         current && 'bg-white/10 text-hud-ink'
                     )}
                 >
@@ -91,10 +91,10 @@ function TrackRow({
 }
 
 const FIELD =
-    'h-7 min-w-0 rounded border border-hud-rule bg-black/60 px-1.5 text-xs text-hud-bone';
+    'h-7 min-w-0 rounded-sm border border-hud-rule bg-black/60 px-1.5 text-xs text-hud-bone';
 
 const SELECT =
-    'h-7 min-w-0 rounded border-hud-rule bg-black/60 px-1.5 py-0 text-xs text-hud-bone shadow-none data-[size=default]:h-7 dark:bg-black/60 dark:hover:bg-black/60';
+    'h-7 min-w-0 rounded-sm border-hud-rule bg-black/60 px-1.5 py-0 text-xs text-hud-bone shadow-none data-[size=default]:h-7 dark:bg-black/60 dark:hover:bg-black/60';
 
 const KINDS: TrackKind[] = ['youtube', 'file'];
 

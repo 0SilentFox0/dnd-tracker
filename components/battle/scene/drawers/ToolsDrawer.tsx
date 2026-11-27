@@ -116,7 +116,6 @@ export function ToolsContent({
                 <section className="flex flex-col gap-2">
                     <h3 className={SECTION}>{td('view')}</h3>
                     <HudChipTabs
-                        size="lg"
                         ariaLabel={ts('viewMode')}
                         items={[
                             {
@@ -139,7 +138,6 @@ export function ToolsContent({
                 <section className="flex flex-col gap-2">
                     <h3 className={SECTION}>{td('view')}</h3>
                     <HudChipTabs
-                        size="lg"
                         ariaLabel={ts('viewMode')}
                         items={[
                             ...(battle.map
@@ -174,7 +172,6 @@ export function ToolsContent({
                         <section className="flex flex-col gap-2">
                             <h3 className={SECTION}>{td('mode')}</h3>
                             <HudChipTabs
-                                size="lg"
                                 ariaLabel={td('mode')}
                                 items={[
                                     {

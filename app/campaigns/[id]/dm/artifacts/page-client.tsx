@@ -12,6 +12,7 @@ import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { HudSection } from '@/components/hud/form';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { HudPill } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { systemUiOf } from '@/components/systems';
 import {
@@ -20,7 +21,6 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useArtifactsCatalog } from '@/lib/hooks/artifacts';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
@@ -145,12 +145,11 @@ export function DMArtifactsPageClient({
                                                 <AccordionTrigger className="px-4 hover:no-underline">
                                                     <span className="flex items-center gap-2">
                                                         {t(`slots.${slot}`)}
-                                                        <Badge
-                                                            variant="secondary"
+                                                        <HudPill
                                                             className="text-xs"
                                                         >
                                                             {artifacts.length}
-                                                        </Badge>
+                                                        </HudPill>
                                                     </span>
                                                 </AccordionTrigger>
                                                 <AccordionContent className="px-3">

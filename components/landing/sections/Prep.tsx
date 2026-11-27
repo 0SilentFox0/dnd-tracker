@@ -22,7 +22,7 @@ export function Prep({ t, locale }: { t: Translator; locale: Locale }) {
                     <article
                         key={id}
                         style={{ '--c': i } as CSSProperties}
-                        className="ld-unfurl flex flex-col gap-4 rounded-2xl border border-hud-line bg-gradient-to-b from-hud-surface to-hud-page p-4 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]"
+                        className="ld-unfurl flex flex-col gap-4 rounded-xl border border-hud-line bg-gradient-to-b from-hud-surface to-hud-page p-4 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]"
                     >
                         <MediaFrame title={p(id, 'screen')}>
                             <Screen

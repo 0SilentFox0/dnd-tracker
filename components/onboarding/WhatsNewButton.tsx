@@ -32,7 +32,7 @@ export function WhatsNewButton() {
             <Button
                 variant="ghost"
                 size="icon"
-                className="relative h-9 w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
+                className="relative w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
                 onClick={() => onOpenChange(true)}
             >
                 <Gift className="h-4 w-4" />

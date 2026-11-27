@@ -28,7 +28,7 @@ export function HudShellHeader({
                                 variant="outline"
                                 size="icon"
                                 aria-label={menu.label}
-                                className="h-10 w-10 shrink-0 border-hud-rule text-hud-ink"
+                                className="w-10 shrink-0 border-hud-rule text-hud-ink"
                             >
                                 <Menu className="size-4" />
                             </Button>

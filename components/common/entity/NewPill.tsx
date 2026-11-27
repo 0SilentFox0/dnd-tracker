@@ -14,7 +14,7 @@ export function NewPill({
     const t = useTranslations('common');
 
     return (
-        <HudPill tone="gold" className={className}>
+        <HudPill tone="accent" className={className}>
             {count && count > 1
                 ? t('notifications.newCount', { count })
                 : t('notifications.new')}

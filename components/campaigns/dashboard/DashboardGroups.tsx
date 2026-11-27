@@ -83,7 +83,7 @@ export function DashboardGroups({
                 subtitle={subtitle}
                 badge={
                     libraryCounts?.[s.key] !== undefined ? (
-                        <HudPill tone="muted">{libraryCounts[s.key]}</HudPill>
+                        <HudPill tone="meta">{libraryCounts[s.key]}</HudPill>
                     ) : isPlayer &&
                       hasUnread(
                           notifications,

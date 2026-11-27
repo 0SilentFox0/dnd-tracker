@@ -94,7 +94,7 @@ export function SlidePickerDialog({
                                     aria-label={
                                         slide.title ?? t('slideN', { n: i + 1 })
                                     }
-                                    className="overflow-hidden rounded border border-hud-rule"
+                                    className="overflow-hidden rounded-sm border border-hud-rule"
                                     onClick={() => {
                                         onPick({
                                             deckId: deck.id,

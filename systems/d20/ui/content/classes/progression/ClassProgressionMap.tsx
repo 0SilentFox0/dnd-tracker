@@ -55,7 +55,7 @@ export function ClassProgressionMap({ progression, actions }: Props) {
                                         src={s.icon}
                                         name={s.name}
                                         size={20}
-                                        className="mr-1 inline-flex size-5 rounded align-middle"
+                                        className="mr-1 inline-flex size-5 rounded-sm align-middle"
                                     />
                                 ) : null}
                                 {s.name}

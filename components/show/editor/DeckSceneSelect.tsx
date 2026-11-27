@@ -33,7 +33,7 @@ export function DeckSceneSelect({
                 options={pages
                     .filter((p) => p.kind === 'scene')
                     .map((p) => ({ value: p.id, label: p.title }))}
-                triggerClassName="h-9 w-auto rounded border-hud-rule bg-black/70 px-2 text-sm text-hud-bone data-[size=default]:h-9 dark:bg-black/70"
+                triggerClassName="h-9 w-auto rounded-sm border-hud-rule bg-black/70 px-2 text-sm text-hud-bone data-[size=default]:h-9 dark:bg-black/70"
             />
         </label>
     );

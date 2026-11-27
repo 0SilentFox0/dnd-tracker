@@ -103,12 +103,12 @@ export function DmPartyCard({
                                         </span>
                                     </span>
                                     <span className="flex flex-wrap gap-1.5">
-                                        <HudPill tone="muted">
+                                        <HudPill tone="meta">
                                             {t('hero.armorClass', {
                                                 value: hero.armorClass,
                                             })}
                                         </HudPill>
-                                        <HudPill tone="muted">
+                                        <HudPill tone="meta">
                                             {t('hero.speed', {
                                                 value: hero.speed,
                                             })}

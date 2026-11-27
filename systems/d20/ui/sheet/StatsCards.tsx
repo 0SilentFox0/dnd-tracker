@@ -41,7 +41,7 @@ export function Mark({ count }: { count: 0 | 1 | 2 }) {
                 <i
                     key={i}
                     className={cn(
-                        'size-2 rotate-45 rounded-[1px] border-[1.5px]',
+                        'size-2 rotate-45 rounded-sm border-[1.5px]',
                         count
                             ? 'border-hud-accent bg-hud-accent'
                             : 'border-hud-muted'
@@ -137,7 +137,7 @@ export function AbilityCard({
                 <span className="hud-num text-4xl leading-none text-hud-ink sm:text-3xl">
                     <Signed value={a.mod} />
                 </span>
-                <span className="hud-num rounded-[4px] border border-hud-line bg-hud-raised px-2.5 text-sm leading-6 text-hud-ink">
+                <span className="hud-num rounded-sm border border-hud-line bg-hud-raised px-2.5 text-sm leading-6 text-hud-ink">
                     {t('score', { n: a.score })}
                 </span>
             </RollableCell>

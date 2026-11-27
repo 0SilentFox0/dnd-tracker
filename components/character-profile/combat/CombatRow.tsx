@@ -27,7 +27,7 @@ export function CombatRow({
                 disabled={!expandable}
                 aria-expanded={expandable ? open : undefined}
                 onClick={() => setOpen((v) => !v)}
-                className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-1 py-1.5 text-left hover:bg-hud-raised disabled:cursor-default disabled:hover:bg-transparent"
+                className="flex min-h-11 w-full items-center justify-between gap-3 rounded-lg px-1 py-1.5 text-left hover:bg-hud-raised disabled:cursor-default disabled:hover:bg-transparent"
             >
                 <span>{label}</span>
                 <span className="hud-num text-lg text-hud-ink">{value}</span>

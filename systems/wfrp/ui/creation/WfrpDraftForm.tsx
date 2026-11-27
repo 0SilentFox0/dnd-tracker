@@ -131,7 +131,7 @@ export function WfrpDraftForm({
                         <Button
                             type="button"
                             variant="outline"
-                            className="min-h-11"
+                            
                             asChild
                         >
                             <Link href={`/campaigns/${campaignId}/character`}>
@@ -142,7 +142,7 @@ export function WfrpDraftForm({
                         <Button
                             type="button"
                             variant="outline"
-                            className="min-h-11"
+                            
                             onClick={step.back}
                             disabled={rolling}
                         >
@@ -152,7 +152,7 @@ export function WfrpDraftForm({
                     {last ? (
                         <Button
                             type="button"
-                            className="min-h-11"
+                            
                             onClick={submit.run}
                             disabled={
                                 !submit.canRun || submit.isPending || rolling
@@ -168,7 +168,7 @@ export function WfrpDraftForm({
                         !step.hideNext && (
                             <Button
                                 type="button"
-                                className="min-h-11"
+                                
                                 onClick={step.next}
                                 disabled={!step.canNext || rolling}
                             >

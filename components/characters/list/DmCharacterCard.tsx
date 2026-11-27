@@ -115,7 +115,7 @@ export function DmCharacterCard({
                         {columns?.has('classes') && ` · ${character.class}`}
                     </p>
                     <div className="flex min-w-0 items-center gap-1.5">
-                        <HudPill tone={isNpc ? 'silver' : 'gold'}>
+                        <HudPill tone={isNpc ? 'npc' : 'meta'}>
                             {isNpc ? t('npcHero') : t('player')}
                         </HudPill>
                         {RerollToken &&
@@ -123,7 +123,7 @@ export function DmCharacterCard({
                             rerollTokenOn(rules) &&
                             character.inspiration && <RerollToken.CardMark />}
                         {levelReady && (
-                            <HudPill tone="gold">{t('levelReady')}</HudPill>
+                            <HudPill tone="accent">{t('levelReady')}</HudPill>
                         )}
                         {!isNpc && (
                             <span className="truncate text-xs text-hud-muted">

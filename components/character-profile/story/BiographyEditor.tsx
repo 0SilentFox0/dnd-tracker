@@ -43,7 +43,7 @@ export function BiographyEditor({
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="h-10 gap-1.5"
+                    className="gap-1.5"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={mark}
                 >

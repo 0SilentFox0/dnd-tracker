@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { Swords } from 'lucide-react';
 
+import { HudPill } from '@/components/hud/page';
 import { ProfileEmptyState } from '@/components/profile/ProfileEmptyState';
 import { ProfileSectionCard } from '@/components/profile/ProfileSectionCard';
 import { CampaignRole } from '@/lib/constants/campaigns';
@@ -50,11 +51,11 @@ export function ProfileCampaigns({
                                         )}
                                     </span>
                                 </span>
-                                <span className="hud-sc shrink-0 text-xs text-hud-accent-fg">
+                                <HudPill tone="role">
                                     {c.role === CampaignRole.DM
                                         ? t('roleDm')
                                         : t('rolePlayer')}
-                                </span>
+                                </HudPill>
                             </Link>
                         </li>
                     ))}

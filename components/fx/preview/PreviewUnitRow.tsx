@@ -26,7 +26,7 @@ const ROW_LOOK = {
         bar: { ally: 'bg-[#c0392b]', enemy: 'bg-[#c0392b]' },
     },
     book: {
-        row: 'spell-book-preview-row rounded-[3px] border',
+        row: 'spell-book-preview-row rounded-sm border',
         portrait: 'spell-book-preview-portrait',
         ring: 'var(--book-ink,#2a1d14)',
         fallenName: 'spell-book-muted',

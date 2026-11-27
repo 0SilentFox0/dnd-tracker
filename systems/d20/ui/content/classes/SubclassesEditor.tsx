@@ -102,7 +102,7 @@ export function SubclassesEditor({
                                     src={subclass.icon}
                                     name={subclass.name}
                                     size={24}
-                                    className="size-6 rounded text-xs"
+                                    className="size-6 rounded-sm text-xs"
                                 />
                                 {subclass.name || t('subclasses.newSubclass')}
                             </span>

@@ -43,7 +43,7 @@ export function SearchInput({
                     type="button"
                     aria-label={t('clear')}
                     onClick={() => onChange('')}
-                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-hud-muted hover:text-foreground"
+                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded-sm p-1 text-hud-muted hover:text-foreground"
                 >
                     <X className="h-4 w-4" aria-hidden />
                 </HudButton>
