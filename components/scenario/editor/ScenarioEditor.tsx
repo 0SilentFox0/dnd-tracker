@@ -201,8 +201,7 @@ export function ScenarioEditor({
             column={column}
             doc={doc}
             active={active?.rowId === rowId && active.column === column}
-            searchMentions={searchMentions}
-            autoMentionIndex={autoMentionIndex}
+            mentions={{ search: searchMentions, autoIndex: autoMentionIndex }}
             handlers={{
                 onActivate: () => setActive({ rowId, sectionId, column }),
                 onReady,

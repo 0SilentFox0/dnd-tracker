@@ -22,7 +22,7 @@ declare module '@tiptap/core' {
     }
 }
 
-// apostrophes are left out: inside a word they belong to it (Мар'яна)
+// apostrophes are left out: inside a Ukrainian word they belong to it
 const BOUNDARY = /^[\s.,;:!?)»"…]$/u;
 
 type Hit = { from: number; to: number; mention: () => void };

@@ -24,8 +24,7 @@ export function ScenarioCell({
     column,
     doc,
     active,
-    searchMentions,
-    autoMentionIndex,
+    mentions,
     handlers,
 }: {
     campaignId: string;
@@ -33,8 +32,10 @@ export function ScenarioCell({
     column: CellColumn;
     doc: RichDoc;
     active: boolean;
-    searchMentions: (query: string) => Promise<MentionOption[]>;
-    autoMentionIndex: AutoMentionIndex | null;
+    mentions: {
+        search: (query: string) => Promise<MentionOption[]>;
+        autoIndex: AutoMentionIndex | null;
+    };
     handlers: Handlers;
 }) {
     const t = useTranslations('scenario.cell');
@@ -46,8 +47,8 @@ export function ScenarioCell({
                     key={`${rowId}-${column}`}
                     doc={doc}
                     label={column === 'story' ? t('story') : t('notes')}
-                    searchMentions={searchMentions}
-                    autoMentionIndex={autoMentionIndex}
+                    searchMentions={mentions.search}
+                    autoMentionIndex={mentions.autoIndex}
                     onReady={handlers.onReady}
                     onChange={handlers.onChange}
                 />

@@ -31,7 +31,7 @@ const LETTER = /\p{L}/u;
 
 const APOSTROPHE = /['’]/u;
 
-// an apostrophe between letters is part of a Ukrainian word (Мар'яна)
+// an apostrophe between letters belongs to the word (Ukrainian spelling)
 const AFTER = "(?![\\p{L}\\p{N}_]|['’]\\p{L})";
 
 const PREFIX = 3;
