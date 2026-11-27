@@ -84,7 +84,7 @@ export function SlidePickerDialog({
                             </div>
                         </>
                     )}
-                    {deckLoading && <LoadingState rows={2} />}
+                    {deckLoading && <LoadingState count={2} />}
                     {deck && (
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             {deck.slides.map((slide, i) => (

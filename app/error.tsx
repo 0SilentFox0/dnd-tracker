@@ -11,7 +11,7 @@ export default function ErrorPage({
     reset: () => void;
 }) {
     return (
-        <HudPage width="md">
+        <HudPage width="narrow">
             <HudPanel>
                 <ErrorState error={error} onRetry={reset} />
             </HudPanel>

@@ -33,7 +33,7 @@ export function DMSpellsPageClient({
     const groupNames = list.view.groups.map(([groupName]) => groupName);
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle', { count })}
@@ -117,7 +117,7 @@ export function DMSpellsPageClient({
             )}
 
             {list.isLoading && count === 0 ? (
-                <LoadingState rows={6} label={t('page.loading')} />
+                <LoadingState count={6} label={t('page.loading')} />
             ) : count === 0 ? (
                 <EmptyState
                     icon={Wand2}

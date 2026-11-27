@@ -91,7 +91,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
     };
 
     if (!editor.ready)
-        return <LoadingState rows={6} label={t('editor.loading')} />;
+        return <LoadingState variant="form" label={t('editor.loading')} />;
 
     const { form, equipped, setEquipped, artifacts } = editor;
 

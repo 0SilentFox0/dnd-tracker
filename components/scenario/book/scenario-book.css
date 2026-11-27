@@ -241,3 +241,7 @@ html.dark .scenario-book:not([data-theme]) {
   .scenario-book { background-image: none; }
   .scenario-book section + section::before { content: "· ❖ ·"; }
 }
+
+.scenario-book--page { background: transparent; background-image: none; }
+.scenario-book--page header.title,
+.scenario-book--page main { background-color: var(--page); background-image: radial-gradient(color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px); background-size: 3px 3px; }

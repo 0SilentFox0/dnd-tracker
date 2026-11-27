@@ -41,7 +41,7 @@ export function MapLibraryList({ campaignId }: { campaignId: string }) {
     const editorHref = (id: string) => `/campaigns/${campaignId}/dm/maps/${id}`;
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('title')}
                 subtitle={t('subtitle')}

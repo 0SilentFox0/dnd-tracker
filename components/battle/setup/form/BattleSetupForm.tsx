@@ -64,7 +64,7 @@ function SetupLoading({ isEdit }: { isEdit: boolean }) {
                 {[0, 1].map((i) => (
                     <div
                         key={i}
-                        className="ds-inset h-[28rem] min-w-0 animate-pulse rounded-xl motion-reduce:animate-none"
+                        className="ds-skeleton h-[28rem] min-w-0 rounded-xl"
                     />
                 ))}
             </div>

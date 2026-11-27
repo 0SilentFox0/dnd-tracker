@@ -65,7 +65,7 @@ export function ScenarioSummaryPanel({
             <div
                 role="status"
                 aria-label={t('loading')}
-                className="h-16 animate-pulse rounded-sm bg-muted"
+                className="ds-skeleton h-16"
             />
         );
 

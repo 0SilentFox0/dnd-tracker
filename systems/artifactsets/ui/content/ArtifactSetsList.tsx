@@ -20,7 +20,7 @@ export function ArtifactSetsList({ campaignId: id }: { campaignId: string }) {
     const { sets, total, search } = useArtifactSetsPage(id);
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('title')}
                 subtitle={t('subtitle')}

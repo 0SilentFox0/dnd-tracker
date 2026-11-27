@@ -36,7 +36,7 @@ export function LevelUpChoicesStep({
     const refs = useChoiceRefs(campaignId, hero.race);
 
     if (!refs.ready)
-        return <LoadingState rows={2} label={t('loadingChoices')} />;
+        return <LoadingState count={2} label={t('loadingChoices')} />;
 
     const merged = {
         ...entry,

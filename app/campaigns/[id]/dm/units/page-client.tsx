@@ -32,7 +32,7 @@ export function DMUnitsPageClient({
     const list = useUnitsList(campaignId, initialUnits);
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle', { count: list.units.length })}
@@ -98,7 +98,7 @@ export function DMUnitsPageClient({
             {canEdit && <OnboardingHint id="dm.units" />}
 
             {list.isLoading && list.units.length === 0 ? (
-                <LoadingState rows={6} label={t('page.loading')} />
+                <LoadingState count={6} label={t('page.loading')} />
             ) : list.units.length === 0 ? (
                 <EmptyState
                     icon={Skull}

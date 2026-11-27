@@ -79,7 +79,7 @@ export function WorldPlayClient({
     }
 
     return (
-        <HudPage className="world-game-page">
+        <HudPage width="wide" className="world-game-page">
             <OnboardingHint id="player.world" />
             <QueryState query={play.view}>
                 {(view) => {

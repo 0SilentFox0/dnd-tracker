@@ -1,10 +1,22 @@
-import { LoadingState } from '@/components/common/states';
+import { LoadingState, type LoadingVariant } from './LoadingState';
 
-/** Route-level and system-gate skeleton: one look, so the gate hands over to `loading.tsx` without a visible swap */
-export function SectionLoading({ label }: { label?: string }) {
+import { HudPage } from '@/components/hud/page';
+
+type PageWidth = Parameters<typeof HudPage>[0]['width'];
+
+/** Route-level and system-gate skeleton: same container as the page, so the gate hands over to `loading.tsx` without a visible swap */
+export function SectionLoading({
+    label,
+    variant = 'cards',
+    width = 'page',
+}: {
+    label?: string;
+    variant?: LoadingVariant;
+    width?: PageWidth;
+}) {
     return (
-        <div className="container mx-auto p-4 print:hidden">
-            <LoadingState count={6} label={label} />
-        </div>
+        <HudPage width={width} className="print:hidden">
+            <LoadingState variant={variant} count={6} label={label} />
+        </HudPage>
     );
 }

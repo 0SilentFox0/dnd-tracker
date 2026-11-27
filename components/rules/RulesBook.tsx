@@ -15,15 +15,19 @@ import { SpellIngredientsSection } from './sections/SpellIngredientsSection';
 import { SystemSection } from './sections/SystemSection';
 import { useMechanicText } from './mechanic-text';
 import { RulesChangesContext } from './RulesChanges';
+import { RulesHeaderChips, type SystemChip } from './RulesChips';
 import { RulesPathsProvider } from './RulesPaths';
+import { RulesRail } from './RulesRail';
 import { RulesSide } from './RulesSide';
 import { RulesTocFilter } from './RulesTocFilter';
 import { useRulesSection } from './useRulesSection';
 
-import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
+import { useRevealInvalidTab } from '@/components/hud/form';
+import { HudPage, HudPageHeader, HudSplit } from '@/components/hud/page';
 import { systemUiOf } from '@/components/systems';
 import type { RulesSectionProps } from '@/components/systems/types';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import {
     type RulesFormState,
     useCampaignModules,
@@ -125,39 +129,48 @@ export function RulesBook({
             node
         );
 
-    const tabs: HudTab<string>[] = groupSectionKeys(keys, active).flatMap(
+    const tabs = groupSectionKeys(keys, active).flatMap(
         ({ group, keys: inGroup }) =>
-            inGroup.map((key) => {
-                const Section = editors[key as MechanicKey];
-
-                return {
-                    id: key,
-                    label: labelOf(key),
-                    group: t(`page.groups.${group}`),
-                    badge: dirty.has(key) ? dot : undefined,
-                    hidden: search.isActive && !shown.has(key),
-                    content: guard(
-                        key === 'system' ? (
-                            <SystemSection
-                                form={form}
-                                locked={systemLocked}
-                                modules={modules}
-                                dirty={isDirty}
-                            />
-                        ) : (
-                            Section && <Section form={form} />
-                        )
-                    ),
-                };
-            })
+            inGroup.map((key) => ({
+                id: key,
+                label: labelOf(key),
+                group: t(`page.groups.${group}`),
+                badge: dirty.has(key) ? dot : undefined,
+                hidden: search.isActive && !shown.has(key),
+            }))
     );
 
-    const chip = [
-        tTerms(ruleSystemLabelKey(form.data.system.key)),
+    const panelOf = (key: string) => {
+        const Section = editors[key as MechanicKey];
+
+        return guard(
+            key === 'system' ? (
+                <SystemSection
+                    form={form}
+                    locked={systemLocked}
+                    modules={modules}
+                    dirty={isDirty}
+                />
+            ) : (
+                Section && <Section form={form} />
+            )
+        );
+    };
+
+    const chips: SystemChip[] = [
+        {
+            key: 'system',
+            label: tTerms(ruleSystemLabelKey(form.data.system.key)),
+            tone: 'accent',
+        },
         ...modules.toggles
             .filter((toggle) => toggle.active)
-            .map((toggle) => `+${tTerms(`module.${toggle.id}.name`)}`),
-    ].join(' ');
+            .map((toggle) => ({
+                key: toggle.id,
+                label: tTerms(`module.${toggle.id}.name`),
+                tone: 'meta' as const,
+            })),
+    ];
 
     const pathsValue = {
         paths: new Set(rulePaths(active)),
@@ -173,61 +186,53 @@ export function RulesBook({
     const resetSection = (key: string) =>
         rules.resetKey(key as keyof typeof form.data);
 
+    const onInvalid = useRevealInvalidTab(tab, setSection);
+
     return (
         <RulesChangesContext.Provider value={{ dirty, reset: resetSection }}>
             <RulesPathsProvider value={pathsValue}>
-                <HudFormPage
-                    width="wide"
-                    header={{
-                        title,
-                        aside: (
-                            <>
-                                <RulesTocFilter
-                                    value={search.query.value}
-                                    onChange={search.query.set}
+                <HudPage width="page">
+                    <HudPageHeader
+                        title={title}
+                        actions={
+                            <RulesTocFilter
+                                value={search.query.value}
+                                onChange={search.query.set}
+                            />
+                        }
+                    >
+                        <RulesHeaderChips chips={chips} />
+                    </HudPageHeader>
+                    <Tabs value={tab} onValueChange={setSection}>
+                        <HudSplit
+                            rail={
+                                <RulesRail
+                                    tabs={tabs}
+                                    sectionOpen={section !== null}
                                 />
-                                <span>{chip}</span>
-                            </>
-                        ),
-                    }}
-                    sidePreview={false}
-                    side={
-                        <RulesSide
-                            changed={dirtyKeys as string[]}
-                            reset={resetSection}
-                        />
-                    }
-                    actions={
-                        readOnly ? undefined : (
-                            <>
-                                {isDirty && (
-                                    <span className="text-sm text-hud-muted">
-                                        {t('page.changedSections', {
-                                            count: dirtyKeys.length,
-                                        })}
-                                    </span>
-                                )}
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    disabled={!isDirty || isSaving}
-                                    onClick={reset}
-                                >
-                                    {tc('actions.cancel')}
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    form={FORM_ID}
-                                    disabled={!isDirty || isSaving}
-                                >
-                                    {tc('actions.save')}
-                                </Button>
-                            </>
-                        )
-                    }
-                >
-                    {(readOnly || section) && (
-                        <div data-notice>
+                            }
+                            aside={{
+                                title: t('aside.changed'),
+                                width: 'sm',
+                                mobile: 'stack',
+                                content: (
+                                    <RulesSide
+                                        changed={dirtyKeys as string[]}
+                                        reset={resetSection}
+                                        actions={
+                                            readOnly
+                                                ? undefined
+                                                : {
+                                                      formId: FORM_ID,
+                                                      canSave: isDirty,
+                                                      isSaving,
+                                                      onCancel: reset,
+                                                  }
+                                        }
+                                    />
+                                ),
+                            }}
+                        >
                             {readOnly && (
                                 <p
                                     role="status"
@@ -247,25 +252,32 @@ export function RulesBook({
                                     {`‹ ${tc('actions.back')}`}
                                 </Button>
                             )}
-                        </div>
-                    )}
-                    <HudForm
-                        id={FORM_ID}
-                        className={cn(
-                            section
-                                ? 'max-lg:[&_[data-slot=hud-tabs-list]]:hidden'
-                                : 'max-lg:[&_[data-slot=hud-tabs-panels]]:hidden'
-                        )}
-                        onSubmit={onSubmit}
-                        tabs={tabs}
-                        tab={tab}
-                        onTabChange={setSection}
-                        tabStyles={{
-                            variant: 'rail',
-                            rail: { from: 'lg', mobile: 'list' },
-                        }}
-                    />
-                </HudFormPage>
+                            <form
+                                id={FORM_ID}
+                                className={cn(
+                                    'hud-form',
+                                    !section && 'max-lg:hidden'
+                                )}
+                                onSubmit={onSubmit}
+                                onInvalidCapture={onInvalid}
+                            >
+                                <div className="min-w-0 [container-type:inline-size]">
+                                    {keys.map((key) => (
+                                        <TabsContent
+                                            key={key}
+                                            value={key}
+                                            data-tab-id={key}
+                                            forceMount
+                                            className="mt-0 py-1 data-[state=inactive]:hidden"
+                                        >
+                                            {panelOf(key)}
+                                        </TabsContent>
+                                    ))}
+                                </div>
+                            </form>
+                        </HudSplit>
+                    </Tabs>
+                </HudPage>
             </RulesPathsProvider>
         </RulesChangesContext.Provider>
     );

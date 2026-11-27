@@ -39,7 +39,7 @@ export function DMMusicPageClient({
     const full = library.tracks.length >= MAX_TRACKS_PER_CAMPAIGN;
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle', {
@@ -71,7 +71,7 @@ export function DMMusicPageClient({
                 }
             />
             {library.isLoading && library.tracks.length === 0 ? (
-                <LoadingState rows={4} label={t('page.loading')} />
+                <LoadingState count={4} label={t('page.loading')} />
             ) : library.tracks.length === 0 ? (
                 <EmptyState
                     icon={Music}

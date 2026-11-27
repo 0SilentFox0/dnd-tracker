@@ -19,7 +19,7 @@ export function AuthSuspense({ children }: { children: ReactNode }) {
         <Suspense
             fallback={
                 <HudPage
-                    width="md"
+                    width="narrow"
                     className="flex min-h-[80vh] items-center justify-center"
                 >
                     <HudPanel className="w-full max-w-sm text-center">

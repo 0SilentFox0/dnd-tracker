@@ -52,7 +52,7 @@ export function DMArtifactsPageClient({
     const newHref = `/campaigns/${campaignId}/dm/artifacts/new`;
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle')}
@@ -82,7 +82,7 @@ export function DMArtifactsPageClient({
             <OnboardingHint id="dm.artifacts" />
 
             {catalog.isLoading && catalog.isEmpty ? (
-                <LoadingState rows={6} label={t('page.loading')} />
+                <LoadingState count={6} label={t('page.loading')} />
             ) : catalog.isEmpty ? (
                 <EmptyState
                     className="bg-hud-panel"

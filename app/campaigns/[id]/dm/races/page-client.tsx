@@ -38,7 +38,7 @@ export function DMRacesPageClient({
     const total = list.total;
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle', { count: total })}

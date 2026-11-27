@@ -26,7 +26,7 @@ export function AuthCard({
 
     return (
         <HudPage
-            width="md"
+            width="narrow"
             className="auth-legacy flex min-h-[80vh] items-center justify-center"
         >
             <HudPanel className="w-full max-w-sm space-y-4">

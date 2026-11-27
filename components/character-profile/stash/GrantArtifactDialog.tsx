@@ -132,7 +132,7 @@ export function GrantArtifactDialog({
             }
         >
             {form.isLoading ? (
-                <LoadingState rows={3} />
+                <LoadingState count={3} />
             ) : picked && form.detail ? (
                 <div className="space-y-2">
                     {property && (

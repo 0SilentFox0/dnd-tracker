@@ -75,6 +75,24 @@ describe('стани сторінки', () => {
         expect(screen.getByText('Завантаження скілів…')).toHaveClass('sr-only');
     });
 
+    it.each([
+        ['cards', 'skeleton-card', 2],
+        ['list', 'skeleton-list-item', 2],
+        ['detail', 'skeleton-paragraph', 4],
+        ['form', 'skeleton-field', 6],
+    ] as const)('LoadingState renders variant %s', (variant, slot, n) => {
+        const { container } = render(<LoadingState variant={variant} count={2} />);
+
+        expect(screen.getByRole('status')).toHaveAttribute(
+            'data-variant',
+            variant
+        );
+        expect(container.querySelectorAll(`[data-slot=${slot}]`)).toHaveLength(
+            n
+        );
+        expect(container.querySelector('.ds-skeleton')).not.toBeNull();
+    });
+
     it('ErrorState: текст ApiError і повтор', () => {
         const onRetry = vi.fn();
 

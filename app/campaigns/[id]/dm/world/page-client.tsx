@@ -170,7 +170,7 @@ export function WorldEditorPageClient({
 
     return (
         <WorldEditorContext.Provider value={ctx}>
-            <HudPage className="world-game-page">
+            <HudPage width="wide" className="world-game-page">
                 <OnboardingHint id="dm.world" />
                 <QueryState query={maps} empty={emptyView}>
                     {() =>

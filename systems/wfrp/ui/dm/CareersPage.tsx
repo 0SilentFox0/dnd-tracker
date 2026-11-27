@@ -78,7 +78,7 @@ export function CareersPage({
     };
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle', { count: careers.length })}
