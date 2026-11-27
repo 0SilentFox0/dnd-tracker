@@ -135,7 +135,9 @@
     "emptyDescription": "Create the first scene with the button below; pages you add appear here.",
     "emptyTitle": "The scenario is empty",
     "lead": "The DM's book: scenes to run, each on its own page.",
-    "newPage": "New page"
+    "newPage": "New page",
+    "noMatches": "Nothing matches this query",
+    "stats": "{total} pages · {scenes} scenes · {ready} ready · {played} played"
   },
   "legend": "Legend",
   "legendColor": "Entry colour",
@@ -150,6 +152,7 @@
   },
   "marker": {
     "unavailable": "Place unavailable",
+    "unavailableHint": "The place was removed from the world map or the map is unavailable. Unbind it and pick the place again.",
     "unbind": "Unbind the place"
   },
   "markerPicker": {
