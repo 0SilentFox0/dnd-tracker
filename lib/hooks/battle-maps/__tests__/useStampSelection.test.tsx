@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, type Mock, vi } from 'vitest';
 
 import type { EditorStamps } from '../useMapArtEditor';
 import { useStampSelection } from '../useStampSelection';
@@ -101,7 +101,7 @@ describe('useStampSelection handles', () => {
 
         sel.onRotateHandle({ x: 100 + 100, y: 100 + 20 }, { shiftKey: true });
 
-        const [id, patch, coalesce] = api.update.mock.calls[0];
+        const [id, patch, coalesce] = (api.update as unknown as Mock).mock.calls[0];
 
         expect(id).toBe('s1');
         expect(patch.rot % 15).toBeCloseTo(0, 6);

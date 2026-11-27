@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { stampCells, stampBlockedCells } from '../stamp-cells';
+import { stampBlockedCells,stampCells } from '../stamp-cells';
 
+import type { MapDims } from '../scene';
 import type { StampDef } from '@/lib/constants/map-art/stamps';
 import { cellKey } from '@/lib/utils/battle/grid/geometry';
 import { hexCenter, hexNeighbors } from '@/lib/utils/battle/grid/hex';
@@ -45,7 +46,7 @@ const sq = { cols: 10, rows: 10, gridType: 'square' as const };
 
 const hex = { cols: 10, rows: 10, gridType: 'hex' as const };
 
-const cells = (stamps: MapArtStamp[], map = sq) =>
+const cells = (stamps: MapArtStamp[], map: MapDims = sq) =>
     [...stampBlockedCells(stamps, map, lookup)].sort();
 
 describe('stampBlockedCells square', () => {

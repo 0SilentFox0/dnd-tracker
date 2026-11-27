@@ -295,12 +295,12 @@ describe('useMapArtEditor', () => {
             );
             act(() => result.current.stamps.place({ x: 50, y: 50 }));
             expect(stampsOf(result.current)).toHaveLength(2000);
-            expect(result.current.notice?.message).toBe('maps.editor.stamps.limit');
+            expect(result.current.notice).toMatchObject({ message: 'maps.editor.stamps.limit' });
 
             act(() => result.current.clearNotice());
             act(() => result.current.stamps.duplicate('s0'));
             expect(stampsOf(result.current)).toHaveLength(2000);
-            expect(result.current.notice?.message).toBe('maps.editor.stamps.limit');
+            expect(result.current.notice).toMatchObject({ message: 'maps.editor.stamps.limit' });
         });
     });
 });

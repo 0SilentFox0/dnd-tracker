@@ -88,7 +88,7 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/battles',
-        ns: ['tileLabels', 'characters', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'choices'],
+        ns: ['characters', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'choices'],
         reason: PACK,
     },
     {
@@ -243,7 +243,7 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/battles',
-        ns: ['tileLabels', 'music'],
+        ns: ['music'],
         reason: PACK,
     },
     {
