@@ -5,6 +5,7 @@ import {
     type CharacteristicKey,
     SKILL_ADVANCE_KEY_RE,
 } from '../characteristics/keys';
+import { APPEARANCE_COLOURS } from './story/colours';
 import type { SpeciesProfile } from './profile';
 
 const max = z.number().int().min(1).max(100);
@@ -43,6 +44,20 @@ const skillPicks = z
     })
     .optional();
 
+const appearanceRoll = z.strictObject({
+    base: z.number().int().min(0).max(400),
+    dice: z.number().int().min(0).max(10),
+});
+
+const appearanceColours = z.array(z.enum(APPEARANCE_COLOURS)).min(1).max(12);
+
+const appearance = z.strictObject({
+    age: appearanceRoll,
+    heightCm: appearanceRoll,
+    eyes: appearanceColours,
+    hair: appearanceColours,
+});
+
 export const SpeciesProfileSchema = z.strictObject({
     mods: z
         .strictObject(
@@ -65,6 +80,7 @@ export const SpeciesProfileSchema = z.strictObject({
     careerTable,
     skillPicks,
     languages: z.array(skillKey).max(10).optional(),
+    appearance: appearance.optional(),
 });
 
 export function parseProfile(raw: unknown): SpeciesProfile {

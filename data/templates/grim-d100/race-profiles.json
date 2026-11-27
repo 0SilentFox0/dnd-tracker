@@ -446,7 +446,41 @@
       },
       "languages": [
         "language:trade-cant"
-      ]
+      ],
+      "appearance": {
+        "age": {
+          "base": 14,
+          "dice": 2
+        },
+        "heightCm": {
+          "base": 145,
+          "dice": 2
+        },
+        "eyes": [
+          "ice-blue",
+          "green",
+          "pale-blue",
+          "blue",
+          "grey",
+          "grey",
+          "brown",
+          "hazel",
+          "dark-brown",
+          "black"
+        ],
+        "hair": [
+          "ash-blond",
+          "golden",
+          "sandy",
+          "brown",
+          "light-brown",
+          "dark-brown",
+          "black",
+          "auburn",
+          "red",
+          "grey"
+        ]
+      }
     }
   },
   {
@@ -852,7 +886,41 @@
       "languages": [
         "language:old-script",
         "language:stone-tongue"
-      ]
+      ],
+      "appearance": {
+        "age": {
+          "base": 15,
+          "dice": 10
+        },
+        "heightCm": {
+          "base": 130,
+          "dice": 1
+        },
+        "eyes": [
+          "black",
+          "dark-grey",
+          "steel-grey",
+          "blue",
+          "brown",
+          "amber",
+          "hazel",
+          "green",
+          "copper",
+          "golden"
+        ],
+        "hair": [
+          "white",
+          "grey",
+          "ash-blond",
+          "golden",
+          "copper",
+          "chestnut",
+          "brown",
+          "dark-brown",
+          "auburn",
+          "black"
+        ]
+      }
     }
   },
   {
@@ -1253,7 +1321,40 @@
       "languages": [
         "language:trade-cant",
         "language:hearth-cant"
-      ]
+      ],
+      "appearance": {
+        "age": {
+          "base": 15,
+          "dice": 5
+        },
+        "heightCm": {
+          "base": 94,
+          "dice": 1
+        },
+        "eyes": [
+          "grey",
+          "steel-grey",
+          "pale-blue",
+          "blue",
+          "green",
+          "hazel",
+          "brown",
+          "copper",
+          "dark-brown"
+        ],
+        "hair": [
+          "grey",
+          "straw",
+          "auburn",
+          "honey",
+          "chestnut",
+          "ginger",
+          "sandy",
+          "light-brown",
+          "dark-brown",
+          "black"
+        ]
+      }
     }
   },
   {
@@ -1615,7 +1716,41 @@
       "languages": [
         "language:court-speech",
         "language:old-script"
-      ]
+      ],
+      "appearance": {
+        "age": {
+          "base": 30,
+          "dice": 10
+        },
+        "heightCm": {
+          "base": 180,
+          "dice": 1
+        },
+        "eyes": [
+          "black",
+          "deep-blue",
+          "pale-blue",
+          "blue",
+          "ice-blue",
+          "green",
+          "amber",
+          "copper",
+          "honey",
+          "golden"
+        ],
+        "hair": [
+          "silver",
+          "white",
+          "ash-blond",
+          "blond",
+          "golden",
+          "copper",
+          "sandy",
+          "auburn",
+          "red",
+          "black"
+        ]
+      }
     }
   },
   {
@@ -1921,7 +2056,40 @@
       "languages": [
         "language:glade-speech",
         "language:old-script"
-      ]
+      ],
+      "appearance": {
+        "age": {
+          "base": 30,
+          "dice": 10
+        },
+        "heightCm": {
+          "base": 180,
+          "dice": 1
+        },
+        "eyes": [
+          "silver",
+          "dark-grey",
+          "green",
+          "moss-green",
+          "chestnut",
+          "dark-brown",
+          "light-brown",
+          "sandy",
+          "deep-blue"
+        ],
+        "hair": [
+          "silver",
+          "ash-blond",
+          "copper",
+          "honey",
+          "brown",
+          "chestnut",
+          "dark-brown",
+          "auburn",
+          "black",
+          "black"
+        ]
+      }
     }
   }
 ]

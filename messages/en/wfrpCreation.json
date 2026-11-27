@@ -167,6 +167,17 @@
     "inc": "More"
   },
   "story": {
+    "appearance": {
+      "title": "Appearance",
+      "hint": "Age and height rolls (base + number of d10; height in cm, 1d10 = 1 inch) and colour pools for eyes and hair. Leave empty to hide the appearance block.",
+      "ageBase": "Age: base",
+      "ageDice": "Age: d10 count",
+      "heightBase": "Height: base (cm)",
+      "heightDice": "Height: d10 count",
+      "eyes": "Eye colours",
+      "hair": "Hair colours",
+      "clear": "Remove appearance"
+    },
     "questions": {
       "origin": "Where are you from?",
       "family": "Who is your family?",

@@ -5,6 +5,32 @@ import { parseProfile, SpeciesProfileSchema } from '../schema';
 
 const parse = (raw: unknown) => SpeciesProfileSchema.safeParse(raw);
 
+const appearance = {
+    age: { base: 14, dice: 2 },
+    heightCm: { base: 145, dice: 2 },
+    eyes: ['blue', 'green'],
+    hair: ['black'],
+};
+
+describe('SpeciesProfileSchema appearance', () => {
+    it('is optional', () => {
+        expect(parse({}).data).not.toHaveProperty('appearance');
+    });
+
+    it('parses a valid appearance', () => {
+        expect(parse({ appearance }).data?.appearance).toEqual(appearance);
+    });
+
+    it.each([
+        ['unknown colour', { ...appearance, eyes: ['plaid'] }],
+        ['dice 11', { ...appearance, age: { base: 14, dice: 11 } }],
+        ['empty hair', { ...appearance, hair: [] }],
+        ['base 401', { ...appearance, heightCm: { base: 401, dice: 1 } }],
+    ])('rejects %s', (_, bad) => {
+        expect(parse({ appearance: bad }).success).toBe(false);
+    });
+});
+
 describe('SpeciesProfileSchema', () => {
     it('defaults on {}', () => {
         expect(parse({}).data).toEqual({

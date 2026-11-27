@@ -1,3 +1,4 @@
+export { rollAppearance } from './appearance';
 export { APPEARANCE_COLOURS, type AppearanceColour } from './colours';
 export { rollStory, STORY_TABLES } from './tables';
 export {

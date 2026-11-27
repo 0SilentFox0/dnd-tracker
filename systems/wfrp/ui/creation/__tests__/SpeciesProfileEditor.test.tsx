@@ -1,5 +1,11 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    within,
+} from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SpeciesProfileEditor } from '../SpeciesProfileEditor';
@@ -146,5 +152,45 @@ describe('SpeciesProfileEditor', () => {
             screen.getByText('wfrpCreation.editor.errors.tableAscending')
         ).toBeTruthy();
         expect(save().disabled).toBe(true);
+    });
+
+    it('saves edited appearance in the profile payload', () => {
+        mount();
+
+        const base = 'wfrpCreation.story.appearance';
+
+        expect(
+            screen.getByRole('region', { name: `${base}.title` })
+        ).toBeTruthy();
+
+        fireEvent.change(screen.getByLabelText(`${base}.ageBase`), {
+            target: { value: '14' },
+        });
+        fireEvent.blur(screen.getByLabelText(`${base}.ageBase`));
+
+        for (const group of [`${base}.eyes`, `${base}.hair`]) {
+            fireEvent.click(
+                within(screen.getByRole('group', { name: group })).getByRole(
+                    'button',
+                    { name: 'wfrpCreation.story.colours.blue' }
+                )
+            );
+        }
+
+        fireEvent.click(save());
+
+        expect(mutate).toHaveBeenCalledWith(
+            expect.objectContaining({
+                profile: expect.objectContaining({
+                    appearance: {
+                        age: { base: 14, dice: 0 },
+                        heightCm: { base: 0, dice: 0 },
+                        eyes: ['blue'],
+                        hair: ['blue'],
+                    },
+                }),
+            }),
+            expect.anything()
+        );
     });
 });

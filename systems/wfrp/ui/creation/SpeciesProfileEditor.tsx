@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { AppearanceEditor } from './AppearanceEditor';
 import { type TableRow, TableRowsEditor } from './TableRowsEditor';
 import { TalentChoicesEditor } from './TalentChoicesEditor';
 
@@ -303,6 +304,10 @@ export function SpeciesProfileEditor({
                         })),
                     })
                 }
+            />
+            <AppearanceEditor
+                value={profile.appearance}
+                onChange={(appearance) => edit({ appearance })}
             />
             {issues.length > 0 &&
                 !tableError('careerTable') &&

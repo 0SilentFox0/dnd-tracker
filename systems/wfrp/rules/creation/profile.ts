@@ -1,4 +1,5 @@
 import type { CharacteristicKey } from '../characteristics/keys';
+import type { AppearanceColour } from './story/colours';
 
 export const STAT_FLOOR = 20;
 
@@ -18,6 +19,12 @@ export type SpeciesProfile = {
     skillPicks?: { count: number; options: string[] };
     /** canon5e: language skill keys the species knows; each starts fluent at +30 (6 purchases) */
     languages?: string[];
+    appearance?: {
+        age: { base: number; dice: number };
+        heightCm: { base: number; dice: number };
+        eyes: AppearanceColour[];
+        hair: AppearanceColour[];
+    };
 };
 
 export const isUsableProfile = (p: SpeciesProfile): boolean =>
