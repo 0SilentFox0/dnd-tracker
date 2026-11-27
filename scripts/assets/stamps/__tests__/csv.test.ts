@@ -52,6 +52,14 @@ describe('parseStampsCsv', () => {
     });
 });
 
+describe('sight without blocks', () => {
+    it('is a row error', () => {
+        expect(() =>
+            parseStampsCsv(`${HEADER}\n${row({ blocks: '', sight: '1' })}\n`)
+        ).toThrow(/Line 2: sight requires blocks/);
+    });
+});
+
 describe('parseBlocks', () => {
     it('parses valid values', () => {
         expect(parseBlocks('')).toBeNull();
@@ -95,7 +103,7 @@ describe('rowToDef', () => {
         expect(def).toMatchObject({
             id: 'mossy-altar',
             file: '/assets/map-stamps/dungeon/mossy-altar.webp',
-            nameKey: 'maps.editor.stamps.name.mossy-altar',
+            nameKey: 'mapStamps.name.mossy-altar',
         });
         expect(def.blocks).toBeUndefined();
         expect(def.sight).toBeUndefined();

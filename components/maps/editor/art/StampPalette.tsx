@@ -26,10 +26,10 @@ export function StampPalette({
     const palette = useStampPalette((key) => names(key as never));
 
     const categories = [
-        { value: ALL_CATEGORIES, label: t('category.all') },
+        { value: ALL_CATEGORIES, label: t('categoryAll') },
         ...palette.categories.map((c) => ({
             value: c,
-            label: t(`category.${c}` as never),
+            label: names(`mapStamps.category.${c}` as never),
         })),
     ];
 

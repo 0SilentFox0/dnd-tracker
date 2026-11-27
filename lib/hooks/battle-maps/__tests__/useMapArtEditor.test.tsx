@@ -4,8 +4,11 @@ import { describe, expect, it } from 'vitest';
 
 import { useMapArtEditor } from '../useMapArtEditor';
 
+import { stampDef } from '@/lib/constants/map-art/stamps';
 import type { EdgeEditing } from '@/lib/hooks/battle/useEdgeStroke';
-import { decodeFloors } from '@/lib/utils/battle/map-art';
+import { mapArtSceneSchema } from '@/lib/schemas/map-art';
+import { cellAtUnitPoint, cellCenter, gridMetrics } from '@/lib/utils/battle/grid/layout';
+import { decodeFloors, stampCells } from '@/lib/utils/battle/map-art';
 import type { MapArtScene } from '@/types/battle-map';
 
 const baseMap = {
@@ -191,7 +194,7 @@ describe('useMapArtEditor', () => {
                 z: 0,
                 scale: 1,
             });
-            expect(result.current.stamps.selectedId).toBe(stampsOf(result.current)[0].id);
+            expect(result.current.stamps.selectedId).toBeNull();
 
             act(() => result.current.stamps.setSnap(false));
             act(() => result.current.stamps.place({ x: 130, y: 270 }));
@@ -268,6 +271,142 @@ describe('useMapArtEditor', () => {
             act(() => result.current.stamps.remove(copy.id));
             expect(stampsOf(result.current)).toHaveLength(1);
             expect(result.current.stamps.selectedId).toBeNull();
+        });
+
+        it('snaps a 2x2 stamp to a cell corner so it blocks four cells', () => {
+            const { result } = setup();
+
+            act(() => result.current.start());
+            act(() => result.current.stamps.setAsset('tree-oak'));
+            act(() => result.current.stamps.place({ x: 330, y: 340 }));
+
+            const placed = stampsOf(result.current)[0];
+
+            expect(placed).toMatchObject({ x: 300, y: 300 });
+            expect(
+                [...stampCells([placed], { cols: 8, rows: 8, gridType: 'square' }).blocked].sort()
+            ).toEqual(['2:2', '2:3', '3:2', '3:3']);
+        });
+
+        it('snaps a 2x2 stamp on hex to a cell centre offset by half a step', () => {
+            const { result } = setup({ ...baseMap, gridType: 'hex', walls: [], doors: {} });
+
+            act(() => result.current.start());
+            act(() => result.current.stamps.setAsset('tree-oak'));
+            act(() => result.current.stamps.place({ x: 200, y: 200 }));
+
+            const { colStep, rowStep } = gridMetrics('hex');
+
+            const c = cellCenter(cellAtUnitPoint({ x: 200, y: 200 }, 'hex'), 'hex');
+
+            expect(stampsOf(result.current)[0]).toMatchObject({
+                x: c.x + colStep / 2,
+                y: c.y + rowStep / 2,
+            });
+        });
+
+        it('rotating the ghost by 90 swaps the snapped footprint axes', () => {
+            const { result } = setup();
+
+            act(() => result.current.start());
+            act(() => result.current.stamps.setAsset('bed'));
+
+            const def = stampDef('bed');
+
+            expect(def && def.cols !== def.rows).toBe(true);
+            for (let i = 0; i < 6; i++) act(() => result.current.stamps.rotateGhost(1));
+            act(() => result.current.stamps.place({ x: 330, y: 340 }));
+
+            const p = stampsOf(result.current)[0];
+
+            const evenCols = (def?.cols ?? 1) % 2 === 0;
+
+            expect(p.x % 100 === 0).toBe(!evenCols);
+            expect(p.y % 100 === 0).toBe(evenCols);
+        });
+
+        it('renumbers z instead of growing past the schema bound', () => {
+            const { result } = started();
+
+            act(() => result.current.stamps.setSnap(false));
+
+            const seed = Array.from({ length: 3 }, (_, i) => ({
+                id: `s${i}`,
+                asset: 'altar',
+                x: 10 + i,
+                y: 10,
+                rot: 0,
+                scale: 1,
+                flip: false,
+                z: 998 + i,
+            }));
+
+            act(() =>
+                result.current.reset({
+                    scene: { ...sceneOf(result.current), stamps: seed },
+                    sceneVersion: 0,
+                    bakedSceneVersion: null,
+                    bakedUrl: null,
+                    bakedAt: null,
+                })
+            );
+            act(() => result.current.stamps.place({ x: 50, y: 50 }));
+            act(() => result.current.stamps.reorder('s2', 1));
+            act(() => result.current.stamps.reorder('s2', 1));
+
+            const zs = stampsOf(result.current).map((s) => s.z);
+
+            expect(Math.max(...zs.map(Math.abs))).toBeLessThanOrEqual(1000);
+            expect(mapArtSceneSchema.safeParse(sceneOf(result.current)).success).toBe(true);
+            expect(stampsOf(result.current).map((s) => s.id)).toContain('s2');
+
+            const byZ = [...stampsOf(result.current)].sort((a, b) => a.z - b.z).map((s) => s.id);
+
+            expect(byZ.slice(0, 2)).toEqual(['s0', 's1']);
+        });
+
+        it('drops stamps of unknown assets on reset and on the initial scene, with a notice', () => {
+            const known = {
+                id: 'k',
+                asset: 'altar',
+                x: 10,
+                y: 10,
+                rot: 0,
+                scale: 1,
+                flip: false,
+                z: 0,
+            };
+
+            const ghosts = [known, { ...known, id: 'u', asset: 'removed-asset' }];
+
+            const { result } = setup();
+
+            act(() => result.current.start());
+            act(() =>
+                result.current.reset({
+                    scene: { ...sceneOf(result.current), stamps: ghosts },
+                    sceneVersion: 0,
+                    bakedSceneVersion: null,
+                    bakedUrl: null,
+                    bakedAt: null,
+                })
+            );
+            expect(stampsOf(result.current).map((s) => s.id)).toEqual(['k']);
+            expect(result.current.notice).toMatchObject({
+                message: 'maps.editor.art.notice.unknownStamps',
+                params: { count: 1 },
+            });
+            expect(result.current.isDirty).toBe(true);
+
+            const seeded = renderHook(() =>
+                useMapArtEditor({
+                    initial: { ...sceneOf(result.current), stamps: ghosts },
+                    map: baseMap as unknown as TestMap,
+                })
+            );
+
+            expect(stampsOf(seeded.result.current).map((s) => s.id)).toEqual(['k']);
+            expect(seeded.result.current.notice).not.toBeNull();
         });
 
         it('stops at the 2000 limit with a notice', () => {

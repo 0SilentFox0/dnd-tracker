@@ -5,6 +5,7 @@ import { useCallback, useRef } from 'react';
 import type { EditorStamps } from './useMapArtEditor';
 
 import { type StampDef, stampDef, type StampLayer } from '@/lib/constants/map-art/stamps';
+import { chordBlocked } from '@/lib/hooks/common/shortcut-guard';
 import { stampBox, toStampLocal } from '@/lib/utils/battle/map-art/stamp-geometry';
 import { alphaHit, type AlphaMask, buildAlphaMask } from '@/lib/utils/canvas/map-art/alpha-mask';
 import { loadedImage } from '@/lib/utils/canvas/map-art/assets';
@@ -44,16 +45,6 @@ export function pickStamp(
     return null;
 }
 
-const isTyping = (target: EventTarget | null): boolean => {
-    const el = target as HTMLElement | null;
-
-    return (
-        !!el &&
-        (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) ||
-            el.isContentEditable === true)
-    );
-};
-
 export function useStampSelection({
     stamps,
     api,
@@ -91,7 +82,7 @@ export function useStampSelection({
 
     const current = () => stamps.find((s) => s.id === api.selectedId);
 
-    const onPointerDown = (at: Point) => {
+    const onPointerDown = (at: Point): string | null => {
         scaleStart.current = null;
 
         const id = pickStamp(stamps, at, maskOf);
@@ -101,6 +92,8 @@ export function useStampSelection({
         const hit = stamps.find((s) => s.id === id);
 
         drag.current = hit ? { id: hit.id, dx: hit.x - at.x, dy: hit.y - at.y } : null;
+
+        return hit?.id ?? null;
     };
 
     const onPointerMove = (at: Point) => {
@@ -150,17 +143,22 @@ export function useStampSelection({
 
         if (!s || deltaY === 0) return;
 
-        api.update(s.id, {
-            scale: s.scale * WHEEL_STEP ** (deltaY < 0 ? 1 : -1),
-        });
+        api.update(
+            s.id,
+            { scale: s.scale * WHEEL_STEP ** (deltaY < 0 ? 1 : -1) },
+            `stamp-wheel:${s.id}`
+        );
     };
 
-    const onKey = (e: KeyboardEvent): boolean => {
-        if (isTyping(e.target)) return false;
+    const onKey = (
+        e: KeyboardEvent,
+        mode: 'stamp' | 'stamp-select' = 'stamp-select'
+    ): boolean => {
+        if (chordBlocked(e)) return false;
 
         const key = e.key.toLowerCase();
 
-        const s = current();
+        const s = mode === 'stamp-select' ? current() : undefined;
 
         const done = () => {
             e.preventDefault();

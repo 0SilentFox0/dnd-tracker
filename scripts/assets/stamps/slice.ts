@@ -73,8 +73,12 @@ export function keyMagenta(
     for (const p of edge) {
         const i = p * 4;
 
-        data[i] = Math.min(data[i], data[i + 1]);
-        data[i + 2] = Math.min(data[i + 2], data[i + 1]);
+        const spill = Math.min(data[i], data[i + 2]) - data[i + 1];
+
+        if (spill > 0) {
+            data[i] -= spill;
+            data[i + 2] -= spill;
+        }
     }
 
     for (const p of transparent) data[p * 4 + 3] = 0;

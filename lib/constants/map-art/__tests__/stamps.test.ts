@@ -5,9 +5,9 @@ import { describe, expect, it } from 'vitest';
 import { stampDef,STAMPS } from '../stamps';
 
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
-import enMaps from '@/messages/en/maps.json';
+import enStamps from '@/messages/en/mapStamps.json';
 import enNames from '@/messages/en/tileLabels.json';
-import ukMaps from '@/messages/uk/maps.json';
+import ukStamps from '@/messages/uk/mapStamps.json';
 import ukNames from '@/messages/uk/tileLabels.json';
 import {
     buildDefs,
@@ -79,21 +79,27 @@ describe('stamp registry', () => {
         }
     });
 
-    it('every non-legacy CSV row has a name and category in both locales', () => {
+    it('every CSV row has a category and every non-legacy row a name in both locales', () => {
         const rows = parseStampsCsv(read('docs/assets/stamp-prompts/stamps.csv'));
 
-        for (const maps of [enMaps, ukMaps]) {
-            const stamps = maps.editor.stamps as {
-                name: Record<string, string>;
-                category: Record<string, string>;
-            };
+        for (const stamps of [enStamps, ukStamps] as {
+            name: Record<string, string>;
+            category: Record<string, string>;
+        }[]) {
+            for (const r of rows) {
+                expect(stamps.category[r.category], r.category).toBeTruthy();
 
-            for (const r of rows.filter((x) => !LEGACY_FILE.test(x.file))) {
+                if (LEGACY_FILE.test(r.file)) continue;
+
                 const id = r.file.replace(/\.webp$/, '');
 
                 expect(stamps.name[id], id).toBeTruthy();
-                expect(stamps.category[r.category], r.category).toBeTruthy();
             }
         }
+    });
+
+    it('non-legacy names live in the mapStamps namespace', () => {
+        for (const d of STAMPS.filter((s) => !s.nameKey.startsWith('tileLabels.')))
+            expect(d.nameKey).toBe(`mapStamps.name.${d.id}`);
     });
 });

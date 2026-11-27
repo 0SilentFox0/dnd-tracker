@@ -35,6 +35,7 @@ export type PackKey =
     | 'contentLibrary'
     | 'contentTransfer'
     | 'story'
+    | 'mapStamps'
     | 'battle'
     | 'ai'
     | 'units'

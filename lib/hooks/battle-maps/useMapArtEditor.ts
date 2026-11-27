@@ -4,11 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { MAP_ART_LIMITS } from '@/lib/constants/map-art/limits';
 import { DEFAULT_ART } from '@/lib/constants/map-art/materials';
+import { isStampId, stampDef } from '@/lib/constants/map-art/stamps';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { EdgeEditing } from '@/lib/hooks/battle/useEdgeStroke';
 import { cellKey, gridOf } from '@/lib/utils/battle/grid/geometry';
 import {
-    cellAtUnitPoint,
     cellCenter,
     mapSize,
     UNIT,
@@ -21,8 +21,10 @@ import {
     encodeFloors,
     type FloorChunks,
     type MapDims,
+    renumberZ,
     roomPerimeter,
     sceneFromMap,
+    snapStampCenter,
 } from '@/lib/utils/battle/map-art';
 import type { TileEditTool } from '@/lib/utils/battle/tiles/edit';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
@@ -76,7 +78,7 @@ export interface EditorStamps {
     reorder(id: string, dir: 1 | -1): void;
 }
 
-export const STAMP_SCALE = { min: 0.25, max: 4 } as const;
+export const STAMP_SCALE = MAP_ART_LIMITS.stampScale;
 
 const GHOST_STEP = 15;
 
@@ -127,6 +129,21 @@ const notice = (key: string): LogLine => ({
     message: `maps.editor.art.notice.${key}`,
 });
 
+const dropUnknownStamps = (
+    scene: MapArtScene
+): { scene: MapArtScene; dropped: number } => {
+    const stamps = scene.stamps.filter((s) => isStampId(s.asset));
+
+    const dropped = scene.stamps.length - stamps.length;
+
+    return dropped ? { scene: { ...scene, stamps }, dropped } : { scene, dropped };
+};
+
+const unknownStampsNotice = (count: number): LogLine => ({
+    message: 'maps.editor.art.notice.unknownStamps',
+    params: { count },
+});
+
 const withoutKeys = <T>(rec: Record<string, T>, keys: readonly string[]) => {
     const next = { ...rec };
 
@@ -142,9 +159,13 @@ export function useMapArtEditor({
     initial: MapArtScene | null;
     map: MapInput;
 }) {
+    const [cleanedInitial] = useState(() =>
+        initial ? dropUnknownStamps(initial) : null
+    );
+
     const [history, setHistory] = useState<History>(() => ({
         past: [],
-        present: initial,
+        present: cleanedInitial?.scene ?? null,
         future: [],
         saved: initial,
         revision: 0,
@@ -176,7 +197,9 @@ export function useMapArtEditor({
 
     const stampSeq = useRef(0);
 
-    const [lastNotice, setLastNotice] = useState<LogLine | null>(null);
+    const [lastNotice, setLastNotice] = useState<LogLine | null>(() =>
+        cleanedInitial?.dropped ? unknownStampsNotice(cleanedInitial.dropped) : null
+    );
 
     const chunkCache = useRef(new WeakMap<MapArtScene, FloorChunks>());
 
@@ -249,9 +272,15 @@ export function useMapArtEditor({
     }, []);
 
     const reset = useCallback((record: MapArtRecord) => {
+        const { scene: cleaned, dropped } = record.scene
+            ? dropUnknownStamps(record.scene)
+            : { scene: null, dropped: 0 };
+
+        if (dropped) setLastNotice(unknownStampsNotice(dropped));
+
         setHistory((h) => ({
             past: [],
-            present: record.scene,
+            present: cleaned,
             future: [],
             saved: record.scene,
             revision: h.revision + 1,
@@ -567,10 +596,16 @@ export function useMapArtEditor({
 
                 if (!base || !stampAsset || full()) return;
 
-                const grid = gridOf(mapRef.current);
+                const def = stampDef(stampAsset);
 
                 const pos = clampTo(
-                    snap ? cellCenter(cellAtUnitPoint(at, grid), grid) : at
+                    snap && def
+                        ? snapStampCenter(
+                              at,
+                              { cols: def.cols, rows: def.rows, rot: ghost.rot },
+                              mapRef.current
+                          )
+                        : at
                 );
 
                 const stamp: MapArtStamp = {
@@ -583,8 +618,7 @@ export function useMapArtEditor({
                     z: topZ(base.stamps),
                 };
 
-                edit((all) => [...all, stamp]);
-                setSelectedStamp(stamp.id);
+                edit((all) => renumberZ([...all, stamp]));
             },
             update: (id, patch, coalesceKey) =>
                 edit(
@@ -624,12 +658,14 @@ export function useMapArtEditor({
                     z: topZ(base.stamps),
                 };
 
-                edit((all) => [...all, copy]);
+                edit((all) => renumberZ([...all, copy]));
                 setSelectedStamp(copy.id);
             },
             reorder: (id, dir) =>
                 edit((all) =>
-                    all.map((s) => (s.id === id ? { ...s, z: s.z + dir } : s))
+                    renumberZ(
+                        all.map((s) => (s.id === id ? { ...s, z: s.z + dir } : s))
+                    )
                 ),
         };
     }, [stampAsset, snap, showAllBlocking, ghost, selectedStamp, commit]);

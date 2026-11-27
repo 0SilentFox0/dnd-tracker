@@ -83,6 +83,33 @@ describe('useStampSelection.onKey', () => {
         expect(sel.onKey(key({ key: 'Delete' }))).toBe(false);
     });
 
+    it('in place mode R/F turn the ghost and stamp shortcuts are ignored', () => {
+        const { api, sel } = setup();
+
+        expect(sel.onKey(key({ key: 'r' }), 'stamp')).toBe(true);
+        expect(api.rotateGhost).toHaveBeenCalledWith(1);
+        sel.onKey(key({ key: 'F' }), 'stamp');
+        expect(api.flipGhost).toHaveBeenCalled();
+        expect(sel.onKey(key({ key: 'Delete' }), 'stamp')).toBe(false);
+        expect(sel.onKey(key({ key: 'd', metaKey: true }), 'stamp')).toBe(false);
+        expect(sel.onKey(key({ key: ']' }), 'stamp')).toBe(false);
+        expect(api.update).not.toHaveBeenCalled();
+        expect(api.remove).not.toHaveBeenCalled();
+        expect(api.reorder).not.toHaveBeenCalled();
+    });
+
+    it('ignores keys while a dialog is open', () => {
+        const { api, sel } = setup();
+
+        const dialog = document.createElement('div');
+
+        dialog.setAttribute('role', 'dialog');
+        document.body.append(dialog);
+        expect(sel.onKey(key({ key: 'Delete' }))).toBe(false);
+        expect(api.remove).not.toHaveBeenCalled();
+        dialog.remove();
+    });
+
     it('ignores typing in inputs', () => {
         const { api, sel } = setup();
 
@@ -120,12 +147,18 @@ describe('useStampSelection handles', () => {
     it('drags with the pointer offset and a move coalesce key', () => {
         const { api, sel } = setup();
 
-        sel.onPointerDown({ x: 110, y: 110 });
+        expect(sel.onPointerDown({ x: 110, y: 110 })).toBe('s1');
         expect(api.select).toHaveBeenCalledWith('s1');
         sel.onPointerMove({ x: 150, y: 130 });
         expect(api.update).toHaveBeenLastCalledWith('s1', { x: 140, y: 120 }, 'stamp-move:s1');
         sel.onPointerUp();
         sel.onPointerMove({ x: 0, y: 0 });
         expect(api.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports no hit on empty space so the pan can take the gesture', () => {
+        const { sel } = setup();
+
+        expect(sel.onPointerDown({ x: 700, y: 700 })).toBeNull();
     });
 });

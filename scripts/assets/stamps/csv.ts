@@ -143,6 +143,9 @@ function toRow(cells: string[]): StampRow {
     if (r.sight !== '' && r.sight !== '1')
         throw new Error(`Invalid sight "${r.sight}"`);
 
+    if (r.sight === '1' && !r.blocks)
+        throw new Error('sight requires blocks');
+
     return {
         file: r.file,
         name: r.name,
@@ -185,7 +188,7 @@ export function rowToDef(row: StampRow): StampDef {
         category: row.category,
         nameKey: legacy
             ? `tileLabels.${id}`
-            : `maps.editor.stamps.name.${id}`,
+            : `mapStamps.name.${id}`,
         file: legacy
             ? `/assets/battle-tiles/objects/${row.file}`
             : `/assets/map-stamps/${row.biome}/${id}.webp`,

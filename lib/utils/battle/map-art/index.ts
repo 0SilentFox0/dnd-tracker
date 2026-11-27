@@ -8,4 +8,6 @@ export * from './room';
 export * from './scene';
 export * from './stamp-cells';
 export * from './stamp-geometry';
+export * from './stamp-order';
+export * from './stamp-snap';
 export * from './wall-runs';

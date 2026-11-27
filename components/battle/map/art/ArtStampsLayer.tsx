@@ -51,7 +51,7 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
     const onKey = sel.onKey;
 
     useEffect(() => {
-        const handler = (e: KeyboardEvent) => void onKey(e);
+        const handler = (e: KeyboardEvent) => void onKey(e, selectMode ? 'stamp-select' : 'stamp');
 
         window.addEventListener('keydown', handler);
 
@@ -156,7 +156,8 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
                     if (!at) return;
 
                     e.currentTarget.setPointerCapture?.(e.pointerId);
-                    sel.onPointerDown(at);
+
+                    if (sel.onPointerDown(at)) e.stopPropagation();
                 }}
                 onPointerUp={(e) => {
                     if (!selectMode) return;

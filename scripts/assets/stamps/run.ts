@@ -118,7 +118,7 @@ async function slice(args: string[]): Promise<number> {
             `${errors.length ? 'FAIL' : 'ok  '} ${biome}/${id}.webp ${webp.length} B ${errors.join(', ')}`
         );
 
-        if (write) {
+        if (write && !errors.length) {
             const dir = join(ASSETS, biome);
 
             mkdirSync(dir, { recursive: true });

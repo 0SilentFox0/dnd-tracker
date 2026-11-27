@@ -70,9 +70,16 @@ const stampSchema = z.object({
     x: z.number().finite(),
     y: z.number().finite(),
     rot: z.number().min(0).lt(360),
-    scale: z.number().min(0.25).max(4),
+    scale: z
+        .number()
+        .min(MAP_ART_LIMITS.stampScale.min)
+        .max(MAP_ART_LIMITS.stampScale.max),
     flip: z.boolean(),
-    z: z.number().int().min(-1000).max(1000),
+    z: z
+        .number()
+        .int()
+        .min(-MAP_ART_LIMITS.stampZ)
+        .max(MAP_ART_LIMITS.stampZ),
 });
 
 const capped = <T extends z.ZodTypeAny>(schema: T, max: number) =>

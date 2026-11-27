@@ -185,6 +185,9 @@ const db = vi.hoisted(() => {
                     return data;
                 }
             ),
+            count: vi.fn(async ({ where }: { where: { mapId: string } }) =>
+                arts.has(where.mapId) ? 1 : 0
+            ),
         },
         battleScene: {
             findMany: vi.fn(async ({ where }: { where: { mapId: string } }) =>
@@ -681,6 +684,50 @@ describe('battle map library service', () => {
                 (snap?.payload as { header: { artBaked?: boolean } }).header
                     .artBaked
             ).toBeUndefined();
+        });
+
+        it('clearArtBakedTx also drops sightBlocked left by stamps', async () => {
+            const { id } = await createMap('c1', input());
+
+            db.maps.set(id, {
+                ...(db.maps.get(id) as object),
+                header: { cols: 10, rows: 10, sightBlocked: ['3:3'] },
+            } as never);
+
+            await db.api.$transaction((tx: unknown) =>
+                clearArtBakedTx(tx as Parameters<typeof clearArtBakedTx>[0], id)
+            );
+
+            expect(
+                (db.maps.get(id)?.header as { sightBlocked?: string[] }).sightBlocked
+            ).toBeUndefined();
+        });
+
+        it('a plain save keeps sightBlocked only while the map has art', async () => {
+            const withSight = (): BattleMapInput =>
+                input({
+                    map: {
+                        cols: 20,
+                        rows: 20,
+                        background: null,
+                        opacity: 0.5,
+                        sightBlocked: ['3:3'],
+                    },
+                });
+
+            const header = (id: string) =>
+                db.maps.get(id)?.header as { sightBlocked?: string[] };
+
+            const plain = await createMap('c1', input());
+
+            await save(plain.id, withSight());
+            expect(header(plain.id).sightBlocked).toBeUndefined();
+
+            const arted = await createMap('c1', input());
+
+            db.arts.set(arted.id, { mapId: arted.id, scene: { v: 1 } } as never);
+            await save(arted.id, withSight());
+            expect(header(arted.id).sightBlocked).toEqual(['3:3']);
         });
 
         it('drops the flag when the background changes', async () => {
