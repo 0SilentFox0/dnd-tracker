@@ -56,7 +56,7 @@ describe('DmParticipantRow keeps the DM panel open', () => {
     ] as const)('%s does not close the panel', async (title, handler) => {
         const { view, actions, participant } = setup();
 
-        fireEvent.click(view.getByTitle(title));
+        fireEvent.click(view.getByRole('button', { name: title }));
 
         await waitFor(() =>
             expect(actions[handler]).toHaveBeenCalledWith(participant)

@@ -38,8 +38,12 @@ export const HudIconButton = React.forwardRef<
         size?: keyof typeof ICON_SIZES;
         tone?: keyof typeof TONES;
     }
->(({ className, size = 'sm', tone, ...props }, ref) => {
-    const label = props['aria-label'] ?? props.title;
+>(({ className, size = 'sm', tone, title, ...props }, ref) => {
+    const label = props['aria-label'] ?? title;
+
+    const tip = title ?? label;
+
+    const wrap = !!tip && !props.disabled;
 
     const button = (
         <HudButton
@@ -52,16 +56,18 @@ export const HudIconButton = React.forwardRef<
                 className
             )}
             {...props}
+            {...(label && { 'aria-label': label })}
+            {...(!wrap && { title })}
         />
     );
 
-    if (!label) return button;
+    if (!wrap) return button;
 
     return (
-        <TooltipProvider>
+        <TooltipProvider delayDuration={200}>
             <Tooltip>
                 <TooltipTrigger asChild>{button}</TooltipTrigger>
-                <TooltipContent>{label}</TooltipContent>
+                <TooltipContent>{tip}</TooltipContent>
             </Tooltip>
         </TooltipProvider>
     );

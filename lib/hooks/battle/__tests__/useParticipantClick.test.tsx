@@ -92,13 +92,13 @@ describe('useParticipantClick', () => {
         expect(select).not.toHaveBeenCalled();
     });
 
-    it('недосяжний ворог - причина в тості, а не інфо-картка', () => {
+    it('недосяжний ворог - причина в тості та вибір для інфо-картки', () => {
         const scene = setup({ meleeOnlyFar: true });
 
         scene.click('gob');
 
         expect(scene.notify).toHaveBeenCalled();
-        expect(scene.select).not.toHaveBeenCalled();
+        expect(scene.select).toHaveBeenCalledWith('gob');
         expect(scene.requestAttack).not.toHaveBeenCalled();
     });
 

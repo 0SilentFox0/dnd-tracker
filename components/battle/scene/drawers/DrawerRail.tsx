@@ -61,7 +61,6 @@ export function DrawerRail({
                         type="button"
                         data-tour={TOUR[key]}
                         aria-label={t(key)}
-                        title={t(key)}
                         aria-pressed={active === key}
                         onClick={() => onToggle(key)}
                         className={cn(

@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { ParticipantSide, ParticipantSourceType } from '@/lib/constants/battle';
 import { useCharacters } from '@/lib/hooks/characters';
-import { useUnits } from '@/lib/hooks/units';
+import { useUnitsCompact } from '@/lib/hooks/units';
 import type { BattlePreparationParticipant } from '@/types/battle';
 
 export interface PrepRosterEntry {
@@ -23,7 +23,7 @@ export function usePrepRoster(
 ): PrepRoster | null {
     const characters = useCharacters(campaignId, { compact: true, enabled });
 
-    const units = useUnits(campaignId, undefined, { enabled });
+    const units = useUnitsCompact(campaignId, { enabled });
 
     return useMemo(() => {
         if (!enabled || !characters.data || !units.data) return null;

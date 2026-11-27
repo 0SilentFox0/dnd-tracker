@@ -184,7 +184,6 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                     data-next-round-toggle=""
                     aria-pressed={showNext}
                     aria-label={t(showNext ? 'hideNextRound' : 'showNextRound')}
-                    title={t(showNext ? 'hideNextRound' : 'showNextRound')}
                     onClick={() => setShowNext((v) => !v)}
                     className={cn(
                         'flex shrink-0 items-center justify-center rounded-full text-[var(--hud-muted)] hover:text-[var(--ink)]',

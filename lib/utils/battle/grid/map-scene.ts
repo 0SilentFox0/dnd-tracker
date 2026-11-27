@@ -68,6 +68,7 @@ export interface MapSceneActor {
     current: BattleParticipant | null;
     viewer: Viewer;
     canAct: boolean;
+    isMyTurn: boolean;
     isDM: boolean;
     attackReady: boolean;
 }
@@ -342,6 +343,7 @@ interface SceneState {
     map: BattleMapConfig;
     rules: Ruleset;
     participants: BattleParticipant[];
+    seen: BattleParticipant[];
     actor: MapSceneActor;
     placing: boolean;
     placingId: string | null;
@@ -677,14 +679,16 @@ function cellClickOf(s: SceneState, p: GridPoint): MapClick {
 }
 
 function invalidMoveClick(s: SceneState, p: GridPoint, key: string): MapClick {
-    const { current, canAct, isDM, viewer } = s.actor;
+    const { current, canAct, isMyTurn, isDM, viewer } = s.actor;
 
     if (!current || !inBounds(s.map, p)) return { kind: 'none' };
+
+    if (!canAct && isMyTurn) return { kind: 'none' };
 
     if (canAct) {
         if (!s.steps || s.marks.has(key)) return { kind: 'none' };
 
-        const occupied = s.participants.some(
+        const occupied = s.seen.some(
             (x) =>
                 isOnMap(x) &&
                 cellsOf(x, gridOf(s.map)).some((c) => cellKey(c) === key)
@@ -744,6 +748,7 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
         map,
         rules,
         participants,
+        seen: visibleToViewer({ participants, actor, modeView }),
         actor,
         ...modeState,
         canAttack: actor.attackReady && canStartAttack(current),

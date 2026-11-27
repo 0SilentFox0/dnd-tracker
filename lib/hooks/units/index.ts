@@ -7,5 +7,5 @@ export { type UnitFormFieldsState } from './useUnitFormFields';
 export { useUnitPicker } from './useUnitPicker';
 export { useUnitQuickStats } from './useUnitQuickStats';
 export type { Unit } from './useUnits';
-export { useUnits } from './useUnits';
+export { useUnits, useUnitsCompact } from './useUnits';
 export { useUnitsList } from './useUnitsList';

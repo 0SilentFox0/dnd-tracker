@@ -7,7 +7,9 @@ import { CatalogRow } from '@/components/battle/setup/participants/CatalogRow';
 import {
     ParticipantCatalog,
     type SetupData,
+    type SetupEntityStats,
 } from '@/components/battle/setup/participants/ParticipantCatalog';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { ParticipantSide, ParticipantSourceType } from '@/lib/constants/battle';
 import type { CatalogTab, ParticipantActions } from '@/lib/hooks/battles';
 
@@ -158,7 +160,10 @@ const data = {
     entityStats: null,
 } as unknown as SetupData;
 
-function renderCatalog(actions: Partial<ParticipantActions> = {}) {
+function renderCatalog(
+    actions: Partial<ParticipantActions> = {},
+    stats: unknown = null
+) {
     const all = {
         addToSide: vi.fn(),
         setQuantity: vi.fn(),
@@ -172,7 +177,7 @@ function renderCatalog(actions: Partial<ParticipantActions> = {}) {
         return (
             <ParticipantCatalog
                 data={data}
-                entityStats={null}
+                entityStats={stats as SetupEntityStats}
                 selection={[]}
                 actions={all}
                 tab={{ tab, set: setTab }}
@@ -180,7 +185,11 @@ function renderCatalog(actions: Partial<ParticipantActions> = {}) {
         );
     }
 
-    render(<Harness />);
+    render(
+        <TooltipProvider>
+            <Harness />
+        </TooltipProvider>
+    );
 
     return all;
 }
@@ -203,6 +212,19 @@ describe('ParticipantCatalog', () => {
             ParticipantSourceType.UNIT,
             ParticipantSide.ENEMY
         );
+    });
+
+    it('показує DPR/HP/KPI з entityStats', () => {
+        renderCatalog(
+            {},
+            {
+                characterStats: { h1: { dpr: 5.5, hp: 30, kpi: 7 } },
+                unitStats: {},
+            }
+        );
+
+        expect(screen.getByText('5.5')).toBeTruthy();
+        expect(screen.getByText('30')).toBeTruthy();
     });
 
     it('sessionStorage кидає: групи розгорнуті, без винятку', () => {

@@ -135,8 +135,8 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
     const canAct = isMyTurn && !anyPending && !!current && !gateDue;
 
     const actor = useMemo<MapSceneActor>(
-        () => ({ current, viewer, canAct, isDM, attackReady }),
-        [current, viewer, canAct, isDM, attackReady]
+        () => ({ current, viewer, canAct, isMyTurn, isDM, attackReady }),
+        [current, viewer, canAct, isMyTurn, isDM, attackReady]
     );
 
     const mode = useMemo<MapSceneMode>(

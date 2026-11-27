@@ -23,9 +23,13 @@ export function useSetupUnitsFilter(units: SetupUnit[]) {
             active: selectedLevels.includes(level),
         }));
 
+    const activeLevels = selectedLevels.filter((l) =>
+        levelChips.some((chip) => chip.level === l)
+    );
+
     const byLevel =
-        selectedLevels.length > 0
-            ? search.items.filter((u) => selectedLevels.includes(u.level))
+        activeLevels.length > 0
+            ? search.items.filter((u) => activeLevels.includes(u.level))
             : search.items;
 
     const allGroups = groupUnitsByRaceName(byLevel);
@@ -67,6 +71,6 @@ export function useSetupUnitsFilter(units: SetupUnit[]) {
         isFiltered:
             search.isActive ||
             activeRaces.length > 0 ||
-            selectedLevels.length > 0,
+            activeLevels.length > 0,
     };
 }

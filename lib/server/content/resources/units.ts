@@ -76,7 +76,13 @@ export const unitsResource = defineResource<
     access: { list: 'member', item: 'member' },
     invalidates: [ReferenceKind.UNITS],
     notFound: API_ERRORS.NOT_FOUND,
-    list: (actor) => getCachedUnits(actor.campaignId),
+    list: async (actor, query) => {
+        const units = await getCachedUnits(actor.campaignId);
+
+        return query.has('compact')
+            ? units.map(({ id, name, avatar }) => ({ id, name, avatar }))
+            : units;
+    },
     find: (actor, id) =>
         prisma.unit.findFirst({ where: { id, campaignId: actor.campaignId } }),
     toItem: (row) => withAbilityIssues('unit', row, toUnit(row)),

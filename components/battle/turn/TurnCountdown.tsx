@@ -41,13 +41,10 @@ export function TurnCountdown({
     }, [seconds]);
 
     return (
-        <div
-            role="alert"
-            className="relative mt-2 flex min-h-[52px] flex-wrap items-center gap-x-3 gap-y-1 overflow-hidden border border-[var(--enemy)] bg-[var(--enemy)]/20 px-3.5 py-1.5"
-        >
+        <div className="relative mt-2 flex min-h-[52px] flex-wrap items-center gap-x-3 gap-y-1 overflow-hidden border border-[var(--enemy)] bg-[var(--enemy)]/20 px-3.5 py-1.5">
             <span className="flex-1 text-[15px] text-[var(--ink)]">
                 {t.rich('endsIn', { left, b: (chunks) => <b>{chunks}</b> })}
-                <span className="block text-[12px] opacity-80">
+                <span role="alert" className="block text-[12px] opacity-80">
                     {t('reason')}
                 </span>
             </span>

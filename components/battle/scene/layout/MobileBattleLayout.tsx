@@ -148,7 +148,9 @@ export function MobileBattleLayout({
                         {mapView ? (
                             <main className="absolute inset-0">
                                 <MapToolsSlotContext.Provider
-                                    value={drawer === 'tools' ? toolsSlot : null}
+                                    value={
+                                        drawer === 'tools' ? toolsSlot : null
+                                    }
                                 >
                                     <MapPreviewSlotContext.Provider
                                         value={previewSlot}
@@ -208,7 +210,6 @@ export function MobileBattleLayout({
                             <HudIconButton
                                 type="button"
                                 aria-label={td('more')}
-                                title={td('more')}
                                 aria-expanded={menuShown}
                                 aria-haspopup="true"
                                 onClick={() => setMenuOpen((v) => !v)}

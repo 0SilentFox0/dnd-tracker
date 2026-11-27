@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Loader2, Swords, X } from 'lucide-react';
 
@@ -17,6 +18,29 @@ export function QuickAttackCard({ quick }: { quick: QuickAttackModel }) {
     const { target, counter, status } = view;
 
     const busy = status !== 'idle';
+
+    const canAttack = !busy && !!target && !!view.attackId;
+
+    const { close, attack } = actions;
+
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            const el = e.target as HTMLElement | null;
+
+            if (el?.closest('input,textarea,select,[contenteditable]')) return;
+
+            if (e.key === 'Escape' && !busy) close();
+
+            if (e.key === 'Enter' && canAttack && !el?.closest('button,a')) {
+                e.preventDefault();
+                attack();
+            }
+        };
+
+        document.addEventListener('keydown', onKey);
+
+        return () => document.removeEventListener('keydown', onKey);
+    }, [busy, canAttack, close, attack]);
 
     return (
         <section
@@ -52,7 +76,9 @@ export function QuickAttackCard({ quick }: { quick: QuickAttackModel }) {
                                 key={p.basicInfo.id}
                                 tall
                                 active={false}
-                                onClick={() => actions.pickTarget(p.basicInfo.id)}
+                                onClick={() =>
+                                    actions.pickTarget(p.basicInfo.id)
+                                }
                             >
                                 {p.basicInfo.name}
                             </HudToggleChip>

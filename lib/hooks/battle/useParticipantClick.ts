@@ -33,6 +33,9 @@ export function useParticipantClick(
 
         if (!res) l.select(id);
         else if ('intent' in res) l.requestAttack(res.intent);
-        else l.notify(res.reason);
+        else {
+            l.select(id);
+            l.notify(res.reason);
+        }
     }, []);
 }

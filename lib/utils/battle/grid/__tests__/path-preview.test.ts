@@ -48,6 +48,7 @@ const scene = deriveMapScene({
             canSeeEnemyHp: false,
         },
         canAct: true,
+        isMyTurn: true,
         isDM: false,
         attackReady: true,
     },

@@ -220,7 +220,6 @@ export function DmParticipantRow({
                             ICON,
                             'text-hud-ink hover:border-hud-muted'
                         )}
-                        title={legendaryLabel}
                         aria-label={legendaryLabel}
                         onClick={() => onLegendary?.(participant)}
                     >
@@ -269,7 +268,6 @@ export function DmParticipantRow({
                     <HudIconButton
                         type="button"
                         className={ICON}
-                        title={t('toReserve')}
                         aria-label={t('toReserve')}
                         onClick={async () => {
                             if (

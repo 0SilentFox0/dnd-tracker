@@ -62,7 +62,7 @@
       "title": "Шкода",
       "crit": "критичне",
       "next": "Далі · підсумок",
-      "rolled": "d20 {d20} → {outcome}",
+      "rolled": "Кидок {d20} → {outcome}",
       "hit": "влучання"
     },
     "summary": {

@@ -109,7 +109,6 @@ export function HudRestoreButton() {
         <HudIconButton
             type="button"
             aria-label={t('hotkey')}
-            title={t('hotkey')}
             onClick={toggleHudAll}
             className={`${HUD_GLASS} pointer-events-auto absolute right-3 bottom-3 z-50 flex size-8 items-center justify-center rounded-lg text-[var(--ink)] opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:outline-none`}
         >

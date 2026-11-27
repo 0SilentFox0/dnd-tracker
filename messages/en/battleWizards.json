@@ -62,7 +62,7 @@
       "title": "Damage",
       "crit": "critical",
       "next": "Next · summary",
-      "rolled": "d20 {d20} → {outcome}",
+      "rolled": "Roll {d20} → {outcome}",
       "hit": "hit"
     },
     "summary": {

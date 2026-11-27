@@ -78,6 +78,7 @@ function input({ actor, mode, ...over }: InputOverride = {}): MapSceneInput {
                 canSeeEnemyHp: false,
             },
             canAct: true,
+            isMyTurn: true,
             isDM: false,
             attackReady: true,
             ...actor,
@@ -126,13 +127,28 @@ describe('deriveMapScene: invalid move feedback', () => {
         });
     });
 
+    it('own turn during the turn-start gate stays silent', () => {
+        const mine = at('m', { x: 3, y: 3 }, ParticipantSide.ALLY);
+
+        mine.basicInfo.controlledBy = 'u1';
+
+        const s = deriveMapScene(
+            input({ participants: [hero, mine], actor: { canAct: false } })
+        );
+
+        expect(s.cellClick({ x: 9, y: 4 })).toEqual({ kind: 'none' });
+    });
+
     it('owner off-turn gets notYourTurn, a stranger stays silent', () => {
         const mine = at('m', { x: 3, y: 3 }, ParticipantSide.ALLY);
 
         mine.basicInfo.controlledBy = 'u1';
 
         const owner = deriveMapScene(
-            input({ participants: [hero, mine], actor: { canAct: false } })
+            input({
+                participants: [hero, mine],
+                actor: { canAct: false, isMyTurn: false },
+            })
         );
 
         expect(owner.cellClick({ x: 9, y: 4 })).toEqual({

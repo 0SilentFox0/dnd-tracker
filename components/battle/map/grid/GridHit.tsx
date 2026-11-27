@@ -165,6 +165,15 @@ export const GridHit = memo(function GridHit({
             onPointerUp={(e) => endDrag(e, true)}
             onPointerCancel={(e) => endDrag(e, false)}
             onPointerDown={(e) => {
+                if (press.current && press.current.id !== e.pointerId) {
+                    press.current = null;
+                    swallowClick.current = true;
+                    e.currentTarget.style.cursor = '';
+                    moveTo(null);
+
+                    return;
+                }
+
                 swallowClick.current = false;
 
                 const at = !onStrokeStart && tokenDrag ? cellAt(e) : null;

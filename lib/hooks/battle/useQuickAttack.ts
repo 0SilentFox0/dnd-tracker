@@ -1,7 +1,9 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useModeView } from './modes/useModeView';
+import { isTargetableForViewer } from './useAttackTargets';
 import type { useAttackWizard } from './useAttackWizard';
 import { useBattleScene } from './useBattleScene';
 
@@ -35,37 +37,47 @@ export function useQuickAttack(
 
     const { state, view, actions } = wizard;
 
+    const { visible } = useModeView();
+
     const order = (battle.initiativeOrder ?? []).filter(
         (p) => !p.battleData.reserved
     );
 
     const { map = null, rules } = battle;
 
+    const live = ready || state.quick;
+
+    if (sel && !live) setSel(null);
+
+    const mainPool = view.pools.main;
+
     const targets =
-        sel && ready && attacker
+        sel && live && attacker
             ? order.filter(
                   (p) =>
+                      isTargetableForViewer(p, visible) &&
                       isHostile(map, attacker, p) &&
                       isAttackable(p) &&
-                      pickAttack(
-                          map,
-                          order,
-                          attacker,
-                          attacker.battleData.attacks,
-                          p,
-                          rules
-                      ).attack !== null
+                      pickAttack(map, order, attacker, mainPool, p, rules)
+                          .attack !== null
               )
             : [];
 
+    const latest = useRef({ quick: state.quick, close: actions.close });
+
+    useEffect(() => {
+        latest.current = { quick: state.quick, close: actions.close };
+    });
+
     const targetId =
-        sel?.targetId ?? (targets.length === 1 ? targets[0].basicInfo.id : null);
+        sel?.targetId ??
+        (targets.length === 1 ? targets[0].basicInfo.id : null);
 
     const target = targets.find((p) => p.basicInfo.id === targetId);
 
     const weapons =
         target && attacker
-            ? view.attacks.map((attack) => {
+            ? mainPool.map((attack) => {
                   const reason = attackReachError(
                       map,
                       order,
@@ -86,7 +98,7 @@ export function useQuickAttack(
             map,
             order,
             attacker,
-            attacker.battleData.attacks,
+            mainPool,
             target,
             rules
         );
@@ -94,11 +106,17 @@ export function useQuickAttack(
         return attack ? (attack.id ?? attack.name) : undefined;
     })();
 
-    const attackId = weapons.some(
-        (w) => w.reachable && (w.attack.id ?? w.attack.name) === sel?.attackId
-    )
+    const isReachable = (id?: string) =>
+        !!id &&
+        weapons.some(
+            (w) => w.reachable && (w.attack.id ?? w.attack.name) === id
+        );
+
+    const attackId = isReachable(sel?.attackId)
         ? sel?.attackId
-        : defaultId;
+        : isReachable(defaultId)
+          ? defaultId
+          : undefined;
 
     const chosen = weapons.find(
         (w) => (w.attack.id ?? w.attack.name) === attackId
@@ -120,10 +138,17 @@ export function useQuickAttack(
         !!map &&
         !!chosen &&
         attackKindOf(chosen.type) === AttackType.RANGED &&
-        lineOfFire(map, order, attacker, target).blocked;
+        lineOfFire(
+            map,
+            order.filter((p) => p === attacker || visible(p)),
+            attacker,
+            target
+        ).blocked;
 
     const begin = useCallback(
         (targetId?: string, attackId?: string) => {
+            if (latest.current.quick) latest.current.close();
+
             setSel({ targetId: targetId ?? null, attackId });
 
             if (targetId) select(targetId);
@@ -134,7 +159,7 @@ export function useQuickAttack(
     const sending = state.quick && state.step === 'submitting';
 
     return {
-        open: sel !== null && ready,
+        open: sel !== null && live,
         begin,
         view: {
             targets,
@@ -155,7 +180,13 @@ export function useQuickAttack(
             pickTarget: (id: string) => begin(id),
             pickWeapon: (id: string) =>
                 setSel((s) => s && { ...s, attackId: id }),
-            attack: () => target && actions.quick(target.basicInfo.id, attackId),
+            attack: () => {
+                if (!target) return;
+
+                if (chosen && !actions.quickAllowed(chosen)) setSel(null);
+
+                actions.quick(target.basicInfo.id, attackId);
+            },
             wizard: () => {
                 actions.open(target?.basicInfo.id, attackId);
                 setSel(null);
