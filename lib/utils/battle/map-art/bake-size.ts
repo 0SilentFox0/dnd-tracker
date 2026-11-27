@@ -8,7 +8,7 @@ export const BAKE = {
     maxSidePx: 8192,
     maxCellPx: 140,
     minCellPx: 32,
-    maxBytes: 4 * 1024 * 1024,
+    maxBytes: 8 * 1024 * 1024,
     quality: 0.85,
     attempts: 3,
 } as const;
