@@ -175,7 +175,8 @@
     "title": "Party",
     "empty": "There are no active heroes in this campaign yet.",
     "summary": "{count, plural, one {# hero} other {# heroes}} · average level {averageLevel}",
-    "all": "All characters"
+    "all": "All characters",
+    "new": "New character"
   },
   "sourceUpdate": {
     "text": "Template updated (v{version})",

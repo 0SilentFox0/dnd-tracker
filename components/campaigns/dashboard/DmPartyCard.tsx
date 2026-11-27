@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { Plus } from 'lucide-react';
 
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudSection } from '@/components/hud/form';
@@ -17,13 +18,14 @@ export function DmPartyCard({
 }) {
     const t = useTranslations('dashboard');
 
-    if (party.length === 0) return null;
-
-    const averageLevel = Number(
-        (
-            party.reduce((total, hero) => total + hero.level, 0) / party.length
-        ).toFixed(1)
-    );
+    const averageLevel = party.length
+        ? Number(
+              (
+                  party.reduce((total, hero) => total + hero.level, 0) /
+                  party.length
+              ).toFixed(1)
+          )
+        : 0;
 
     return (
         <HudPanel data-tour="dashboard.party">
@@ -34,10 +36,12 @@ export function DmPartyCard({
                             {t('party.title')}
                         </h2>
                         <p className="flex items-center gap-3 text-xs text-hud-muted">
-                            {t('party.summary', {
-                                count: party.length,
-                                averageLevel,
-                            })}
+                            {party.length > 0
+                                ? t('party.summary', {
+                                      count: party.length,
+                                      averageLevel,
+                                  })
+                                : t('party.empty')}
                             <Link
                                 href={`/campaigns/${campaignId}/dm/characters`}
                                 className="font-medium text-hud-accent-fg underline-offset-4 hover:underline"
@@ -118,6 +122,13 @@ export function DmPartyCard({
                             </HudCard>
                         );
                     })}
+                    <Link
+                        href={`/campaigns/${campaignId}/dm/characters/new`}
+                        className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-hud-line p-4 text-hud-ink transition-colors hover:border-hud-muted hover:bg-hud-raised"
+                    >
+                        <Plus className="size-6" aria-hidden />
+                        {t('party.new')}
+                    </Link>
                 </div>
             </HudSection>
         </HudPanel>

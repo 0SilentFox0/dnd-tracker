@@ -134,8 +134,6 @@ export default async function CampaignDetailPage({
         status: campaign.status,
     };
 
-    const hasDmParty = (dm?.party.length ?? 0) > 0;
-
     const page = (
         <HudPage className="campaign-dashboard hud-wide">
             <Suspense fallback={null}>
@@ -255,24 +253,8 @@ export default async function CampaignDetailPage({
                             </p>
                         </HudPanel>
                     )}
-                    {hasDmParty && dm && (
+                    {isDM && !isTemplate && dm && (
                         <DmPartyCard campaignId={id} party={dm.party} />
-                    )}
-                    {isDM && !isTemplate && !hasDmParty && (
-                        <HudPanel data-tour="dashboard.party-empty">
-                            <h2 className="hud-sc mb-2 text-sm tracking-[.06em] text-hud-ink">
-                                {t('party.title')}
-                            </h2>
-                            <p className="text-sm text-hud-muted">
-                                {t('party.empty')}
-                            </p>
-                            <Link
-                                href={`/campaigns/${id}/dm/characters`}
-                                className="mt-2 inline-flex min-h-8 items-center text-sm font-medium text-hud-accent-fg underline-offset-4 hover:underline"
-                            >
-                                {t('party.all')}
-                            </Link>
-                        </HudPanel>
                     )}
                     {player && (
                         <SystemGate system={rules.system}>
