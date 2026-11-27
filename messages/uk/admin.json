@@ -182,5 +182,20 @@
     "cancel": "Скасувати",
     "confirm": "Підтвердити",
     "failed": "Дія не вдалася. Спробуйте ще раз."
+  },
+  "security": {
+    "period": "Період",
+    "daysOption": "{n} дн.",
+    "refresh": "Оновити",
+    "sharedIps": "Спільні IP",
+    "sharedIpsEmpty": "За цей період немає IP, спільних для кількох акаунтів.",
+    "sharedDays": "спільних активних днів: {n}",
+    "activeDays": "активних днів: {n}",
+    "crowd": "ймовірно NAT/VPN",
+    "reRegistrations": "Повторні реєстрації після видалення",
+    "reRegistrationsEmpty": "Повторних реєстрацій не знайдено.",
+    "reRegisteredAt": "зареєстрований {created}, видалений раніше {deleted}",
+    "actions": "Останні дії адміна",
+    "actionsEmpty": "Дій адміна ще немає."
   }
 }

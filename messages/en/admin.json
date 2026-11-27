@@ -182,5 +182,20 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "failed": "The action failed. Try again."
+  },
+  "security": {
+    "period": "Period",
+    "daysOption": "{n} days",
+    "refresh": "Refresh",
+    "sharedIps": "Shared IPs",
+    "sharedIpsEmpty": "No IP is shared by several accounts in this period.",
+    "sharedDays": "{n} shared active days",
+    "activeDays": "{n} active days",
+    "crowd": "likely NAT/VPN",
+    "reRegistrations": "Re-registrations after deletion",
+    "reRegistrationsEmpty": "No re-registrations found.",
+    "reRegisteredAt": "registered {created}, deleted earlier {deleted}",
+    "actions": "Recent admin actions",
+    "actionsEmpty": "No admin actions yet."
   }
 }
