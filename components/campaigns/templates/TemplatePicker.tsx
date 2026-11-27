@@ -61,7 +61,8 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
     const current = value.file ? FILE_VALUE : (value.templateId ?? NONE_VALUE);
 
     const isRecommended = (tpl: TemplateCard) =>
-        isCanonicalTemplate(tpl) && templateKeyOf(tpl) === DEFAULT_TEMPLATE_KEY;
+        templateKeyOf(tpl) === DEFAULT_TEMPLATE_KEY &&
+        (tpl.locale == null || tpl.locale === 'en');
 
     const toOption = (tpl: TemplateCard) => {
         const name = templateDisplayName(tpl, uiLocale);
