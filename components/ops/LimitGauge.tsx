@@ -58,7 +58,9 @@ export function LimitGauge({ row }: { row: OpsLimitRow }) {
                         />
                     </div>
                     <div className="flex items-baseline justify-between gap-2 text-sm">
-                        <span className="hud-num">{t('percent', { percent })}</span>
+                        <span className="hud-num">
+                            {t('percent', { percent })}
+                        </span>
                         <span className="text-xs text-muted-foreground">
                             {t('used', {
                                 value: formatValue(row.value, row.unit),

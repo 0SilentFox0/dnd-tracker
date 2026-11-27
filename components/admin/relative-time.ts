@@ -12,7 +12,8 @@ export function formatRelative(iso: string, locale: string, now: number) {
     const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
 
     for (const [unit, ms] of UNITS)
-        if (Math.abs(diff) >= ms) return rtf.format(Math.round(diff / ms), unit);
+        if (Math.abs(diff) >= ms)
+            return rtf.format(Math.round(diff / ms), unit);
 
     return rtf.format(0, 'minute');
 }

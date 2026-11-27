@@ -44,7 +44,9 @@ export function ChartTooltipBody({
                                 single && 'flex-1 text-right'
                             )}
                         >
-                            {typeof e.value === 'number' ? format(e.value) : '—'}
+                            {typeof e.value === 'number'
+                                ? format(e.value)
+                                : '—'}
                         </span>
                     </li>
                 ))}

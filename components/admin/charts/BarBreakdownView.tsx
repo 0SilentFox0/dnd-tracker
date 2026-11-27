@@ -47,7 +47,9 @@ export default function BarBreakdownView({
                             active && payload?.length ? (
                                 <ChartTooltipBody
                                     title={String(payload[0].payload.label)}
-                                    entries={payload as unknown as TooltipEntry[]}
+                                    entries={
+                                        payload as unknown as TooltipEntry[]
+                                    }
                                     format={format}
                                     single
                                 />

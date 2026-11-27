@@ -28,10 +28,7 @@ export function OpsChartGroup({
             aria-labelledby={`ops-group-${group.id}`}
             className="space-y-3"
         >
-            <h3
-                id={`ops-group-${group.id}`}
-                className="hud-sc text-base"
-            >
+            <h3 id={`ops-group-${group.id}`} className="hud-sc text-base">
                 {t(`groups.${group.id}`)}
             </h3>
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">

@@ -32,10 +32,10 @@ export default function TimeSeriesChartView({
     series,
     format,
     caption,
-    kind = 'line',
-    limit,
-    height = 260,
+    options,
 }: TimeSeriesChartProps) {
+    const { kind = 'line', limit, height = 260 } = options ?? {};
+
     const locale = useLocale();
 
     const uid = useId().replace(/\W/g, '');
@@ -75,11 +75,7 @@ export default function TimeSeriesChartView({
     const color = (i: number) => SERIES_COLORS[i % SERIES_COLORS.length];
 
     const axes = [
-        <CartesianGrid
-            key="grid"
-            vertical={false}
-            stroke="var(--hud-rule)"
-        />,
+        <CartesianGrid key="grid" vertical={false} stroke="var(--hud-rule)" />,
         <XAxis
             key="x"
             dataKey="t"
@@ -136,7 +132,11 @@ export default function TimeSeriesChartView({
             <div role="img" aria-label={title} style={{ height }}>
                 <ResponsiveContainer width="100%" height="100%">
                     {kind === 'bars' ? (
-                        <BarChart data={rows} margin={margin} stackOffset="sign">
+                        <BarChart
+                            data={rows}
+                            margin={margin}
+                            stackOffset="sign"
+                        >
                             {axes}
                             <ReferenceLine y={0} stroke="var(--hud-line)" />
                             {series.map((s, i) => (

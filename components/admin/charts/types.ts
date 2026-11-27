@@ -10,9 +10,11 @@ export interface TimeSeriesChartProps {
     series: ChartSeries[];
     format: (v: number) => string;
     caption?: string;
-    kind?: 'line' | 'area' | 'bars';
-    limit?: { value: number; label: string };
-    height?: number;
+    options?: {
+        kind?: 'line' | 'area' | 'bars';
+        limit?: { value: number; label: string };
+        height?: number;
+    };
 }
 
 export interface BarBreakdownProps {

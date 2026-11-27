@@ -21,7 +21,10 @@ export function timeFormats(locale: string, times: number[]): TimeFormats {
     const daily = step >= DAY_MS * 0.9;
 
     const opts = (o: Intl.DateTimeFormatOptions) =>
-        new Intl.DateTimeFormat(locale, { timeZone: daily ? 'UTC' : undefined, ...o });
+        new Intl.DateTimeFormat(locale, {
+            timeZone: daily ? 'UTC' : undefined,
+            ...o,
+        });
 
     const date = opts({ day: 'numeric', month: 'short' });
 

@@ -84,7 +84,9 @@ describe('SecurityClient', () => {
 
         await render();
 
-        expect(screen.getAllByText('likely shared network or VPN')).toHaveLength(1);
+        expect(
+            screen.getAllByText('likely shared network or VPN')
+        ).toHaveLength(1);
         expect(
             screen
                 .getByText('Name u1 (u1@example.test)')

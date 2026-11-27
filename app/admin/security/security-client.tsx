@@ -166,10 +166,9 @@ export function SecurityClient() {
                                             values: chart.values,
                                         },
                                     ]}
-                                    kind="bars"
                                     format={String}
                                     caption={t('actionsPerDay')}
-                                    height={180}
+                                    options={{ kind: 'bars', height: 180 }}
                                 />
                             </ChartPanel>
                         )}

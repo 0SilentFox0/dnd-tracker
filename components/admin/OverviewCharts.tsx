@@ -92,7 +92,7 @@ export function OverviewCharts({
                         title={p.title}
                         times={times}
                         series={p.list}
-                        kind={p.kind}
+                        options={{ kind: p.kind }}
                         format={format}
                         caption={t('perDay')}
                     />

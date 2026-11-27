@@ -103,13 +103,24 @@ describe('RosterBoard', () => {
 
 describe('BalanceMeter', () => {
     it('[?] відкриває деталі балансу', () => {
-        render(<BalanceMeter {...balance} units={[]} />);
+        const xp = computeXpBudget({
+            edition: '2014',
+            heroLevels: [3, 3, 3, 3],
+            enemies: [{ unitId: 'ogre', quantity: 2, xp: 450 }],
+        });
 
-        expect(screen.queryByTestId('balance-summary')).toBeNull();
+        render(<BalanceMeter kind="xp" fair={null} xp={xp} units={[]} />);
+
         fireEvent.click(
             screen.getByLabelText('battleSetup.balance.detailsAria')
         );
-        expect(screen.getByTestId('balance-summary')).toBeTruthy();
+        expect(screen.getByTestId('xp-balance-summary')).toBeTruthy();
+    });
+
+    it('renders no plate for an empty balance', () => {
+        render(<BalanceMeter {...balance} units={[]} />);
+
+        expect(screen.queryByTestId('balance-meter')).toBeNull();
     });
 
     it('xp-режим показує складність і бюджет', () => {

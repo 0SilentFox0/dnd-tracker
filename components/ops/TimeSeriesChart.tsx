@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { ChartPanel, TimeSeriesChart } from '@/components/admin/charts';
 import type { ChartDef } from '@/lib/ops/chart-groups';
-import { hasAnyValue,toChartData } from '@/lib/utils/ops/chart-data';
+import { hasAnyValue, toChartData } from '@/lib/utils/ops/chart-data';
 import { formatValue } from '@/lib/utils/ops/format';
 import type { OpsLimitRow, OpsSeriesResponse } from '@/types/ops';
 
@@ -65,14 +65,15 @@ export function OpsTimeSeriesChart({
                 title={title}
                 times={times}
                 series={series}
-                kind={series.length === 1 ? 'area' : 'line'}
                 format={(v) => formatValue(v, chart.unit)}
                 caption={t(`units.${chart.unit}`)}
-                limit={
-                    limit === null
-                        ? undefined
-                        : { value: limit, label: t('limit') }
-                }
+                options={{
+                    kind: series.length === 1 ? 'area' : 'line',
+                    limit:
+                        limit === null
+                            ? undefined
+                            : { value: limit, label: t('limit') },
+                }}
             />
         </ChartPanel>
     );
