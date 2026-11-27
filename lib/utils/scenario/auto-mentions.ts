@@ -27,7 +27,7 @@ const ENDINGS =
 
 const CLUSTER = /\P{M}\p{M}*/gu;
 
-// fleeting vowel: the vowel drops in the oblique cases (-ець -> -ця, -ок -> -ка)
+// fleeting vowel: the e/o before the last consonant drops in the oblique cases
 const FLEETING: [RegExp, RegExp][] = [
     [/ець$/u, /(?:ець|ц)/u],
     [/ок$/u, /(?:ок|к)/u],
@@ -87,7 +87,7 @@ function wordPattern(word: string): string {
 
     const stem = chars.slice(0, -1);
 
-    // a soft consonant doubles before -ю/-і in the instrumental/locative (Ізабель -> Ізабеллю)
+    // a soft consonant doubles in the instrumental/locative endings
     const doubled = SOFT_SIGN.test(word)
         ? `${escapeRe(stem.at(-1) ?? '')}?`
         : '';
