@@ -43,6 +43,9 @@ const CSS_FONT = /font-size:\s*(\d*\.?\d+)(px|rem)\b/g;
 
 const BUTTON_TAG = /<(Button|HudIconButton|HudButton)(?![\w])/g;
 
+const BUTTON_CONST =
+    /\bconst\s+\w*(?:BTN|BUTTON|Btn|Button)\w*(?:\s*:\s*[^=]+)?\s*=\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
+
 const HEIGHT_TOKEN = /^(?:min-h|h|size)-(.+)$/;
 
 const HUD_BUTTON_LADDER = new Set(['8', '10', '12']);
@@ -103,6 +106,27 @@ const countButtonHeights = (text: string): number => {
     return n;
 };
 
+const countButtonConstHeights = (text: string): number => {
+    let n = 0;
+
+    for (const m of matches(BUTTON_CONST, text))
+        for (const token of m[2].split(/\s+/)) {
+            if (token.includes('pointer-coarse:')) continue;
+
+            const base = baseToken(token);
+
+            const hit = base && HEIGHT_TOKEN.exec(base);
+
+            if (!hit) continue;
+
+            if (hit[1].startsWith('[') || /^\d/.test(hit[1])) {
+                if (!HUD_BUTTON_LADDER.has(hit[1])) n++;
+            }
+        }
+
+    return n;
+};
+
 const stripCssComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 export const countUiScale = (
@@ -145,7 +169,8 @@ export const countUiScale = (
             radiusArbitrary +
             matches(RADIUS_OFF_SCALE, text).length +
             matches(RADIUS_BARE, text).length,
-        'button-height': countButtonHeights(text),
+        'button-height':
+            countButtonHeights(text) + countButtonConstHeights(text),
         'disabled-opacity': matches(DISABLED_OPACITY, text).filter(
             ([, n]) => n !== '50'
         ).length,

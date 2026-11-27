@@ -100,6 +100,17 @@ describe('ui-scale ratchet', () => {
         ).toBe(2);
     });
 
+    it('counts off-ladder heights in button class constants', () => {
+        expect(
+            countUiScale(
+                `const ICON_BTN = 'size-7 h-[30px] h-10 pointer-coarse:min-h-11'`
+            )['button-height']
+        ).toBe(2);
+        expect(
+            countUiScale(`const PANEL = 'h-7 size-7'`)['button-height']
+        ).toBe(0);
+    });
+
     it('counts disabled:opacity-40 but not 50', () => {
         expect(
             countUiScale(T('disabled:opacity-', '40'))['disabled-opacity']

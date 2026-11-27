@@ -16,7 +16,7 @@ const FIELD =
     'h-8 w-full rounded-lg border border-hud-rule bg-black/30 px-2 text-sm';
 
 const BUTTON =
-    'h-9 rounded-lg border border-hud-rule px-3 text-sm hover:bg-white/10';
+    'h-8 rounded-lg border border-hud-rule px-3 text-sm hover:bg-white/10';
 
 function clampSize(value: string, fallback: number): number {
     const n = Math.round(Number(value));
