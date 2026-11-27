@@ -23,7 +23,11 @@ export const HudButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ref={ref}
             type="button"
             data-slot="hud-button"
-            className={cn('ds-interactive cursor-pointer', DISABLED_CLASS, className)}
+            className={cn(
+                'ds-interactive cursor-pointer',
+                DISABLED_CLASS,
+                className
+            )}
             {...props}
         />
     )

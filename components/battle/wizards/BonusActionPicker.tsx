@@ -126,7 +126,10 @@ export function BonusActionPicker({
                                             {cooldownLeft > 0 && (
                                                 <span className="ml-2 text-xs font-normal text-hud-soft">
                                                     {t('bonus.cooldown', {
-                                                        duration: formatDuration(cooldownLeft),
+                                                        duration:
+                                                            formatDuration(
+                                                                cooldownLeft
+                                                            ),
                                                     })}
                                                 </span>
                                             )}

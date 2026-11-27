@@ -207,9 +207,7 @@ export function ArtifactCard({
                         {artifact.name}
                     </h3>
                     {artifact.rarity && (
-                        <HudPill className="shrink-0">
-                            {rarityLabel}
-                        </HudPill>
+                        <HudPill className="shrink-0">{rarityLabel}</HudPill>
                     )}
                 </div>
             </div>
@@ -221,11 +219,7 @@ export function ArtifactCard({
                             : t('card.kindGear')}
                     </HudPill>
                 )}
-                {canEdit ? (
-                    slotSelect
-                ) : (
-                    <HudPill>{slotLabel}</HudPill>
-                )}
+                {canEdit ? slotSelect : <HudPill>{slotLabel}</HudPill>}
                 {artifact.artifactSet && (
                     <HudPill>
                         {t('card.set', { name: artifact.artifactSet.name })}

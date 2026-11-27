@@ -37,7 +37,6 @@ function DmRestControls({ rest }: { rest: SheetRest }) {
                     type="button"
                     size="sm"
                     variant="outline"
-                    
                     onClick={() => setOpen(true)}
                 >
                     {t('resources')}

@@ -91,9 +91,7 @@ describe('ui-scale ratchet', () => {
 
     it('allows HudButton h-10 but not h-9', () => {
         expect(
-            countUiScale(`<HudButton className="h-10 w-full">`)[
-                'button-height'
-            ]
+            countUiScale(`<HudButton className="h-10 w-full">`)['button-height']
         ).toBe(0);
         expect(
             countUiScale(`<HudButton className="h-9 h-[30px]">`)[

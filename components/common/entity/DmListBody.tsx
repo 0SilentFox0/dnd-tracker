@@ -21,7 +21,11 @@ export function DmListBody({
         return (
             <>
                 {isLoading ? (
-                    <LoadingState variant="cards" count={6} label={loadingLabel} />
+                    <LoadingState
+                        variant="cards"
+                        count={6}
+                        label={loadingLabel}
+                    />
                 ) : (
                     empty
                 )}

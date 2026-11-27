@@ -81,7 +81,9 @@ describe('стани сторінки', () => {
         ['detail', 'skeleton-paragraph', 4],
         ['form', 'skeleton-field', 6],
     ] as const)('LoadingState renders variant %s', (variant, slot, n) => {
-        const { container } = render(<LoadingState variant={variant} count={2} />);
+        const { container } = render(
+            <LoadingState variant={variant} count={2} />
+        );
 
         expect(screen.getByRole('status')).toHaveAttribute(
             'data-variant',

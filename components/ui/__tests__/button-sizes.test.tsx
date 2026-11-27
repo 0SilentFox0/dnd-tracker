@@ -39,9 +39,9 @@ describe('Button sizes', () => {
     });
 
     it('secondary variant removed', () => {
-        expect(
-            buttonVariants({ variant: 'secondary' } as never)
-        ).not.toContain('secondary');
+        expect(buttonVariants({ variant: 'secondary' } as never)).not.toContain(
+            'secondary'
+        );
     });
 
     it('chip class height 32', () => {

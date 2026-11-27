@@ -32,9 +32,7 @@ export function ClassCard({
             canEdit={canEdit}
         >
             <HudPill>d{gameClass.hitDie}</HudPill>
-            <HudPill>
-                {t(`classes.casters.${gameClass.caster}`)}
-            </HudPill>
+            <HudPill>{t(`classes.casters.${gameClass.caster}`)}</HudPill>
             <HudPill>
                 {t('classes.card.subclasses', {
                     count: gameClass.subclasses.length,

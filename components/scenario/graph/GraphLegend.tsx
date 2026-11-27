@@ -22,15 +22,17 @@ export function GraphLegend({ showSequence }: { showSequence: boolean }) {
             role="group"
         >
             <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                {(['draft', 'ready', 'played', 'personal'] as const).map((s) => (
-                    <span key={s} className={item}>
-                        <span
-                            className="h-3.5 w-1 rounded-sm"
-                            style={{ background: GRAPH_STATUS_COLOR[s] }}
-                        />
-                        {t(s)}
-                    </span>
-                ))}
+                {(['draft', 'ready', 'played', 'personal'] as const).map(
+                    (s) => (
+                        <span key={s} className={item}>
+                            <span
+                                className="h-3.5 w-1 rounded-sm"
+                                style={{ background: GRAPH_STATUS_COLOR[s] }}
+                            />
+                            {t(s)}
+                        </span>
+                    )
+                )}
                 {showSequence ? (
                     <span className={item}>
                         <span className="inline-block h-0 w-4 border-t-2 border-[var(--color-hud-accent-fg)]" />

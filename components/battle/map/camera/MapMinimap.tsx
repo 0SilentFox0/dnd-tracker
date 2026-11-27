@@ -84,7 +84,9 @@ export function MapMinimap({
 
     const background = backgroundBox(map, 1, aspect, grid);
 
-    const blocked = map.blocked?.length ? regionFillPath(map.blocked, grid) : '';
+    const blocked = map.blocked?.length
+        ? regionFillPath(map.blocked, grid)
+        : '';
 
     const fog = hiddenCells ? regionFillPath(hiddenCells, grid) : '';
 

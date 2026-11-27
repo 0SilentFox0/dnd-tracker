@@ -15,7 +15,9 @@ describe('not-found', () => {
         const { container } = render(<NotFound />);
 
         expect(
-            container.querySelector('[data-slot="empty-state-illustration"] svg')
+            container.querySelector(
+                '[data-slot="empty-state-illustration"] svg'
+            )
         ).toBeTruthy();
         expect(screen.getAllByRole('button').length).toBe(1);
         expect(

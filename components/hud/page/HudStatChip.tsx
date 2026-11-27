@@ -31,9 +31,7 @@ export function HudStatChip({
             >
                 {value}
             </b>
-            <span className="hud-label">
-                {short}
-            </span>
+            <span className="hud-label">{short}</span>
         </div>
     );
 }

@@ -58,9 +58,7 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
                     </div>
                 </div>
                 <CardDescription className="mt-2 flex flex-wrap gap-1 sm:gap-2">
-                    <HudPill
-                        className="flex items-center gap-1 text-xs"
-                    >
+                    <HudPill className="flex items-center gap-1 text-xs">
                         <SpellGroupIcon className="h-3 w-3" />
                         <span className="hidden sm:inline">
                             {spell.spellGroup?.name ||
@@ -71,10 +69,7 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
                         </span>
                     </HudPill>
                     {mechanics(spell).map((label) => (
-                        <HudPill
-                            key={label}
-                            className="text-xs"
-                        >
+                        <HudPill key={label} className="text-xs">
                             {label}
                         </HudPill>
                     ))}

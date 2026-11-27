@@ -82,9 +82,7 @@ export const UnitGroupAccordion = memo(function UnitGroupAccordion({
     };
 
     const highlight = (key: string) =>
-        over === key
-            ? 'bg-[rgba(230,194,90,.08)] ring-1'
-            : '';
+        over === key ? 'bg-[rgba(230,194,90,.08)] ring-1' : '';
 
     return (
         <AccordionItem

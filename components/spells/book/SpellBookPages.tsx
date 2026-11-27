@@ -141,9 +141,7 @@ export function EmptySpellBook({ text }: { text: string }) {
                 'flex min-h-56 flex-col items-center justify-center gap-2 px-6 py-10 text-center'
             )}
         >
-            <div className="spell-book-muted text-sm italic">
-                {t('title')}
-            </div>
+            <div className="spell-book-muted text-sm italic">{t('title')}</div>
             <p className="hud-sc text-lg leading-6">{text}</p>
         </div>
     );

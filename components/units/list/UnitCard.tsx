@@ -105,9 +105,7 @@ export const UnitCard = memo(function UnitCard({
                         <h3 className="text-base font-semibold text-hud-ink">
                             {unit.name}
                             {unit.cr != null && (
-                                <HudPill
-                                    className="ml-2 align-middle text-xs"
-                                >
+                                <HudPill className="ml-2 align-middle text-xs">
                                     {`CR ${challengeLabel(unit.cr)}`}
                                 </HudPill>
                             )}
@@ -171,10 +169,7 @@ export const UnitCard = memo(function UnitCard({
                         </div>
                         <div className="flex flex-wrap gap-1">
                             {allImmunities.slice(0, 3).map((immunity, idx) => (
-                                <HudPill
-                                    key={idx}
-                                    className="text-xs"
-                                >
+                                <HudPill key={idx} className="text-xs">
                                     {immunity}
                                 </HudPill>
                             ))}

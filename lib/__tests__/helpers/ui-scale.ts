@@ -95,10 +95,7 @@ const countButtonHeights = (text: string): number => {
             if (!hit) continue;
 
             if (m[1] !== 'HudButton') n++;
-            else if (
-                hit[1].startsWith('[') ||
-                !HUD_BUTTON_LADDER.has(hit[1])
-            )
+            else if (hit[1].startsWith('[') || !HUD_BUTTON_LADDER.has(hit[1]))
                 n++;
         }
     }

@@ -62,11 +62,15 @@ describe('DashboardGroups', () => {
             />
         );
 
-        expect(screen.getByRole('heading', { name: 'Бібліотеки' })).toBeTruthy();
+        expect(
+            screen.getByRole('heading', { name: 'Бібліотеки' })
+        ).toBeTruthy();
         expect(screen.getByText('Довідник')).toBeTruthy();
         expect(screen.queryByText('Сценарій')).toBeNull();
         expect(screen.queryByText('Персонажі')).toBeNull();
-        expect(container.querySelector('[data-tour="dashboard.search"]')).toBeNull();
+        expect(
+            container.querySelector('[data-tour="dashboard.search"]')
+        ).toBeNull();
         expect(
             container.querySelector('[data-tour="dashboard.sections"]')
         ).toBeNull();

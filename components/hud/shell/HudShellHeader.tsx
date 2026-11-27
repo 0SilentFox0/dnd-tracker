@@ -42,7 +42,7 @@ export function HudShellHeader({
                     </DropdownMenu>
                 )}
                 {breadcrumb}
-                <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2 [&_button]:min-h-10 [&_button]:min-w-10 [&_a]:min-h-10 [&_a]:min-w-10">
+                <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2 [&_a]:min-h-10 [&_a]:min-w-10 [&_button]:min-h-10 [&_button]:min-w-10">
                     {actions}
                 </div>
             </div>

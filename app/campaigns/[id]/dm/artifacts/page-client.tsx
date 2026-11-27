@@ -145,9 +145,7 @@ export function DMArtifactsPageClient({
                                                 <AccordionTrigger className="px-4 hover:no-underline">
                                                     <span className="flex items-center gap-2">
                                                         {t(`slots.${slot}`)}
-                                                        <HudPill
-                                                            className="text-xs"
-                                                        >
+                                                        <HudPill className="text-xs">
                                                             {artifacts.length}
                                                         </HudPill>
                                                     </span>

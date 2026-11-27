@@ -261,7 +261,7 @@ export function RulesBook({
                                 onSubmit={onSubmit}
                                 onInvalidCapture={onInvalid}
                             >
-                                <div className="min-w-0 [container-type:inline-size]">
+                                <div className="[container-type:inline-size] min-w-0">
                                     {keys.map((key) => (
                                         <TabsContent
                                             key={key}

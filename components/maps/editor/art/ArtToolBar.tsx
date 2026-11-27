@@ -27,7 +27,9 @@ export function ArtToolBar({ art }: { art: Art }) {
 
     const { tool, brush } = art;
 
-    const toggle = (value: (typeof ART_TOOLS)[number] | 'stamp' | 'stamp-select') => {
+    const toggle = (
+        value: (typeof ART_TOOLS)[number] | 'stamp' | 'stamp-select'
+    ) => {
         art.clearNotice();
         art.setTool(tool === value ? null : value);
     };

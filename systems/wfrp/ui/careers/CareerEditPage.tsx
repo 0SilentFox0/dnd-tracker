@@ -81,17 +81,11 @@ export function CareerEditPage({
                     <Button
                         type="button"
                         variant="outline"
-                        
                         onClick={() => router.push(listHref)}
                     >
                         {tc('actions.cancel')}
                     </Button>
-                    <Button
-                        type="submit"
-                        form={FORM_ID}
-                        
-                        disabled={saving}
-                    >
+                    <Button type="submit" form={FORM_ID} disabled={saving}>
                         {tc('actions.save')}
                     </Button>
                 </>

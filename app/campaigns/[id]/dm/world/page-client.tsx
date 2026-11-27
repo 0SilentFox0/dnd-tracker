@@ -191,12 +191,12 @@ export function WorldEditorPageClient({
                                         layers.panel.open;
 
                                     const leftPanels = isDesktop
-                                        ? ([
+                                        ? [
                                               treeShown && 'tree',
                                               layersShown && 'layers',
                                           ]
                                               .filter(Boolean)
-                                              .join('-') || undefined)
+                                              .join('-') || undefined
                                         : undefined;
 
                                     const bubble =
@@ -250,12 +250,8 @@ export function WorldEditorPageClient({
 
                                     return (
                                         <>
-                                            <div
-                                                className='world-game-editor-frame'
-                                            >
-                                                <div
-                                                    className='world-game-toolbar shrink-0'
-                                                >
+                                            <div className="world-game-editor-frame">
+                                                <div className="world-game-toolbar shrink-0">
                                                     <WorldToolbar
                                                         drawing={drawing}
                                                         mode={mode.value}
@@ -268,9 +264,7 @@ export function WorldEditorPageClient({
                                                             details.set(true);
                                                         }}
                                                     >
-                                                        <div
-                                                            className='world-editor-sections'
-                                                        >
+                                                        <div className="world-editor-sections">
                                                             <HudToggleChip
                                                                 active={
                                                                     treeShown
@@ -330,23 +324,19 @@ export function WorldEditorPageClient({
                                                     </WorldToolbar>
                                                 </div>
                                                 <div
-                                                    className='world-game-editor-body'
+                                                    className="world-game-editor-body"
                                                     data-left-panels={
                                                         leftPanels
                                                     }
                                                 >
                                                     {isDesktop && treeShown ? (
-                                                        <aside
-                                                            className='world-glass world-game-side-panel world-game-tree p-2'
-                                                        >
+                                                        <aside className="world-glass world-game-side-panel world-game-tree p-2">
                                                             {mapTree}
                                                         </aside>
                                                     ) : null}
                                                     {isDesktop &&
                                                     layersShown ? (
-                                                        <aside
-                                                            className='world-glass world-game-side-panel world-game-layers p-2'
-                                                        >
+                                                        <aside className="world-glass world-game-side-panel world-game-layers p-2">
                                                             {layersPanel}
                                                         </aside>
                                                     ) : null}
@@ -369,7 +359,7 @@ export function WorldEditorPageClient({
                                                                 : undefined
                                                         }
                                                     >
-                                                        {(
+                                                        {
                                                             <WorldSceneHeading>
                                                                 <WorldCrumbs
                                                                     maps={
@@ -390,7 +380,7 @@ export function WorldEditorPageClient({
                                                                     }
                                                                 />
                                                             </WorldSceneHeading>
-                                                        )}
+                                                        }
                                                         {eyes.asHeroId ? (
                                                             <QueryState
                                                                 query={
@@ -405,7 +395,7 @@ export function WorldEditorPageClient({
 
                                                                     return (
                                                                         <>
-                                                                            {(
+                                                                            {
                                                                                 <>
                                                                                     <WorldJourneyHud
                                                                                         places={{
@@ -440,7 +430,7 @@ export function WorldEditorPageClient({
                                                                                         }
                                                                                     />
                                                                                 </>
-                                                                            )}
+                                                                            }
                                                                             <WorldMapView
                                                                                 key={`${v.map.id}:${eyes.asHeroId}`}
                                                                                 detail={
@@ -463,7 +453,7 @@ export function WorldEditorPageClient({
                                                                                 }
                                                                                 className="rounded-none border-0"
                                                                                 slots={{
-mode: 'own',
+                                                                                    mode: 'own',
                                                                                     fullscreen:
                                                                                         fsSlot,
                                                                                     hint: (
@@ -568,7 +558,7 @@ mode: 'own',
                                                                 focus={focus}
                                                                 className="rounded-none border-0"
                                                                 slots={{
-mode: 'party',
+                                                                    mode: 'party',
                                                                     fullscreen:
                                                                         fsSlot,
                                                                     hint: (
@@ -610,7 +600,9 @@ mode: 'party',
                                                             .length > 0 ||
                                                             showTrailLegend) && (
                                                             <WorldFilterLegend
-compact={!isDesktop}
+                                                                compact={
+                                                                    !isDesktop
+                                                                }
                                                             >
                                                                 <LayerLegend
                                                                     layers={
@@ -645,87 +637,85 @@ compact={!isDesktop}
                                                             </WorldFilterLegend>
                                                         )}
                                                         {!eyes.asHeroId && (
-                                                                <>
-                                                                    {(tool ===
-                                                                        'select' ||
-                                                                        tool ===
-                                                                            'move') && (
-                                                                        <WorldJourneyHud
-                                                                            places={{
-                                                                                markers:
-                                                                                    applyLayerStyle(
-                                                                                        d.markers,
-                                                                                        layers.items
-                                                                                    ),
-                                                                                maps:
-                                                                                    maps.data ??
-                                                                                    [],
-                                                                                hidden: layers
-                                                                                    .visibility
-                                                                                    .hidden,
-                                                                                selectedId,
-                                                                            }}
-                                                                            sections={
-                                                                                !isDesktop &&
-                                                                                tool ===
-                                                                                    'move' ? (
-                                                                                    <HudButton
-                                                                                        className="world-journey-icon"
-                                                                                        aria-label={t(
-                                                                                            'travel.kinds.travel'
-                                                                                        )}
-                                                                                        title={t(
-                                                                                            'travel.kinds.travel'
-                                                                                        )}
-                                                                                        onClick={() =>
-                                                                                            setTravelPanelOpen(
-                                                                                                (
-                                                                                                    open
-                                                                                                ) =>
-                                                                                                    !open
-                                                                                            )
-                                                                                        }
-                                                                                        aria-expanded={
-                                                                                            travelPanelOpen
-                                                                                        }
-                                                                                    >
-                                                                                        <Route
-                                                                                            aria-hidden
-                                                                                            className="size-4"
-                                                                                        />
-                                                                                    </HudButton>
-                                                                                ) : null
-                                                                            }
-                                                                            actions={{
-                                                                                pickMarker:
-                                                                                    (
-                                                                                        id
-                                                                                    ) => {
-                                                                                        handlers.onMarkerClick(
-                                                                                            id
-                                                                                        );
-                                                                                        focusMarker(
-                                                                                            id
-                                                                                        );
-                                                                                    },
-                                                                                openMap,
-                                                                                openTree:
-                                                                                    () => {
-                                                                                        fullscreen.exit();
-                                                                                        tree.set(
-                                                                                            true
-                                                                                        );
-                                                                                    },
-                                                                            }}
-                                                                        />
-                                                                    )}
-                                                                    <WorldMapLegend
-                                                                        fog={
-                                                                            false
+                                                            <>
+                                                                {(tool ===
+                                                                    'select' ||
+                                                                    tool ===
+                                                                        'move') && (
+                                                                    <WorldJourneyHud
+                                                                        places={{
+                                                                            markers:
+                                                                                applyLayerStyle(
+                                                                                    d.markers,
+                                                                                    layers.items
+                                                                                ),
+                                                                            maps:
+                                                                                maps.data ??
+                                                                                [],
+                                                                            hidden: layers
+                                                                                .visibility
+                                                                                .hidden,
+                                                                            selectedId,
+                                                                        }}
+                                                                        sections={
+                                                                            !isDesktop &&
+                                                                            tool ===
+                                                                                'move' ? (
+                                                                                <HudButton
+                                                                                    className="world-journey-icon"
+                                                                                    aria-label={t(
+                                                                                        'travel.kinds.travel'
+                                                                                    )}
+                                                                                    title={t(
+                                                                                        'travel.kinds.travel'
+                                                                                    )}
+                                                                                    onClick={() =>
+                                                                                        setTravelPanelOpen(
+                                                                                            (
+                                                                                                open
+                                                                                            ) =>
+                                                                                                !open
+                                                                                        )
+                                                                                    }
+                                                                                    aria-expanded={
+                                                                                        travelPanelOpen
+                                                                                    }
+                                                                                >
+                                                                                    <Route
+                                                                                        aria-hidden
+                                                                                        className="size-4"
+                                                                                    />
+                                                                                </HudButton>
+                                                                            ) : null
                                                                         }
+                                                                        actions={{
+                                                                            pickMarker:
+                                                                                (
+                                                                                    id
+                                                                                ) => {
+                                                                                    handlers.onMarkerClick(
+                                                                                        id
+                                                                                    );
+                                                                                    focusMarker(
+                                                                                        id
+                                                                                    );
+                                                                                },
+                                                                            openMap,
+                                                                            openTree:
+                                                                                () => {
+                                                                                    fullscreen.exit();
+                                                                                    tree.set(
+                                                                                        true
+                                                                                    );
+                                                                                },
+                                                                        }}
                                                                     />
-                                                                </>
-                                                            )}
+                                                                )}
+                                                                <WorldMapLegend
+                                                                    fog={false}
+                                                                />
+                                                            </>
+                                                        )}
                                                         {tool === 'zone' &&
                                                         drawing.draft.length >
                                                             0 ? (
@@ -762,9 +752,7 @@ compact={!isDesktop}
                                                     </div>
                                                     {isDesktop &&
                                                     detailsOpen ? (
-                                                        <aside
-                                                            className='world-glass world-game-side-panel world-game-details p-3'
-                                                        >
+                                                        <aside className="world-glass world-game-side-panel world-game-details p-3">
                                                             <div className="mb-2 flex justify-end">
                                                                 <Button
                                                                     size="sm"
@@ -784,23 +772,26 @@ compact={!isDesktop}
                                                     {tool === 'move' &&
                                                     !eyes.asHeroId ? (
                                                         <div
-hidden={!isDesktop && !travelPanelOpen}
-                                                            className='world-glass world-game-side-panel world-game-travel p-2'
+                                                            hidden={
+                                                                !isDesktop &&
+                                                                !travelPanelOpen
+                                                            }
+                                                            className="world-glass world-game-side-panel world-game-travel p-2"
                                                         >
                                                             {!isDesktop && (
-                                                                    <HudButton
-                                                                        className="min-h-11"
-                                                                        onClick={() =>
-                                                                            setTravelPanelOpen(
-                                                                                false
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        {t(
-                                                                            'editor.closePanel'
-                                                                        )}
-                                                                    </HudButton>
-                                                                )}
+                                                                <HudButton
+                                                                    className="min-h-11"
+                                                                    onClick={() =>
+                                                                        setTravelPanelOpen(
+                                                                            false
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    {t(
+                                                                        'editor.closePanel'
+                                                                    )}
+                                                                </HudButton>
+                                                            )}
                                                             <TravelPanel
                                                                 campaignId={
                                                                     campaignId
@@ -943,9 +934,7 @@ hidden={!isDesktop && !travelPanelOpen}
                                                         onOpenChange={tree.set}
                                                         title={t('tree.label')}
                                                     >
-                                                        <div
-                                                            className='world-game-tree-dialog'
-                                                        >
+                                                        <div className="world-game-tree-dialog">
                                                             {mapTree}
                                                         </div>
                                                     </ResponsiveDialog>

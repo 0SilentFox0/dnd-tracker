@@ -95,7 +95,6 @@ function TrackFields({
                 type="button"
                 variant="outline"
                 size="sm"
-                
                 onClick={() =>
                     onChange({
                         ...track,

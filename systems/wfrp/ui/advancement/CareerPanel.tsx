@@ -97,7 +97,6 @@ function CareerPicker({
                 type="button"
                 size="sm"
                 variant="outline"
-                
                 disabled={!pick || pending}
                 onClick={() => void assign()}
             >
@@ -243,7 +242,6 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
                     <Button
                         type="button"
                         size="sm"
-                        
                         disabled={ops.isPending}
                         onClick={() => void advance()}
                     >

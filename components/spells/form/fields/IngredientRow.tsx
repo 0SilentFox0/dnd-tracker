@@ -108,7 +108,6 @@ export function IngredientRow({
                 type="button"
                 variant="outline"
                 size="sm"
-                
                 onClick={onRemove}
             >
                 {t('remove')}

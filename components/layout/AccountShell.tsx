@@ -69,7 +69,7 @@ export function AccountShell({ children }: { children: ReactNode }) {
                     activeId={activeId}
                     ariaLabel={t('profile')}
                 />
-                <main className="mx-auto min-w-0 w-full max-w-[960px] flex-1 max-sm:[&>.hud-form-page>.hud-form-actions]:!px-0 max-sm:[&>.hud-form-page>.hud-form-head>*]:!px-0 md:mx-0">
+                <main className="mx-auto w-full max-w-[960px] min-w-0 flex-1 md:mx-0 max-sm:[&>.hud-form-page>.hud-form-actions]:!px-0 max-sm:[&>.hud-form-page>.hud-form-head>*]:!px-0">
                     {children}
                 </main>
             </div>

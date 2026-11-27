@@ -105,9 +105,7 @@ export function ShowWorldControls({
             <SelectField
                 aria-label={t('map')}
                 value={mapId ?? ''}
-                onValueChange={(id) =>
-                    setMapPick({ base: shownMapId, id })
-                }
+                onValueChange={(id) => setMapPick({ base: shownMapId, id })}
                 options={rows.map(({ map, path }) => ({
                     value: map.id,
                     label: `${'\u00a0\u00a0'.repeat(path.length - 1)}${map.name}`,

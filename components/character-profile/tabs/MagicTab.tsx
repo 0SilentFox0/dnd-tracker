@@ -138,7 +138,8 @@ export function MagicTab() {
                 )}
             {sheet.spells.length > 0 ? (
                 <>
-                    <Button size="lg"
+                    <Button
+                        size="lg"
                         type="button"
                         className="mt-4 w-full gap-2"
                         onClick={() => setOpen(true)}

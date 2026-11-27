@@ -82,10 +82,7 @@ export function UnitImmunities({ formData, onChange }: UnitImmunitiesProps) {
                     <Label className="text-sm font-semibold">{t('all')}</Label>
                     <div className="flex flex-wrap gap-2">
                         {allImmunities.map((immunity, index) => (
-                            <HudPill
-                                key={`all-${index}`}
-                                className="text-sm"
-                            >
+                            <HudPill key={`all-${index}`} className="text-sm">
                                 {immunity}
                             </HudPill>
                         ))}

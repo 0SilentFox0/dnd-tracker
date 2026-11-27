@@ -54,7 +54,8 @@ export function TokenList() {
             title={t('title')}
             action={
                 isDM && (
-                    <Button size="sm"
+                    <Button
+                        size="sm"
                         type="button"
                         variant="ghost"
                         className="px-2 text-hud-ink"
@@ -110,7 +111,6 @@ export function TokenList() {
                                 type="button"
                                 size="icon"
                                 variant="ghost"
-                                
                                 aria-label={t('deleteLabel')}
                                 disabled={isPending}
                                 onClick={() =>

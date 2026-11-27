@@ -136,11 +136,7 @@ export function EditorSidebar({
                 </div>
             </TabsContent>
             <TabsContent value="art">
-                <ArtPanel
-                    art={art.editor}
-                    artSave={art.save}
-                    ids={art.ids}
-                />
+                <ArtPanel art={art.editor} artSave={art.save} ids={art.ids} />
             </TabsContent>
             {!hex && (
                 <TabsContent value="objects">

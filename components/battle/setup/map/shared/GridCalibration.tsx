@@ -253,7 +253,6 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                                     type="button"
                                     variant="outline"
                                     size="icon"
-                                    
                                     disabled={!state.canNudge}
                                     aria-label={`${t(unit === 'px' ? 'nudgePx' : 'nudgeCell')}: ${t(key)}`}
                                     onClick={() =>

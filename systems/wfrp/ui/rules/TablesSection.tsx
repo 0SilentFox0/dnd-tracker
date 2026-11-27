@@ -143,7 +143,6 @@ export function TablesSection({ form }: { form: RulesFormState }) {
                             type="button"
                             variant="outline"
                             size="sm"
-                            
                             disabled={
                                 rows.length >= MAX_ROWS || secondLast >= 99
                             }
@@ -165,7 +164,6 @@ export function TablesSection({ form }: { form: RulesFormState }) {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            
                             onClick={() => setRows(null)}
                         >
                             {t('reset')}
@@ -180,7 +178,6 @@ export function TablesSection({ form }: { form: RulesFormState }) {
                         type="button"
                         variant="outline"
                         size="sm"
-                        
                         onClick={customize}
                     >
                         {t('customize')}

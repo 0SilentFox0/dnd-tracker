@@ -72,7 +72,10 @@ export function AttackRow({
             className="motion-rise border-b border-hud-rule py-2.5 first:pt-0 last:border-b-0 last:pb-0"
         >
             <div className="flex flex-wrap items-center gap-3">
-                <Icon aria-hidden className="size-5 shrink-0 text-hud-accent-fg" />
+                <Icon
+                    aria-hidden
+                    className="size-5 shrink-0 text-hud-accent-fg"
+                />
                 <span className="min-w-0 flex-1 truncate text-base font-medium text-hud-ink">
                     {a.name}
                 </span>

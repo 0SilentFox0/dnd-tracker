@@ -75,7 +75,6 @@ export function AdvancementEditor({
                         <Button
                             type="button"
                             variant="outline"
-                            
                             onClick={() => set('career', undefined)}
                         >
                             {t('clear')}

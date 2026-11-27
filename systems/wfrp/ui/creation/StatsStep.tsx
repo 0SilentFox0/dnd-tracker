@@ -133,7 +133,6 @@ export function StatsStep({ form }: { form: WfrpDraftFormState }) {
                                         type="button"
                                         size="icon"
                                         variant="outline"
-                                        
                                         aria-label={`${t('up')}: ${tg(`${key}.label`)}`}
                                         disabled={i === 0}
                                         onClick={() => swap(i, i - 1)}
@@ -144,7 +143,6 @@ export function StatsStep({ form }: { form: WfrpDraftFormState }) {
                                         type="button"
                                         size="icon"
                                         variant="outline"
-                                        
                                         aria-label={`${t('down')}: ${tg(`${key}.label`)}`}
                                         disabled={
                                             i === CHARACTERISTIC_KEYS.length - 1

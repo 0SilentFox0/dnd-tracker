@@ -19,10 +19,15 @@ describe('HudPill tones', () => {
     it('role tone only on role badges', () => {
         const hits = ['app', 'components', 'systems']
             .flatMap((d) => walk(join(process.cwd(), d)))
-            .filter((f) => /tone="role"|\? 'role'/.test(readFileSync(f, 'utf8')))
+            .filter((f) =>
+                /tone="role"|\? 'role'/.test(readFileSync(f, 'utf8'))
+            )
             .map((f) => f.split('/').pop())
             .sort();
 
-        expect(hits).toEqual(['CampaignMembersList.tsx', 'ProfileCampaigns.tsx']);
+        expect(hits).toEqual([
+            'CampaignMembersList.tsx',
+            'ProfileCampaigns.tsx',
+        ]);
     });
 });

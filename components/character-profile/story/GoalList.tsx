@@ -196,7 +196,6 @@ export function GoalList() {
                                     type="button"
                                     size="icon"
                                     variant="ghost"
-                                    
                                     aria-label={t('editLabel', {
                                         name: goalName(g),
                                     })}
@@ -214,7 +213,6 @@ export function GoalList() {
                                     type="button"
                                     size="icon"
                                     variant="ghost"
-                                    
                                     aria-label={t('deleteLabel', {
                                         name: goalName(g),
                                     })}
@@ -258,7 +256,6 @@ export function GoalList() {
                     </div>
                     <Button
                         type="button"
-                        
                         aria-label={t('save')}
                         disabled={isPending || !draft.text.trim()}
                         onClick={() => void commit()}
@@ -268,7 +265,6 @@ export function GoalList() {
                     <Button
                         type="button"
                         variant="ghost"
-                        
                         aria-label={tc('cancel')}
                         onClick={() => setDraft(null)}
                     >

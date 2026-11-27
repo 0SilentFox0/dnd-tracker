@@ -33,9 +33,7 @@ export function UserCampaigns({
                                     {c.name}
                                 </Link>
                                 <HudPill>{c.kind}</HudPill>
-                                {c.system && (
-                                    <HudPill>{c.system}</HudPill>
-                                )}
+                                {c.system && <HudPill>{c.system}</HudPill>}
                                 <span className="text-hud-muted">
                                     {t('players', { n: c.players })}
                                 </span>

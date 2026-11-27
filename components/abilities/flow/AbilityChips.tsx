@@ -49,8 +49,7 @@ export function AbilityChips({
                         onClick={() => onSelect(a.id)}
                         className={cn(
                             'flex h-8 shrink-0 items-center rounded-full px-3 text-sm text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
-                            on &&
-                                'text-hud-ink'
+                            on && 'text-hud-ink'
                         )}
                     >
                         <span className="max-w-[10rem] truncate">
@@ -66,7 +65,8 @@ export function AbilityChips({
                     </HudButton>
                 );
             })}
-            <Button size="sm"
+            <Button
+                size="sm"
                 type="button"
                 variant="ghost"
                 onClick={onAdd}

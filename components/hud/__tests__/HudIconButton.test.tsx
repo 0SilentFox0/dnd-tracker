@@ -40,8 +40,11 @@ describe('HudIconButton', () => {
         expect(sm.className).toContain('size-8');
         expect(md.className).toContain('size-10');
         expect(
-            render(<HudIconButton aria-label="lg" size="lg">c</HudIconButton>)
-                .getByLabelText('lg').className
+            render(
+                <HudIconButton aria-label="lg" size="lg">
+                    c
+                </HudIconButton>
+            ).getByLabelText('lg').className
         ).toContain('size-12');
         expect(md.className).toContain('text-hud-danger');
         expect(sm.className).not.toContain('text-hud-danger');

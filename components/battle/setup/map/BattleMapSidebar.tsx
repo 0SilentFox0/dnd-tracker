@@ -28,15 +28,17 @@ import type { BattleMapEditor, BattleMapSections } from '@/lib/hooks/battles';
 import { cn } from '@/lib/utils';
 import type { BattleMapSection } from '@/lib/utils/battle/grid/map-sections';
 
-const GROUPS: { key: 'map' | 'draw' | 'special'; sections: BattleMapSection[] }[] =
-    [
-        {
-            key: 'map',
-            sections: ['grid', 'calibration', 'background', 'margins'],
-        },
-        { key: 'draw', sections: ['cells', 'edges'] },
-        { key: 'special', sections: ['mode', 'motion'] },
-    ];
+const GROUPS: {
+    key: 'map' | 'draw' | 'special';
+    sections: BattleMapSection[];
+}[] = [
+    {
+        key: 'map',
+        sections: ['grid', 'calibration', 'background', 'margins'],
+    },
+    { key: 'draw', sections: ['cells', 'edges'] },
+    { key: 'special', sections: ['mode', 'motion'] },
+];
 
 const ICONS: Record<BattleMapSection, LucideIcon> = {
     grid: Grid2X2,
@@ -130,7 +132,8 @@ export function BattleMapSidebar({
                             {shown.map((id) => {
                                 const Icon = ICONS[id];
 
-                                const muted = stateOf(id)?.status === 'disabled';
+                                const muted =
+                                    stateOf(id)?.status === 'disabled';
 
                                 return (
                                     <TabsTrigger

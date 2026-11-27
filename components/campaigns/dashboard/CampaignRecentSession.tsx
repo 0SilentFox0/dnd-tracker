@@ -28,15 +28,15 @@ export function CampaignRecentSession({
 
     return (
         <section
-            className="border-hud-rule border-b pb-4"
+            className="border-b border-hud-rule pb-4"
             data-tour="dashboard.recent-session"
         >
-            <h2 className="hud-sc text-hud-ink mb-3 text-sm tracking-[.06em]">
+            <h2 className="hud-sc mb-3 text-sm tracking-[.06em] text-hud-ink">
                 {t('recentSession.title')}
             </h2>
             {session ? (
                 <div className="space-y-1.5">
-                    <h3 className="text-hud-ink break-words font-semibold">
+                    <h3 className="font-semibold break-words text-hud-ink">
                         <Link
                             href={`${base}/${session.id}`}
                             className="underline-offset-4 hover:underline"
@@ -45,12 +45,12 @@ export function CampaignRecentSession({
                         </Link>
                     </h3>
                     {session.subtitle && (
-                        <p className="text-hud-bone line-clamp-2 text-sm leading-relaxed">
+                        <p className="line-clamp-2 text-sm leading-relaxed text-hud-bone">
                             {session.subtitle}
                         </p>
                     )}
                     {session.lastChapter && (
-                        <p className="text-hud-bone text-sm">
+                        <p className="text-sm text-hud-bone">
                             <span className="text-hud-muted">
                                 {t('recentSession.lastChapter')}:{' '}
                             </span>
@@ -60,7 +60,7 @@ export function CampaignRecentSession({
                     {date && session.playedAt && (
                         <time
                             dateTime={session.playedAt}
-                            className="text-hud-muted inline-flex items-center gap-1 text-xs"
+                            className="inline-flex items-center gap-1 text-xs text-hud-muted"
                         >
                             <CalendarDays aria-hidden className="size-3.5" />
                             {date}
@@ -68,14 +68,14 @@ export function CampaignRecentSession({
                     )}
                 </div>
             ) : (
-                <p className="text-hud-muted text-sm">
+                <p className="text-sm text-hud-muted">
                     {t('recentSession.empty')}
                 </p>
             )}
             {session?.nextChapter && (
                 <Link
                     href={`${base}/${session.id}#sec-${session.nextChapter.id}`}
-                    className="bg-hud-page/45 text-hud-ink hover:bg-hud-raised mt-3 flex min-h-10 items-center justify-between gap-2 rounded-lg px-3 text-sm shadow-[inset_0_0_0_1px_var(--color-hud-edge-faint)] transition-colors"
+                    className="mt-3 flex min-h-10 items-center justify-between gap-2 rounded-lg bg-hud-page/45 px-3 text-sm text-hud-ink shadow-[inset_0_0_0_1px_var(--color-hud-edge-faint)] transition-colors hover:bg-hud-raised"
                 >
                     <span className="min-w-0 truncate">
                         <span className="text-hud-muted">
@@ -89,7 +89,7 @@ export function CampaignRecentSession({
             {!session && (
                 <Link
                     href={base}
-                    className="text-hud-accent-fg mt-3 inline-flex min-h-8 items-center text-sm font-medium underline-offset-4 hover:underline"
+                    className="mt-3 inline-flex min-h-8 items-center text-sm font-medium text-hud-accent-fg underline-offset-4 hover:underline"
                 >
                     {t('recentSession.openScenario')}
                 </Link>

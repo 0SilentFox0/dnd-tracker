@@ -40,7 +40,10 @@ export function SelectedSpellsList({
             <div className="grid grid-cols-1 gap-3">
                 {selectedSpells.map((spell) => {
                     return (
-                        <HudCard key={spell.id} className="relative min-w-0 overflow-hidden">
+                        <HudCard
+                            key={spell.id}
+                            className="relative min-w-0 overflow-hidden"
+                        >
                             <div className="flex items-start gap-3">
                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted sm:h-16 sm:w-16">
                                     <SpellIcon
@@ -70,15 +73,13 @@ export function SelectedSpellsList({
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-1">
-                                        <HudPill
-                                            className="max-w-full whitespace-normal break-words text-left text-xs"
-                                        >
+                                        <HudPill className="max-w-full text-left text-xs break-words whitespace-normal">
                                             {tg(`spellLevels.${spell.level}`)}
                                         </HudPill>
                                         {mechanics(spell).map((label) => (
                                             <HudPill
                                                 key={label}
-                                                className="max-w-full whitespace-normal break-words text-left text-xs"
+                                                className="max-w-full text-left text-xs break-words whitespace-normal"
                                             >
                                                 {label}
                                             </HudPill>

@@ -3,11 +3,7 @@ import * as React from 'react';
 import { FIELD_CLASS } from '@/components/ui/field-class';
 import { cn } from '@/lib/utils';
 
-function Input({
-    className,
-    type,
-    ...props
-}: React.ComponentProps<'input'>) {
+function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
     return (
         <input
             type={type}

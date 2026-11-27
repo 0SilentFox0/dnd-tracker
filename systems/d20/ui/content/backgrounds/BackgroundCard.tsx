@@ -30,9 +30,7 @@ export function BackgroundCard({
             canEdit={canEdit}
         >
             {choices > 0 && (
-                <HudPill>
-                    {t('card.choices', { count: choices })}
-                </HudPill>
+                <HudPill>{t('card.choices', { count: choices })}</HudPill>
             )}
         </DmEntityCard>
     );

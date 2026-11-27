@@ -23,9 +23,7 @@ export function DockDiamond({
                         : 'border-[#3bd38a] bg-[#167a50]'
                 )}
             />
-            <span className="hud-sc tracking-[.07em] uppercase">
-                {label}
-            </span>
+            <span className="hud-sc tracking-[.07em] uppercase">{label}</span>
             {spent && <span className="sr-only">{spentLabel}</span>}
         </span>
     );

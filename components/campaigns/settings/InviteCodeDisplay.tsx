@@ -44,12 +44,18 @@ export function InviteCodeDisplay({
                 variant="ghost"
                 size="icon"
                 onClick={handleCopy}
-                className={' shrink-0'}
+                className={'shrink-0'}
                 title={t('settings.copyCode')}
                 aria-label={t('settings.copyCode')}
             >
                 {copied ? (
-                    <Check className={compact ? 'size-3.5 text-hud-accent-fg' : 'h-4 w-4 text-hud-accent-fg'} />
+                    <Check
+                        className={
+                            compact
+                                ? 'size-3.5 text-hud-accent-fg'
+                                : 'h-4 w-4 text-hud-accent-fg'
+                        }
+                    />
                 ) : (
                     <Copy className={compact ? 'size-3.5' : 'h-4 w-4'} />
                 )}

@@ -36,9 +36,7 @@ export function CampaignSummary({ data }: { data: AdminCampaignSummary }) {
                     </h2>
                     <HudPill>{data.kind}</HudPill>
                     <HudPill>{data.status}</HudPill>
-                    {data.system && (
-                        <HudPill>{data.system}</HudPill>
-                    )}
+                    {data.system && <HudPill>{data.system}</HudPill>}
                 </div>
                 <dl className="grid grid-cols-2 gap-2 text-base sm:grid-cols-4">
                     <div>

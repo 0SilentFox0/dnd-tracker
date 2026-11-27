@@ -98,7 +98,9 @@ export function MapCatalogDialog({
                                     >
                                         {entry.previewUrl ? (
                                             <Image
-                                                src={toMediaUrl(entry.previewUrl)}
+                                                src={toMediaUrl(
+                                                    entry.previewUrl
+                                                )}
                                                 alt=""
                                                 width={160}
                                                 height={100}
@@ -128,7 +130,9 @@ export function MapCatalogDialog({
                                         </h3>
                                         {selected.previewUrl ? (
                                             <Image
-                                                src={toMediaUrl(selected.previewUrl)}
+                                                src={toMediaUrl(
+                                                    selected.previewUrl
+                                                )}
                                                 alt={selected.name}
                                                 width={640}
                                                 height={640}

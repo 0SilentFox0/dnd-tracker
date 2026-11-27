@@ -30,7 +30,7 @@ export function PaletteCard({
             disabled={disabled}
             onClick={() => onSelect(id)}
             className={cn(
-                'h-auto flex-col items-stretch gap-2 whitespace-normal p-3',
+                'h-auto flex-col items-stretch gap-2 p-3 whitespace-normal',
                 selected && 'border-hud-accent'
             )}
         >

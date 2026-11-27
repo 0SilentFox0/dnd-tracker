@@ -14,9 +14,7 @@ import { WallMaterialPicker } from './WallMaterialPicker';
 import { HudToggleChip } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import {
-    FLOOR_TOOLS,
-} from '@/lib/constants/map-art/lights';
+import { FLOOR_TOOLS } from '@/lib/constants/map-art/lights';
 import { BLOCKED_MATERIALS } from '@/lib/constants/map-art/materials';
 import {
     isStampTool,

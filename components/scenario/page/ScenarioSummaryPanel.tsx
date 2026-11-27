@@ -84,9 +84,7 @@ export function ScenarioSummaryPanel({
             {entry ? (
                 <>
                     {entry.stale ? (
-                        <HudPill className="self-start">
-                            {t('stale')}
-                        </HudPill>
+                        <HudPill className="self-start">{t('stale')}</HudPill>
                     ) : null}
                     <p>{entry.summary.overview}</p>
                     <SummaryList

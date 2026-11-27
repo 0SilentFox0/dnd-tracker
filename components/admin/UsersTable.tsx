@@ -92,9 +92,7 @@ export function UsersTable({
                                         <span>{na}</span>
                                     )}
                                     {r.sharedIp && (
-                                        <HudPill>
-                                            {t('sharedIp')}
-                                        </HudPill>
+                                        <HudPill>{t('sharedIp')}</HudPill>
                                     )}
                                 </span>
                             </td>

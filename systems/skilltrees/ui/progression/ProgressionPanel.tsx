@@ -19,7 +19,10 @@ import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/lib/hooks/common';
 import type { ProgressionNode } from '@/lib/utils/skills/progression';
 import { canUnlearn } from '@/lib/utils/skills/progression';
-import { useCharacterProgression, useProgressionActions } from '@/systems/skilltrees/hooks';
+import {
+    useCharacterProgression,
+    useProgressionActions,
+} from '@/systems/skilltrees/hooks';
 import type { NodeState } from '@/systems/skilltrees/rules/progression';
 
 export function ProgressionPanel({

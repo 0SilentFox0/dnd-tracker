@@ -65,7 +65,6 @@ export function SpellComponentsFields({
                             <Button
                                 type="button"
                                 variant="outline"
-                                
                                 onClick={c.add}
                             >
                                 {t('add')}

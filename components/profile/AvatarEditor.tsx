@@ -25,7 +25,8 @@ export function AvatarEditor({
 
     const { upload, remove, pending } = useAvatar();
 
-    const hasCustom = !!user.avatarUrl && isHostedOnProjectStorage(user.avatarUrl);
+    const hasCustom =
+        !!user.avatarUrl && isHostedOnProjectStorage(user.avatarUrl);
 
     const onRemove = async () => {
         const ok = await confirm({

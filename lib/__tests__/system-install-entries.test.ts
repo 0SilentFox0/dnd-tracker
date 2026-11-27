@@ -150,9 +150,7 @@ describe('system install entries', () => {
     });
 
     it('every route and page that reaches a lookup reaches its root', () => {
-        const exempt = new Set([
-            ...STATIC_SAFE,
-        ]);
+        const exempt = new Set([...STATIC_SAFE]);
 
         expect(
             unrooted(

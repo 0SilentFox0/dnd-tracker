@@ -39,7 +39,9 @@ export function RestBadges() {
                     {rest.xp.next !== null &&
                         t('xpNext', { next: rest.xp.next })}
                     {rest.xp.levelUp && (
-                        <b className="ml-1 text-hud-accent-fg">{t('levelUp')}</b>
+                        <b className="ml-1 text-hud-accent-fg">
+                            {t('levelUp')}
+                        </b>
                     )}
                 </span>
             )}

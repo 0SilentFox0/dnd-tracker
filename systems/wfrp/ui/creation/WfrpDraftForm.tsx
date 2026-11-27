@@ -75,7 +75,12 @@ export function WfrpDraftForm({
     const ids = characterId ? (['identity'] as const) : STEP_ORDER;
 
     return (
-        <HudFormPage header={{ title: characterId ? t('titleEdit') : t('title'), aside: t('aside') }}>
+        <HudFormPage
+            header={{
+                title: characterId ? t('titleEdit') : t('title'),
+                aside: t('aside'),
+            }}
+        >
             <div className="flex flex-1 flex-col px-4 pt-4">
                 <div className="relative flex-1 pb-2">
                     {!characterId && (
@@ -128,12 +133,7 @@ export function WfrpDraftForm({
                     className="mt-4 sm:sticky sm:bottom-0 sm:border-t sm:bg-background/[.97] sm:pt-3"
                 >
                     {characterId || step.index === 0 ? (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            
-                            asChild
-                        >
+                        <Button type="button" variant="outline" asChild>
                             <Link href={`/campaigns/${campaignId}/character`}>
                                 {tc('actions.cancel')}
                             </Link>
@@ -142,7 +142,6 @@ export function WfrpDraftForm({
                         <Button
                             type="button"
                             variant="outline"
-                            
                             onClick={step.back}
                             disabled={rolling}
                         >
@@ -152,7 +151,6 @@ export function WfrpDraftForm({
                     {last ? (
                         <Button
                             type="button"
-                            
                             onClick={submit.run}
                             disabled={
                                 !submit.canRun || submit.isPending || rolling
@@ -168,7 +166,6 @@ export function WfrpDraftForm({
                         !step.hideNext && (
                             <Button
                                 type="button"
-                                
                                 onClick={step.next}
                                 disabled={!step.canNext || rolling}
                             >

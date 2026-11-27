@@ -42,7 +42,6 @@ function Chip({
                 type="button"
                 variant="ghost"
                 size="icon"
-                
                 aria-label={removeLabel}
                 onClick={onRemove}
             >

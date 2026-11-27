@@ -63,9 +63,7 @@ export function MapTree({ maps, activeId, onOpen, footer }: MapTreeProps) {
                         tabIndex={m.id === focusable ? 0 : -1}
                         className={cn(
                             'truncate rounded-sm px-2 py-1 text-left text-sm hover:bg-white/10',
-                            m.id === activeId
-                                ? 'text-hud-ink'
-                                : 'text-hud-ink'
+                            m.id === activeId ? 'text-hud-ink' : 'text-hud-ink'
                         )}
                         style={{
                             paddingLeft: `${0.5 + treeDepth(maps, m.id) * INDENT_REM}rem`,

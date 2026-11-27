@@ -92,9 +92,7 @@ export function SpellLevelAccordion({
                                     {levelLabel}
                                 </span>
                             </span>
-                            <HudPill
-                                className="ml-2 shrink-0"
-                            >
+                            <HudPill className="ml-2 shrink-0">
                                 {spells.length}
                             </HudPill>
                         </div>

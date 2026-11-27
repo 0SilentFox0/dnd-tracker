@@ -65,7 +65,6 @@ export function TableRowsEditor({
                         type="button"
                         size="icon"
                         variant="ghost"
-                        
                         aria-label={`${t('removeRow')} ${i + 1}`}
                         onClick={() => onChange(rows.filter((_, k) => k !== i))}
                     >
@@ -78,12 +77,7 @@ export function TableRowsEditor({
                     {error}
                 </p>
             )}
-            <Button
-                type="button"
-                variant="outline"
-                
-                onClick={add}
-            >
+            <Button type="button" variant="outline" onClick={add}>
                 {t('addRow')}
             </Button>
         </section>

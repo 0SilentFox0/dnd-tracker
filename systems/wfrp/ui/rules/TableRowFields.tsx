@@ -94,7 +94,6 @@ export function RowFields({
                 type="button"
                 variant="outline"
                 size="sm"
-                
                 disabled={row.effects.length >= effectsMax(slot)}
                 onClick={() =>
                     onChange({

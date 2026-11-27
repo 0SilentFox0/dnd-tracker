@@ -17,7 +17,8 @@ const SLIDER_DEBOUNCE_MS = 250;
 
 const PRESET_KEYS = ['slow', 'medium', 'fast', 'veryFast'] as const;
 
-const ACTION = 'h-7 bg-black/60 px-2 text-xs text-hud-muted hover:text-hud-bone';
+const ACTION =
+    'h-7 bg-black/60 px-2 text-xs text-hud-muted hover:text-hud-bone';
 
 export function MapMotionPanel({ tool }: { tool: MapMotionTool }) {
     const t = useTranslations('battle.map');

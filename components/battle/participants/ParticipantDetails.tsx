@@ -144,10 +144,7 @@ function ParticipantDetailsBody({
         <div className="text-[var(--bone)]">
             <div ref={shakeRef} className="relative flex items-center gap-4">
                 <HitFrame change={change} />
-                <HitFloat
-                    change={change}
-                    className="top-0 left-4 text-2xl"
-                />
+                <HitFloat change={change} className="top-0 left-4 text-2xl" />
                 <ZoomablePortrait
                     flashKey={`portrait:${change?.id ?? ''}`}
                     participant={participant}

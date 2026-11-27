@@ -36,7 +36,6 @@ export function DeleteAccountSection({ email }: { email: string }) {
             <Button
                 type="button"
                 variant="destructive"
-                
                 onClick={() => setOpen(true)}
             >
                 {t('open')}
@@ -52,7 +51,6 @@ export function DeleteAccountSection({ email }: { email: string }) {
                         <Button
                             type="button"
                             variant="ghost"
-                            
                             disabled={isPending}
                             onClick={() => close(false)}
                         >
@@ -61,7 +59,6 @@ export function DeleteAccountSection({ email }: { email: string }) {
                         <Button
                             type="button"
                             variant="destructive"
-                            
                             disabled={!sameEmail(typed, email) || isPending}
                             onClick={() => void remove(email)}
                         >

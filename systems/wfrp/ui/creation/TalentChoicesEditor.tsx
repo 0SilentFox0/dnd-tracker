@@ -55,7 +55,6 @@ export function TalentChoicesEditor({
                                     type="button"
                                     size="icon"
                                     variant="ghost"
-                                    
                                     aria-label={`${t('removeTalent')}: ${label(id)}`}
                                     onClick={() =>
                                         patch(
@@ -91,7 +90,6 @@ export function TalentChoicesEditor({
                         <Button
                             type="button"
                             variant="outline"
-                            
                             onClick={() =>
                                 onChange(groups.filter((_, j) => j !== i))
                             }
@@ -105,7 +103,6 @@ export function TalentChoicesEditor({
                 <Button
                     type="button"
                     variant="outline"
-                    
                     onClick={() => onChange([...groups, []])}
                 >
                     {t('addTalentChoice')}

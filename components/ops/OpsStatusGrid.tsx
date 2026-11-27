@@ -82,9 +82,7 @@ export function OpsStatusGrid({ summary }: { summary: OpsSummary }) {
                                     <span className="font-medium">
                                         {t(`providers.${p.name}`)}
                                     </span>
-                                    <HudPill>
-                                        {t(`tier.${p.tier}`)}
-                                    </HudPill>
+                                    <HudPill>{t(`tier.${p.tier}`)}</HudPill>
                                 </div>
                                 <div
                                     className={`flex items-center gap-1.5 text-sm ${STATE_TONE[state]}`}

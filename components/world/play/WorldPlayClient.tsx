@@ -195,7 +195,9 @@ export function WorldPlayClient({
                                     >
                                         {(play.layers.items.length > 0 ||
                                             trail.trails.length > 0) && (
-                                            <WorldFilterLegend compact={!isDesktop}>
+                                            <WorldFilterLegend
+                                                compact={!isDesktop}
+                                            >
                                                 <LayerLegend
                                                     layers={play.layers.items}
                                                     hidden={play.layers.hidden}
@@ -215,7 +217,7 @@ export function WorldPlayClient({
                                                 />
                                             </WorldFilterLegend>
                                         )}
-                                        {(
+                                        {
                                             <>
                                                 <WorldSceneHeading>
                                                     {crumbs}
@@ -262,7 +264,7 @@ export function WorldPlayClient({
                                                     fog={view.fog}
                                                 />
                                             </>
-                                        )}
+                                        }
                                         <WorldMapView
                                             key={view.map.id}
                                             detail={props.detail}
@@ -283,7 +285,7 @@ export function WorldPlayClient({
                                             compact={!isDesktop}
                                             handlers={play.handlers}
                                             slots={{
-mode: 'own',
+                                                mode: 'own',
                                                 fullscreen: {
                                                     full: play.fullscreen.full,
                                                     toggle: play.fullscreen

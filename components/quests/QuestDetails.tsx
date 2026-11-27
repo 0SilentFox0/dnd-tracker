@@ -107,7 +107,6 @@ export function QuestDetails({
                 {!actions.readOnly && (
                     <Button
                         variant="outline"
-                        
                         disabled={actions.pending}
                         onClick={actions.track}
                     >
@@ -115,11 +114,7 @@ export function QuestDetails({
                     </Button>
                 )}
                 {isDM && (
-                    <Button
-                        variant="outline"
-                        
-                        onClick={actions.edit}
-                    >
+                    <Button variant="outline" onClick={actions.edit}>
                         {t('edit')}
                     </Button>
                 )}

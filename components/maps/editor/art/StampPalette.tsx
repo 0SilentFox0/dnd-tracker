@@ -72,7 +72,9 @@ export function StampPalette({
                             aria-label={name}
                             title={name}
                             className="h-auto min-w-0 flex-col gap-1 px-1 py-1.5 text-center whitespace-normal"
-                            variant={selected === def.id ? 'default' : 'outline'}
+                            variant={
+                                selected === def.id ? 'default' : 'outline'
+                            }
                             onClick={() => onSelect(def.id)}
                         >
                             <span className="flex h-12 w-full items-center justify-center overflow-hidden rounded-sm bg-black/30 p-1">

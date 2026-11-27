@@ -35,13 +35,9 @@ export function FeatCard({
                     {t('card.level', { level: feat.prerequisite.level })}
                 </HudPill>
             )}
-            {feat.repeatable && (
-                <HudPill>{t('card.repeatable')}</HudPill>
-            )}
+            {feat.repeatable && <HudPill>{t('card.repeatable')}</HudPill>}
             {choices > 0 && (
-                <HudPill>
-                    {t('card.choices', { count: choices })}
-                </HudPill>
+                <HudPill>{t('card.choices', { count: choices })}</HudPill>
             )}
         </DmEntityCard>
     );

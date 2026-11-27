@@ -68,7 +68,9 @@ describe('read-only rules demo', () => {
         expect(container.querySelector('pre')).toBeNull();
         expect(container.querySelector('fieldset[disabled]')).not.toBeNull();
         expect(screen.getByText('rules.page.demoReadOnly')).toBeTruthy();
-        expect(screen.queryByRole('button', { name: 'common.actions.save' })).toBeNull();
+        expect(
+            screen.queryByRole('button', { name: 'common.actions.save' })
+        ).toBeNull();
     });
 });
 

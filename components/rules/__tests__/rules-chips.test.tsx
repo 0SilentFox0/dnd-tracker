@@ -24,7 +24,9 @@ describe('rules chips', () => {
         expect(screen.getByText('Module 3')).toBeTruthy();
         expect(screen.queryByText('Module 4')).toBeNull();
 
-        fireEvent.click(screen.getByRole('button', { name: /rules\.page\.more/ }));
+        fireEvent.click(
+            screen.getByRole('button', { name: /rules\.page\.more/ })
+        );
 
         expect(screen.getByText('Module 5')).toBeTruthy();
     });
@@ -49,7 +51,9 @@ describe('rules chips', () => {
         render(<RulesSide changed={keys} reset={vi.fn()} />);
 
         expect(screen.queryByText('label:k7')).toBeNull();
-        expect(screen.getByRole('button', { name: /rules\.page\.more/ })).toBeTruthy();
+        expect(
+            screen.getByRole('button', { name: /rules\.page\.more/ })
+        ).toBeTruthy();
     });
 
     it('save disabled without changes', () => {

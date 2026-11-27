@@ -33,7 +33,8 @@ function UpdateMapButton({
     const t = useTranslations('battle.map.update');
 
     return (
-        <Button size="sm"
+        <Button
+            size="sm"
             variant="outline"
             disabled={!tool.available || tool.pending}
             title={tool.available ? undefined : t('upToDate')}
@@ -307,9 +308,7 @@ function BattleMapPanelContent({
                 phone={phone}
             />
             {noHost ? tools : inRow && tools && createPortal(tools, slot)}
-            {phone
-                ? inRow && createPortal(fogControls, slot)
-                : fogControls}
+            {phone ? inRow && createPortal(fogControls, slot) : fogControls}
         </div>
     );
 }

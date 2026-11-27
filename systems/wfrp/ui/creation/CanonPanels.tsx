@@ -40,7 +40,6 @@ function Stepper({
                 type="button"
                 size="icon"
                 variant="outline"
-                
                 aria-label={`${t('dec')}: ${label}`}
                 disabled={value <= min}
                 onClick={() => onChange(value - 1)}
@@ -52,7 +51,6 @@ function Stepper({
                 type="button"
                 size="icon"
                 variant="outline"
-                
                 aria-label={`${t('inc')}: ${label}`}
                 disabled={value >= max}
                 onClick={() => onChange(value + 1)}

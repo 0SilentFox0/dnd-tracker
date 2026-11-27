@@ -4,7 +4,9 @@ import { cn } from '@/lib/utils';
 
 export type LoadingVariant = 'rows' | 'cards' | 'list' | 'detail' | 'form';
 
-const bar = (cls: string) => <div className={cn('ds-skeleton rounded-lg', cls)} />;
+const bar = (cls: string) => (
+    <div className={cn('ds-skeleton rounded-lg', cls)} />
+);
 
 function Body({ variant, count }: { variant: LoadingVariant; count: number }) {
     const items = Array.from({ length: count }, (_, i) => i);

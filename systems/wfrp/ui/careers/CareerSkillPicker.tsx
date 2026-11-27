@@ -80,7 +80,6 @@ export function CareerSkillPicker({
             <Button
                 type="button"
                 variant="outline"
-                
                 disabled={!def || !specOk}
                 onClick={() => {
                     if (!def) return;
