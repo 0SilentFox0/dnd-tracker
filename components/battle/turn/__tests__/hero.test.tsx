@@ -24,10 +24,10 @@ describe('TurnCountdown', () => {
             />
         );
 
-        expect(screen.getByText('5')).toBeTruthy();
+        expect(screen.getByText('5 с')).toBeTruthy();
 
         act(() => vi.advanceTimersByTime(2_000));
-        expect(screen.getByText('3')).toBeTruthy();
+        expect(screen.getByText('3 с')).toBeTruthy();
 
         fireEvent.click(screen.getByRole('button', { name: 'Залишитись' }));
         expect(onStay).toHaveBeenCalled();

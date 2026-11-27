@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { useAttackWizard } from './useAttackWizard';
 import { useBattleScene } from './useBattleScene';
@@ -122,11 +122,14 @@ export function useQuickAttack(
         attackKindOf(chosen.type) === AttackType.RANGED &&
         lineOfFire(map, order, attacker, target).blocked;
 
-    const begin = (targetId?: string, attackId?: string) => {
-        setSel({ targetId: targetId ?? null, attackId });
+    const begin = useCallback(
+        (targetId?: string, attackId?: string) => {
+            setSel({ targetId: targetId ?? null, attackId });
 
-        if (targetId) select(targetId);
-    };
+            if (targetId) select(targetId);
+        },
+        [select]
+    );
 
     const sending = state.quick && state.step === 'submitting';
 

@@ -114,9 +114,13 @@ describe('deriveMapScene: invalid move feedback', () => {
     });
 
     it('a cell held by someone else rejects as occupied', () => {
-        const s = deriveMapScene(input());
+        const buddy = at('b', { x: 4, y: 0 }, ParticipantSide.ALLY);
 
-        expect(s.cellClick({ x: 5, y: 0 })).toEqual({
+        const s = deriveMapScene(
+            input({ participants: [hero, near, far, reserved, buddy] })
+        );
+
+        expect(s.cellClick({ x: 4, y: 0 })).toEqual({
             kind: 'reject',
             reason: textRef(REJECT.mapOccupied),
         });
@@ -340,7 +344,10 @@ describe('deriveMapScene', () => {
             })
         );
 
-        expect(s.cellClick({ x: 9, y: 4 })).toEqual({ kind: 'none' });
+        expect(s.cellClick({ x: 9, y: 4 })).toEqual({
+            kind: 'reject',
+            reason: textRef(REJECT.moveOutOfReach),
+        });
         expect(s.tokenClick('e1')).toEqual({
             kind: 'attack',
             targetId: 'e1',

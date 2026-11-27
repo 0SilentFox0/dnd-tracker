@@ -66,12 +66,10 @@ function setup() {
 }
 
 describe('QuickAttackCard', () => {
-    it('показує цілі, а після вибору - чипи зброї та кнопки', async () => {
+    it('єдина ціль обирається сама - чипи зброї та кнопки', async () => {
         const { wrapper, me } = setup();
 
         render(<Harness attacker={me} />, { wrapper });
-
-        fireEvent.click(await screen.findByRole('button', { name: /Гоблін/ }));
 
         expect(await screen.findByRole('button', { name: 'Лук' })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Майстер атаки/ })).toBeTruthy();

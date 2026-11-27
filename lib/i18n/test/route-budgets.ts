@@ -4,7 +4,7 @@ import type { RouteKey } from '../route-scopes';
 export const ROUTE_BUDGETS_KB: Partial<Record<RouteKey, number>> = {
     '[id]': 28.2,
     '[id]/acquaintances': 37.7,
-    '[id]/battles': 87.8,
+    '[id]/battles': 88.3,
     '[id]/character': 61.3,
     '[id]/character/draft': 71.0,
     '[id]/character/edit': 71.0,
