@@ -41,6 +41,7 @@ export function useMapBackground({
                     backgroundCols: _cols,
                     backgroundRows: _rows,
                     gridOffset: _offset,
+                    plainGrid: _plain,
                     ...m
                 }) => ({ ...m, background })
             );
@@ -49,7 +50,8 @@ export function useMapBackground({
     );
 
     const replaceBackground = useCallback(
-        (background: string | null) => setMap((m) => ({ ...m, background })),
+        (background: string | null) =>
+            setMap(({ plainGrid: _plain, ...m }) => ({ ...m, background })),
         [setMap]
     );
 

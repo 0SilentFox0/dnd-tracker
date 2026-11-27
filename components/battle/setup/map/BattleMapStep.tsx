@@ -131,7 +131,8 @@ function OwnMap({
     const quickStart = (action: MapQuickStartAction) => {
         setStarted(true);
 
-        if (action !== 'grid') select('background');
+        if (action === 'grid') editor.actions.startPlainGrid();
+        else select('background');
     };
 
     return (

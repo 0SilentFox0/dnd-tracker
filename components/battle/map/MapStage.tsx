@@ -23,7 +23,12 @@ import { useMapStageTokens } from './tokens/useMapStageTokens';
 import type { MapStageProps } from './map-stage-types';
 
 import { modeUiOf } from '@/components/battle/modes';
-import { gridMetrics, gridOf, unitOf } from '@/lib/utils/battle/grid';
+import {
+    gridMetrics,
+    gridOf,
+    showsBackground,
+    unitOf,
+} from '@/lib/utils/battle/grid';
 
 const ArtStampsLayer = dynamic(
     () => import('./art/ArtStampsLayer').then((m) => m.ArtStampsLayer),
@@ -156,7 +161,7 @@ function MapStageImpl({
             }}
         >
             {art && <ArtCanvas map={map} art={art} cellPx={cellPx} />}
-            {!art && (map.background || showDefaultBackground) && (
+            {!art && showsBackground(map, showDefaultBackground) && (
                 <MapBackground
                     map={map}
                     cellPx={cellPx}

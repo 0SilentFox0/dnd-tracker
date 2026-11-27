@@ -18,6 +18,7 @@ import {
     type GridWindow,
     mapSize,
     regionFillPath,
+    showsBackground,
     UNIT,
 } from '@/lib/utils/battle/grid';
 import { toMediaUrl } from '@/lib/utils/common/image-url';
@@ -158,14 +159,16 @@ export function MapMinimap({
                                     : undefined
                             }
                         >
-                            <image
-                                href={src}
-                                x={background.left - win.x}
-                                y={background.top - win.y}
-                                width={background.width}
-                                height={background.height}
-                                preserveAspectRatio="none"
-                            />
+                            {showsBackground(map, true) && (
+                                <image
+                                    href={src}
+                                    x={background.left - win.x}
+                                    y={background.top - win.y}
+                                    width={background.width}
+                                    height={background.height}
+                                    preserveAspectRatio="none"
+                                />
+                            )}
                             <rect
                                 x="0"
                                 y="0"
