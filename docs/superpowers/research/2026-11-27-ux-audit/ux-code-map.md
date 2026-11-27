@@ -1,0 +1,55 @@
+# UX code map (items 1-27)
+
+1. Acquaintances: no public/DM split. `Acquaintance.description` single column (prisma/schema/core.prisma:1432); character kind uses hero `background` (lib/utils/acquaintances/visibility.ts:114). Players see only rows revealed by played sections (lib/server/acquaintances/store.ts:89, lib/utils/scenario/reveal). Not a leak path; spoiler only if DM wrote it into description (lib/server/acquaintances/service.ts:70). Fix if wanted: separate publicDescription / DM-only note.
+
+2. /info (app/campaigns/[id]/info/page.tsx) renders the campaign reference catalog (lib/cache/info-reference.ts: all skills, spells, artifacts, classes), not heroes' personal skills. No other hero data read; gate is requireCampaignMember. Not a leak; user likely saw the skill library.
+
+3. Temp HP supported: battle lib/utils/battle/attack/process/damage.ts, lib/server/battles/participant/from-character.ts, lib/utils/characters/hp.ts (applyHpChange 'temp'); sheet: TempHpDialog in components/character-profile/sheet/SheetVitals.tsx:236; dashboard lib/server/campaigns/dashboard.ts:243 + HeroHp.tsx.
+
+4. Dashboard tiles: DM_DASHBOARD_SECTIONS lib/constants/campaign-dashboard.ts:44; gating DM_SECTIONS/dmSectionsFor lib/constants/campaigns.ts:85-185 (skills, skill-trees hiddenWithClasses + owned by skilltrees module; careers owned by wfrp). Context built app/campaigns/[id]/page.tsx:96 (campaignSectionContext, lib/utils/campaigns/game-navigation.ts:14). 404 from dmSectionLayout (lib/server/campaigns/dm-section-layout.ts) and dm/system/[section]/[[...rest]]/page.tsx. Server logic looks consistent; could not find why a 5e tile would show. Check dmSectionsOf for the composition and whether DashboardGroups.tsx:31 falls back to DEFAULT_DASHBOARD_CONTEXT. Unconfirmed.
+
+5. Silent redirects, all lib/server/campaigns/access.ts: requireCampaignDM (l.77) redirects non-DM to /campaigns/{id}; used by dm/ai, dm/compendium, dm/assistant, dm/print/spells, dm/print/skills, main-skills etc. requireMapLibrary (l.94) redirects when mapLibraryEnabled off (dm/maps, dm/maps/[mapId]). requireCampaignDMOrDemo (l.104) lets demo through; ai/compendium/assistant/print use plain requireCampaignDM so demo/read-only users are bounced. app/campaigns/[id]/dm/page.tsx always redirects to /campaigns/{id}. /dm/main-skills -> dmSectionLayout('skill-trees') notFound() without module. dm/system/... page redirects demo on non-list views. Fix: toast/notice instead of bare redirect, or DMOrDemo on read-only pages.
+
+6. Spell list description: components/spells/list/SpellCard.tsx:177 prints {spell.description} plain in line-clamp-2 p. No react-markdown dep. Shared renderer: markdownToDoc (lib/utils/scenario/markdown) + components/scenario/page/ScenarioRichText.tsx (also AiMessageList). Duplicated metadata line probably in the description text itself (importer) or SpellComponentsLine on next line; unverified. Fix: strip/render Markdown in SpellCard, check importer.
+
+7. /dm/graph filter: defaultFilters() lib/utils/scenario/graph/model.ts:16 (showAll false, showLeaves false, onlyMissing false); useState in lib/hooks/scenario/useScenarioGraph.ts:39; buildGraphModel caps with GRAPH_ENTITY_CAP and hides leaves; toggles components/scenario/graph/GraphToolbar.tsx:138-156. Fix: default showLeaves/showAll true on small graphs.
+
+8. Journal: app/campaigns/[id]/journal/page.tsx; DM create button components/quests/Journal.tsx:71 (isDM, setEditing('new'), t('new')); ?create=1 opens it (l.51); editor components/quests/QuestEditor.tsx. Only a header button; empty-state CTA at Journal.tsx:101-103 for DM.
+
+9. Battle counters: lib/hooks/battles/useBattleListSections.ts, components/battle/list/BattleList.tsx. Counts by status==='completed' (l.24); code correct. An ongoing battle under "Завершені" means DB status is completed while still playing (reserve/awaiting-DM victory?) - data/transition issue in lib/server/battles. BattleStatus = prepared|active|completed (lib/constants/battle.ts:53).
+
+10. .ico in /dm/show: SLIDE_FILE_ACCEPT lib/constants/show.ts:42 (webp,jpeg,png,gif) only a hint; lib/hooks/show/useSlideUpload.ts resizes via canvas (ico decodes) to webp/jpeg; SLIDE_UPLOAD_TYPES lib/schemas/show.ts:95. 400 errors.imageFormats from lib/supabase/image-storage.ts:115/126/172, hit when deck save has external imageUrl: lib/server/show/deck-store.ts:120 resolveImageForPersistence sniffs type. Fix: validate type client-side before preview, or convert via canvas for URL images.
+
+11. Class tooltip raw skill ids: components/characters/basic/CharacterClassesField.tsx:173 `from: hint.from.join(', ')`. Map like components/choices/picker/useBackgroundFacts.ts:25 tg(`dndSkills.${s}`).
+
+12. HP/AC. List HP: components/characters/list/DmCharacterCard.tsx:71 characterBaseHp (lib/utils/characters/hero-hp.ts -> systems/d20/rules/progression/max-hp.ts classHp) = class HP + Con only. Battle: from-character.ts:725 same function, then abilities with stat 'maxHp' baked in lib/utils/abilities/build/bake.ts:36-47. Dwarven Toughness (+1/level) likely 14 vs 15 (probable, unverified). Fix: show baked value in list or same pipeline. AC: classArmorBase lib/utils/characters/classes/armor-class.ts:20; no armor -> 10+dex (l.30); grep "unarmored" in lib/systems empty => Barbarian/Monk Unarmored Defense not implemented; add class branch before l.28 or armor ability modifier. Battle copy: character.armorClass (from-character.ts:645), armorTotal systems/d20/rules/sheet/lines.ts:32.
+
+13. "Шлях" tab: exists only when withPath (skill-tree modules), components/character-profile/sheet/view-tabs.tsx; 5e class mode shows "Риси". Label key messages/uk/characterProfile.json:14. Stale texts: messages/uk/help.json:247 (i1, player-quickstart), messages/uk/onboarding.json:152, en: messages/en/help.json:247, messages/en/onboarding.json:152; whatsNew.json:171/175 historical. Real tabs in VIEW_TABS: stats, combat, magic, items, skills, story, advancement, downtime, log.
+
+14. Sheet header bio: components/character-profile/sheet/SheetIdentityPanel.tsx:26-31 excerpt() strips #*_> and collapses whitespace (.replace(/\s+/g,' ')), gluing headings/paragraphs. Fix: keep paragraph breaks or markdownToDoc and take first block.
+
+15. ?tab=inventory: asTab view-tabs.tsx:30 maps only alias stash->items; 'inventory' not in VIEW_TABS -> falls to stats. Page passes tab app/campaigns/[id]/character/page.tsx:25,84; useSheetTab.ts writes ?tab=<id>. Fix: add inventory->items.
+
+16. Red HP bar at full: components/campaigns/dashboard/HeroHp.tsx always fills with var(--hud-hp)/var(--hud-hp-2) (red), no tone logic. Fix: color by pct; lib/utils/battle/view/health.ts + components/battle/hud/HealthBar.tsx have battle tone logic.
+
+17. Onboarding: steps lib/onboarding/checklists.ts (DM_STEPS); derived lib/onboarding/progress.ts from lib/server/onboarding/facts.ts SQL counts. 2/6: races/units count all rows incl. template-seeded (facts.ts:33-34); fix: count only non-seeded. Placement last: app/campaigns/[id]/page.tsx:363-371; move above DashboardGroups. Step 'players' href #invite (checklists.ts:25) = invite pill in CampaignSummaryPanel.tsx:47 (DM only); copy messages/uk/onboarding.json:12-14 (+en) says «блоку "Налаштування кампанії" нижче» which doesn't exist; fix text.
+
+18. Spell "verified": components/spells/form/forms/SpellFormBody.tsx:103-113 checked={formData.executionMode !== 'manual'}; new spell executionMode undefined (lib/utils/spells/model/form.ts:92) => checked. Fix: default 'manual' for new spells or invert. Label messages/uk/spellEditor.json:21.
+
+19. "Порожня сітка": components/battle/setup/map/BattleMapStep.tsx:131-135 quickStart('grid') only setStarted(true), hides MapQuickStart (l.172, isFreshMap). Map = DEFAULT_BATTLE_MAP (lib/constants/battle.ts:163), empty. No random dungeon generator found in this path. Suspect map-art layer (components/battle/map/art/ArtStampsLayer.tsx, lib/constants/map-art/stamps*) or maze mode default; unverified.
+
+20. Invite: lib/utils/campaigns/invite-code.ts:4 ALPHABET 0-9A-Z, length 6, randomInt; called lib/server/campaigns/create-campaign.ts:95. Fix: drop 0 O 1 I, case-insensitive join. UI: components/campaigns/settings/InviteCodeDisplay.tsx (copies code only, l.24), components/campaigns/join/JoinCampaignDialog.tsx, components/campaigns/members/CampaignMembersList.tsx. No invite link route (no app/join); need /join/[code] + copy link.
+
+21. Battle map: click flow lib/hooks/battle/useMapCellActions.ts -> scene.cellClick -> cellClickOf lib/utils/battle/grid/map-scene.ts:630; move only if canAct && isMoveMark(mark) (~l.666); otherwise `{kind:'none'}` = silent invalid move; add hint/toast or {kind:'invalid'}. Active-turn token: components/battle/map/tokens/MapToken.tsx `current?: boolean` (l.23,36,121). Tooltip: components/ui/tooltip.tsx exports Tooltip, TooltipTrigger, TooltipContent, TooltipProvider; HUD icon buttons mostly use title/aria-label.
+
+22. Starting equipment: hero form tabs components/characters/character-form-tabs.ts (basic, combat, skills, choices); wizard components/choices/picker/ChoiceWizard.tsx, editor components/choices/editor/ChoicesEditor.tsx. No starting-equipment step; only import adapter lib/server/compendium-import/adapters/characters.ts:60. Optional "стартова зброя" fits as a choice group / section in choices tab or ChoiceWizard.
+
+23. Sheet dice rolls exist: components/character-profile/sheet/{useSheetRoll.ts,SheetRollProvider.tsx}, components/character-profile/rest/SheetRollDialog.tsx (useSheetRoll from lib/hooks/characters). d20: systems/d20/rules/sheet-roll.ts, systems/d20/ui/RollDialogBody.tsx, systems/d20/ui/sheet/StatsCards.tsx; wfrp: systems/wfrp/ui/{CharacteristicsGrid,SkillsList}.tsx. canRoll = !!sheet.rest && (owner||DM) (useSheetRoll.ts:19). Reusable dice UI: components/dice/{DiceRoller,DiceStage,engine,scene}; lib/utils/common/dice cryptoRandom. Not checked which of ability/save/skill/attack/spell have buttons in StatsCards.
+
+24. Typo: messages/uk/help.json:406 (dm-rule-systems.title "Рульові системи"); also messages/uk/whatsNew.json:159. Better: «Системи правил».
+
+25. /dm/rules renders components/rules/RulesForm.tsx (+RulesBook, RulesSection, RulesSide), no components/hud/page usage. /info uses HudPage/HudPageHeader in page.tsx but body components/campaigns/info/InfoReferenceClient.tsx has no Hud* usage. Game-style kit: components/hud/page/ (HudPage, HudPageHeader, HudPanel, HudCard, HudTile, HudPill, HudChipTabs, HudSectionTitle, HudStatChip, HudSheetHeading), components/hud/shell (GameShell, HudShellHeader), components/hud (HudButton, HudIconButton, HudSegmented, HudToggleChip, HudToolbar, HudFormMenu).
+
+26. app/not-found.tsx:20 `<Link href="/campaigns">{t('notFound.home')}</Link>` - «На головну» goes to /campaigns, not /.
+
+27. Header «До бою»/«Показ»: components/campaigns/JoinBattleButton.tsx, WatchShowButton.tsx, used from components/layout/HeaderActions.tsx; both via components/campaigns/HeaderPillLink.tsx which shows label only at sm+ (hidden sm:inline, l.23), sr-only below -> icon-only on mobile. Fix: Tooltip or visible label below sm.
