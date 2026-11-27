@@ -118,7 +118,7 @@
 
 - `--r-sm/md/lg/pill` у `:root` (`globals.css`) = `var(--radius-sm/lg/xl)`, `9999px`; для CSS-файлів.
 - Codemod: `rounded-md` → `rounded-lg`, `rounded-2xl`/`3xl`/`4xl` → `rounded-xl`, `rounded-xs` і голий `rounded` → `rounded-sm`, `rounded-[4px]` → `rounded-sm`, `rounded-[var(--r)]` → `rounded-xl`; `--r: 10px` видаляється. Значення `--radius-md/2xl/3xl/4xl/xs` у темі лишаються (сумісність сторонніх shadcn-класів), але утиліти рахує ratchet.
-- Дозволені довільні: `rounded-[inherit]`, `rounded-[var(--r-*)]`.
+- Дозволені довільні: `rounded-[inherit]`, `rounded-[var(--r-SIZE)]`.
 
 ### 3.3 Бейджі (`HudPill` — єдиний)
 - Геометрія: `h-6` (24), `rounded-sm` (4), `px-2`, `text-xs` Alegreya 600, `leading-none`, gap 4.
@@ -206,8 +206,8 @@ aside: { content, width?: 'sm' | 'md', title, mobile: 'stack' | { open, onClose 
 
 | Лічильник | Що ловить (TS/TSX) |
 |---|---|
-| `font-arbitrary` | `text-[Npx|Nrem|Nem]`, крім 12/14/16/18/22/28/40px; `text-[length:var(...)]` і `text-[clamp(...)]` у `components/landing/**` дозволені |
-| `radius-arbitrary` | `rounded(-[trblse]{1,2})?-\[...\]`, крім `[inherit]` і `[var(--r-*)]`; а також `rounded(-…)?-(md|xs|2xl|3xl|4xl)` і голий `rounded` |
+| `font-arbitrary` | `text-[Npx|Nrem|Nem]`, крім 12/14/16/18/22/28/40px; `text-[length:var(--X)]` і `text-[clamp(...)]` у `components/landing/**` дозволені |
+| `radius-arbitrary` | `rounded(-[trblse]{1,2})?-\[...\]`, крім `[inherit]` і `[var(--r-SIZE)]`; а також `rounded(-…)?-(md|xs|2xl|3xl|4xl)` і голий `rounded` |
 | `button-height` | у відкриваючому тегу `<Button`/`<HudIconButton` — будь-який `(min-)?h-*`/`size-*` у `className` (розмір лише з `size`); у `<HudButton` — `(min-)?h-*`/`size-*` зі значенням поза `8|10|12` або довільне `[...]` |
 | `disabled-opacity` | `disabled:opacity-N`, N ≠ 50 |
 | `css-small-font` | у CSS `font-size:` < 12px або < .75rem |
