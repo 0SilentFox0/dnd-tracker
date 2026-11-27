@@ -47,7 +47,9 @@
   },
   "notFound": {
     "title": "Page not found",
-    "home": "Home"
+    "description": "The page may have moved, or the link is wrong.",
+    "back": "Go back",
+    "campaigns": "To campaigns"
   },
   "loading": {
     "battle": "Loading battle…",

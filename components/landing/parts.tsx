@@ -77,7 +77,7 @@ export function SectionTitle({
             <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                 {eyebrow}
             </p>
-            <h2 id={id} className="hud-sc ld-h2 ld-ink text-hud-ink">
+            <h2 id={id} className="hud-sc ld-h2 ld-reveal text-hud-ink">
                 {title}
             </h2>
             {text && <p className="ld-lead text-hud-bone">{text}</p>}

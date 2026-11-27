@@ -26,7 +26,7 @@ export function AiSection({ t }: { t: Translator }) {
                     <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                         {t('ai.eyebrow')}
                     </p>
-                    <h2 className="hud-sc ld-ink text-3xl text-hud-ink sm:text-4xl">
+                    <h2 className="hud-sc ld-reveal text-3xl text-hud-ink sm:text-4xl">
                         {t('ai.title')}
                     </h2>
                     <p className="text-lg text-hud-bone">{t('ai.text')}</p>

@@ -32,7 +32,7 @@ export function Problem({ t }: { t: Translator }) {
                     </p>
                     <h2
                         id="pain-title"
-                        className="hud-sc ld-ink text-3xl text-hud-ink sm:text-4xl"
+                        className="hud-sc ld-reveal text-3xl text-hud-ink sm:text-4xl"
                     >
                         {t('problem.title')}
                     </h2>

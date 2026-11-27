@@ -21,7 +21,7 @@ export function FinalCta({ t }: { t: Translator }) {
             <LandingFog variant="final" />
             <div className="ld-cta-light mx-auto max-w-2xl space-y-4 text-center">
                 <TrailMark className="mx-auto" />
-                <h2 className="hud-sc ld-ink text-3xl text-hud-ink sm:text-4xl">
+                <h2 className="hud-sc ld-reveal text-3xl text-hud-ink sm:text-4xl">
                     {t('cta.title')}
                 </h2>
                 <p className="text-lg text-hud-bone">{t('cta.text')}</p>

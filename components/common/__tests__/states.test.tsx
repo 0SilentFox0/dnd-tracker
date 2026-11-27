@@ -31,6 +31,22 @@ const q = <T,>(
 describe('стани сторінки', () => {
     afterEach(cleanup);
 
+    it('EmptyState renders illustration slot', () => {
+        const { container } = render(
+            <EmptyState
+                icon={Swords}
+                illustration={<svg data-testid="ill" />}
+                title="T"
+            />
+        );
+
+        expect(screen.getByTestId('ill')).toBeTruthy();
+        expect(
+            container.querySelector('[data-slot="empty-state-illustration"]')
+        ).toBeTruthy();
+        expect(container.querySelectorAll('svg').length).toBe(1);
+    });
+
     it('EmptyState: заголовок, опис, дія', () => {
         render(
             <EmptyState
@@ -49,7 +65,7 @@ describe('стани сторінки', () => {
 
     it('LoadingState: N рядків-скелетонів і aria-busy', () => {
         const { container } = render(
-            <LoadingState rows={4} label="Завантаження скілів…" />
+            <LoadingState count={4} label="Завантаження скілів…" />
         );
 
         expect(

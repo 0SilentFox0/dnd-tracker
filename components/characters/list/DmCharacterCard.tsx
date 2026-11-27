@@ -66,6 +66,11 @@ export function DmCharacterCard({
             ? resolveClassEntries(character.classes, classMode.byId)
             : null;
 
+    const topClass = entries?.reduce<(typeof entries)[number] | null>(
+        (best, e) => (e.class && (!best || e.level > best.level) ? e : best),
+        null
+    )?.class;
+
     const ooc = rules?.outOfCombat;
 
     const maxHp = rules
@@ -103,6 +108,8 @@ export function DmCharacterCard({
                 src={character.avatar}
                 name={character.name}
                 className="max-h-72"
+                variant="card"
+                classVisual={topClass}
             />
             <div className="flex items-start gap-3">
                 <div className="min-w-0 flex-1 space-y-1">

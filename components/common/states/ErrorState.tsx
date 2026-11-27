@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -7,10 +8,12 @@ import { errorMessage } from '@/lib/utils/common/error-message';
 export function ErrorState({
     error,
     onRetry,
+    illustration,
     className,
 }: {
     error: unknown;
     onRetry?: () => void;
+    illustration?: ReactNode;
     className?: string;
 }) {
     const t = useTranslations('common.states');
@@ -24,6 +27,7 @@ export function ErrorState({
                 className
             )}
         >
+            {illustration}
             <p className="text-sm text-destructive">
                 {errorMessage(error, t('error'))}
             </p>
