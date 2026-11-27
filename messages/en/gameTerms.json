@@ -426,6 +426,10 @@
       "name": "Neutral Evil",
       "short": "NE"
     },
+    "unaligned": {
+      "name": "Unaligned",
+      "short": "Unal."
+    },
     "chaoticEvil": {
       "name": "Chaotic Evil",
       "short": "CE"

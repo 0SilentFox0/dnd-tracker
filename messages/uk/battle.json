@@ -57,7 +57,7 @@
     "triggers": "тригери",
     "hideDetails": "Сховати деталі",
     "details": "Деталі",
-    "damage": "Урон",
+    "damage": "Шкода",
     "damageBreakdown": "Розклад шкоди",
     "expandAll": "Розгорнути всі",
     "collapseAll": "Згорнути всі",
@@ -251,7 +251,7 @@
   },
   "resultScreen": {
     "stats": {
-      "damageDealt": "Урон",
+      "damageDealt": "Шкода",
       "healingDone": "Лікування",
       "kills": "Вбивства",
       "damageTaken": "Отримано"

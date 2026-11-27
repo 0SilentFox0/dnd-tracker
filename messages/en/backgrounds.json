@@ -9,7 +9,8 @@
     "classesOnly": "Backgrounds are available in 5e classes mode."
   },
   "card": {
-    "choices": "{count, plural, one {# choice} other {# choices}}"
+    "choice": "{label} ×{count}",
+    "choicesMore": "+{count}"
   },
   "create": {
     "title": "New background",

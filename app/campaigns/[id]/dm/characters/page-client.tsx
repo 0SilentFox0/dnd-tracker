@@ -21,7 +21,11 @@ import {
     CharacterType,
     type CharacterTypeValue,
 } from '@/lib/constants/characters';
-import { useDmCharactersPage } from '@/lib/hooks/characters';
+import {
+    type CharactersListView,
+    useCharactersListView,
+    useDmCharactersPage,
+} from '@/lib/hooks/characters';
 
 const TABS: {
     id: 'all' | 'players' | 'npcHeroes';
@@ -31,6 +35,8 @@ const TABS: {
     { id: 'players', type: CharacterType.PLAYER },
     { id: 'npcHeroes', type: CharacterType.NPC_HERO },
 ];
+
+const VIEWS: CharactersListView[] = ['grid', 'list'];
 
 interface DMCharactersClientProps {
     campaignId: string;
@@ -48,6 +54,8 @@ export function DMCharactersClient({
     const t = useTranslations('characters.list');
 
     const page = useDmCharactersPage(campaignId, type);
+
+    const [view, setView] = useCharactersListView();
 
     const characterCount = page.query.data?.length ?? 0;
 
@@ -119,6 +127,15 @@ export function DMCharactersClient({
                         active: tab.type === type,
                     }))}
                 />
+                <HudChipTabs
+                    ariaLabel={t('viewToggle')}
+                    items={VIEWS.map((id) => ({
+                        key: id,
+                        label: t(`views.${id}`),
+                        active: id === view,
+                        onSelect: () => setView(id),
+                    }))}
+                />
             </HudPageHeader>
 
             {canEdit && <PendingDraftsPanel campaignId={campaignId} />}
@@ -157,7 +174,13 @@ export function DMCharactersClient({
                                 onClear={() => page.search.query.set('')}
                             />
                         ) : (
-                            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                            <div
+                                className={
+                                    view === 'list'
+                                        ? 'grid gap-2'
+                                        : 'grid gap-3 md:grid-cols-2 lg:grid-cols-3'
+                                }
+                            >
                                 {page.search.items.map((character) => (
                                     <DmCharacterCard
                                         key={character.id}
@@ -182,6 +205,7 @@ export function DMCharactersClient({
                                                 ),
                                         }}
                                         canEdit={canEdit}
+                                        compact={view === 'list'}
                                     />
                                 ))}
                             </div>

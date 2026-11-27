@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { DmEntityCard } from '@/components/common/entity/DmEntityCard';
 import { Badge } from '@/components/ui/badge';
+import { summarizeChoices } from '@/lib/utils/choices/summary';
 import type { BackgroundData } from '@/types/backgrounds';
 
 export function BackgroundCard({
@@ -19,7 +20,7 @@ export function BackgroundCard({
 }) {
     const t = useTranslations('backgrounds');
 
-    const choices = background.choices.length;
+    const choices = summarizeChoices(background.choices);
 
     return (
         <DmEntityCard
@@ -29,9 +30,19 @@ export function BackgroundCard({
             onDelete={() => onDelete?.(background.id)}
             canEdit={canEdit}
         >
-            {choices > 0 && (
+            {choices.items.map((choice) => (
+                <Badge key={choice.id} variant="outline">
+                    {choice.count > 1
+                        ? t('card.choice', {
+                              label: choice.label,
+                              count: choice.count,
+                          })
+                        : choice.label}
+                </Badge>
+            ))}
+            {choices.more > 0 && (
                 <Badge variant="outline">
-                    {t('card.choices', { count: choices })}
+                    {t('card.choicesMore', { count: choices.more })}
                 </Badge>
             )}
         </DmEntityCard>

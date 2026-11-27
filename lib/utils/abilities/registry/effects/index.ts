@@ -83,6 +83,7 @@ import {
     type Segment,
     segmentsLine,
 } from '@/lib/utils/abilities/segments';
+import { STATBLOCK_NOTE } from '@/lib/utils/abilities/statblock-note';
 import { pickOne } from '@/lib/utils/common/dice';
 import type { SpellEffect } from '@/lib/utils/spells/model/schema';
 
@@ -143,12 +144,14 @@ const BASE_EFFECT_REGISTRY: {
         static: true,
         fields: [{ name: 'text', input: 'text' }],
         describe: (e) => [
-            seg(
-                /\bDM\b/.test(e.text)
-                    ? 'summary.effects.noteDm'
-                    : 'summary.effects.note',
-                { text: e.text }
-            ),
+            e.text === STATBLOCK_NOTE
+                ? seg('summary.effects.noteStatblock')
+                : seg(
+                      /\bDM\b/.test(e.text)
+                          ? 'summary.effects.noteDm'
+                          : 'summary.effects.note',
+                      { text: e.text }
+                  ),
         ],
         apply: (i) => ({
             participants: i.participants,

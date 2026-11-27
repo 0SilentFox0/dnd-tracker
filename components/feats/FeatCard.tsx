@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { DmEntityCard } from '@/components/common/entity/DmEntityCard';
 import { Badge } from '@/components/ui/badge';
+import { summarizeChoices } from '@/lib/utils/choices/summary';
 import type { FeatData } from '@/types/choices';
 
 export function FeatCard({
@@ -19,7 +20,7 @@ export function FeatCard({
 }) {
     const t = useTranslations('feats');
 
-    const choices = feat.choices.length;
+    const choices = summarizeChoices(feat.choices);
 
     return (
         <DmEntityCard
@@ -38,9 +39,19 @@ export function FeatCard({
             {feat.repeatable && (
                 <Badge variant="outline">{t('card.repeatable')}</Badge>
             )}
-            {choices > 0 && (
+            {choices.items.map((choice) => (
+                <Badge key={choice.id} variant="outline">
+                    {choice.count > 1
+                        ? t('card.choice', {
+                              label: choice.label,
+                              count: choice.count,
+                          })
+                        : choice.label}
+                </Badge>
+            ))}
+            {choices.more > 0 && (
                 <Badge variant="outline">
-                    {t('card.choices', { count: choices })}
+                    {t('card.choicesMore', { count: choices.more })}
                 </Badge>
             )}
         </DmEntityCard>
