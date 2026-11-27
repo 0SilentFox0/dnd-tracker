@@ -94,7 +94,7 @@ export function AbilityCard({
     );
 
     const saveClass =
-        'flex min-h-11 w-full items-center justify-center gap-2 border-t border-hud-rule text-sm text-hud-muted';
+        'flex min-h-10 w-full items-center justify-center gap-2 pointer-coarse:min-h-11 border-t border-hud-rule text-sm text-hud-muted';
 
     return (
         <div
@@ -119,6 +119,7 @@ export function AbilityCard({
                     })
                 }
                 title={t('roll')}
+                tile
                 className="motion-press grid min-h-11 justify-items-center gap-1 px-1 pt-3.5 pb-3 hover:bg-hud-raised"
             >
                 {canRoll && <span className="sr-only">{t('roll')}: </span>}
@@ -193,7 +194,7 @@ export function SkillRow({
                     })
                 }
                 title={t('roll')}
-                className="motion-press flex min-h-11 w-full items-center gap-3 px-2 text-left hover:bg-hud-raised"
+                className="motion-press flex min-h-10 w-full items-center gap-3 px-2 text-left hover:bg-hud-raised pointer-coarse:min-h-11"
             >
                 {canRoll && <span className="sr-only">{t('roll')}: </span>}
                 <Mark count={level} />

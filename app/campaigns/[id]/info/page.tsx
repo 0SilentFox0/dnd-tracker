@@ -52,7 +52,7 @@ export default async function CampaignInfoPage({
                     <Button
                         size="sm"
                         variant="outline"
-                        className="shrink-0 touch-manipulation"
+                        className="shrink-0"
                         asChild
                     >
                         <Link href={`/campaigns/${campaignId}`}>

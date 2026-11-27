@@ -184,7 +184,7 @@ export function SpellCard({
                 <GroupIcon className="size-3 shrink-0" />
                 <span className="truncate">{groupName}</span>
                 <code
-                    className="ml-auto max-w-[45%] truncate text-xs"
+                    className="ml-auto max-w-[45%] truncate text-sm"
                     title={spell.id}
                 >
                     {copied ? t('copied') : spell.id}

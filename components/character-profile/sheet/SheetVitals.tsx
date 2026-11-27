@@ -25,7 +25,7 @@ const FORM_ID = 'sheet-vitals-form';
 type Hp = { current: number; max: number; temp: number };
 
 const BTN =
-    'motion-press inline-flex min-h-11 min-w-fit flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-sm border border-hud-line bg-hud-raised px-3 text-base font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50';
+    'motion-press inline-flex min-h-10 min-w-fit flex-1 pointer-coarse:min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-sm border border-hud-line bg-hud-raised px-3 text-base font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50';
 
 const LABEL =
     'hud-title flex items-center gap-2 text-base text-hud-muted lg:text-lg';
@@ -109,7 +109,7 @@ function HpReadout({
     const ratio = (n: number) => (hp.max > 0 ? n / hp.max : 0);
 
     return (
-        <div className="relative h-[42px]">
+        <div className="relative h-10">
             <div
                 role="progressbar"
                 aria-label={summary}
@@ -143,16 +143,18 @@ function HpReadout({
                 aria-label={summary}
                 aria-expanded={open}
                 onClick={onToggle}
-                className="hud-num absolute inset-0 flex items-center gap-1.5 px-4 text-left text-white [text-shadow:0_1px_2px_rgba(0,0,0,.55)] focus-visible:ring-2 focus-visible:outline-none"
+                className="hud-num absolute inset-0 flex items-center px-3 text-left text-white focus-visible:ring-2 focus-visible:outline-none"
             >
-                <span
-                    className="motion-flash inline-block text-2xl leading-none"
-                    data-flash={flash ?? undefined}
-                >
-                    {shown}
-                </span>
-                <span className="pt-1.5 text-lg leading-none opacity-80">
-                    / {hp.max}
+                <span className="flex items-center gap-1.5 rounded-sm bg-[color-mix(in_srgb,var(--palette-art-shadow)_72%,transparent)] px-2 py-0.5">
+                    <span
+                        className="motion-flash inline-block text-2xl leading-none"
+                        data-flash={flash ?? undefined}
+                    >
+                        {shown}
+                    </span>
+                    <span className="pt-1.5 text-lg leading-none">
+                        / {hp.max}
+                    </span>
                 </span>
             </HudButton>
         </div>
