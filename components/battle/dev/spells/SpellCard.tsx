@@ -19,9 +19,7 @@ import { useText } from '@/lib/i18n/use-text';
 function FxField({ label, children }: { label: string; children: ReactNode }) {
     return (
         <div className="min-w-0">
-            <dt className="text-xs tracking-wide text-hud-muted uppercase">
-                {label}
-            </dt>
+            <dt className="hud-label">{label}</dt>
             <dd className="flex items-center gap-1.5 text-xs text-hud-bone">
                 {children}
             </dd>

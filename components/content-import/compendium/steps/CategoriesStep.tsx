@@ -86,7 +86,7 @@ export function CategoriesStep({
                         data-group={group.id}
                         className="ds-panel space-y-2 p-3"
                     >
-                        <p className="text-xs tracking-wide text-hud-muted uppercase">
+                        <p className="hud-label">
                             {t(`categoriesStep.groups.${group.id}`)}
                         </p>
                         <div className="flex flex-wrap gap-2">

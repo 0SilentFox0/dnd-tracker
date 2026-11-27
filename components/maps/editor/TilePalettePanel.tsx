@@ -23,7 +23,7 @@ const BRUSH_SIZES = ['1', '2', '3'].map((size) => ({
 
 const SECTION = 'space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3';
 
-const HEADING = 'text-xs font-semibold tracking-wide text-hud-muted uppercase';
+const HEADING = 'hud-label';
 
 export function TilePalettePanel({
     workspace,

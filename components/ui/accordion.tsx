@@ -15,10 +15,7 @@ const AccordionItem = React.forwardRef<
     <AccordionPrimitive.Item
         ref={ref}
         data-slot="accordion-item"
-        className={cn(
-            'overflow-hidden border-b border-hud-rule',
-            className
-        )}
+        className={cn('overflow-hidden border-b border-hud-rule', className)}
         {...props}
     />
 ));
@@ -42,7 +39,7 @@ const AccordionTrigger = React.forwardRef<
             {children}
             <ChevronDown
                 className={cn(
-                    'h-4 w-4 shrink-0 text-hud-faint transition-transform duration-200'
+                    'h-4 w-4 shrink-0 text-hud-faint-deco transition-transform duration-200'
                 )}
             />
         </AccordionPrimitive.Trigger>

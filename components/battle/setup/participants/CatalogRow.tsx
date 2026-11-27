@@ -161,9 +161,7 @@ export function CatalogRow({
                             ['KPI', stats.kpi],
                         ].map(([label, value]) => (
                             <span key={label} className="flex flex-col">
-                                <span className="text-xs tracking-wider text-hud-muted uppercase">
-                                    {label}
-                                </span>
+                                <span className="hud-label">{label}</span>
                                 <span className="text-xs font-medium">
                                     {value}
                                 </span>

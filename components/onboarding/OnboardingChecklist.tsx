@@ -73,7 +73,10 @@ export function OnboardingChecklist({ campaignId }: { campaignId: string }) {
         return (
             <HudPanel className="flex items-center justify-between gap-2 text-sm">
                 <span className="text-hud-muted">{t('ui.firstStepsDone')}</span>
-                <Link href="/help" className="text-hud-accent-fg hover:underline">
+                <Link
+                    href="/help"
+                    className="text-hud-accent-fg hover:underline"
+                >
                     {t('ui.help')}
                 </Link>
             </HudPanel>
@@ -104,9 +107,7 @@ export function OnboardingChecklist({ campaignId }: { campaignId: string }) {
                 </ol>
                 {extra.length > 0 && (
                     <>
-                        <p className="mt-3 text-xs tracking-wide text-hud-muted uppercase">
-                            {t('ui.moreFeatures')}
-                        </p>
+                        <p className="hud-label mt-3">{t('ui.moreFeatures')}</p>
                         <ul className="divide-y divide-hud-rule">
                             {extra.map((s) => (
                                 <StepRow key={s.id} step={s} role={data.role} />

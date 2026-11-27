@@ -92,7 +92,7 @@ export function HudGameShell({
                             <>
                                 <ChevronRight
                                     aria-hidden
-                                    className="size-3 shrink-0 text-hud-line"
+                                    className="size-3 shrink-0 text-hud-faint-deco"
                                 />
                                 <span
                                     aria-current="page"

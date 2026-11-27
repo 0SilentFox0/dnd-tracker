@@ -28,8 +28,7 @@ import type {
     useUvttImport,
 } from '@/lib/hooks/battle-maps';
 
-const GROUP_LABEL =
-    'col-span-2 px-1 pt-1 text-xs font-semibold tracking-wide text-hud-muted uppercase';
+const GROUP_LABEL = 'col-span-2 px-1 pt-1 hud-label';
 
 export function EditorSidebar({
     draft,

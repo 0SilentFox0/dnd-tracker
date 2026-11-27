@@ -8,9 +8,7 @@ interface FieldSectionProps {
 export function FieldSection({ title, children }: FieldSectionProps) {
     return (
         <section className="space-y-1.5">
-            <h4 className="text-xs font-semibold tracking-wider text-hud-muted uppercase">
-                {title}
-            </h4>
+            <h4 className="hud-label">{title}</h4>
             {children}
         </section>
     );

@@ -57,7 +57,7 @@ function Disclosure({
                 className={cn('border-b border-hud-rule', className)}
             >
                 <AccordionPrimitive.Header asChild>
-                    <Heading className="m-0 text-[length:inherit] font-[inherit]">
+                    <Heading className="m-0 font-[inherit] text-[length:inherit]">
                         <AccordionPrimitive.Trigger
                             className={cn(
                                 'group/disclosure flex w-full cursor-pointer items-center gap-1.5 text-left',
@@ -68,7 +68,7 @@ function Disclosure({
                             {!hideChevron && (
                                 <ChevronRight
                                     className={cn(
-                                        'size-3.5 shrink-0 text-hud-faint transition-transform group-data-[state=open]/disclosure:rotate-90',
+                                        'size-3.5 shrink-0 text-hud-faint-deco transition-transform group-data-[state=open]/disclosure:rotate-90',
                                         chevronClassName
                                     )}
                                 />

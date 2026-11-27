@@ -84,9 +84,7 @@ export function EditorHeader({
         <div className="flex shrink-0 flex-wrap items-end gap-3 rounded-lg border border-hud-rule bg-background/60 p-3 shadow-sm">
             <BackLink campaignId={campaignId} />
             <div className="min-w-[12rem] flex-1 space-y-1">
-                <h1 className="text-xs font-semibold tracking-wide text-hud-muted uppercase">
-                    {t('workspaceTitle')}
-                </h1>
+                <h1 className="hud-label">{t('workspaceTitle')}</h1>
                 <Label htmlFor="map-name" className="text-xs">
                     {t('name')}
                 </Label>

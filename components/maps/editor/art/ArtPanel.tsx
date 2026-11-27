@@ -30,7 +30,7 @@ type ArtSave = ReturnType<typeof useMapArtSave>;
 
 const SECTION = 'space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3';
 
-const HEADING = 'text-xs font-semibold tracking-wide text-hud-muted uppercase';
+const HEADING = 'hud-label';
 
 const NO_ART = {
     scene: null,

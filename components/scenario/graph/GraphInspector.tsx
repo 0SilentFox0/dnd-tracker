@@ -48,9 +48,7 @@ export function GraphInspector({
     return (
         <div className="flex flex-col gap-3">
             <div>
-                <p className="text-xs text-muted-foreground uppercase">
-                    {kind}
-                </p>
+                <p className="hud-label">{kind}</p>
                 <p className="font-medium">{node.label}</p>
                 {node.missing ? (
                     <p className="text-sm text-destructive">

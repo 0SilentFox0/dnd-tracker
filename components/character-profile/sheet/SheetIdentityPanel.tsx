@@ -140,7 +140,7 @@ export function SheetIdentityPanel({
                                     {i > 0 && (
                                         <span
                                             aria-hidden
-                                            className="px-1 text-hud-faint lg:px-2"
+                                            className="px-1 text-hud-faint-deco lg:px-2"
                                         >
                                             ·
                                         </span>

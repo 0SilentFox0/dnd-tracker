@@ -142,7 +142,7 @@ export function Breadcrumbs() {
                             <Home className="h-3.5 w-3.5" />
                             <span className="sr-only">{tHeader('home')}</span>
                         </Link>
-                        <ChevronRight className="h-3 w-3 text-hud-line" />
+                        <ChevronRight className="h-3 w-3 text-hud-faint-deco" />
                     </li>
                 )}
                 {crumbs.map((crumb, index) => (
@@ -166,7 +166,7 @@ export function Breadcrumbs() {
                             </Link>
                         )}
                         {!crumb.isLast && (
-                            <ChevronRight className="h-3 w-3 shrink-0 text-hud-line" />
+                            <ChevronRight className="h-3 w-3 shrink-0 text-hud-faint-deco" />
                         )}
                     </li>
                 ))}

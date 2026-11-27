@@ -67,7 +67,7 @@ export function GraphListPanel({
                                     : tType(group.key)
                             }
                         >
-                            <h3 className="sticky top-0 z-10 flex items-center gap-1.5 bg-card px-1 py-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                            <h3 className="hud-label sticky top-0 z-10 flex items-center gap-1.5 bg-card px-1 py-1">
                                 <Icon
                                     className="size-3.5"
                                     style={{ color: style?.color }}

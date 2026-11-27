@@ -35,9 +35,7 @@ function StatButton({
                 pressed ? 'border-hud-accent' : 'border-hud-line'
             )}
         >
-            <span className="text-xs tracking-[.08em] text-hud-muted uppercase">
-                {label}
-            </span>
+            <span className="hud-label">{label}</span>
             <b className="hud-num text-xl leading-tight text-hud-ink tabular-nums">
                 {value}
             </b>
