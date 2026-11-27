@@ -14,6 +14,7 @@ export {
 export { useCheckedIds } from './useCheckedIds';
 export { useCoarsePointer } from './useCoarsePointer';
 export { useConfirm } from './useConfirm';
+export { useCopyToClipboard } from './useCopyToClipboard';
 export { useCountUp } from './useCountUp';
 export { useCrudMutation } from './useCrudMutation';
 export { useCssVarHeight } from './useCssVarHeight';

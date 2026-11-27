@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { CampaignStatus, CampaignVisibility } from '@/lib/constants/campaigns';
+import { normalizeInviteCode } from '@/lib/utils/campaigns/invite-link';
 import { MODULE_ID_RE } from '@/lib/utils/rules/systems/catalog';
 import { TEMPLATE_CONTENT_LOCALES } from '@/lib/utils/templates/manifest';
 
@@ -55,5 +56,5 @@ export const updateCampaignSchema = z.object({
 });
 
 export const joinCampaignSchema = z.object({
-    inviteCode: z.string().trim().min(1),
+    inviteCode: z.string().trim().min(1).transform(normalizeInviteCode),
 });

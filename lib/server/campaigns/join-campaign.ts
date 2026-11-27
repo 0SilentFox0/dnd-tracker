@@ -9,30 +9,29 @@ import {
 import { prisma } from '@/lib/db';
 import { ensureDbUser, PUBLIC_USER_SELECT } from '@/lib/server/users/db-user';
 import type { AuthUserResult } from '@/lib/utils/api/api-auth';
+import { normalizeInviteCode } from '@/lib/utils/campaigns/invite-link';
 
-type JoinFailure = {
+export type JoinFailure = {
     ok: false;
     error: (typeof API_ERRORS)[keyof typeof API_ERRORS];
     status: 400 | 403 | 404;
 };
 
-export async function joinCampaignByCode(
-    userId: string,
-    authUser: AuthUserResult['authUser'],
-    inviteCode: string
-) {
-    // codes are uppercase, but phone keyboards often send lowercase
-    const campaign = await prisma.campaign.findFirst({
-        where: { inviteCode: { equals: inviteCode, mode: 'insensitive' } },
-        include: { members: { select: { userId: true } } },
-        omit: { aiInstructions: true },
-    });
+const failure = (
+    error: JoinFailure['error'],
+    status: JoinFailure['status']
+): JoinFailure => ({ ok: false, error, status });
 
-    const failure = (
-        error: JoinFailure['error'],
-        status: JoinFailure['status']
-    ): JoinFailure => ({ ok: false, error, status });
+type JoinTarget = {
+    kind: string;
+    status: string;
+    members: Array<{ userId: string }>;
+};
 
+export function checkJoinable(
+    campaign: JoinTarget | null,
+    userId: string
+): JoinFailure | null {
     if (!campaign) return failure(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 
     if (campaign.kind === CampaignKind.TEMPLATE)
@@ -46,6 +45,77 @@ export async function joinCampaignByCode(
 
     if (campaign.members.some((m) => m.userId === userId))
         return failure(API_ERRORS.ALREADY_MEMBER, 400);
+
+    return null;
+}
+
+export type JoinPreview =
+    | { kind: 'member'; campaignId: string }
+    | {
+          kind: 'joinable';
+          campaign: { id: string; name: string; dmName: string };
+      }
+    | JoinFailure;
+
+export async function getJoinPreview(
+    userId: string,
+    inviteCode: string
+): Promise<JoinPreview> {
+    const campaign = await prisma.campaign.findUnique({
+        where: { inviteCode: normalizeInviteCode(inviteCode) },
+        select: {
+            id: true,
+            name: true,
+            kind: true,
+            status: true,
+            dmUserId: true,
+            members: {
+                select: {
+                    userId: true,
+                    role: true,
+                    user: { select: { displayName: true } },
+                },
+            },
+        },
+    });
+
+    if (campaign?.members.some((m) => m.userId === userId))
+        return { kind: 'member', campaignId: campaign.id };
+
+    const rejected = checkJoinable(campaign, userId);
+
+    if (rejected || !campaign)
+        return rejected ?? failure(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
+
+    const dm =
+        campaign.members.find((m) => m.userId === campaign.dmUserId) ??
+        campaign.members.find((m) => m.role === CampaignRole.DM);
+
+    return {
+        kind: 'joinable',
+        campaign: {
+            id: campaign.id,
+            name: campaign.name,
+            dmName: dm?.user.displayName ?? '',
+        },
+    };
+}
+
+export async function joinCampaignByCode(
+    userId: string,
+    authUser: AuthUserResult['authUser'],
+    inviteCode: string
+) {
+    const campaign = await prisma.campaign.findUnique({
+        where: { inviteCode: normalizeInviteCode(inviteCode) },
+        include: { members: { select: { userId: true } } },
+        omit: { aiInstructions: true },
+    });
+
+    const rejected = checkJoinable(campaign, userId);
+
+    if (rejected || !campaign)
+        return rejected ?? failure(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 
     await ensureDbUser(authUser);
 

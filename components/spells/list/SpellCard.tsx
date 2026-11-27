@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Copy, Move, Pencil, Sparkles, X } from 'lucide-react';
@@ -18,6 +17,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useCopyToClipboard } from '@/lib/hooks/common';
 import { useSpellMechanics } from '@/lib/hooks/spells/useSpellMechanics';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { getSpellGroupIcon } from '@/lib/utils/spells/spell-icons';
@@ -57,7 +57,7 @@ export function SpellCard({
 
     const mechanics = useSpellMechanics();
 
-    const [copied, setCopied] = useState(false);
+    const { copied, copy } = useCopyToClipboard();
 
     if (printMode) return <SpellPrintCard spell={spell} />;
 
@@ -65,11 +65,7 @@ export function SpellCard({
 
     const GroupIcon = getSpellGroupIcon(spell.spellGroup);
 
-    const handleCopyId = async () => {
-        await navigator.clipboard.writeText(spell.id);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+    const handleCopyId = () => void copy(spell.id);
 
     return (
         <HudCard

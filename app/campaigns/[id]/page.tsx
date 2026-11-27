@@ -345,6 +345,11 @@ export default async function CampaignDetailPage({
                                     isDM={isDM}
                                     isOwner={campaign.dmUserId === user.id}
                                     ownerId={campaign.dmUserId}
+                                    inviteCode={
+                                        isDM && !isTemplate
+                                            ? campaign.inviteCode
+                                            : null
+                                    }
                                 />
                             </div>
                         </HudPanel>

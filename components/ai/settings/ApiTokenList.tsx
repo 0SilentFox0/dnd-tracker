@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { type ApiTokenScope, tokenScopeKey } from '@/lib/constants/ai';
-import { useConfirm } from '@/lib/hooks/common';
+import { useConfirm, useCopyToClipboard } from '@/lib/hooks/common';
 import type {
     ApiTokenSummary,
     CreateApiTokenInput,
@@ -47,6 +47,8 @@ export function ApiTokenList({
     const confirm = useConfirm();
 
     const initialScopes = scopes.slice(0, 1);
+
+    const { copy } = useCopyToClipboard();
 
     const [open, setOpen] = useState(false);
 
@@ -181,11 +183,7 @@ export function ApiTokenList({
                         <>
                             <Button
                                 variant="ghost"
-                                onClick={() =>
-                                    void navigator.clipboard.writeText(
-                                        created.token
-                                    )
-                                }
+                                onClick={() => void copy(created.token)}
                             >
                                 {t('tokens.dialog.copy')}
                             </Button>

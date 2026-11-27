@@ -22,6 +22,15 @@ describe('joinErrorMessage', () => {
         ).toBe('t:common.joinErrors.campaignNotActive');
     });
 
+    it('maps template and demo errors', () => {
+        expect(
+            joinErrorMessage(new Error(API_ERRORS.TEMPLATE_NOT_JOINABLE), t)
+        ).toBe('t:common.joinErrors.templateNotJoinable');
+        expect(
+            joinErrorMessage(new Error(API_ERRORS.DEMO_NOT_JOINABLE), t)
+        ).toBe('t:common.joinErrors.demoNotJoinable');
+    });
+
     it('recognizes known server errors by errorKey, even when the message is translated', () => {
         const err = Object.assign(new Error('Campaign not found'), {
             errorKey: API_ERRORS.CAMPAIGN_NOT_FOUND,

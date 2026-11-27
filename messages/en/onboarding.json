@@ -11,7 +11,7 @@
       },
       "players": {
         "title": "Invite players",
-        "description": "Send players the invite code shown in the pill at the top of this page."
+        "description": "Send players the invite code or link from the pill at the top of this page."
       },
       "characters": {
         "title": "Approve or create a hero",

@@ -1,4 +1,8 @@
 {
+  "2026-11-27-invite-links": {
+    "title": "Invite players with a link",
+    "body": "Copy the invite link next to the code in the campaign header and send it. The player signs in or registers and lands straight on the join page. Codes no longer use 0, O, 1 and I."
+  },
   "2026-11-26-delete-account": {
     "title": "Delete your account from the profile",
     "body": "The new Danger zone at the bottom of your profile deletes your account, the campaigns you run and your personal files after you confirm with your email."

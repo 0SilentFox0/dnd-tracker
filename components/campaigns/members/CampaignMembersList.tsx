@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Crown, ShieldOff, X } from 'lucide-react';
+import { Check, Crown, Link, ShieldOff, X } from 'lucide-react';
 
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudPill } from '@/components/hud/page';
@@ -11,7 +11,8 @@ import {
     useRemoveCampaignMember,
     useSetCampaignMemberRole,
 } from '@/lib/hooks/campaigns';
-import { useConfirm } from '@/lib/hooks/common';
+import { useConfirm, useCopyToClipboard } from '@/lib/hooks/common';
+import { inviteLinkPath } from '@/lib/utils/campaigns/invite-link';
 import type { CampaignMembership, PublicUser } from '@/types/campaigns';
 
 interface CampaignMembersListProps {
@@ -20,6 +21,7 @@ interface CampaignMembersListProps {
     isDM: boolean;
     isOwner: boolean;
     ownerId: string;
+    inviteCode?: string | null;
 }
 
 export function CampaignMembersList({
@@ -28,8 +30,11 @@ export function CampaignMembersList({
     isDM,
     isOwner,
     ownerId,
+    inviteCode = null,
 }: CampaignMembersListProps) {
     const t = useTranslations('campaigns');
+
+    const { copied, copy } = useCopyToClipboard();
 
     const confirm = useConfirm();
 
@@ -72,6 +77,25 @@ export function CampaignMembersList({
 
     return (
         <div className="space-y-2">
+            {isDM && inviteCode && (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() =>
+                        void copy(
+                            `${window.location.origin}${inviteLinkPath(inviteCode)}`
+                        )
+                    }
+                >
+                    {copied ? (
+                        <Check aria-hidden className="text-hud-accent-fg" />
+                    ) : (
+                        <Link aria-hidden />
+                    )}
+                    {copied ? t('settings.linkCopied') : t('settings.copyLink')}
+                </Button>
+            )}
             {members.map((member) => (
                 <div
                     key={member.id}

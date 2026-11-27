@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { AuthCard } from '@/components/auth/AuthCard';
@@ -31,6 +32,7 @@ import {
 } from '@/lib/hooks/auth';
 import type { Locale } from '@/lib/i18n/config';
 import { emailSchema, signInSchema, signUpSchema } from '@/lib/schemas/auth';
+import { authPathWithNext } from '@/lib/utils/auth';
 
 function SignInCard() {
     const t = useTranslations('auth');
@@ -38,6 +40,8 @@ function SignInCard() {
     useRedirectIfSignedIn();
 
     const urlError = useAuthUrlError();
+
+    const next = useSearchParams().get('next');
 
     const { pending, error, unconfirmedEmail, signIn } = useEmailSignIn();
 
@@ -51,7 +55,7 @@ function SignInCard() {
             footer={
                 <p className="text-center text-sm text-hud-muted">
                     {t('signIn.noAccount')}{' '}
-                    <AuthLink href="/sign-up">
+                    <AuthLink href={authPathWithNext('/sign-up', next)}>
                         {t('signIn.signUpLink')}
                     </AuthLink>
                 </p>
@@ -117,6 +121,8 @@ function SignUpCard() {
 
     const urlError = useAuthUrlError();
 
+    const next = useSearchParams().get('next');
+
     const { pending, error, sentTo, signUp, reset } = useEmailSignUp();
 
     const { errors, read } = useFormErrors();
@@ -138,7 +144,7 @@ function SignUpCard() {
                         >
                             {t('signUp.changeEmail')}
                         </HudButton>
-                        <AuthLink href="/sign-in">
+                        <AuthLink href={authPathWithNext('/sign-in', next)}>
                             {t('common.backToSignIn')}
                         </AuthLink>
                     </div>
@@ -155,7 +161,7 @@ function SignUpCard() {
             footer={
                 <p className="text-center text-sm text-hud-muted">
                     {t('signUp.haveAccount')}{' '}
-                    <AuthLink href="/sign-in">
+                    <AuthLink href={authPathWithNext('/sign-in', next)}>
                         {t('signUp.signInLink')}
                     </AuthLink>
                 </p>

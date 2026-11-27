@@ -1,20 +1,9 @@
-import { AFTER_SIGN_IN_PATH, PASSWORD_MIN_LENGTH } from '@/lib/constants/auth';
+import { PASSWORD_MIN_LENGTH } from '@/lib/constants/auth';
 import { translateIssue } from '@/lib/i18n/translate-issue';
 import type { Translator } from '@/lib/i18n/translator';
 import { zodErrorMap } from '@/lib/i18n/zod-errors';
 
-/** Only same-origin relative paths survive, so `next` can't bounce the user to another site. */
-export function safeNextPath(next: string | null | undefined): string {
-    if (
-        !next ||
-        !next.startsWith('/') ||
-        next.startsWith('//') ||
-        next.startsWith('/\\')
-    )
-        return AFTER_SIGN_IN_PATH;
-
-    return next;
-}
+export { authPathWithNext, safeNextPath } from './next-path';
 
 /** `t` is scoped to the `auth` namespace; unknown codes and raw provider messages pass through. */
 export function authErrorMessage(
