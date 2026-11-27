@@ -59,6 +59,7 @@ function logData(result: SheetRollResult, inspired: boolean) {
             total: result.total,
             mode: 'normal',
             ...(result.flat && { flat: result.flat }),
+            ...(result.crit && { manualCrit: true }),
         };
     }
 

@@ -211,6 +211,55 @@ describe('rollFromSheet', () => {
             expect(r.kind === 'damage' && r.dice).toHaveLength(4);
         });
 
+        const withAttack = (attack: BattleAttack) => {
+            const base = rogue();
+
+            return {
+                ...base,
+                battleData: { ...base.battleData, attacks: [attack] },
+            };
+        };
+
+        it('keeps the weapon flat bonus from the formula (1d8+2)', () => {
+            const r = rollFromSheet(
+                withAttack({ ...sword, damageDice: '1d8+2' }),
+                { kind: 'damage', attackId: 'sword' },
+                opts(false)
+            );
+
+            if (r.kind !== 'damage') throw new Error('expected damage');
+
+            const diceSum = r.dice.reduce((sum, d) => sum + d.value, 0);
+
+            expect(r.flat).toBeGreaterThanOrEqual(2);
+            expect(r.total).toBe(diceSum + r.flat);
+        });
+
+        it('crit multiplies the total when the rules do not double dice', () => {
+            const rules = {
+                ...DEFAULT_RULES,
+                criticals: { ...DEFAULT_RULES.criticals, doubleDice: false },
+            };
+
+            const normal = rollFromSheet(
+                armed(),
+                { kind: 'damage', attackId: 'sword' },
+                { ...opts(false), rules }
+            );
+
+            const crit = rollFromSheet(
+                armed(),
+                { kind: 'damage', attackId: 'sword', crit: true },
+                { ...opts(false), rules }
+            );
+
+            if (normal.kind !== 'damage' || crit.kind !== 'damage')
+                throw new Error('expected damage');
+
+            expect(crit.dice).toHaveLength(normal.dice.length);
+            expect(crit.total).toBe(normal.total * 2);
+        });
+
         it('unknown attack is a 404', () => {
             expect(() =>
                 rollFromSheet(

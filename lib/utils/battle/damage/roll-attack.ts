@@ -1,13 +1,7 @@
-import { attackDamageContext, attackDamageParts } from './attack-parts';
-import { applyHeroDmDamageMultiplier } from './hero-dm-multiplier';
-import { calculateDamageWithModifiers } from './index';
+import { attackDamageParts } from './attack-parts';
+import { computeDamageBreakdown } from './breakdown';
 
-import {
-    attackAbilityOf,
-    attackDamageModifier,
-} from '@/lib/utils/battle/attack/ability';
 import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
-import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { parseDiceLenient, rollGroups } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
@@ -45,27 +39,17 @@ export function rollAttackDamage(
             .map((value) => ({ sides: g.size, value }));
     });
 
-    const statMod = attackDamageModifier(p, attack, rules, [p]);
-
-    const calc = calculateDamageWithModifiers(
-        p,
-        rolls.reduce((sum, r) => sum + r, 0),
-        statMod,
-        attackKindOf(attack.type),
-        {
-            allParticipants: [p],
-            ...attackDamageContext(p, attack, rolls, rules),
-            statKey: attackAbilityOf(rules, p, attack).key,
-        }
-    );
-
-    const { damage } = applyHeroDmDamageMultiplier(
-        p,
-        attackKindOf(attack.type),
-        calc.totalDamage + (attack.damageBonus ?? 0)
-    );
-
     const diceSum = rolls.reduce((sum, r) => sum + r, 0);
 
-    return { dice, flat: damage - diceSum, total: damage, doubled };
+    const { totalDamage } = computeDamageBreakdown({
+        attacker: p,
+        target: p,
+        attack,
+        damageRolls: rolls,
+        allParticipants: [p],
+        isCritical: opts.crit,
+        rules,
+    });
+
+    return { dice, flat: totalDamage - diceSum, total: totalDamage, doubled };
 }

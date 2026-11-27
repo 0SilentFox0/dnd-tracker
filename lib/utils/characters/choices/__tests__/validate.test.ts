@@ -10,7 +10,7 @@ import {
     type PickContext,
     validatePicks,
 } from '@/lib/utils/characters/choices/validate';
-import type { Picks } from '@/types/choices';
+import type { Choice, Picks } from '@/types/choices';
 
 const defs = classChoiceDefs(sorcerer, null);
 
@@ -241,5 +241,36 @@ describe('validatePicks', () => {
             code: 'CHOICE_UNKNOWN',
         });
         expect(issue.message).toContain(API_ERRORS.CHOICE_UNKNOWN);
+    });
+});
+
+describe('validatePicks atCreation', () => {
+    const kit: Choice = {
+        id: 'starting-equipment',
+        label: 'Starting Equipment',
+        level: 1,
+        count: 1,
+        kind: 'option',
+        atCreation: true,
+        options: [
+            { id: 'a', name: 'A', abilities: [] },
+            { id: 'b', name: 'B', abilities: [] },
+        ],
+    };
+
+    const run = (picks: Picks) =>
+        validatePicks([kit], picks, ctx(1), 'classes.x').map((i) => i.code);
+
+    it('accepts a known option', () => {
+        expect(run({ 'starting-equipment': [{ id: 'a' }] })).toEqual([]);
+    });
+
+    it('rejects an unknown option and more than one pick', () => {
+        expect(run({ 'starting-equipment': [{ id: 'zzz' }] })).toEqual([
+            'CHOICE_UNKNOWN',
+        ]);
+        expect(
+            run({ 'starting-equipment': [{ id: 'a' }, { id: 'b' }] })
+        ).toContain('CHOICE_COUNT');
     });
 });

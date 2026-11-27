@@ -121,7 +121,7 @@
     "empty": "Записів ще немає.",
     "more": "Показати ще",
     "system": "Система",
-    "roll": "🎲 {hasLabel, select, yes {{label}} other {Кидок}}: {autoFail, select, yes {автопровал} other {{rolls} → {total}{mode, select, advantage { (перевага)} disadvantage { (перешкода)} other {}}}}{inspiration, select, yes { · натхнення} other {}}",
+    "roll": "🎲 {hasLabel, select, yes {{label}} other {Кидок}}: {autoFail, select, yes {автопровал} other {{rolls} → {total}{mode, select, advantage { (перевага)} disadvantage { (перешкода)} other {}}}}{inspiration, select, yes { · натхнення} other {}}{manualCrit, select, yes { · крит (вручну)} other {}}",
     "test": "🎲 {label}: {roll} проти {target} · {outcome, select, critical {критичний успіх} success {успіх} failure {провал} other {фатальний провал}}, РУ {sl}{reversed, select, yes { · реверс} other {}}{auto, select, success { · автоуспіх} failure { · автопровал} other {}}",
     "session": "🎭 Нова сесія: Удача відновлена",
     "shortRest": "☕ Короткий відпочинок",
