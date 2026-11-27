@@ -104,7 +104,7 @@ export function useStoryQuiz({
     const compose = useCallback(
         () =>
             composeStory(answers, (id, answer) =>
-                t(`story.sentences.${id}` as never, { answer })
+                t(`story.sentences.${id}` as 'story.sentences.origin', { answer })
             ),
         [answers, t]
     );

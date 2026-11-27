@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 import { useStoryQuiz } from '../useStoryQuiz';
 
+import type { SpeciesProfile } from '@/systems/wfrp/rules/creation';
+
 const fixedRng = (roll: number) => () => (roll - 1 + 0.5) / 100;
 
 const appearance = {
@@ -11,7 +13,7 @@ const appearance = {
     heightCm: { base: 145, dice: 2 },
     eyes: ['blue', 'green'],
     hair: ['black', 'red'],
-};
+} satisfies NonNullable<SpeciesProfile['appearance']>;
 
 describe('useStoryQuiz', () => {
     it('roll sets the translated table row', () => {
