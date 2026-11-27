@@ -6,9 +6,9 @@ vi.mock('@/lib/server/battle-maps/library-service', () => ({
 
 import { FLOOR_MATERIALS } from '@/lib/constants/map-art/materials';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
-import { visibleFrom } from '@/lib/utils/battle/vision/shadowcast';
 import { encodeEdges } from '@/lib/utils/battle/map-storage/edge-chunks';
 import { encodeTileChunk } from '@/lib/utils/battle/tiles/rle';
+import { visibleFrom } from '@/lib/utils/battle/vision/shadowcast';
 import {
     applyConversionTx,
     applyObjectsTx,

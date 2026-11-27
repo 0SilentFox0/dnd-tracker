@@ -15,7 +15,6 @@
 import { Prisma } from '@prisma/client';
 
 import { mapArtSceneSchema } from '@/lib/schemas/map-art';
-
 import {
     applyConversionTx,
     applyObjectsTx,

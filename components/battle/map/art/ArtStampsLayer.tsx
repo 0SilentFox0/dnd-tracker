@@ -1,6 +1,13 @@
 'use client';
 
-import { memo, type PointerEvent, useEffect, useMemo, useRef, useState } from 'react';
+import {
+    memo,
+    type PointerEvent,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
 import type { ArtPreviewState } from '../battle-map-types';
 import { svgPoint } from './svg-point';
@@ -11,7 +18,11 @@ import { gridOf, mapSize, unitOf } from '@/lib/utils/battle/grid';
 import { parseCellKey } from '@/lib/utils/battle/grid/geometry';
 import { cellPolygon } from '@/lib/utils/battle/grid/layout';
 import { stampCells } from '@/lib/utils/battle/map-art/stamp-cells';
-import { fromStampLocal, stampBox, stampCorners } from '@/lib/utils/battle/map-art/stamp-geometry';
+import {
+    fromStampLocal,
+    stampBox,
+    stampCorners,
+} from '@/lib/utils/battle/map-art/stamp-geometry';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { MapArtStamp } from '@/types/battle-map';
 
@@ -52,7 +63,12 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
 
     const keyRef = useRef<(e: KeyboardEvent) => void>(() => undefined);
 
-    keyRef.current = (e) => void sel.onKey(e, selectMode ? 'stamp-select' : 'stamp');
+    const { onKey } = sel;
+
+    useEffect(() => {
+        keyRef.current = (e) =>
+            void onKey(e, selectMode ? 'stamp-select' : 'stamp');
+    }, [onKey, selectMode]);
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => keyRef.current(e);
@@ -99,11 +115,15 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
 
     const corners = box ? stampCorners(box) : null;
 
-    const rotHandle = box ? fromStampLocal(box, 0, -box.h / 2 - ROTATE_OFFSET) : null;
+    const rotHandle = box
+        ? fromStampLocal(box, 0, -box.h / 2 - ROTATE_OFFSET)
+        : null;
 
     const topMid = box ? fromStampLocal(box, 0, -box.h / 2) : null;
 
-    const handleProps = (onMove: (at: { x: number; y: number }, shift: boolean) => void) => ({
+    const handleProps = (
+        onMove: (at: { x: number; y: number }, shift: boolean) => void
+    ) => ({
         style: { cursor: 'grab', touchAction: 'none' as const },
         onPointerDown: (e: PointerEvent<SVGElement>) => {
             e.stopPropagation();
@@ -142,7 +162,10 @@ export const ArtStampsLayer = memo(function ArtStampsLayer({
                 width={size.width}
                 height={size.height}
                 fill="transparent"
-                style={{ cursor: selectMode ? 'default' : 'copy', touchAction: 'none' }}
+                style={{
+                    cursor: selectMode ? 'default' : 'copy',
+                    touchAction: 'none',
+                }}
                 onPointerMove={(e) => {
                     const at = svgPoint(e);
 

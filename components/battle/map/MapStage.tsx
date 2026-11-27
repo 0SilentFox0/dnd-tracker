@@ -1,7 +1,7 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { memo, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 
 import { ArtCanvas } from './art/ArtCanvas';
 import { ArtLightsLayer } from './art/ArtLightsLayer';
