@@ -345,9 +345,25 @@ export default async function CampaignDetailPage({
                                     isDM={isDM}
                                     isOwner={campaign.dmUserId === user.id}
                                     ownerId={campaign.dmUserId}
+                                    inviteCode={
+                                        isDM && !isTemplate
+                                            ? campaign.inviteCode
+                                            : null
+                                    }
                                 />
                             </div>
                         </HudPanel>
+                    </div>
+                )}
+
+                {hasMembership && (
+                    <div className="min-w-0 lg:col-span-12">
+                        <PrefetchedQuery
+                            queryKey={onboardingKeys.campaign(id)}
+                            data={onboarding}
+                        >
+                            <OnboardingChecklist campaignId={id} />
+                        </PrefetchedQuery>
                     </div>
                 )}
 
@@ -366,15 +382,6 @@ export default async function CampaignDetailPage({
                     />
                 </div>
             </div>
-
-            {hasMembership && (
-                <PrefetchedQuery
-                    queryKey={onboardingKeys.campaign(id)}
-                    data={onboarding}
-                >
-                    <OnboardingChecklist campaignId={id} />
-                </PrefetchedQuery>
-            )}
         </HudPage>
     );
 

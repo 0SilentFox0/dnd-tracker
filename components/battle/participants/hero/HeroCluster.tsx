@@ -34,7 +34,7 @@ export const HeroCluster = memo(function HeroCluster({
 
     const [pickedLevel, setLevel] = useState<number | null>(null);
 
-    const { viewer } = useBattleSceneData();
+    const { viewer, select } = useBattleSceneData();
 
     const spells = useBattleSpellLibrary(hero, {
         isOpen: !phone && !viewer.readOnly,
@@ -98,6 +98,7 @@ export const HeroCluster = memo(function HeroCluster({
                         <div className="absolute top-0 left-0">
                             <ZoomablePortrait
                                 participant={hero}
+                                onOpenDetails={() => select(hero.basicInfo.id)}
                                 fx="main"
                                 size={size}
                                 me

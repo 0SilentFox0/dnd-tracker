@@ -300,6 +300,13 @@ export function ToolsContent({
             >
                 {t('toCampaign')}
             </Link>
+            <Link
+                href="/help/player-battle"
+                target="_blank"
+                className="hud-sc flex h-11 items-center text-sm text-hud-soft hover:text-hud-ink"
+            >
+                {t('help')}
+            </Link>
         </div>
     );
 }

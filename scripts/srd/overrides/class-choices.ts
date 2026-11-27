@@ -217,3 +217,9 @@ export const INVOCATION_MECHANICS: Record<string, AbilityCore> = {
         effects: [{ kind: 'modifyStat', stat: 'attacksPerAction', flat: 1 }],
     },
 };
+
+/** Starting-equipment entries that name a gear item indirectly (focus = quarterstaff); the value is a letters-only artifact name key. */
+export const STARTING_EQUIPMENT_OVERRIDES: Record<string, string> = {
+    'Arcane Focus (Quarterstaff)': 'quarterstaff',
+    'Druidic Focus (Quarterstaff)': 'quarterstaff',
+};

@@ -100,6 +100,13 @@ function MapTokenImpl({
                     height: `${PORTRAIT_SHARE * 100}%`,
                 }}
             >
+                {current && !isDown(participant) && (
+                    <span
+                        aria-hidden
+                        data-map-token-active
+                        className="map-token-active"
+                    />
+                )}
                 <HitFrame change={change} />
                 <span
                     key={`portrait:${change?.id ?? ''}`}

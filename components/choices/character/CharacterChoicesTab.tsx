@@ -18,12 +18,14 @@ interface CharacterChoicesTabProps {
         set: React.Dispatch<React.SetStateAction<CharacterFormData>>;
     };
     classesEnabled: boolean;
+    creation?: boolean;
 }
 
 export function CharacterChoicesTab({
     campaignId,
     form: { data, set },
     classesEnabled,
+    creation,
 }: CharacterChoicesTabProps) {
     const t = useTranslations('choices');
 
@@ -61,6 +63,7 @@ export function CharacterChoicesTab({
                     })),
             }}
             refs={refs}
+            creation={creation}
             hero={{
                 level: data.basicInfo.level,
                 scores,

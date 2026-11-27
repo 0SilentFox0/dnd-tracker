@@ -14,6 +14,6 @@ export function useSheetRollRequest() {
         request,
         setRequest,
         close,
-        canRoll: !!sheet.rest && (sheet.viewer.isOwner || sheet.viewer.isDM),
+        canRoll: sheet.viewer.isOwner || sheet.viewer.isDM,
     };
 }

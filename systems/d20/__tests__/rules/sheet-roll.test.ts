@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
+import { AttackType } from '@/lib/constants/battle';
 import { makeT } from '@/lib/i18n/test/mock-t';
 import { seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { attackSheet } from '@/lib/utils/characters/sheet/lines';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { rollFromSheet } from '@/systems/d20/rules/sheet-roll';
-import type { BattleParticipant } from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const rogue = (exhausted = false): BattleParticipant => {
     const p = createMockParticipant();
@@ -108,5 +110,164 @@ describe('rollFromSheet', () => {
             ).label
         ).toBe('gameTerms.dndSkills.stealth');
         expect(r).toMatchObject({ total: 11, autoFail: false });
+    });
+
+    it('attack: d20 + the same to-hit as the sheet row', () => {
+        const attack: BattleAttack = {
+            id: 'sword',
+            name: 'Sword',
+            type: AttackType.MELEE,
+            attackBonus: 1,
+            damageDice: '1d6',
+            damageType: 'slashing',
+        };
+
+        const base = rogue();
+
+        const p = {
+            ...base,
+            battleData: { ...base.battleData, attacks: [attack] },
+        };
+
+        const id = attack.id ?? attack.name;
+
+        const r = rollFromSheet(
+            p,
+            { kind: 'attack', attackId: id },
+            opts(false)
+        );
+
+        const row = attackSheet(p, attack, DEFAULT_RULES);
+
+        expect(r).toMatchObject({
+            label: attack.name,
+            roll: 11,
+            mod: row.toHit.total,
+        });
+        expect(r.total).toBe(11 + row.toHit.total);
+    });
+
+    it('attack: unknown id is a 404', () => {
+        expect(() =>
+            rollFromSheet(
+                rogue(),
+                { kind: 'attack', attackId: 'nope' },
+                opts(false)
+            )
+        ).toThrow();
+    });
+
+    describe('damage', () => {
+        const sword: BattleAttack = {
+            id: 'sword',
+            name: 'Sword',
+            type: AttackType.MELEE,
+            attackBonus: 0,
+            damageDice: '1d6',
+            damageType: 'slashing',
+        };
+
+        const armed = () => {
+            const base = rogue();
+
+            return {
+                ...base,
+                battleData: { ...base.battleData, attacks: [sword] },
+            };
+        };
+
+        it('rolls the weapon dice and adds the sheet modifiers', () => {
+            const r = rollFromSheet(
+                armed(),
+                { kind: 'damage', attackId: 'sword' },
+                opts(false)
+            );
+
+            expect(r).toMatchObject({ kind: 'damage', crit: false });
+            expect(r.kind === 'damage' && r.dice).toEqual([
+                { sides: 4, value: 3 },
+                { sides: 6, value: 6 },
+            ]);
+            expect(r.kind === 'damage' && r.total).toBeGreaterThanOrEqual(1);
+        });
+
+        it('crit doubles the dice', () => {
+            const r = rollFromSheet(
+                armed(),
+                { kind: 'damage', attackId: 'sword', crit: true },
+                {
+                    ...opts(false),
+                    rules: {
+                        ...DEFAULT_RULES,
+                        criticals: {
+                            ...DEFAULT_RULES.criticals,
+                            doubleDice: true,
+                        },
+                    },
+                }
+            );
+
+            expect(r).toMatchObject({ kind: 'damage', crit: true });
+            expect(r.kind === 'damage' && r.dice).toHaveLength(4);
+        });
+
+        const withAttack = (attack: BattleAttack) => {
+            const base = rogue();
+
+            return {
+                ...base,
+                battleData: { ...base.battleData, attacks: [attack] },
+            };
+        };
+
+        it('keeps the weapon flat bonus from the formula (1d8+2)', () => {
+            const r = rollFromSheet(
+                withAttack({ ...sword, damageDice: '1d8+2' }),
+                { kind: 'damage', attackId: 'sword' },
+                opts(false)
+            );
+
+            if (r.kind !== 'damage') throw new Error('expected damage');
+
+            const diceSum = r.dice.reduce((sum, d) => sum + d.value, 0);
+
+            expect(r.flat).toBeGreaterThanOrEqual(2);
+            expect(r.total).toBe(diceSum + r.flat);
+        });
+
+        it('crit multiplies the total when the rules do not double dice', () => {
+            const rules = {
+                ...DEFAULT_RULES,
+                criticals: { ...DEFAULT_RULES.criticals, doubleDice: false },
+            };
+
+            const normal = rollFromSheet(
+                armed(),
+                { kind: 'damage', attackId: 'sword' },
+                { ...opts(false), rules }
+            );
+
+            const crit = rollFromSheet(
+                armed(),
+                { kind: 'damage', attackId: 'sword', crit: true },
+                { ...opts(false), rules }
+            );
+
+            if (normal.kind !== 'damage' || crit.kind !== 'damage')
+                throw new Error('expected damage');
+
+            expect(crit.dice).toHaveLength(normal.dice.length);
+            expect(crit.total).toBe(normal.total * 2);
+        });
+
+        it('unknown attack is a 404', () => {
+            expect(() =>
+                rollFromSheet(
+                    armed(),
+                    { kind: 'damage', attackId: 'nope' },
+                    opts(false)
+                )
+            ).toThrow();
+        });
     });
 });

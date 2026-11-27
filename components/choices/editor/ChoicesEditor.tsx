@@ -1,5 +1,6 @@
 'use client';
 
+import { Fragment } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { ChoicePicker, type PickerContext } from '../picker/ChoicePicker';
@@ -33,6 +34,7 @@ interface ChoicesEditorProps {
     issues?: ChoiceIssue[];
     saved?: ChoicesState;
     only?: { classId: string; level: number; multiclass?: boolean };
+    creation?: boolean;
 }
 
 export function ChoicesEditor({
@@ -42,6 +44,7 @@ export function ChoicesEditor({
     issues,
     saved,
     only,
+    creation = false,
 }: ChoicesEditorProps) {
     const t = useTranslations('choices');
 
@@ -313,14 +316,67 @@ export function ChoicesEditor({
                             filter
                         );
 
-                        return list.length > 0 ? (
-                            <HudSection
-                                key={entry.classId}
-                                title={`${cls.name} ${entry.level}`}
-                            >
-                                <div className="space-y-4">{list}</div>
-                            </HudSection>
-                        ) : null;
+                        const kitChoice =
+                            creation && !only && data.classes[0] === entry
+                                ? defs.find((c) => c.atCreation)
+                                : undefined;
+
+                        return (
+                            <Fragment key={entry.classId}>
+                                {kitChoice && (
+                                    <HudSection title={t('kit.title')}>
+                                        <div className="space-y-3">
+                                            <p className="text-xs text-hud-muted">
+                                                {t('kit.optional')}
+                                            </p>
+                                            <ChoicePicker
+                                                choice={kitChoice}
+                                                value={
+                                                    entry.choices?.[
+                                                        kitChoice.id
+                                                    ] ?? []
+                                                }
+                                                onChange={(picked) =>
+                                                    setPicks({
+                                                        ...entry.choices,
+                                                        [kitChoice.id]: picked,
+                                                    })
+                                                }
+                                                ctx={ctx}
+                                                error={issueFor(
+                                                    issues,
+                                                    `classes.${entry.classId}.${kitChoice.id}`
+                                                )}
+                                            />
+                                            <HudButton
+                                                type="button"
+                                                className="underline"
+                                                disabled={
+                                                    !entry.choices?.[
+                                                        kitChoice.id
+                                                    ]?.length
+                                                }
+                                                onClick={() =>
+                                                    setPicks({
+                                                        ...entry.choices,
+                                                        [kitChoice.id]: [],
+                                                    })
+                                                }
+                                            >
+                                                {t('kit.none')}
+                                            </HudButton>
+                                        </div>
+                                    </HudSection>
+                                )}
+                                {list.length > 0 && (
+                                    <HudSection
+                                        title={`${cls.name} ${entry.level}`}
+                                    >
+                                        <div className="space-y-4">{list}</div>
+                                    </HudSection>
+                                )}
+                            </Fragment>
+                        );
                     })}
         </div>
     );

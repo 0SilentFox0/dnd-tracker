@@ -66,6 +66,24 @@ export function localizationOf(
         : null;
 }
 
+export function templateDisplayName(
+    source: TemplateIdentity & { name: string },
+    locale: string
+): string {
+    if (
+        source.kind !== CampaignKind.TEMPLATE ||
+        source.visibility !== CampaignVisibility.OFFICIAL ||
+        (source.locale != null && source.locale !== 'en')
+    )
+        return source.name;
+
+    const key = templateKeyOf(source);
+
+    const names = key ? templateOf(key)?.names : undefined;
+
+    return names?.[locale === 'uk' ? 'uk' : 'en'] ?? source.name;
+}
+
 export const isLocalizableTemplate = (source: TemplateIdentity): boolean =>
     localizationOf(source) !== null;
 export const isCanonicalTemplate = (source: TemplateIdentity): boolean =>

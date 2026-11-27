@@ -4,7 +4,10 @@
     "subtitle": "NPCs the heroes have met",
     "empty": "No acquaintances yet",
     "search": "Search acquaintances",
-    "hiddenFromPlayers": "Players can't see this section yet — enable it in the campaign settings."
+    "hiddenFromPlayers": "Players can't see this section yet — enable it in the campaign settings.",
+    "add": "Open the scenario",
+    "emptyHint": "NPCs your heroes meet will appear here.",
+    "emptyHintDm": "Acquaintances are added from scenario pages: open a page and add an NPC there."
   },
   "card": {
     "hidden": "Hidden",

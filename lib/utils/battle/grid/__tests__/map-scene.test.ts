@@ -78,6 +78,7 @@ function input({ actor, mode, ...over }: InputOverride = {}): MapSceneInput {
                 canSeeEnemyHp: false,
             },
             canAct: true,
+            isMyTurn: true,
             isDM: false,
             attackReady: true,
             ...actor,
@@ -100,6 +101,60 @@ describe('deriveMapScene: reach', () => {
         const s = deriveMapScene(input({ actor: { canAct: false } }));
 
         expect(s.view.reach).toBeNull();
+    });
+});
+
+describe('deriveMapScene: invalid move feedback', () => {
+    it('empty cell outside the reach rejects with outOfReach', () => {
+        const s = deriveMapScene(input());
+
+        expect(s.cellClick({ x: 9, y: 4 })).toEqual({
+            kind: 'reject',
+            reason: textRef(REJECT.moveOutOfReach),
+        });
+    });
+
+    it('a cell held by someone else rejects as occupied', () => {
+        const buddy = at('b', { x: 4, y: 0 }, ParticipantSide.ALLY);
+
+        const s = deriveMapScene(
+            input({ participants: [hero, near, far, reserved, buddy] })
+        );
+
+        expect(s.cellClick({ x: 4, y: 0 })).toEqual({
+            kind: 'reject',
+            reason: textRef(REJECT.mapOccupied),
+        });
+    });
+
+    it('own turn during the turn-start gate stays silent', () => {
+        const mine = at('m', { x: 3, y: 3 }, ParticipantSide.ALLY);
+
+        mine.basicInfo.controlledBy = 'u1';
+
+        const s = deriveMapScene(
+            input({ participants: [hero, mine], actor: { canAct: false } })
+        );
+
+        expect(s.cellClick({ x: 9, y: 4 })).toEqual({ kind: 'none' });
+    });
+
+    it('owner off-turn gets notYourTurn, a stranger stays silent', () => {
+        const mine = at('m', { x: 3, y: 3 }, ParticipantSide.ALLY);
+
+        mine.basicInfo.controlledBy = 'u1';
+
+        const owner = deriveMapScene(
+            input({
+                participants: [hero, mine],
+                actor: { canAct: false, isMyTurn: false },
+            })
+        );
+
+        expect(owner.cellClick({ x: 9, y: 4 })).toEqual({
+            kind: 'reject',
+            reason: textRef(REJECT.moveNotYourTurn),
+        });
     });
 });
 
@@ -305,7 +360,10 @@ describe('deriveMapScene', () => {
             })
         );
 
-        expect(s.cellClick({ x: 9, y: 4 })).toEqual({ kind: 'none' });
+        expect(s.cellClick({ x: 9, y: 4 })).toEqual({
+            kind: 'reject',
+            reason: textRef(REJECT.moveOutOfReach),
+        });
         expect(s.tokenClick('e1')).toEqual({
             kind: 'attack',
             targetId: 'e1',

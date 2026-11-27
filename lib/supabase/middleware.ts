@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { waitUntil } from '@vercel/functions';
 
+import { AFTER_SIGN_IN_PATH } from '@/lib/constants/auth';
 import { STATIC_PUBLIC_PATHS } from '@/lib/constants/site';
 import { parseClientIp, parseCountry } from '@/lib/utils/admin/client-ip';
 import { parseDevice } from '@/lib/utils/admin/device';
@@ -17,6 +18,7 @@ import {
     ipRateLimitResponse,
     ipScopeOf,
 } from '@/lib/utils/api/ip-rate-limit';
+import { safeNextPath } from '@/lib/utils/auth/next-path';
 
 /** CSRF defense: mutating /api/* requests must be same-origin (Origin or Sec-Fetch-Site). A missing Origin is rejected except `Sec-Fetch-Site: same-origin|none`, Bearer calls and NO_ORIGIN_PREFIXES; `/api/pusher/auth` stays covered since the client is always same-origin. */
 const SIGN_OUT_PATH = '/auth/signout';
@@ -180,17 +182,27 @@ export async function updateSession(request: NextRequest) {
     if (!user && !isPublicPath) {
         const url = request.nextUrl.clone();
 
+        const next = request.nextUrl.pathname + request.nextUrl.search;
+
         url.pathname = '/sign-in';
+        url.search = '';
+
+        if (next !== AFTER_SIGN_IN_PATH) url.searchParams.set('next', next);
 
         return NextResponse.redirect(url);
     }
 
-    if (user && request.nextUrl.pathname.startsWith('/sign-in')) {
-        const url = request.nextUrl.clone();
+    if (
+        user &&
+        (request.nextUrl.pathname.startsWith('/sign-in') ||
+            request.nextUrl.pathname.startsWith('/sign-up'))
+    ) {
+        const target = new URL(
+            safeNextPath(request.nextUrl.searchParams.get('next')),
+            request.url
+        );
 
-        url.pathname = '/campaigns';
-
-        return NextResponse.redirect(url);
+        return NextResponse.redirect(target);
     }
 
     if (

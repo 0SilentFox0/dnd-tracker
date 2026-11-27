@@ -403,7 +403,7 @@ describe('campaign templates API', () => {
     });
 
     it('join за кодом шаблону — 403 TEMPLATE_NOT_JOINABLE', async () => {
-        m.db.campaign.findFirst.mockResolvedValue({
+        m.db.campaign.findUnique.mockResolvedValue({
             id: 't1',
             kind: 'template',
             status: 'active',
@@ -417,7 +417,7 @@ describe('campaign templates API', () => {
     });
 
     it('join за кодом демо-кампанії — 403 DEMO_NOT_JOINABLE, без запису членства', async () => {
-        m.db.campaign.findFirst.mockResolvedValue({
+        m.db.campaign.findUnique.mockResolvedValue({
             id: 'd1',
             kind: 'demo',
             status: 'active',

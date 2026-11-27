@@ -11,6 +11,7 @@ import { REFERENCE_STALE_MS } from '@/lib/providers/query-provider';
 import {
     DEFAULT_TEMPLATE_KEY,
     isCanonicalTemplate,
+    templateDisplayName,
     templateKeyOf,
 } from '@/lib/utils/templates/registry';
 import type { TemplateSelection } from '@/types/campaigns';
@@ -44,7 +45,11 @@ export function useTemplateSelection() {
 
     const name =
         selection.file?.name.replace(/\.json$/i, '') ??
-        all.find((t) => t.id === selection.templateId)?.name;
+        (() => {
+            const tpl = all.find((t) => t.id === selection.templateId);
+
+            return tpl && templateDisplayName(tpl, uiLocale);
+        })();
 
     const setSelection = (next: TemplateSelection) => {
         if (next.file) return setChosen({ file: next.file });

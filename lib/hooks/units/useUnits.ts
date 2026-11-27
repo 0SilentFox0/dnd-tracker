@@ -8,6 +8,7 @@ import {
     deleteUnit,
     getUnit,
     getUnits,
+    getUnitsCompact,
     updateUnit,
 } from '@/lib/api/units';
 import { invalidateCampaignRules } from '@/lib/hooks/campaigns/invalidate';
@@ -27,6 +28,18 @@ export function useUnits(
         queryFn: () => getUnits(campaignId),
         staleTime: REFERENCE_STALE_MS,
         ...(initialUnits !== undefined && { initialData: initialUnits }),
+        enabled: !!campaignId && (opts?.enabled ?? true),
+    });
+}
+
+export function useUnitsCompact(
+    campaignId: string,
+    opts?: { enabled?: boolean }
+) {
+    return useQuery({
+        queryKey: unitKeys.compact(campaignId),
+        queryFn: () => getUnitsCompact(campaignId),
+        staleTime: REFERENCE_STALE_MS,
         enabled: !!campaignId && (opts?.enabled ?? true),
     });
 }

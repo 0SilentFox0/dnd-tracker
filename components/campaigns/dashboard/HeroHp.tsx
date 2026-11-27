@@ -1,4 +1,11 @@
+import { type HpTone,hpTone } from '@/lib/utils/battle/view/health';
 import type { HeroHpValue } from '@/types/campaigns';
+
+const TONE_GRADIENT: Record<HpTone, string> = {
+    high: 'linear-gradient(#9be87a, #3c8a2c)',
+    mid: 'linear-gradient(#ffe27a, #c4921a)',
+    low: 'linear-gradient(#ff8264, #a32216)',
+};
 
 export function HeroHp({ hp }: { hp: HeroHpValue }) {
     const pct =
@@ -31,10 +38,10 @@ export function HeroHp({ hp }: { hp: HeroHpValue }) {
             >
                 <div
                     className="h-full rounded-full"
+                    data-hp-tone={hpTone(pct / 100)}
                     style={{
                         width: `${pct}%`,
-                        background:
-                            'linear-gradient(var(--hud-hp), var(--hud-hp-2))',
+                        background: TONE_GRADIENT[hpTone(pct / 100)],
                     }}
                 />
             </div>

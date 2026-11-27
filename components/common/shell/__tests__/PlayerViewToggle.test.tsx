@@ -9,7 +9,7 @@ afterEach(cleanup);
 const labels = { on: 'Player view: on', off: 'Player view: off' };
 
 describe('PlayerViewToggle', () => {
-    it('reflects state via aria-pressed and label, with the hotkey in the title', () => {
+    it('reflects state via aria-pressed and label, without a native title', () => {
         const { rerender } = render(
             <PlayerViewToggle
                 enabled={false}
@@ -21,7 +21,7 @@ describe('PlayerViewToggle', () => {
         const button = screen.getByRole('button', { name: labels.off });
 
         expect(button.getAttribute('aria-pressed')).toBe('false');
-        expect(button.getAttribute('title')).toContain('P');
+        expect(button.getAttribute('title')).toBeNull();
 
         rerender(
             <PlayerViewToggle enabled onToggle={vi.fn()} labels={labels} />

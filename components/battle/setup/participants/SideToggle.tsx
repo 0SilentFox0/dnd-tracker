@@ -8,6 +8,21 @@ import { HudSegmented } from '@/components/hud';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { cn } from '@/lib/utils';
 
+const SIDES = [
+    {
+        side: ParticipantSide.ALLY,
+        key: 'ally',
+        Icon: Shield,
+        tone: 'text-hud-accent-fg',
+    },
+    {
+        side: ParticipantSide.ENEMY,
+        key: 'enemy',
+        Icon: Swords,
+        tone: 'text-hud-crimson-fg',
+    },
+] as const;
+
 interface SideToggleProps {
     side: ParticipantSide;
     onChange: (side: ParticipantSide) => void;
@@ -43,32 +58,22 @@ export function SideToggle({
                 label={label}
                 value={side}
                 onValueChange={onChange}
-                options={[
-                    {
-                        value: ParticipantSide.ALLY,
-                        label: (
-                            <>
-                                <span className="sr-only">{t('ally')}</span>
-                                <Shield
-                                    className="size-4 text-hud-accent-fg"
-                                    aria-hidden
-                                />
-                            </>
-                        ),
-                    },
-                    {
-                        value: ParticipantSide.ENEMY,
-                        label: (
-                            <>
-                                <span className="sr-only">{t('enemy')}</span>
-                                <Swords
-                                    className="size-4 text-hud-crimson-fg"
-                                    aria-hidden
-                                />
-                            </>
-                        ),
-                    },
-                ]}
+                options={SIDES.map(({ side: value, key, Icon, tone }) => ({
+                    value,
+                    label: (
+                        <>
+                            <Icon className={cn('size-4', tone)} aria-hidden />
+                            <span
+                                className={cn(
+                                    'text-[11px]',
+                                    layout === 'compact' ? 'sr-only' : 'ml-1'
+                                )}
+                            >
+                                {t(key)}
+                            </span>
+                        </>
+                    ),
+                }))}
             />
         </div>
     );

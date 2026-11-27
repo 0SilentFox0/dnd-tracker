@@ -109,6 +109,7 @@ describe('buildGraphModel', () => {
             target: 'unit:u1',
         });
         expect(m.edges.some((e) => e.target === 'character:c1')).toBe(false);
+        expect(m.collapsedLeaves).toBe(2);
     });
 
     it('showLeaves expands leaves', () => {

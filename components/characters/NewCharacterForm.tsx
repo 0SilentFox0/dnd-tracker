@@ -31,8 +31,10 @@ import {
     useCharacterForm,
     useChoiceRefs,
     useCreateCharacter,
+    useOpenSpellPicks,
 } from '@/lib/hooks/characters';
 import { useClassMode } from '@/lib/hooks/classes';
+import { useNotify } from '@/lib/hooks/common';
 import { useRaces } from '@/lib/hooks/races';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { pruneFormChoices } from '@/lib/utils/characters/choices/prune';
@@ -57,7 +59,11 @@ export function NewCharacterForm({
 
     const tc = useTranslations('common');
 
+    const tChoices = useTranslations('choices');
+
     const create = useCreateCharacter(id);
+
+    const notify = useNotify();
 
     const { members, isLoading: membersLoading } = useCampaignMembers(id);
 
@@ -75,6 +81,8 @@ export function NewCharacterForm({
 
     const refsRef = useRef<ChoiceRefsView | null>(null);
 
+    const openSpellsRef = useRef(0);
+
     const {
         status: { isLoading, error },
         formData,
@@ -90,11 +98,31 @@ export function NewCharacterForm({
         seedCharacteristics: system.characteristics.defaults,
         recommendScores: classMode.byId,
         onSubmit: async (data) => {
-            await create.mutateAsync(
+            const created = await create.mutateAsync(
                 refsRef.current?.ready
                     ? pruneFormChoices(data, refsRef.current)
                     : data
             );
+
+            const notices = [
+                ...(created.kitSkipped?.length
+                    ? [
+                          tChoices('kit.skipped', {
+                              names: created.kitSkipped.join(', '),
+                          }),
+                      ]
+                    : []),
+                ...(openSpellsRef.current > 0
+                    ? [
+                          tChoices('kit.openSpells', {
+                              count: openSpellsRef.current,
+                          }),
+                      ]
+                    : []),
+            ];
+
+            if (notices.length > 0) await notify(notices.join('\n'));
+
             router.push(
                 `/campaigns/${id}/dm/characters?type=${data.basicInfo.type}`
             );
@@ -103,17 +131,20 @@ export function NewCharacterForm({
 
     const refs = useChoiceRefs(id, basicInfo.data.race);
 
+    const heroClassMode =
+        classMode.enabled &&
+        (basicInfo.data.classes ?? []).some((e) => e.classId);
+
+    const openSpells = useOpenSpellPicks(refs, formData, heroClassMode);
+
     useEffect(() => {
         refsRef.current = refs;
-    }, [refs]);
+        openSpellsRef.current = openSpells;
+    }, [refs, openSpells]);
 
     const raceHasChoices =
         (races.find((r) => r.name === basicInfo.data.race)?.choices?.length ??
             0) > 0;
-
-    const heroClassMode =
-        classMode.enabled &&
-        (basicInfo.data.classes ?? []).some((e) => e.classId);
 
     const tabs: HudTab<CharacterFormTabId>[] = [
         {
@@ -184,11 +215,13 @@ export function NewCharacterForm({
                   {
                       id: CHARACTER_FORM_TAB.choices,
                       label: tc('tabs.choices'),
+                      badge: openSpells > 0 ? openSpells : undefined,
                       content: (
                           <CharacterChoicesTab
                               campaignId={id}
                               form={{ data: formData, set: setFormData }}
                               classesEnabled={classMode.enabled}
+                              creation
                           />
                       ),
                   },

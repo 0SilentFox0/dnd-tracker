@@ -47,12 +47,14 @@ export {
     type InventorySelection,
     useInventory,
 } from './useInventory';
+export { useOpenSpellPicks } from './useOpenSpellPicks';
 export {
     useAwardXp,
     useCharacterLog,
     useEditResources,
     useRest,
     useSheetRoll,
+    useSlotToggle,
     useSpendHitDie,
 } from './useOutOfCombat';
 export {

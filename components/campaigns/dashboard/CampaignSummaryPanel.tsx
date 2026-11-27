@@ -41,7 +41,14 @@ export function CampaignSummaryPanel({
                 <HudPill tone="bone">
                     {t('maxLevel')} · {campaign.maxLevel}
                 </HudPill>
-                {memberCount && <HudPill tone="muted">{memberCount}</HudPill>}
+                {memberCount && (
+                    <HudPill
+                        tone="muted"
+                        className="h-auto max-w-full min-w-0 shrink py-0.5 leading-4"
+                    >
+                        {memberCount}
+                    </HudPill>
+                )}
                 {isDM && campaign.inviteCode && (
                     <div
                         id="invite"

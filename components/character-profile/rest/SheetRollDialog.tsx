@@ -15,6 +15,7 @@ import { useSheetRoll } from '@/lib/hooks/characters';
 import { prefersReducedMotion } from '@/lib/hooks/common';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { cryptoRandom } from '@/lib/utils/common/dice';
+import type { DieSides } from '@/types/battle-actions';
 import type {
     SheetRollBody,
     SheetRollExtra,
@@ -25,6 +26,8 @@ export type { SheetRollRequest };
 
 const DICE_WAIT_MS = 1200;
 
+const DIE_SIDES: number[] = [4, 6, 8, 10, 12, 20];
+
 function rollBody(
     subject: SheetRollBody,
     difficulty: string,
@@ -32,6 +35,9 @@ function rollBody(
     extra: SheetRollExtra
 ): SheetRollBody {
     if (subject.kind === 'test') return { ...subject, difficulty, ...extra };
+
+    if (subject.kind === 'damage')
+        return { ...subject, ...(extra.critical && { crit: true }) };
 
     return { ...subject, ...(useInspiration && { useInspiration: true }) };
 }
@@ -93,19 +99,26 @@ export function SheetRollDialog({
             setUseInspiration(false);
             setExtra({});
 
-            if (r.kind === 'check' && !prefersReducedMotion()) {
+            const groups =
+                r.kind === 'check'
+                    ? [r.rolls.map((value) => ({ sides: 20 as const, value }))]
+                    : r.kind === 'damage'
+                      ? [
+                            r.dice.filter(
+                                (d): d is { sides: DieSides; value: number } =>
+                                    DIE_SIDES.includes(d.sides as DieSides)
+                            ),
+                        ]
+                      : null;
+
+            if (groups?.[0].length && !prefersReducedMotion()) {
                 const mine = ++run.current;
 
                 setRolling(true);
                 await Promise.race([
                     stage.current?.play({
                         seed: Math.floor(cryptoRandom() * 2 ** 31),
-                        groups: [
-                            r.rolls.map((value) => ({
-                                sides: 20 as const,
-                                value,
-                            })),
-                        ],
+                        groups,
                     }),
                     new Promise((resolve) => setTimeout(resolve, DICE_WAIT_MS)),
                 ]);
@@ -140,7 +153,8 @@ export function SheetRollDialog({
             {Ui.rerollToken &&
                 sheet.rest?.inspiration &&
                 !result &&
-                request?.subject.kind !== 'test' && (
+                request?.subject.kind !== 'test' &&
+                request?.subject.kind !== 'damage' && (
                     <Ui.rerollToken.SheetOption
                         checked={useInspiration}
                         onChange={setUseInspiration}

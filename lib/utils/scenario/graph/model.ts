@@ -180,6 +180,7 @@ export function buildGraphModel(
         sequence,
         relations,
         truncated,
+        collapsedLeaves: collapsed.length,
         entityTotal: candidates.length,
     };
 }

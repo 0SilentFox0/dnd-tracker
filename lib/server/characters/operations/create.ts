@@ -20,6 +20,7 @@ import {
 import { deriveCharacterDefaults } from '@/lib/server/characters/core/derive-character-defaults';
 import { resolveCharacterOwner } from '@/lib/server/characters/core/resolve-character-owner';
 import { normalizeCharacterInput } from '@/lib/server/characters/core/system-fields';
+import { grantStartingKit } from '@/lib/server/characters/kit/grant-kit';
 import { ContentError } from '@/lib/server/content/errors';
 import { PUBLIC_USER_SELECT } from '@/lib/server/users/db-user';
 import { resolveAvatarForPersistence } from '@/lib/supabase/avatar-storage';
@@ -30,9 +31,12 @@ import {
     classSkillIssues,
     skillIdsInPicks,
 } from '@/lib/utils/characters/choices/class-skills';
+import { pickedKit } from '@/lib/utils/characters/choices/kit';
 import { hasPicks } from '@/lib/utils/characters/choices/read';
+import { classesEnabled as hasClasses } from '@/lib/utils/characters/classes/classes-enabled';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { toInputJson } from '@/lib/utils/common/json';
+import { parseRules } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 import {
@@ -299,36 +303,60 @@ async function createCharacterCore(
     );
 
     try {
-        const character = await prisma.character.create({
-            data: characterCreateData({
-                campaignId,
-                rules: campaign.rules,
-                system,
-                data,
-                initiative,
-                fromClasses,
-                choices,
-                owner,
-                avatar,
-                spellSlots,
-                split,
-            }),
-            include: { user: { select: PUBLIC_USER_SELECT } },
+        const kit = pickedKit(entries, applied.classesById ?? {});
+
+        const { character, skipped } = await prisma.$transaction(async (tx) => {
+            const created = await tx.character.create({
+                data: characterCreateData({
+                    campaignId,
+                    rules: campaign.rules,
+                    system,
+                    data,
+                    initiative,
+                    fromClasses,
+                    choices,
+                    owner,
+                    avatar,
+                    spellSlots,
+                    split,
+                }),
+                include: { user: { select: PUBLIC_USER_SELECT } },
+            });
+
+            await tx.characterInventory.create({
+                data: {
+                    characterId: created.id,
+                    equipped: {},
+                    backpack: [],
+                    gold: 0,
+                    silver: 0,
+                    copper: 0,
+                    items: [],
+                },
+            });
+
+            const granted = kit
+                ? await grantStartingKit(
+                      tx,
+                      {
+                          campaignId,
+                          characterId: created.id,
+                          actorUserId: access.userId,
+                          classesEnabled: hasClasses(
+                              parseRules(campaign.rules)
+                          ),
+                      },
+                      kit
+                  )
+                : { skipped: [] };
+
+            return { character: created, skipped: granted.skipped };
         });
 
-        await prisma.characterInventory.create({
-            data: {
-                characterId: character.id,
-                equipped: {},
-                backpack: [],
-                gold: 0,
-                silver: 0,
-                copper: 0,
-                items: [],
-            },
-        });
-
-        return columnViewDto(character, system);
+        return {
+            ...columnViewDto(character, system),
+            ...(skipped.length > 0 && { kitSkipped: skipped }),
+        };
     } catch (error) {
         if (
             error instanceof Prisma.PrismaClientKnownRequestError &&

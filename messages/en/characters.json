@@ -57,7 +57,10 @@
       "subclassPlaceholder": "For example: Oath of Vengeance",
       "archetype": "Archetype",
       "alignment": "Alignment",
-      "level": "Level"
+      "level": "Level",
+      "subraceOther": "Other…",
+      "subraceNone": "No subrace",
+      "subraceCustomPlaceholder": "Custom subrace"
     },
     "classes": {
       "classN": "Class {n}",
@@ -73,7 +76,8 @@
       "totalLevel": "Total level: {level}",
       "hitDice": "Hit dice: {dice}",
       "skillChoice": "Choose {count} skills from: {from}",
-      "level": "Level"
+      "level": "Level",
+      "fromLevelHint": "A subclass is chosen from level {level}; the field is disabled until then."
     },
     "personalAbility": {
       "label": "Ability (Personal)",
@@ -94,7 +98,9 @@
     "armorClass": "Armor class (AC)",
     "classArmorHint": "AC is calculated from armor and Dexterity",
     "minTargets": "Min targets",
-    "maxTargets": "Max targets"
+    "maxTargets": "Max targets",
+    "initiativeHint": "Bonus added to the initiative roll when a battle starts. Allowed: {min} to {max}.",
+    "targetsHint": "How many targets one attack can hit at once; normally 1."
   },
   "spells": {
     "loadError": "Failed to load spells: {message}",

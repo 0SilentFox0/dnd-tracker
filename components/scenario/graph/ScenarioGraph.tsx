@@ -223,21 +223,26 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
                     onNextMatch: set.nextMatch,
                 }}
             />
-            {state.truncated > 0 ? (
+            {state.truncated + state.collapsedLeaves > 0 ? (
                 <div
                     role="status"
                     className="flex items-center gap-3 rounded-md border px-3 py-1.5 text-sm"
                 >
                     <span>
                         {t('limits.truncated', {
-                            shown: state.entityTotal - state.truncated,
+                            shown:
+                                state.entityTotal -
+                                state.truncated -
+                                state.collapsedLeaves,
                             total: state.entityTotal,
                         })}
                     </span>
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => set.filters({ showAll: true })}
+                        onClick={() =>
+                            set.filters({ showAll: true, showLeaves: true })
+                        }
                     >
                         {t('limits.showAll')}
                     </Button>

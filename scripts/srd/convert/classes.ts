@@ -302,3 +302,28 @@ export function convertClasses(data: Open5eData): ClassRow[] {
         })
         .sort(bySlug);
 }
+
+/** Raw `Starting Equipment` cell of each class's core traits table, by class slug. */
+export function startingEquipmentCells(
+    data: Open5eData
+): Record<string, string> {
+    return Object.fromEntries(
+        data.classes
+            .filter((c) => !c.fields.subclass_of)
+            .flatMap((c) => {
+                const core = data.features.find(
+                    (f) =>
+                        f.fields.parent === c.pk &&
+                        f.fields.feature_type === 'CORE_TRAITS_TABLE'
+                );
+
+                const cell = core
+                    ? /\|Starting Equipment\|([^|]*)\|/.exec(
+                          core.fields.desc
+                      )?.[1]
+                    : undefined;
+
+                return cell ? [[c.pk, cell.trim()]] : [];
+            })
+    );
+}

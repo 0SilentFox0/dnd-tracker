@@ -1,5 +1,11 @@
 import * as React from 'react';
 
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 type ButtonProps = React.ComponentProps<'button'>;
@@ -32,18 +38,39 @@ export const HudIconButton = React.forwardRef<
         size?: keyof typeof ICON_SIZES;
         tone?: keyof typeof TONES;
     }
->(({ className, size = 'sm', tone, ...props }, ref) => (
-    <HudButton
-        ref={ref}
-        data-slot="hud-icon-button"
-        className={cn(
-            'flex items-center justify-center',
-            ICON_SIZES[size],
-            tone && TONES[tone],
-            className
-        )}
-        {...props}
-    />
-));
+>(({ className, size = 'sm', tone, title, ...props }, ref) => {
+    const label = props['aria-label'] ?? title;
+
+    const tip = title ?? label;
+
+    const wrap = !!tip && !props.disabled;
+
+    const button = (
+        <HudButton
+            ref={ref}
+            data-slot="hud-icon-button"
+            className={cn(
+                'flex items-center justify-center',
+                ICON_SIZES[size],
+                tone && TONES[tone],
+                className
+            )}
+            {...props}
+            {...(label && { 'aria-label': label })}
+            {...(!wrap && { title })}
+        />
+    );
+
+    if (!wrap) return button;
+
+    return (
+        <TooltipProvider delayDuration={200}>
+            <Tooltip>
+                <TooltipTrigger asChild>{button}</TooltipTrigger>
+                <TooltipContent>{tip}</TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    );
+});
 
 HudIconButton.displayName = 'HudIconButton';

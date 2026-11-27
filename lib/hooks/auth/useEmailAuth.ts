@@ -127,6 +127,8 @@ export function useEmailSignUp() {
 
     const router = useRouter();
 
+    const searchParams = useSearchParams();
+
     const { pending, error, run } = useRequestState();
 
     const [sentTo, setSentTo] = useState<string | null>(null);
@@ -134,12 +136,16 @@ export function useEmailSignUp() {
     const signUp = async ({ displayName, email, password }: SignUpValues) => {
         let signedIn = false;
 
+        const next = safeNextPath(searchParams.get('next'));
+
         const ok = await run(async () => {
             const { data, error: failure } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
-                    emailRedirectTo: callbackUrl(),
+                    emailRedirectTo: callbackUrl(
+                        next === AFTER_SIGN_IN_PATH ? undefined : next
+                    ),
                     data: { full_name: displayName },
                 },
             });
@@ -153,7 +159,7 @@ export function useEmailSignUp() {
 
         // projects without email confirmation hand back a session right away
         if (signedIn) {
-            router.replace(AFTER_SIGN_IN_PATH);
+            router.replace(next);
             router.refresh();
 
             return;
@@ -248,11 +254,13 @@ export function useRedirectIfSignedIn() {
 
     const router = useRouter();
 
+    const next = useSearchParams().get('next');
+
     useEffect(() => {
         void supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user) router.replace(AFTER_SIGN_IN_PATH);
+            if (user) router.replace(safeNextPath(next));
         });
-    }, [router, supabase]);
+    }, [router, supabase, next]);
 }
 
 export function useAuthUrlError(): string | null {

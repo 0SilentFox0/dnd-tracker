@@ -31,7 +31,7 @@ import type {
     SheetRollBody,
     SheetRollResult,
 } from '@/types/characters';
-import type { ChoicesBody } from '@/types/choices';
+import type { ChoicesBody, StartingKitResult } from '@/types/choices';
 import type { ClassLevelUpPick } from '@/types/classes';
 
 export async function getCharacter(
@@ -117,10 +117,14 @@ export async function getCharacters(
 export async function createCharacter(
     campaignId: string,
     data: CharacterFormData
-): Promise<Character> {
+): Promise<Character & StartingKitResult> {
     const flatData = formDataToCharacter(data);
 
-    return campaignPost<Character>(campaignId, '/characters', flatData);
+    return campaignPost<Character & StartingKitResult>(
+        campaignId,
+        '/characters',
+        flatData
+    );
 }
 
 export async function updateCharacter(

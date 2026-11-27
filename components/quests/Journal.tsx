@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ScrollText } from 'lucide-react';
+import { Plus, ScrollText } from 'lucide-react';
 
 import { QuestDetails } from './QuestDetails';
 import { QuestEditor } from './QuestEditor';
@@ -69,7 +69,11 @@ function JournalBook({
                 title={t('title')}
                 actions={
                     isDM && (
-                        <Button onClick={() => setEditing('new')}>
+                        <Button
+                            onClick={() => setEditing('new')}
+                            className="gap-2"
+                        >
+                            <Plus className="size-4" />
                             {t('new')}
                         </Button>
                     )
@@ -99,9 +103,11 @@ function JournalBook({
                 <EmptyState
                     icon={ScrollText}
                     title={t(isDM ? 'empty' : 'emptyPlayer')}
+                    description={t(isDM ? 'emptyHint' : 'emptyPlayerHint')}
                     action={
                         isDM ? (
                             <Button onClick={() => setEditing('new')}>
+                                <Plus className="size-4" />
                                 {t('new')}
                             </Button>
                         ) : undefined

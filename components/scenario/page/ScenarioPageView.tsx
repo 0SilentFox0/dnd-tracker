@@ -89,6 +89,9 @@ export function ScenarioPageView({
                             type="button"
                             className="toggle played"
                             aria-pressed={done}
+                            title={
+                                isHero ? t('revealHint') : t('playedHint')
+                            }
                             disabled={progress.pending}
                             onClick={() =>
                                 isHero

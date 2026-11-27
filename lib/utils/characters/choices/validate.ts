@@ -224,7 +224,8 @@ export function validatePicks(
 
         if (!choice) return [choiceIssue(at, 'CHOICE_UNKNOWN', choiceId)];
 
-        if (!isChoiceOpen(choice, ctx.level, ctx.owner)) return [];
+        if (!choice.atCreation && !isChoiceOpen(choice, ctx.level, ctx.owner))
+            return [];
 
         const issues: ChoiceIssue[] = [];
 

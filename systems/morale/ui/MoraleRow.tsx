@@ -9,7 +9,15 @@ import { signed } from '@/lib/utils/common/format';
 export function MoraleRow({ sheet, rules }: CombatRowProps) {
     const tg = useTranslations('gameTerms');
 
+    const t = useTranslations('rulesMorale');
+
     if (!rules.morale.enabled) return null;
 
-    return <CombatRow label={tg('stats.moral')} value={signed(sheet.morale)} />;
+    return (
+        <CombatRow
+            label={tg('stats.moral')}
+            hint={t('sheetHint')}
+            value={signed(sheet.morale)}
+        />
+    );
 }

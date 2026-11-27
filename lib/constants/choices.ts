@@ -30,4 +30,7 @@ export const CHOICE_LIMITS = {
     listLength: 40,
     characterFeats: 30,
     grantUses: 20,
+    kitItems: 12,
+    kitGold: 10000,
+    kitQuantity: 20,
 } as const;

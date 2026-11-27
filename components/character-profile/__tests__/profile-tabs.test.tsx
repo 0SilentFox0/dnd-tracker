@@ -28,6 +28,8 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
     ...(await orig<object>()),
     useCharacterRoster: () => ({ data: [], isLoading: false }),
     useTransferArtifact: () => ({ mutateAsync: vi.fn(), isPending: false }),
+    useSheetRoll: () => ({ mutateAsync: vi.fn(), isPending: false }),
+    useSlotToggle: () => ({ setCurrent: vi.fn(), isPending: false }),
     useStashAction: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 vi.mock('@/lib/hooks/campaigns', () => ({
@@ -93,7 +95,8 @@ describe('таби профілю', () => {
         expect(screen.getByRole('dialog')).toHaveAccessibleName(
             'characterProfile.spellBook.title'
         );
-        expect(screen.getByText('Мітка мисливця')).toBeTruthy();
+        // list row + wide-screen detail preview
+        expect(screen.getAllByText('Мітка мисливця')).toHaveLength(2);
     });
 
     it('Магія без заклинань — порожня книга з написом, без кнопки книги', () => {

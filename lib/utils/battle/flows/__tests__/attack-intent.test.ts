@@ -5,6 +5,7 @@ import {
     isIntentStale,
     participantAttackIntent,
     type ParticipantClickScene,
+    quickAttackAllowed,
 } from '../attack-intent';
 
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
@@ -97,14 +98,32 @@ function clickScene(
     };
 }
 
+describe('quickAttackAllowed', () => {
+    const base = { maxTargets: 1, hitsAllEnemies: false, systemInput: false };
+
+    it('одна ціль без особливостей - дозволено', () => {
+        expect(quickAttackAllowed(base)).toBe(true);
+    });
+
+    it.each([
+        { maxTargets: 2 },
+        { hitsAllEnemies: true },
+        { systemInput: true },
+    ])('вибір цілей чи ввід системи - візард %o', (patch) => {
+        expect(quickAttackAllowed({ ...base, ...patch })).toBe(false);
+    });
+});
+
 describe('participantAttackIntent', () => {
     it('ворог без карти — намір першою ближньою зброєю', () => {
         expect(participantAttackIntent(clickScene(), 'e')).toEqual({
-            targetId: 'e',
-            attackId: 'sword',
-            actorId: 'h',
-            round: 2,
-            turnIndex: 0,
+            intent: {
+                targetId: 'e',
+                attackId: 'sword',
+                actorId: 'h',
+                round: 2,
+                turnIndex: 0,
+            },
         });
     });
 
@@ -140,7 +159,7 @@ describe('participantAttackIntent', () => {
         ).toBeNull();
     });
 
-    it('на карті ціль недосяжна — лише вибір', () => {
+    it('на карті ціль недосяжна — причина замість наміру', () => {
         const order = [
             unit('h', ParticipantSide.ALLY, { position: { x: 0, y: 0 } }),
             unit('e', ParticipantSide.ENEMY, { position: { x: 5, y: 0 } }),
@@ -164,7 +183,7 @@ describe('participantAttackIntent', () => {
                 ),
                 'e'
             )
-        ).toBeNull();
+        ).toHaveProperty('reason');
     });
 });
 
@@ -205,7 +224,7 @@ describe('participantAttackIntent: герой, що вмирає', () => {
                 scene(downed({ successes: 0, failures: 0, stable: false })),
                 'd'
             )
-        ).toMatchObject({ targetId: 'd' });
+        ).toMatchObject({ intent: { targetId: 'd' } });
     });
 
     it('без кидків смерті (HOMM) — лише вибір', () => {
@@ -236,7 +255,9 @@ describe('participantAttackIntent: додаткова атака й друга �
     it('дія витрачена, але лічильник атак не порожній — намір є', () => {
         expect(
             participantAttackIntent(scene(used({ attacksLeft: 1 })), 'e')
-        ).toMatchObject({ targetId: 'e', attackId: 'sword' });
+        ).toMatchObject({
+            intent: { targetId: 'e', attackId: 'sword' },
+        });
     });
 
     it('дія витрачена й лічильник порожній — лише вибір', () => {
@@ -255,7 +276,7 @@ describe('participantAttackIntent: додаткова атака й друга �
                 ),
                 'e'
             )
-        ).toMatchObject({ attackId: 'sword' });
+        ).toMatchObject({ intent: { attackId: 'sword' } });
         expect(
             participantAttackIntent(
                 scene(unit('h', ParticipantSide.ALLY, { attacks: [dagger] })),

@@ -16,6 +16,7 @@ export { ACTION_RESULT_MS, useActionResult } from './useActionResult';
 export { useAddParticipantForm } from './useAddParticipantForm';
 export { useAttackWizard } from './useAttackWizard';
 export { type AuraZoneStep, useAuraZones } from './useAuraZones';
+export { useAutoEndTurnSetting } from './useAutoEndTurnSetting';
 export { useBattleAudioHost } from './useBattleAudioHost';
 export { useBattleFxQueue } from './useBattleFxQueue';
 export { useBattleMapFog } from './useBattleMapFog';
@@ -110,6 +111,8 @@ export {
     useParticipantFacesValue,
 } from './useParticipantFace';
 export { usePlayerTurn } from './usePlayerTurn';
+export { type PrepRoster, usePrepRoster } from './usePrepRoster';
+export { type QuickAttackModel, useQuickAttack } from './useQuickAttack';
 export { type SceneDrawerKey, useSceneDrawers } from './useSceneDrawers';
 export { useScrollToCurrent } from './useScrollToCurrent';
 export {

@@ -2,10 +2,12 @@ import {
     findParticipant,
     isAttackable,
 } from '@/lib/utils/abilities/engine/core/participants';
-import { canStartAttack, pickAttack } from '@/lib/utils/battle/grid';
+import { pickAttack } from '@/lib/utils/battle/grid/attack-reach';
+import { canStartAttack } from '@/lib/utils/battle/grid/map-scene';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { BattleScene } from '@/types/api';
 import type { BattleParticipant } from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
 export interface AttackIntent {
     targetId: string;
@@ -65,6 +67,22 @@ export interface ParticipantClickScene {
     attackReady: boolean;
 }
 
+export type AttackIntentResult = { intent: AttackIntent } | { reason: LogLine };
+
+export interface QuickAttackContext {
+    maxTargets: number;
+    hitsAllEnemies: boolean;
+    systemInput: boolean;
+}
+
+export function quickAttackAllowed({
+    maxTargets,
+    hitsAllEnemies,
+    systemInput,
+}: QuickAttackContext): boolean {
+    return maxTargets <= 1 && !hitsAllEnemies && !systemInput;
+}
+
 export function participantAttackIntent(
     {
         battle,
@@ -73,7 +91,7 @@ export function participantAttackIntent(
         attackReady,
     }: ParticipantClickScene,
     targetId: string
-): AttackIntent | null {
+): AttackIntentResult | null {
     if (!isMyTurn || anyPending || !attackReady || !canStartAttack(current))
         return null;
 
@@ -90,7 +108,7 @@ export function participantAttackIntent(
     )
         return null;
 
-    const { attack } = pickAttack(
+    const { attack, error } = pickAttack(
         battle.map ?? null,
         order,
         current,
@@ -99,13 +117,15 @@ export function participantAttackIntent(
         battle.rules
     );
 
-    return attack
-        ? {
-              targetId,
-              attackId: attack.id ?? attack.name,
-              actorId: current.basicInfo.id,
-              round: battle.currentRound,
-              turnIndex: battle.currentTurnIndex,
-          }
-        : null;
+    if (!attack) return error ? { reason: error } : null;
+
+    return {
+        intent: {
+            targetId,
+            attackId: attack.id ?? attack.name,
+            actorId: current.basicInfo.id,
+            round: battle.currentRound,
+            turnIndex: battle.currentTurnIndex,
+        },
+    };
 }

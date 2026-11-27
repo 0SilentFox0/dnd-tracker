@@ -109,6 +109,7 @@ export function AddSlidesBar({
                     variant="outline"
                     disabled={disabled}
                     onClick={() => puzzleInput.current?.click()}
+                    title={t('addSlides.puzzleHint')}
                     className="flex items-center gap-2"
                 >
                     <Puzzle className="size-4" />

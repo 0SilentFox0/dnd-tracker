@@ -16,13 +16,18 @@ describe('TurnCountdown', () => {
         const onStay = vi.fn();
 
         const { unmount } = render(
-            <TurnCountdown seconds={5} onElapsed={onElapsed} onStay={onStay} />
+            <TurnCountdown
+                seconds={5}
+                onElapsed={onElapsed}
+                onStay={onStay}
+                onDisable={() => {}}
+            />
         );
 
-        expect(screen.getByText('5')).toBeTruthy();
+        expect(screen.getByText('5 с')).toBeTruthy();
 
         act(() => vi.advanceTimersByTime(2_000));
-        expect(screen.getByText('3')).toBeTruthy();
+        expect(screen.getByText('3 с')).toBeTruthy();
 
         fireEvent.click(screen.getByRole('button', { name: 'Залишитись' }));
         expect(onStay).toHaveBeenCalled();
@@ -33,7 +38,12 @@ describe('TurnCountdown', () => {
         const second = vi.fn();
 
         render(
-            <TurnCountdown seconds={2} onElapsed={second} onStay={() => {}} />
+            <TurnCountdown
+                seconds={2}
+                onElapsed={second}
+                onStay={() => {}}
+                onDisable={() => {}}
+            />
         );
         act(() => vi.advanceTimersByTime(2_100));
         expect(second).toHaveBeenCalledTimes(1);

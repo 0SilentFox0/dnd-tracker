@@ -51,6 +51,8 @@ function SideColumn({
         return entity ? [{ member, entity }] : [];
     });
 
+    const total = rows.reduce((n, r) => n + (r.member.quantity ?? 1), 0);
+
     return (
         <section
             data-side={side}
@@ -68,7 +70,12 @@ function SideColumn({
                     )}
                 />
                 {t(`sides.${side}.title`)}
-                <span className="hud-num tabular-nums">{rows.length}</span>
+                <span
+                    className="hud-num tabular-nums"
+                    title={tParticipants('sideCount', { count: total })}
+                >
+                    {total}
+                </span>
             </h3>
             {rows.length === 0 ? (
                 <p

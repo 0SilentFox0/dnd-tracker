@@ -83,6 +83,7 @@ export function CombatTab() {
                 {system.attacks && (
                     <CombatRow
                         label={t('targets')}
+                        hint={t('targetsHint')}
                         value={
                             sheet.targets.min === sheet.targets.max
                                 ? String(sheet.targets.max)

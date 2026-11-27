@@ -1,7 +1,8 @@
 import { Prisma } from '@prisma/client';
 import { randomInt } from 'node:crypto';
 
-const ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+// no 0 O 1 I; codes issued before this alphabet may still contain them
+const ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 
 export const INVITE_CODE_LENGTH = 6;
 

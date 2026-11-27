@@ -13,13 +13,17 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
 vi.mock('@/lib/server/characters/core/resolve-character-owner', () => ({
     resolveCharacterOwner: vi.fn(async () => ({ controlledBy: 'owner' })),
 }));
-vi.mock('@/lib/db', () => ({
-    prisma: {
+vi.mock('@/lib/db', () => {
+    const prisma: Record<string, unknown> = {
         character: { create: vi.fn() },
         characterInventory: { create: vi.fn() },
         race: { findFirst: vi.fn() },
-    },
-}));
+    };
+
+    prisma.$transaction = (fn: (tx: unknown) => unknown) => fn(prisma);
+
+    return { prisma };
+});
 vi.mock('@/lib/server/content/write', () => ({
     withCampaignContentWrite: async (
         _id: string,

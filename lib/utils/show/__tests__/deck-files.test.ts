@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { removedSlideUrls } from '../deck-files';
+import { isUnsupportedSlideFile, removedSlideUrls } from '../deck-files';
 
 const s = (id: string, imageUrl: string) => ({ id, imageUrl });
 
@@ -26,5 +26,21 @@ describe('removedSlideUrls', () => {
         expect(
             removedSlideUrls([s('a', 'u1'), s('b', 'u2')], [s('c', 'u2')], [])
         ).toEqual(['u1']);
+    });
+});
+
+describe('isUnsupportedSlideFile', () => {
+    it('rejects icons and non-images, accepts images and unknown types', () => {
+        expect(
+            isUnsupportedSlideFile({ name: 'a.ico', type: 'image/x-icon' })
+        ).toBe(true);
+        expect(isUnsupportedSlideFile({ name: 'a.ico', type: '' })).toBe(true);
+        expect(
+            isUnsupportedSlideFile({ name: 'a.pdf', type: 'application/pdf' })
+        ).toBe(true);
+        expect(isUnsupportedSlideFile({ name: 'a.png', type: 'image/png' })).toBe(
+            false
+        );
+        expect(isUnsupportedSlideFile({ name: 'a.png', type: '' })).toBe(false);
     });
 });

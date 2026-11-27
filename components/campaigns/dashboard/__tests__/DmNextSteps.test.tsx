@@ -12,12 +12,12 @@ describe('DmNextSteps', () => {
 
         expect(
             screen
-                .getByRole('link', { name: 'dashboard.sections.show.title' })
+                .getByRole('link', { name: /^dashboard\.sections\.show\.title\./ })
                 .getAttribute('href')
         ).toBe('/campaigns/c1/dm/show');
         expect(
             screen
-                .getByRole('link', { name: 'dashboard.sections.music.title' })
+                .getByRole('link', { name: /^dashboard\.sections\.music\.title\./ })
                 .getAttribute('href')
         ).toBe('/campaigns/c1/dm/music');
         expect(

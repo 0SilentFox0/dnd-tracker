@@ -31,11 +31,11 @@ vi.mock('@/lib/db', () => {
     return { prisma };
 });
 
-const gate = (persistResources = true) =>
+const gate = (persistResources = true, isDM = true) =>
     vi.mocked(access.requireCharacterAccess).mockResolvedValue({
         access: {
             userId: 'dm',
-            isDM: true,
+            isDM,
             campaign: {
                 id: 'camp',
                 maxLevel: 20,
@@ -70,15 +70,20 @@ const patch = async (body: object) => {
 describe('PATCH resources', () => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('DM only; 409 when persistResources is off', async () => {
+    it('409 when persistResources is off; the gate is not DM-only', async () => {
         gate(false);
 
         expect((await patch({ exhaustion: 0 })).status).toBe(409);
-        expect(access.requireCharacterAccess).toHaveBeenCalledWith(
-            'camp',
-            'ch',
-            { dmOnly: true }
-        );
+        expect(
+            vi.mocked(access.requireCharacterAccess).mock.calls[0][2]
+        ).not.toHaveProperty('dmOnly');
+    });
+
+    it('an owner may edit hp but not other resources', async () => {
+        gate(true, false);
+
+        expect((await patch({ exhaustion: 0 })).status).toBe(403);
+        expect((await patch({ hp: 10 })).status).toBe(200);
     });
 
     it('heals to full via hp = max and logs before/after', async () => {

@@ -21,6 +21,7 @@ export interface PlayerAudioDm {
     control: AudioControl;
     library: MusicLibrary;
     musicHref: string;
+    readOnly: boolean;
 }
 
 export interface PlayerAudioValue {
@@ -37,7 +38,7 @@ export function usePlayerAudioValue(host: AudioHost): {
     value: PlayerAudioValue;
     audioRef: (el: HTMLAudioElement | null) => void;
 } {
-    const { campaignId, isDM, silent = false } = host;
+    const { campaignId, isDM, silent = false, readOnly = false } = host;
 
     // browsers allow sound only after a gesture: one click per page open
     const [unlocked, setUnlocked] = useState(false);
@@ -83,9 +84,10 @@ export function usePlayerAudioValue(host: AudioHost): {
                       control,
                       library,
                       musicHref: `/campaigns/${campaignId}/dm/music`,
+                      readOnly,
                   }
                 : null,
-        [control, library, campaignId]
+        [control, library, campaignId, readOnly]
     );
 
     const value = useMemo(

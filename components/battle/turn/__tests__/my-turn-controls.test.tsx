@@ -82,6 +82,8 @@ vi.mock('@/lib/hooks/battle', () => ({
         hotkeys.enabled = args.enabled;
     },
     useBattleRules: () => rules.current,
+    useAutoEndTurnSetting: () => ({ autoEnd: true, setAutoEnd: vi.fn() }),
+    useQuickAttack: () => ({ open: false, begin: vi.fn() }),
     useBattleScene: () => ({
         anyPending: false,
         roster: { hero: null },

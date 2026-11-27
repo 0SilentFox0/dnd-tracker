@@ -64,6 +64,17 @@ export function ScenarioIndexPageClient({
                         <EmptyState
                             title={t('emptyTitle')}
                             description={t('emptyDescription')}
+                            action={
+                                canEdit ? (
+                                    <Button
+                                        onClick={() => setCreating(true)}
+                                        className="gap-2"
+                                    >
+                                        <Plus className="size-4" />
+                                        {t('newPage')}
+                                    </Button>
+                                ) : undefined
+                            }
                         />
                     }
                 >
@@ -94,7 +105,7 @@ export function ScenarioIndexPageClient({
                         .then((page) => {
                             setCreating(false);
                             router.push(
-                                `/campaigns/${campaignId}/dm/scenario/${page.id}`
+                                `/campaigns/${campaignId}/dm/scenario/${page.id}?edit=1`
                             );
                         })
                         .catch(() => {})

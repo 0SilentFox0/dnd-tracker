@@ -10,7 +10,7 @@ const base: Omit<GameClassData, 'id' | 'name' | 'hitDie' | 'subclassLevel'> = {
     color: null,
     savingThrows: [],
     proficiencies: { armor: [], weapons: [], tools: [] },
-    skillChoices: { count: 2, from: ['Атлетика', 'Залякування'] },
+    skillChoices: { count: 2, from: ['athletics', 'intimidation'] },
     caster: 'none',
     spellcastingAbility: null,
     features: [],
@@ -31,7 +31,7 @@ const wizard: GameClassData = {
     name: 'Чарівник',
     hitDie: 6,
     subclassLevel: 2,
-    skillChoices: { count: 2, from: ['Магія'] },
+    skillChoices: { count: 2, from: ['arcana'] },
 };
 
 const renderField = (
@@ -59,7 +59,9 @@ describe('CharacterClassesField', () => {
             ).disabled
         ).toBe(true);
         expect(
-            screen.getByText(`characters.form.classes.fromLevel {"level":3}`)
+            screen.getByText(
+                `characters.form.classes.fromLevelHint {"level":3}`
+            )
         ).toBeTruthy();
         rerender(
             <CharacterClassesField
@@ -93,7 +95,7 @@ describe('CharacterClassesField', () => {
         ).toBeTruthy();
         expect(
             screen.getByText(
-                `characters.form.classes.skillChoice {"count":2,"from":"Атлетика, Залякування"}`
+                `characters.form.classes.skillChoice {"count":2,"from":"gameTerms.dndSkills.athletics, gameTerms.dndSkills.intimidation"}`
             )
         ).toBeTruthy();
     });

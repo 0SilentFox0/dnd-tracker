@@ -48,7 +48,8 @@ const battle = (status: BattleScene['status']) =>
         battleLog: Array.from({ length: 30 }, (_, i) => entry(i + 1)),
     }) as unknown as BattleScene;
 
-const rollbackButtons = () => screen.queryAllByTitle(/Відмінити дію/);
+const rollbackButtons = () =>
+    screen.queryAllByRole('button', { name: /Відмінити дію/ });
 
 describe('DmBattleLog — кнопка відкату', () => {
     it('активний бій — на кожному записі', () => {

@@ -12,13 +12,14 @@ import {
     RESISTANCE_FEATURES,
     SKILL_FEATURES,
     SPELL_FEATURES,
+    STARTING_EQUIPMENT_OVERRIDES,
 } from '../overrides/class-choices';
 import { SPELLCASTING_ABILITY } from '../overrides/classes';
 
 import type { Ability } from '@/lib/utils/abilities/schema';
 import { choiceSlug } from '@/lib/utils/characters/choices/slug';
 import { capitalize } from '@/lib/utils/common/text';
-import type { Choice, ChoiceOption } from '@/types/choices';
+import type { Choice, ChoiceOption, StartingKit } from '@/types/choices';
 
 const tailOf = (abilityId: string) => abilityId.replace(/-\d+$/, '');
 
@@ -393,5 +394,117 @@ export function applyClassChoices(rows: ClassRow[]): ClassRow[] {
                 features: transform(s.features, ctx),
             })),
         };
+    });
+}
+
+const nameKey = (name: string) => name.toLowerCase().replace(/[^a-z]/g, '');
+
+export const STARTING_EQUIPMENT_ID = 'starting-equipment';
+
+const GEAR_SLOTS = new Set(['weapon', 'range_weapon', 'armor', 'shield']);
+
+/** Plain gear artifacts (no magic variants) addressable by the letters-only name key; the source text may carry stray spaces inside words. */
+export function gearSlugsByKey(
+    artifacts: ReadonlyArray<{
+        slug: string;
+        name: string;
+        slot: string;
+        rarity?: string | null;
+        item?: { unique?: boolean; property?: unknown };
+    }>
+): Map<string, string> {
+    return new Map(
+        artifacts
+            .filter(
+                (a) =>
+                    GEAR_SLOTS.has(a.slot) &&
+                    a.rarity === 'common' &&
+                    a.item?.unique === false &&
+                    !a.item.property
+            )
+            .map((a) => [nameKey(a.name), a.slug])
+    );
+}
+
+function kitOf(body: string, gear: ReadonlyMap<string, string>): StartingKit {
+    const items: StartingKit['items'] = [];
+
+    let gp = 0;
+
+    for (const part of body.split(/,\s*(?:and\s+)?|\s+and\s+(?=\d)/)) {
+        const text = part.trim();
+
+        const gold = /^(\d+)\s*GP$/i.exec(text);
+
+        if (gold) {
+            gp += Number(gold[1]);
+            continue;
+        }
+
+        const counted = /^(\d+)\s+(.+)$/.exec(text);
+
+        const quantity = counted ? Number(counted[1]) : 1;
+
+        const key =
+            STARTING_EQUIPMENT_OVERRIDES[text] ?? nameKey(counted?.[2] ?? text);
+
+        const artifact = gear.get(key) ?? gear.get(key.replace(/s$/, ''));
+
+        if (!artifact) continue;
+
+        const known = items.find((i) => i.artifact === artifact);
+
+        if (known) known.quantity += quantity;
+        else items.push({ artifact, quantity });
+    }
+
+    return { items, gp };
+}
+
+/** The class-level `Starting Equipment` table cell: `Choose A or B: (A) ...; or (B) 75 GP`. */
+export function startingEquipmentChoice(
+    cell: string,
+    gear: ReadonlyMap<string, string>
+): Choice | null {
+    const packages = [
+        ...cell.matchAll(/\(([A-Z])\)\s*([^;]+?)(?=\s*;|\s*$)/g),
+    ].map(([, letter, text]) => ({
+        letter,
+        text: text
+            .replace(/^or\s+/i, '')
+            .replace(/\bAr mor\b/g, 'Armor')
+            .trim(),
+    }));
+
+    if (packages.length === 0) return null;
+
+    return {
+        id: STARTING_EQUIPMENT_ID,
+        label: 'Starting Equipment',
+        level: 1,
+        count: 1,
+        kind: 'option',
+        atCreation: true,
+        options: packages.map(({ letter, text }) => ({
+            id: letter.toLowerCase(),
+            name: `Package ${letter}`,
+            description: text,
+            abilities: [],
+            kit: kitOf(text, gear),
+        })),
+    };
+}
+
+export function applyStartingEquipment(
+    rows: ClassRow[],
+    cells: Readonly<Record<string, string>>,
+    gear: ReadonlyMap<string, string>
+): ClassRow[] {
+    return rows.map((c) => {
+        const choice = cells[c.slug]
+            ? startingEquipmentChoice(cells[c.slug], gear)
+            : null;
+
+        return choice ? { ...c, features: addAt(c.features, [choice]) } : c;
     });
 }

@@ -27,6 +27,7 @@ import type {
 } from '@/lib/hooks/battle/types';
 import { battleQueryKey, useBattle } from '@/lib/hooks/battles';
 import { usePlayerView } from '@/lib/hooks/common';
+import { useText } from '@/lib/i18n/use-text';
 import { type AttackIntent, isIntentStale } from '@/lib/utils/battle/flows';
 import type { MapAim, MapPick } from '@/lib/utils/battle/grid';
 import { deriveScene, NO_ORDER } from '@/lib/utils/battle/view';
@@ -66,6 +67,8 @@ export function useBattleSceneValue(
     const t = useTranslations('battle.notify');
 
     const toast = useBattleToast();
+
+    const text = useText();
 
     const { show } = toast;
 
@@ -242,6 +245,7 @@ export function useBattleSceneValue(
                   attackReady,
                   select,
                   requestAttack: setAttackIntent,
+                  notify: (reason) => show(text(reason)),
               }
             : null
     );

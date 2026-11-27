@@ -12,6 +12,7 @@ describe('safeNextPath', () => {
         expect(safeNextPath('/campaigns/abc?tab=x')).toBe(
             '/campaigns/abc?tab=x'
         );
+        expect(safeNextPath('/join/ABC?x=1#h')).toBe('/join/ABC?x=1#h');
     });
 
     it.each([
@@ -21,6 +22,10 @@ describe('safeNextPath', () => {
         'https://evil.test',
         '//evil.test',
         '/\\evil.test',
+        '/\t/evil.com',
+        '/\n/evil.com',
+        '/\r/evil.com',
+        '/\t\\evil.com',
         'campaigns',
     ])('falls back for %s', (next) => {
         expect(safeNextPath(next)).toBe(AFTER_SIGN_IN_PATH);

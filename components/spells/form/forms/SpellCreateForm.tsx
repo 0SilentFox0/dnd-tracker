@@ -59,6 +59,8 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (createSpellMutation.isPending) return;
+
         const problem = spellFormIssue(formData);
 
         if (problem) {

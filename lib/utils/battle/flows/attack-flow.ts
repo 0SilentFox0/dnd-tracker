@@ -52,6 +52,8 @@ export interface AttackFlowState {
     error?: LogLine;
     results: AttackOutcomeSummary[];
     waitingCrit?: boolean;
+    /** one-click attack driven by the quick card: the wizard dialog stays closed */
+    quick?: boolean;
     picked?: boolean;
     offHand?: boolean;
     inspiration?: boolean;
@@ -97,6 +99,14 @@ export type AttackFlowAction =
           outcome: RollOutcome;
           judge?: 'server';
           damage?: number[];
+      }
+    | {
+          type: 'QUICK_ROLL';
+          d20?: number;
+          second?: number;
+          outcome: RollOutcome;
+          damage: number[];
+          judge?: 'server';
       }
     | { type: 'DAMAGE'; values: number[] }
     | { type: 'BACK' }
@@ -280,6 +290,29 @@ export function attackFlow(
                 ? { ...s, strikes, step: 'submitting', error: undefined }
                 : { ...s, strikes, step: 'damage', index: first };
         }
+        case 'QUICK_ROLL': {
+            if (s.step !== 'roll' || s.strikes.length !== 1) return s;
+
+            const [st] = s.strikes;
+
+            const strike: Strike = {
+                ...st,
+                d20: a.d20,
+                second: a.second,
+                outcome: a.outcome,
+                damage: isHit({ ...st, outcome: a.outcome }) ? a.damage : [],
+            };
+
+            return {
+                ...s,
+                strikes: [strike],
+                index: 0,
+                step: 'submitting',
+                quick: true,
+                error: undefined,
+                ...(a.judge && { judge: a.judge }),
+            };
+        }
         case 'DAMAGE': {
             const strikes = s.strikes.map((st, i) =>
                 i === s.index ? { ...st, damage: a.values } : st
@@ -327,13 +360,15 @@ export function attackFlow(
         case 'SUCCESS':
             return {
                 ...s,
+                quick: undefined,
                 step: 'result',
                 results: a.results,
                 error: undefined,
                 waitingCrit: false,
             };
         case 'FAIL': {
-            const toSummary = s.strikes.some(isHit) && s.judge !== 'server';
+            const toSummary =
+                !s.quick && s.strikes.some(isHit) && s.judge !== 'server';
 
             return {
                 ...s,

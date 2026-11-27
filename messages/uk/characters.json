@@ -57,7 +57,10 @@
       "subclassPlaceholder": "Наприклад: Клятва Месника",
       "archetype": "Архетип",
       "alignment": "Світогляд",
-      "level": "Рівень"
+      "level": "Рівень",
+      "subraceOther": "Інше…",
+      "subraceNone": "Без підраси",
+      "subraceCustomPlaceholder": "Власна підраса"
     },
     "classes": {
       "classN": "Клас {n}",
@@ -73,7 +76,8 @@
       "totalLevel": "Загальний рівень: {level}",
       "hitDice": "Кістки хітів: {dice}",
       "skillChoice": "Оберіть {count} навички з: {from}",
-      "level": "Рівень"
+      "level": "Рівень",
+      "fromLevelHint": "Підклас обирається з рівня {level}: до цього рівня поле неактивне."
     },
     "personalAbility": {
       "label": "Уміння (Персональні)",
@@ -94,7 +98,9 @@
     "armorClass": "Клас Броні (AC)",
     "classArmorHint": "КЗ рахується з броні й Спритності",
     "minTargets": "Мін. цілей",
-    "maxTargets": "Макс. цілей"
+    "maxTargets": "Макс. цілей",
+    "initiativeHint": "Бонус до кидка ініціативи на початку бою. Допустимо: {min}…{max}.",
+    "targetsHint": "Скільки цілей атака може зачепити за раз; зазвичай 1."
   },
   "spells": {
     "loadError": "Помилка завантаження заклинань: {message}",

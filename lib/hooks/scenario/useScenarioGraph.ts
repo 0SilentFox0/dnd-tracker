@@ -4,7 +4,10 @@ import { useCallback, useDeferredValue, useMemo, useState } from 'react';
 
 import { useScenarioIndex } from './useScenarioIndex';
 
-import { GRAPH_WARN_NODES } from '@/lib/constants/scenario-graph';
+import {
+    GRAPH_SMALL_ENTITY_LIMIT,
+    GRAPH_WARN_NODES,
+} from '@/lib/constants/scenario-graph';
 import { matchesQuery } from '@/lib/utils/common/text-search';
 import {
     type GraphLayoutMode,
@@ -37,6 +40,15 @@ export function useScenarioGraph(campaignId: string) {
     } = useScenarioIndex(campaignId);
 
     const [filters, setFilters] = useState<GraphFilters>(defaultFilters);
+
+    const [leavesAutoSet, setLeavesAutoSet] = useState(false);
+
+    if (index && !leavesAutoSet) {
+        setLeavesAutoSet(true);
+
+        if (index.entities.length <= GRAPH_SMALL_ENTITY_LIMIT)
+            setFilters((f) => ({ ...f, showAll: true, showLeaves: true }));
+    }
 
     const [query, setQueryState] = useState('');
 
@@ -215,6 +227,7 @@ export function useScenarioGraph(campaignId: string) {
             matches,
             matchIndex,
             truncated: model?.truncated ?? 0,
+            collapsedLeaves: model?.collapsedLeaves ?? 0,
             entityTotal: model?.entityTotal ?? 0,
             overLimit: (model?.nodes.length ?? 0) > GRAPH_WARN_NODES,
             counts: index?.counts ?? null,

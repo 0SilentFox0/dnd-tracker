@@ -58,7 +58,7 @@
     "lib/schemas/assistant-handoff.ts": 2,
     "lib/schemas/battles.ts": 3,
     "lib/schemas/main-skills.ts": 2,
-    "lib/schemas/out-of-combat.ts": 4,
+    "lib/schemas/out-of-combat.ts": 1,
     "lib/schemas/prisma-json.ts": 1,
     "lib/schemas/skills.ts": 1,
     "lib/schemas/units.ts": 3,

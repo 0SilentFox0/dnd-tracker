@@ -13,7 +13,26 @@ export function useSetupUnitsFilter(units: SetupUnit[]) {
 
     const [selectedRaces, setSelectedRaces] = useState<string[]>([]);
 
-    const allGroups = groupUnitsByRaceName(search.items);
+    const [selectedLevels, setSelectedLevels] = useState<number[]>([]);
+
+    const levelChips = [...new Set(search.items.map((u) => u.level))]
+        .sort((a, b) => a - b)
+        .map((level) => ({
+            level,
+            count: search.items.filter((u) => u.level === level).length,
+            active: selectedLevels.includes(level),
+        }));
+
+    const activeLevels = selectedLevels.filter((l) =>
+        levelChips.some((chip) => chip.level === l)
+    );
+
+    const byLevel =
+        activeLevels.length > 0
+            ? search.items.filter((u) => activeLevels.includes(u.level))
+            : search.items;
+
+    const allGroups = groupUnitsByRaceName(byLevel);
 
     const activeRaces = selectedRaces.filter((key) => allGroups.has(key));
 
@@ -31,6 +50,13 @@ export function useSetupUnitsFilter(units: SetupUnit[]) {
                 : [...current, key]
         );
 
+    const toggleLevel = (level: number) =>
+        setSelectedLevels((current) =>
+            current.includes(level)
+                ? current.filter((l) => l !== level)
+                : [...current, level]
+        );
+
     return {
         query: search.query,
         groups,
@@ -39,7 +65,12 @@ export function useSetupUnitsFilter(units: SetupUnit[]) {
             count: list.length,
             active: activeRaces.includes(key),
         })),
+        levelChips,
         toggleRace,
-        isFiltered: search.isActive || activeRaces.length > 0,
+        toggleLevel,
+        isFiltered:
+            search.isActive ||
+            activeRaces.length > 0 ||
+            activeLevels.length > 0,
     };
 }

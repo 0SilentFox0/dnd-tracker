@@ -12,6 +12,8 @@ import {
 import type { MentionType } from '@/types/scenario';
 
 export const GRAPH_ENTITY_CAP = 150;
+
+export const GRAPH_SMALL_ENTITY_LIMIT = 40;
 export const GRAPH_WARN_NODES = 400;
 export const GRAPH_TICKS = 300;
 export const GRAPH_MIN_TICKS = 90;

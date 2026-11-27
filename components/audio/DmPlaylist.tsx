@@ -42,7 +42,7 @@ function TrackRow({
     label: string;
     current: boolean;
     disabled: boolean;
-    actions: { play(): void; rename(title: string): void };
+    actions: { play(): void; rename?: (title: string) => void };
 }) {
     const t = useTranslations('music');
 
@@ -53,7 +53,7 @@ function TrackRow({
             {editing ? (
                 <TrackTitleInput
                     track={track}
-                    onRename={actions.rename}
+                    onRename={(title) => actions.rename?.(title)}
                     onClose={() => setEditing(false)}
                     className="h-auto rounded border-hud-rule bg-black/60 px-1.5 py-1 text-xs text-hud-bone md:text-xs"
                 />
@@ -73,7 +73,7 @@ function TrackRow({
                     {label}
                 </HudButton>
             )}
-            {!editing && (
+            {!editing && actions.rename && (
                 <HudButton
                     type="button"
                     aria-label={t('playlist.renameLabel', {
@@ -204,7 +204,9 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
             disabled={control.pending}
             actions={{
                 play: () => control.send({ action: 'play', trackId: tr.id }),
-                rename: (title) => library.rename(tr.id, title),
+                ...(!dm.readOnly && {
+                    rename: (title: string) => library.rename(tr.id, title),
+                }),
             }}
         />
     );
@@ -228,31 +230,35 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
             </HudButton>
             {open && (
                 <>
-                    <div className="mt-2 flex flex-col gap-1">
-                        <UploadTrackButton
-                            pending={library.isBusy}
-                            onFile={(file) => void library.upload(file)}
-                            size="sm"
-                            className="w-full"
-                        />
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={library.isBusy}
-                            onClick={() => setYoutubeOpen(true)}
-                            className="w-full"
-                        >
-                            <Plus />
-                            {t('music.youtube.add')}
-                        </Button>
-                    </div>
-                    <AddYoutubeTrackDialog
-                        open={youtubeOpen}
-                        onOpenChange={setYoutubeOpen}
-                        pending={library.isBusy}
-                        onSubmit={library.addYoutube}
-                    />
+                    {!dm.readOnly && (
+                        <>
+                            <div className="mt-2 flex flex-col gap-1">
+                                <UploadTrackButton
+                                    pending={library.isBusy}
+                                    onFile={(file) => void library.upload(file)}
+                                    size="sm"
+                                    className="w-full"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={library.isBusy}
+                                    onClick={() => setYoutubeOpen(true)}
+                                    className="w-full"
+                                >
+                                    <Plus />
+                                    {t('music.youtube.add')}
+                                </Button>
+                            </div>
+                            <AddYoutubeTrackDialog
+                                open={youtubeOpen}
+                                onOpenChange={setYoutubeOpen}
+                                pending={library.isBusy}
+                                onSubmit={library.addYoutube}
+                            />
+                        </>
+                    )}
                     <PlaylistFilters
                         view={view}
                         total={library.tracks.length}

@@ -204,13 +204,14 @@ describe('d20 StatsTab accessibility', () => {
             ],
         } as never);
 
+        // rows are sorted by name: arcana, athletics, stealth
         const items = screen.getAllByRole('listitem');
 
-        expect(items[0]).toHaveTextContent(
+        expect(items[1]).toHaveTextContent(
             'characterProfile.combat.proficient'
         );
-        expect(items[1]).toHaveTextContent('characterProfile.combat.expertise');
-        expect(items[2]).not.toHaveTextContent(
+        expect(items[2]).toHaveTextContent('characterProfile.combat.expertise');
+        expect(items[0]).not.toHaveTextContent(
             'characterProfile.combat.proficient'
         );
     });

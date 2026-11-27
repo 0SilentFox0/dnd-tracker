@@ -6,6 +6,7 @@ import { type AttackWizardModel, btn, primaryBtn } from './shared';
 import { AiRollButton, DamageDice } from '@/components/battle/hud/DiceInput';
 import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
+import { effectiveD20, strikeMode } from '@/lib/utils/battle/flows/attack-flow';
 import { cryptoRandom, rollDie } from '@/lib/utils/common/dice';
 
 export function DamageStep({
@@ -34,6 +35,14 @@ export function DamageStep({
                 {t('title')}
                 {strike?.outcome === 'crit' ? ` · ${t('crit')}` : ''}
             </div>
+            {strike?.d20 !== undefined && (
+                <div className="mt-1 text-sm text-hud-soft" data-roll-result>
+                    {t('rolled', {
+                        d20: effectiveD20(strike, strikeMode(state, strike)),
+                        outcome: t(strike.outcome === 'crit' ? 'crit' : 'hit'),
+                    })}
+                </div>
+            )}
             <DamageDice
                 slots={state.diceSlots}
                 values={draft}
