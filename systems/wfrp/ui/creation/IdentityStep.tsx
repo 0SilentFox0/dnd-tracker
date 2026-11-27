@@ -26,7 +26,9 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
 
     const [goal, setGoal] = useState('');
 
-    const { values, set } = form.identity;
+    const ts = useTranslations('wfrpCreation.story');
+
+    const { values, set, quiz } = form.identity;
 
     const goals = values.goals ?? [];
 
@@ -119,6 +121,14 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
                     onChange={(e) => set({ background: e.target.value })}
                 />
             </FormField>
+            {quiz.canReplace && (
+                <Button type="button" variant="outline" onClick={quiz.replace}>
+                    {ts('replace')}
+                </Button>
+            )}
+            {quiz.truncated && (
+                <p className="text-sm text-hud-muted">{ts('truncated')}</p>
+            )}
             <ImageUpload
                 label={t('avatar')}
                 value={values.avatar ?? ''}

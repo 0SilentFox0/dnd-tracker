@@ -432,5 +432,9 @@
   "2026-11-26-hex-edges": {
     "title": "Walls, bars and doors on hex maps",
     "body": "Hex battle maps now support walls, bars and doors: draw them along cell edges in the map editor and in battle setup, and they block movement, sight and fog just like on square grids. Maze and textures remain square-only."
+  },
+  "2026-11-27-wfrp-backstory-quiz": {
+    "title": "Grim d100 (5e): the hero backstory quiz",
+    "body": "A new Story step in hero creation: questions about origin, family, friends, memories and temper with d100 table rolls, plus age, height, eye and hair colour by species. The answers are composed into the hero's biography and goals."
   }
 }

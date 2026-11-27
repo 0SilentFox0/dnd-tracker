@@ -44,6 +44,11 @@ export const WFRP_META = {
     },
     whatsNew: [
         {
+            id: '2026-11-27-wfrp-backstory-quiz',
+            date: '2026-11-27',
+            audience: 'all',
+        },
+        {
             id: '2026-11-20-wfrp-creation',
             date: '2026-11-20',
             audience: 'all',
