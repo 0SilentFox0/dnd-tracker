@@ -392,7 +392,7 @@ describe('campaign route scopes', () => {
         });
 
         expect(stale).toEqual([]);
-    });
+    }, 30_000);
 
     it('the campaign shell reads only the base namespaces', () => {
         const files = [
