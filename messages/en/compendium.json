@@ -101,7 +101,8 @@
     "title": "Summary",
     "records": "Records",
     "next": "Next",
-    "new": "New import"
+    "new": "New import",
+    "images": "Images: {count}"
   },
   "info": {
     "unsupportedCategories": "Skipped unsupported categories: {categories}",
@@ -404,13 +405,15 @@
   "wizard": {
     "resetNotice": "Changing the selection resets the check",
     "restart": "Start over",
-    "restartText": "The file, check and result will be cleared."
+    "restartText": "The file, check and result will be cleared.",
+    "restartConfirm": "Clear the file and start the import over?"
   },
   "confirm": {
     "until": "Check valid until {time}",
     "expired": "The check has expired",
     "recheck": "Check again",
-    "changes": "What will change"
+    "changes": "What will change",
+    "expiresIn": "The check is valid until {time}"
   },
   "history": {
     "row": "Import #{id}",
@@ -418,5 +421,13 @@
   },
   "result": {
     "title": "Import complete"
+  },
+  "check": {
+    "tabs": {
+      "records": "Records",
+      "deps": "Dependencies",
+      "sources": "Sources and coverage",
+      "media": "Images"
+    }
   }
 }

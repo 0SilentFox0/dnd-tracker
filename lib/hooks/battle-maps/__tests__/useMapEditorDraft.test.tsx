@@ -38,6 +38,7 @@ const source: BattleMapFull = {
     rows: 8,
     version: 3,
     updatedAt: '2026-11-14T00:00:00.000Z',
+    thumb: null,
     map: { cols: 10, rows: 8, background: null, opacity: 0.35 },
     walls: ['0,0|1,0'],
     bars: [],

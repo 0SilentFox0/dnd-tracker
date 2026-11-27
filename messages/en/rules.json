@@ -12,7 +12,14 @@
     "changedSections": "Changed sections: {count}",
     "resetSection": "Reset section",
     "filter": "Filter sections",
-    "demoReadOnly": "View only"
+    "demoReadOnly": "View only",
+    "changedBadge": "changed",
+    "toc": "Contents",
+    "changeSystem": "Change",
+    "aside": {
+      "composition": "System",
+      "changed": "Changed sections"
+    }
   },
   "form": {
     "hint": "Changes apply to new battles; a battle already in progress uses the rules fixed at its start",

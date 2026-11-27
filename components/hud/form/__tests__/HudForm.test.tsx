@@ -163,6 +163,28 @@ describe('findInvalidTab', () => {
 
         expect(findInvalidTab(root, 'a')).toBeNull();
     });
+
+    it('renders no action bar without actions and shows error above the tabs', () => {
+        const { container } = render(
+            <HudForm
+                id="t-form"
+                onSubmit={() => {}}
+                error="Помилка"
+                tabs={[{ id: 'a', label: 'Основне', content: <p>x</p> }]}
+            />
+        );
+
+        expect(container.querySelector('[data-slot="action-bar"]')).toBeNull();
+
+        const alert = screen.getByRole('alert');
+
+        const list = screen.getByRole('tablist');
+
+        expect(
+            alert.compareDocumentPosition(list) &
+                Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+    });
 });
 
 describe('HudForm rail and layout', () => {

@@ -7,16 +7,16 @@ import { PANEL_ICONS, panelsFor } from './editor-icons';
 import { TilePalettePanel } from './TilePalettePanel';
 import { UvttImportSection } from './UvttImportSection';
 
-import { MapBackgroundSection } from '@/components/battle/setup/map/MapBackgroundSection';
+import { MapBackgroundSection } from '@/components/battle/setup/map/shared/MapBackgroundSection';
 import {
     ART_CELL_TOOLS,
     MapCellToolsSection,
-} from '@/components/battle/setup/map/MapCellToolsSection';
+} from '@/components/battle/setup/map/shared/MapCellToolsSection';
 import {
     DoorToolOptions,
     EDGE_TOOLS,
     ToolButtons,
-} from '@/components/battle/setup/map/MapToolButtons';
+} from '@/components/battle/setup/map/shared/MapToolButtons';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type {
@@ -85,7 +85,7 @@ export function EditorSidebar({
                                 type="button"
                                 value={p}
                                 title={t(`panels.${p}`)}
-                                className="flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-md border border-hud-rule bg-black/20 px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-hud-accent data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                className="flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-md border border-hud-rule bg-black/20 px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-hud-accent data-[state=active]:bg-hud-panel-2 data-[state=active]:text-hud-ink"
                             >
                                 <Icon
                                     aria-hidden="true"

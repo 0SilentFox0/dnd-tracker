@@ -1,42 +1,52 @@
 'use client';
 
-import { useState } from 'react';
+import type { FormEvent } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { Lock } from 'lucide-react';
 
-import { BalanceSummary } from '../balance/BalanceSummary';
-import { XpBalanceSummary } from '../balance/XpBalanceSummary';
-import { BattleMapLibraryPicker } from '../map/BattleMapLibraryPicker';
+import type { BalanceView } from '../balance/BalanceMeter';
+import { BattleMapStep } from '../map/BattleMapStep';
 import { AutopickCard } from '../participants/AutopickCard';
-import { CharactersListCard } from '../participants/CharactersListCard';
-import { SidePanelCard } from '../participants/SidePanelCard';
-import { UnitsListCard } from '../participants/UnitsListCard';
-import { BattleFormBasicInfo } from './BattleFormBasicInfo';
-import { BattleFormMap } from './BattleFormMap';
+import { ParticipantCatalog } from '../participants/ParticipantCatalog';
+import { RosterBoard } from '../participants/RosterBoard';
+import { RosterPhoneBar } from '../participants/RosterPhoneBar';
+import { SetupHeader } from './SetupHeader';
+import { SetupSummary } from './SetupSummary';
 
 import {
     BATTLE_FORM_TAB,
+    battleFormId,
     type BattleFormTabId,
 } from '@/components/battle/setup/form/battle-form-tabs';
-import { LoadingState } from '@/components/common/states';
-import { HudButton } from '@/components/hud';
+import { HudFormMenu } from '@/components/hud';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
-import { ParticipantSide } from '@/lib/constants/battle';
 import {
+    type BattleSetup,
     type BattleSetupInitial,
     useBattleSetup,
     useBattleSetupInitial,
+    useBattleSetupView,
 } from '@/lib/hooks/battles';
-import { cn } from '@/lib/utils';
+
+// two submit buttons share one row on phones: zero basis keeps flex-wrap from wrapping them
+const PAGE_CLASS = [
+    'max-w-page max-sm:[--hud-form-footer-h:4.75rem]',
+    'max-sm:[&>.hud-form-actions]:sticky max-sm:[&>.hud-form-actions]:bottom-0 max-sm:[&>.hud-form-actions]:z-30',
+    'max-sm:[&>.hud-form-actions]:!mt-0 max-sm:[&>.hud-form-actions]:border-t max-sm:[&>.hud-form-actions]:border-hud-rule',
+    'max-sm:[&>.hud-form-actions]:bg-hud-panel max-sm:[&>.hud-form-actions]:py-3',
+    'max-sm:[&>.hud-form-actions]:pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]',
+].join(' ');
+
+const SUBMIT_FIT =
+    'min-w-0 flex-1 basis-0 truncate px-3 sm:flex-none sm:basis-auto';
 
 interface BattleSetupFormProps {
     campaignId: string;
     battleId?: string;
 }
-
-const PAGE_CLASS = 'max-w-6xl';
 
 function SetupLoading({ isEdit }: { isEdit: boolean }) {
     const t = useTranslations('battleSetup.form');
@@ -46,10 +56,111 @@ function SetupLoading({ isEdit }: { isEdit: boolean }) {
             header={{ title: isEdit ? t('title.edit') : t('title.create') }}
             className={PAGE_CLASS}
         >
-            <div className="px-4 py-3">
-                <LoadingState label={t('loading')} />
+            <div
+                role="status"
+                aria-label={t('loading')}
+                className="grid min-w-0 gap-4 px-4 py-3 md:grid-cols-[minmax(0,1.35fr)_minmax(22rem,1fr)]"
+            >
+                {[0, 1].map((i) => (
+                    <div
+                        key={i}
+                        className="ds-inset h-[28rem] min-w-0 animate-pulse rounded-xl motion-reduce:animate-none"
+                    />
+                ))}
             </div>
         </HudFormPage>
+    );
+}
+
+function mapSummary(setup: BattleSetup) {
+    const { libraryMap, mapEditor } = setup;
+
+    if (libraryMap.selectedId) {
+        const picked = libraryMap.maps.find(
+            (m) => m.id === libraryMap.selectedId
+        );
+
+        return {
+            enabled: true,
+            cols: picked?.cols ?? 0,
+            rows: picked?.rows ?? 0,
+        };
+    }
+
+    const { enabled, map } = mapEditor.state;
+
+    return { enabled, cols: map.cols, rows: map.rows };
+}
+
+function ParticipantsTab({
+    setup,
+    balance,
+    locked,
+}: {
+    setup: BattleSetup;
+    balance: BalanceView;
+    locked: boolean;
+}) {
+    const { participants, data, battleId } = setup;
+
+    const view = useBattleSetupView();
+
+    const roster = (
+        <RosterBoard
+            participants={participants.list}
+            data={data}
+            actions={participants.actions}
+            balance={balance}
+            autopick={
+                battleId ? undefined : (
+                    <AutopickCard
+                        hasAllies={participants.allies.exists}
+                        races={data.races}
+                        balance={setup.balance}
+                    />
+                )
+            }
+        />
+    );
+
+    return (
+        <div inert={locked} className="min-w-0">
+            <div className="grid min-w-0 gap-4 md:grid-cols-2">
+                <div className="flex min-h-[24rem] min-w-0 flex-col md:h-[calc(100dvh-18rem)]">
+                    <ParticipantCatalog
+                        data={data}
+                        entityStats={data.entityStats}
+                        selection={participants.list}
+                        actions={participants.actions}
+                        tab={view.catalog}
+                    />
+                </div>
+                <div className="hidden min-w-0 md:block md:max-h-[calc(100dvh-18rem)] md:overflow-y-auto">
+                    {roster}
+                </div>
+            </div>
+            <RosterPhoneBar
+                participants={participants.list}
+                balance={balance}
+                roster={view.roster}
+            >
+                {roster}
+            </RosterPhoneBar>
+        </div>
+    );
+}
+
+function LockedBanner() {
+    const t = useTranslations('battleSetup.form');
+
+    return (
+        <p
+            role="status"
+            className="ds-inset mx-4 mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-hud-accent-fg"
+        >
+            <Lock className="size-4 shrink-0" aria-hidden />
+            {t('locked')}
+        </p>
     );
 }
 
@@ -60,210 +171,144 @@ function BattleSetupLayout({
 }: BattleSetupFormProps & { initial?: BattleSetupInitial }) {
     const t = useTranslations('battleSetup.form');
 
-    const tMap = useTranslations('battleSetup.map');
-
     const setup = useBattleSetup(campaignId, battleId, initial);
-
-    const [preparedMapChosen, setPreparedMapChosen] = useState(false);
 
     const tActions = useTranslations('common.actions');
 
     const isEdit = !!battleId;
 
-    const title = isEdit ? t('title.edit') : t('title.create');
-
     if (setup.loading) return <SetupLoading isEdit={isEdit} />;
 
-    const { participants, details, data, balance, form } = setup;
+    const { participants, details, form, libraryMap } = setup;
 
-    const { libraryMap, mapEditor } = setup;
+    const locked = libraryMap.isLocked;
 
-    const mapChoice = libraryMap.selectedId
-        ? 'prepared'
-        : preparedMapChosen
-          ? 'prepared'
-          : mapEditor.state.enabled
-            ? 'create'
-            : 'none';
-
-    const chooseMap = (choice: 'none' | 'create' | 'prepared') => {
-        setPreparedMapChosen(choice === 'prepared');
-
-        if (choice === 'none' || choice === 'create') {
-            if (libraryMap.selectedId) void libraryMap.select(null);
-        }
-
-        mapEditor.actions.setEnabled(choice === 'create' ? true : false);
+    const balance: BalanceView = {
+        kind: setup.balanceKind,
+        fair: setup.fair,
+        xp: setup.xp,
     };
 
-    const sidePanel = (side: ParticipantSide) => (
-        <SidePanelCard
-            side={side}
-            participants={participants.list}
-            characters={data.characters}
-            units={data.units}
-            actions={participants.actions}
-        />
-    );
+    const map = mapSummary(setup);
 
     const tabs: HudTab<BattleFormTabId>[] = [
         {
-            id: BATTLE_FORM_TAB.basic,
-            label: t('tabs.basic'),
-            content: <BattleFormBasicInfo details={details} />,
-        },
-        {
-            id: BATTLE_FORM_TAB.map,
-            label: t('tabs.map'),
+            id: BATTLE_FORM_TAB.participants,
+            label: t('tabs.participants'),
             content: (
-                <div className="space-y-4">
-                    <div
-                        className="grid gap-3 md:grid-cols-3"
-                        role="group"
-                        aria-label={tMap('mapChoice.title')}
-                    >
-                        {(['none', 'create', 'prepared'] as const).map(
-                            (choice) => (
-                                <HudButton
-                                    key={choice}
-                                    type="button"
-                                    aria-pressed={mapChoice === choice}
-                                    onClick={() => chooseMap(choice)}
-                                    className={cn(
-                                        'min-h-28 rounded-lg border p-4 text-left transition-colors',
-                                        mapChoice === choice
-                                            ? 'border-hud-accent bg-hud-panel-2 ring-1'
-                                            : 'border-hud-rule bg-background/40 hover:border-hud-muted hover:bg-background/70'
-                                    )}
-                                >
-                                    <span className="block font-semibold">
-                                        {tMap(`mapChoice.${choice}.title`)}
-                                    </span>
-                                    <span className="mt-1 block text-sm text-hud-muted">
-                                        {tMap(
-                                            `mapChoice.${choice}.description`
-                                        )}
-                                    </span>
-                                </HudButton>
-                            )
-                        )}
-                    </div>
-                    {mapChoice === 'prepared' ? (
-                        libraryMap.visible ? (
-                            <BattleMapLibraryPicker
-                                campaignId={campaignId}
-                                library={libraryMap}
-                                onClear={() => setPreparedMapChosen(false)}
-                            />
-                        ) : (
-                            <p className="rounded-md border border-hud-rule p-4 text-sm text-hud-muted">
-                                {tMap('mapChoice.prepared.unavailable')}
-                            </p>
-                        )
-                    ) : mapChoice === 'create' ? (
-                        <BattleFormMap editor={mapEditor} />
-                    ) : null}
-                </div>
-            ),
-        },
-        {
-            id: BATTLE_FORM_TAB.heroes,
-            label: t('tabs.heroes'),
-            content: (
-                <CharactersListCard
-                    playerCharacters={data.playerCharacters}
-                    npcCharacters={data.npcCharacters}
-                    entityStats={data.entityStats?.characterStats ?? null}
-                    selection={participants.selection}
-                    actions={participants.actions}
+                <ParticipantsTab
+                    setup={setup}
+                    balance={balance}
+                    locked={locked}
                 />
             ),
         },
         {
-            id: BATTLE_FORM_TAB.units,
-            label: t('tabs.units'),
+            id: BATTLE_FORM_TAB.map,
+            label: t('tabs.map'),
+            badge: map.enabled
+                ? map.cols > 0
+                    ? `✓ ${map.cols}×${map.rows}`
+                    : '✓'
+                : undefined,
             content: (
-                <div className="space-y-4">
-                    {!isEdit && (
-                        <AutopickCard
-                            hasAllies={participants.allies.exists}
-                            races={data.races}
-                            balance={balance}
-                        />
-                    )}
-                    <UnitsListCard
-                        units={data.units}
-                        entityStats={data.entityStats?.unitStats ?? null}
-                        selection={participants.selection}
-                        actions={participants.actions}
+                <div inert={locked} className="min-w-0">
+                    <BattleMapStep
+                        campaignId={campaignId}
+                        editor={setup.mapEditor}
+                        library={libraryMap}
                     />
-                </div>
-            ),
-        },
-        {
-            id: BATTLE_FORM_TAB.roster,
-            label: t('tabs.roster', { count: participants.list.length }),
-            content: (
-                <div>
-                    {setup.balanceKind === 'xp' && (
-                        <XpBalanceSummary xp={setup.xp} units={data.units} />
-                    )}
-                    {setup.balanceKind === 'fair' && (
-                        <BalanceSummary fair={setup.fair} />
-                    )}
-                    <div className="grid gap-4 md:grid-cols-2">
-                        {sidePanel(ParticipantSide.ALLY)}
-                        {sidePanel(ParticipantSide.ENEMY)}
-                    </div>
                 </div>
             ),
         },
     ];
 
+    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+        const submitter = (e.nativeEvent as SubmitEvent).submitter;
+
+        form.actions.submit(e, {
+            start: submitter?.getAttribute('value') === 'start',
+        });
+    };
+
+    const saving = form.status.isSaving;
+
+    const formId = battleFormId(isEdit);
+
     return (
         <HudFormPage
             header={{
-                title: title,
-                aside: isEdit ? t('aside.edit') : t('aside.create'),
+                title: isEdit ? t('title.edit') : t('title.create'),
+                menu: isEdit && (
+                    <HudFormMenu
+                        label={t('more')}
+                        items={[
+                            {
+                                label: tActions('delete'),
+                                tone: 'danger',
+                                onSelect: form.actions.remove,
+                            },
+                        ]}
+                    />
+                ),
             }}
             className={PAGE_CLASS}
+            actions={
+                <>
+                    <SetupSummary
+                        participants={participants.list}
+                        balance={balance}
+                        map={map}
+                    />
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="hidden sm:inline-flex"
+                        asChild
+                    >
+                        <Link href={`/campaigns/${campaignId}/dm/battles`}>
+                            {tActions('cancel')}
+                        </Link>
+                    </Button>
+                    {!isEdit && (
+                        <Button
+                            type="submit"
+                            form={formId}
+                            name="intent"
+                            value="start"
+                            variant="outline"
+                            className={SUBMIT_FIT}
+                            disabled={saving}
+                        >
+                            {t('createAndStart')}
+                        </Button>
+                    )}
+                    <Button
+                        type="submit"
+                        form={formId}
+                        className={SUBMIT_FIT}
+                        disabled={saving || locked}
+                    >
+                        {isEdit
+                            ? saving
+                                ? tActions('saving')
+                                : t('saveChanges')
+                            : saving
+                              ? tActions('creating')
+                              : t('title.create')}
+                    </Button>
+                </>
+            }
         >
-            <OnboardingHint id="dm.battle-setup" className="mb-3" />
-            <HudForm
-                id={isEdit ? 'battle-edit-form' : 'battle-form'}
-                onSubmit={form.actions.submit}
-                tabs={tabs}
-                actions={
-                    <>
-                        {isEdit && (
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                onClick={form.actions.remove}
-                                disabled={form.status.isDeleting}
-                            >
-                                {form.status.isDeleting
-                                    ? t('deleting')
-                                    : tActions('delete')}
-                            </Button>
-                        )}
-                        <Button type="button" variant="outline" asChild>
-                            <Link href={`/campaigns/${campaignId}/dm/battles`}>
-                                {tActions('cancel')}
-                            </Link>
-                        </Button>
-                        <Button type="submit" disabled={form.status.isSaving}>
-                            {isEdit
-                                ? form.status.isSaving
-                                    ? tActions('saving')
-                                    : t('saveChanges')
-                                : form.status.isSaving
-                                  ? tActions('creating')
-                                  : t('title.create')}
-                        </Button>
-                    </>
-                }
+            <OnboardingHint id="dm.battle-setup" className="mx-4 mb-1" />
+            <SetupHeader
+                details={details}
+                campaignId={campaignId}
+                isEdit={isEdit}
+                locked={locked}
             />
+            {locked && <LockedBanner />}
+            <HudForm id={formId} onSubmit={onSubmit} tabs={tabs} />
         </HudFormPage>
     );
 }

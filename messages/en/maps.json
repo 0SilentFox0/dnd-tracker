@@ -253,6 +253,12 @@
       "empty": "No stamps found.",
       "hints": "R / Shift+R rotate, F flip, [ ] order, Ctrl/Cmd+D duplicate, Delete remove, wheel scales.",
       "categoryAll": "All"
+    },
+    "workbench": {
+      "fullscreen": "Full screen",
+      "done": "Done",
+      "toolHint": "Esc to clear",
+      "clearTool": "Clear tool"
     }
   },
   "catalog": {

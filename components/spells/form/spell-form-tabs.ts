@@ -6,3 +6,5 @@ export const SPELL_FORM_TAB = {
 
 export type SpellFormTabId =
     (typeof SPELL_FORM_TAB)[keyof typeof SPELL_FORM_TAB];
+
+export const SPELL_FORM_ID = 'spell-form';

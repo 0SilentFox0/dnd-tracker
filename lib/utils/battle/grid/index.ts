@@ -10,6 +10,7 @@ export * from './line-of-fire';
 export * from './map-click';
 export * from './map-compose';
 export * from './map-editor';
+export * from './map-library';
 export * from './map-scene';
 export * from './map-view';
 export * from './move-route';

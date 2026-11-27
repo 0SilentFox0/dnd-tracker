@@ -42,7 +42,7 @@ export function SpellFormPowerFields({
     const zone = targeting.kind === 'template' ? targeting.zone : undefined;
 
     return (
-        <div className="ds-fields">
+        <div className="ds-fields [&>*]:min-w-0">
             <div className="ds-span">
                 <Label htmlFor="dice">{tp('baseDice')}</Label>
                 <BoundedNumberInput
@@ -151,7 +151,7 @@ export function SpellFormPowerFields({
                     formData.damageBonus != null) && (
                     <div className="ds-span">
                         <HudSection title="5e">
-                            <div className="ds-fields">
+                            <div className="ds-fields [&>*]:min-w-0">
                                 <label className="ds-span flex items-center gap-2">
                                     <Checkbox
                                         id="fixed-dice"

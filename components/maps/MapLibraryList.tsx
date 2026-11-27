@@ -46,7 +46,7 @@ export function MapLibraryList({ campaignId }: { campaignId: string }) {
                 title={t('title')}
                 subtitle={t('subtitle')}
                 actions={
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         {libraryEnabled && (
                             <ContentCopyButton
                                 campaignId={campaignId}

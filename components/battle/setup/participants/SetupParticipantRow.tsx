@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Eye, EyeOff, Minus, Plus } from 'lucide-react';
+import { ArrowLeftRight, Eye, EyeOff, Minus, Plus, X } from 'lucide-react';
 
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { Button } from '@/components/ui/button';
@@ -33,39 +33,34 @@ export function SetupParticipantRow({
 
     const isAlly = side === ParticipantSide.ALLY;
 
-    const bgClass = isAlly
-        ? 'bg-green-50 dark:bg-green-950/20'
-        : 'bg-red-50 dark:bg-red-950/20';
-
     return (
         <div
             className={cn(
-                'flex items-center justify-between gap-2 rounded-lg border p-3',
-                bgClass,
+                'relative flex min-w-0 flex-col overflow-hidden rounded-xl border bg-hud-panel-2 transition-opacity',
+                isAlly
+                    ? 'border-hud-accent shadow-[0_0_0_1px_var(--hud-accent)]'
+                    : 'border-hud-crimson shadow-[0_0_0_1px_var(--hud-crimson)]',
                 reserved > 0 && 'opacity-60'
             )}
         >
-            <div className="flex min-w-0 flex-1 items-center gap-2">
+            <div className="flex w-full min-w-0 flex-col items-center gap-2 px-2.5 pt-2.5 pb-2">
                 <EntityIcon
                     src={avatar}
                     name={name}
-                    alt={name}
-                    size={36}
-                    className="size-9 rounded"
-                    fallback={
-                        <span>
-                            {side === ParticipantSide.ALLY ? '👤' : '⚔️'}
-                        </span>
-                    }
+                    alt=""
+                    size={160}
+                    className="aspect-square h-auto w-full rounded-lg bg-black/30 ring-1 ring-hud-rule"
                 />
-                <span className="truncate text-sm font-medium">{name}</span>
-                {quantity != null && quantity > 1 && (
-                    <span className="shrink-0 text-xs text-muted-foreground">
-                        ×{quantity}
-                    </span>
-                )}
+                <span className="w-full truncate text-center text-sm font-semibold">
+                    {name}
+                    {quantity != null && quantity > 1 && (
+                        <span className="ml-1 text-xs font-normal text-muted-foreground">
+                            ×{quantity}
+                        </span>
+                    )}
+                </span>
             </div>
-            <div className="flex shrink-0 items-center gap-1">
+            <div className="flex w-full items-center gap-1 border-t border-hud-rule p-1.5">
                 {reserved > 0 && (quantity ?? 1) > 1 && (
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Button
@@ -97,6 +92,7 @@ export function SetupParticipantRow({
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="flex-1"
                     aria-pressed={reserved > 0}
                     title={reserved > 0 ? t('unreserve') : t('reserve')}
                     onClick={() =>
@@ -115,20 +111,23 @@ export function SetupParticipantRow({
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="flex-1"
                     onClick={actions.onMoveToOtherSide}
                     title={isAlly ? t('moveToEnemies') : t('moveToAllies')}
+                    aria-label={isAlly ? t('moveToEnemies') : t('moveToAllies')}
                 >
-                    {isAlly ? '→' : '←'}
+                    <ArrowLeftRight className="size-4" aria-hidden />
                 </Button>
                 <Button
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="flex-1"
                     onClick={actions.onRemove}
                     title={t('remove')}
-                    className="text-muted-foreground hover:text-destructive"
+                    aria-label={t('remove')}
                 >
-                    ✕
+                    <X className="size-4" aria-hidden />
                 </Button>
             </div>
         </div>

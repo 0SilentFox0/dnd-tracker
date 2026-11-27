@@ -230,7 +230,8 @@
     "delete": "Видалити персонажа",
     "sections": {
       "identity": "Особа",
-      "classes": "Клас і рівень"
+      "classes": "Клас і рівень",
+      "classLevel": "Клас і рівень"
     }
   },
   "editor": {

@@ -31,7 +31,7 @@ export function SpellFormBasicFields({
     const t = useTranslator();
 
     return (
-        <div className="ds-fields">
+        <div className="ds-fields [&>*]:min-w-0">
             <LabeledInput
                 containerClassName="ds-span"
                 id="name"

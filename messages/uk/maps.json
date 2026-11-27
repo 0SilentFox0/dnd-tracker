@@ -253,6 +253,12 @@
       "empty": "Штампів не знайдено.",
       "hints": "R / Shift+R — поворот, F — віддзеркалення, [ ] — порядок, Ctrl/Cmd+D — дублювати, Delete — видалити, коліщатко — масштаб.",
       "categoryAll": "Усі"
+    },
+    "workbench": {
+      "fullscreen": "На весь екран",
+      "done": "Готово",
+      "toolHint": "Esc — зняти",
+      "clearTool": "Зняти інструмент"
     }
   },
   "catalog": {

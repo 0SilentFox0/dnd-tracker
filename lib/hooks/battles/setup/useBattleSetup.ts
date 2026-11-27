@@ -19,7 +19,10 @@ import { sharedEnemyRace } from '@/lib/utils/battle/balance/setup';
 import { fromJson } from '@/lib/utils/common/json';
 import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
-import type { BattlePreparationParticipant } from '@/types/battle';
+import type {
+    BattleParticipant,
+    BattlePreparationParticipant,
+} from '@/types/battle';
 import type { BattleMapConfig, BattleMapRef } from '@/types/battle-grid';
 
 export interface BattleSetupInitial {
@@ -138,6 +141,31 @@ export function useBattleSetup(
 
 export type BattleSetup = ReturnType<typeof useBattleSetup>;
 
+function rosterOfStarted(
+    order: BattleParticipant[]
+): BattlePreparationParticipant[] {
+    const groups = new Map<string, BattlePreparationParticipant>();
+
+    for (const { basicInfo: b } of order) {
+        if (b.isExtraTurnSlot) continue;
+
+        const key = `${b.sourceType}:${b.sourceId}:${b.side}`;
+
+        const group = groups.get(key);
+
+        if (group) group.quantity = (group.quantity ?? 1) + 1;
+        else
+            groups.set(key, {
+                id: b.sourceId,
+                type: b.sourceType,
+                side: b.side,
+                quantity: 1,
+            });
+    }
+
+    return [...groups.values()];
+}
+
 export function useBattleSetupInitial(campaignId: string, battleId: string) {
     const { data: battle, isLoading } = useBattle(campaignId, battleId, {
         pausePolling: true,
@@ -149,9 +177,11 @@ export function useBattleSetupInitial(campaignId: string, battleId: string) {
                 ? {
                       name: battle.name || '',
                       description: (battle.description as string) || '',
-                      participants: fromJson<BattlePreparationParticipant[]>(
-                          battle.participants ?? []
-                      ),
+                      participants: battle.participants?.length
+                          ? fromJson<BattlePreparationParticipant[]>(
+                                battle.participants
+                            )
+                          : rosterOfStarted(battle.initiativeOrder ?? []),
                       map: battle.map ?? null,
                       mapRef: battle.mapRef ?? null,
                       status: battle.status,

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { GridTypeChoice } from '@/components/battle/setup/map/GridTypeChoice';
+import { GridTypeChoice } from '@/components/battle/setup/map/shared/GridTypeChoice';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

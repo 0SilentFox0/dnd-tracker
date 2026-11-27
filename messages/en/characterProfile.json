@@ -230,7 +230,8 @@
     "delete": "Delete character",
     "sections": {
       "identity": "Identity",
-      "classes": "Class and level"
+      "classes": "Class and level",
+      "classLevel": "Class and level"
     }
   },
   "editor": {

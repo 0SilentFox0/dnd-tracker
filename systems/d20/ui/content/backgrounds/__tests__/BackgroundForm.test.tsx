@@ -251,3 +251,13 @@ it('disables saving until the pending update settles', async () => {
     await act(async () => resolveUpdate(background));
     await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
 });
+
+it('has one save button outside the form that targets it', () => {
+    mount();
+
+    const save = screen.getAllByRole('button', { name: 'common.actions.save' });
+
+    expect(save).toHaveLength(1);
+    expect(save[0].getAttribute('form')).toBe('background-form');
+    expect(save[0].closest('form')).toBeNull();
+});

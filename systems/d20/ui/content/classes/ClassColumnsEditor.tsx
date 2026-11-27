@@ -114,6 +114,7 @@ export function ClassColumnsEditor({
     return (
         <div className="space-y-4">
             <p className="text-xs text-muted-foreground">{t('columns.hint')}</p>
+            <div className="ds-list-grid">
             {value.map((c, i) => (
                 <HudSection
                     key={i}
@@ -191,6 +192,7 @@ export function ClassColumnsEditor({
                     </div>
                 </HudSection>
             ))}
+            </div>
             {value.length < MAX_CLASS_COLUMNS && (
                 <Button type="button" variant="outline" size="sm" onClick={add}>
                     <Plus className="h-4 w-4" />

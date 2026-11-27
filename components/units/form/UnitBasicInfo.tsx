@@ -80,7 +80,7 @@ export function UnitBasicInfo({
                 />
             </div>
 
-            <div className="ds-fields ds-fields--num ds-span">
+            <div className="ds-fields ds-fields--num ds-span items-end">
                 {NUMBER_FIELDS.map((field) => (
                     <div key={field.key} className="flex flex-col justify-end">
                         <Label

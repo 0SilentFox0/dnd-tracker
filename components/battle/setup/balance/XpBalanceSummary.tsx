@@ -23,7 +23,8 @@ export function XpBalanceSummary({ xp, units }: XpBalanceSummaryProps) {
 
     return (
         <HudSection title={t('title')} className="mb-4">
-            <HudCard className="space-y-3" data-testid="xp-balance-summary">
+            <div data-testid="xp-balance-summary">
+<HudCard className="space-y-3">
                 {!xp ? (
                     <p className="text-sm text-[var(--hud-muted)]">
                         {t('empty')}
@@ -71,6 +72,7 @@ export function XpBalanceSummary({ xp, units }: XpBalanceSummaryProps) {
                     </>
                 )}
             </HudCard>
+</div>
         </HudSection>
     );
 }

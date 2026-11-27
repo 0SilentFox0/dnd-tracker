@@ -1,16 +1,19 @@
 'use client';
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { ActiveToolChip } from './editor/ActiveToolChip';
 import { BackLink, EditorHeader } from './editor/EditorHeader';
 import { EditorSidebar } from './editor/EditorSidebar';
+import { MapWorkbench } from './editor/MapWorkbench';
 
 import { BattleMap } from '@/components/battle/map';
 import { QueryState } from '@/components/common/states';
 import {
     type EditorPanel,
     isStampTool,
+    useActiveToolChip,
     useBattleMap,
     useBattleMapTiles,
     useMapArt,
@@ -112,11 +115,13 @@ function EditorContent({
         draft
     );
 
-    const asideRef = useRef<HTMLElement>(null);
+    const [fullscreen, setFullscreen] = useState(false);
 
     const { editor } = draft;
 
     const { map, tool, notice } = editor.state;
+
+    const toolChip = useActiveToolChip(editor);
 
     const { panel, paintingTiles, tileEditor } = workspace;
 
@@ -125,7 +130,6 @@ function EditorContent({
     const goToPanel = useCallback(
         (next: EditorPanel) => {
             selectPanel(next);
-            asideRef.current?.scrollTo({ top: 0 });
         },
         [selectPanel]
     );
@@ -265,21 +269,33 @@ function EditorContent({
                     {t('tiles.saveFailed')}
                 </p>
             )}
-            <p
-                aria-live="polite"
-                role="status"
-                className="min-h-5 shrink-0 text-sm text-hud-ink"
-            >
-                {notice
-                    ? text(notice)
-                    : artEditor.notice
-                      ? text(artEditor.notice)
-                      : draft.justSaved
-                        ? t('saved')
-                        : ''}
-            </p>
-            <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(14rem,42%)] gap-3 overflow-hidden lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-1">
-                <div className="relative min-h-0 min-w-0 overflow-hidden">
+            <MapWorkbench
+                layout={{
+                    className:
+                        'flex-1 grid-rows-[minmax(0,1fr)_minmax(14rem,42%)] lg:h-auto',
+                }}
+                fullscreen={{
+                    value: fullscreen,
+                    set: setFullscreen,
+                    label: t('workbench.fullscreen'),
+                }}
+                onEscape={toolChip.onEscape}
+                toolbar={
+                    <ActiveToolChip
+                        tool={toolChip.tool}
+                        onClear={toolChip.onClear}
+                    />
+                }
+                notice={
+                    notice
+                        ? text(notice)
+                        : artEditor.notice
+                          ? text(artEditor.notice)
+                          : draft.justSaved
+                            ? t('saved')
+                            : null
+                }
+                canvas={
                     <BattleMap
                         map={previewMap}
                         participants={NO_PARTICIPANTS}
@@ -287,11 +303,8 @@ function EditorContent({
                         look={look}
                         editing={editing}
                     />
-                </div>
-                <aside
-                    ref={asideRef}
-                    className="min-h-0 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain rounded-lg border border-hud-rule bg-background p-2 pb-6 shadow-sm"
-                >
+                }
+                sidebar={
                     <EditorSidebar
                         draft={draft}
                         workspace={workspace}
@@ -299,8 +312,8 @@ function EditorContent({
                         art={art}
                         onSelectPanel={goToPanel}
                     />
-                </aside>
-            </div>
+                }
+            />
         </div>
     );
 }

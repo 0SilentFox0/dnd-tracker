@@ -3,7 +3,7 @@
     "page": {
       "title": "Battle scenes",
       "subtitle": "Create and manage battles",
-      "create": "+ Create battle scene"
+      "create": "New battle"
     },
     "deleteAll": {
       "noun": "battles",
@@ -14,25 +14,31 @@
       "prepared": "Prepared battles",
       "completed": "Completed battles"
     },
-    "status": {
-      "active": "Active",
-      "prepared": "Prepared",
-      "completed": "Completed"
-    },
     "card": {
-      "round": "Round:",
-      "participants": "Participants:",
-      "play": "Go to battle",
       "edit": "Edit",
       "start": "Start",
       "view": "View",
       "delete": "Delete",
       "stop": "Stop",
-      "replay": "Play again"
+      "replay": "Play again",
+      "open": "Open",
+      "continue": "Continue battle",
+      "more": "Battle actions",
+      "noMap": "No map",
+      "sides": "Allies: {ally}, enemies: {enemy}",
+      "roundN": "Round {round}",
+      "rounds": "{count, plural, one {# round} other {# rounds}}",
+      "started": "started {date}",
+      "active": "In progress",
+      "result": {
+        "victory": "Allies won",
+        "defeat": "Defeat"
+      }
     },
     "empty": {
       "title": "No battle scenes yet",
-      "create": "Create the first battle scene"
+      "create": "Create the first battle scene",
+      "description": "Pick participants and a map and the battle is ready to start."
     },
     "search": "Search battles",
     "reset": {
@@ -46,6 +52,22 @@
         "description": "The battle returns to its pre-start state: the log and result are cleared.",
         "confirm": "Play again"
       }
+    },
+    "actions": {
+      "more": "Actions",
+      "deleteAll": "Delete all battles…"
+    },
+    "filter": {
+      "label": "Battle filter",
+      "all": "All",
+      "prepared": "Prepared",
+      "completed": "Completed"
+    },
+    "filterEmpty": "No battles in this filter.",
+    "status": {
+      "active": "Active",
+      "prepared": "Prepared",
+      "completed": "Completed"
     }
   },
   "form": {
@@ -54,26 +76,33 @@
       "create": "Create battle scene",
       "edit": "Edit battle scene"
     },
-    "aside": {
-      "create": "Pick participants and split them into allies and enemies",
-      "edit": "Update the participants and their roles in the battle"
-    },
     "tabs": {
-      "basic": "Basics",
-      "map": "Map",
-      "heroes": "Heroes",
-      "units": "Units",
-      "roster": "Roster · {count}"
+      "participants": "Participants",
+      "map": "Map"
     },
-    "deleting": "Deleting...",
     "saveChanges": "Save changes",
     "confirmDelete": "Are you sure you want to delete this battle scene?",
     "notify": {
       "noParticipants": "Pick at least one participant",
       "updateFailed": "Failed to update the battle",
       "createFailed": "Failed to create the battle",
-      "deleteFailed": "Failed to delete the battle"
-    }
+      "deleteFailed": "Failed to delete the battle",
+      "startFailed": "The battle was created but could not be started"
+    },
+    "backToList": "Battles",
+    "details": {
+      "label": "Details",
+      "title": "Battle details"
+    },
+    "nameRequired": "Enter a battle name",
+    "summary": {
+      "noEnemies": "No enemies",
+      "map": "Map {cols}×{rows}",
+      "noMap": "No map"
+    },
+    "locked": "The battle has already started: participants and map cannot be changed.",
+    "createAndStart": "Create and start",
+    "more": "More actions"
   },
   "basic": {
     "title": "Basic information",
@@ -87,23 +116,6 @@
   },
   "map": {
     "title": "Battle map",
-    "mapChoice": {
-      "title": "How do you want to add a map?",
-      "none": {
-        "title": "No map",
-        "description": "Show the battle as a column based list."
-      },
-      "create": {
-        "title": "Create a map now",
-        "description": "Set up a grid, background, cells, and walls for this battle."
-      },
-      "prepared": {
-        "title": "Load a prepared map",
-        "description": "Choose a campaign map or add one from the catalog.",
-        "unavailable": "The map library is turned off for this campaign. Enable it in campaign settings to use prepared maps."
-      }
-    },
-    "enabled": "Battle on a map",
     "cols": "Columns",
     "rows": "Rows",
     "cellSize": "Cell size · {size} · {cols} × {rows}",
@@ -164,38 +176,67 @@
     "edgesLinked": "Walls of a library map are edited on the Maps page — then press «Update map»",
     "edgesDesktopOnly": "Drawing walls and bars is desktop-only — open this on a computer",
     "doorLocked": "Locked",
-    "doorLimit": "Door limit reached, the extra doors were not added"
-  },
-  "characters": {
-    "title": "Characters",
-    "hint": "Players and NPC heroes",
-    "players": "Players",
-    "npc": "NPC heroes",
-    "empty": "No characters available",
-    "dprHow": "How DPR is calculated",
-    "dprTitle": "DPR breakdown",
-    "dprSummary": "Physical: {physical} · Magic: {spell} · Skills: {nonMagic}"
+    "doorLimit": "Door limit reached, the extra doors were not added",
+    "sidebar": "Battle map panels",
+    "groups": {
+      "map": "Map",
+      "draw": "Drawing",
+      "special": "Special"
+    },
+    "panels": {
+      "grid": "Grid & size",
+      "calibration": "Calibration",
+      "background": "Background",
+      "margins": "Margins",
+      "cells": "Cells",
+      "edges": "Walls and doors",
+      "mode": "Mode",
+      "motion": "Motion"
+    },
+    "panelDescription": {
+      "grid": "Grid type and map size in cells.",
+      "calibration": "Cell size and grid offset relative to the background.",
+      "background": "Image, default background and grid opacity.",
+      "margins": "Unplayable cells along the map edges.",
+      "cells": "Mark blocked cells and hazardous areas.",
+      "edges": "Draw walls, bars and doors along cell edges.",
+      "mode": "A special map mode, such as a maze.",
+      "motion": "Movement animation on the map."
+    },
+    "quickStart": {
+      "title": "Get started",
+      "image": "Upload a map image",
+      "uvtt": "Import UVTT (.dd2vtt)",
+      "grid": "Empty grid — draw by hand"
+    },
+    "saveToLibrary": {
+      "button": "Save to library",
+      "title": "Save map to the library",
+      "description": "The battle keeps its own map; the library gets a separate copy.",
+      "name": "Map name",
+      "submit": "Save",
+      "saving": "Saving...",
+      "saved": "Map saved to the library.",
+      "open": "Open library",
+      "failed": "Could not save the map to the library"
+    },
+    "source": {
+      "label": "Map source",
+      "none": "No map",
+      "own": "Own map",
+      "library": "From library"
+    },
+    "noMap": {
+      "title": "The battle runs without a map",
+      "description": "Participants are shown as a list. Add a map to fight on a grid."
+    },
+    "fullscreen": "Full screen"
   },
   "dprBreakdown": {
     "physical": "Melee {melee}, ranged {ranged} → physical DPR = {physical}",
     "spell": "Magic school (highest level): +{value} DPR",
     "nonMagic": "Non-magic main skills (sum): +{value} DPR",
     "total": "Total DPR = {physical} + {spell} + {nonMagic} = {total}"
-  },
-  "units": {
-    "title": "Units",
-    "hintEmpty": "NPC units. Click to add as an ally; \"To enemies\" puts it in the enemy column.",
-    "hint": "Click a card to add it to the allies or remove it. \"To enemies\" puts it straight into the enemy column.",
-    "empty": "No units available",
-    "tier": "tier {level}",
-    "enemy": "Enemy",
-    "ally": "Ally",
-    "quantity": "Quantity:",
-    "alreadyEnemy": "Already an enemy",
-    "toEnemies": "To enemies",
-    "search": "Search units",
-    "raceFilter": "Filter by race",
-    "noMatches": "No units match"
   },
   "autopick": {
     "title": "Enemy picker",
@@ -248,7 +289,11 @@
     "weak": "Too weak",
     "excess": "Too strong",
     "hintWeak": "Too weak: add {list}",
-    "hintExcess": "Too strong: remove {list}"
+    "hintExcess": "Too strong: remove {list}",
+    "scalesAria": "Power ratio: allies {share}%",
+    "detailsAria": "Balance details",
+    "shortEmpty": "Balance —",
+    "evenShort": "Even"
   },
   "xp": {
     "title": "Battle balance (5e XP)",
@@ -289,6 +334,42 @@
       "description": "Terrain and zones of the current map will be reset (weather and motion are kept).",
       "confirm": "Change"
     },
-    "catalog": "Browse maps"
+    "catalog": "Browse maps",
+    "search": "Search maps",
+    "empty": "The library has no maps yet.",
+    "openInEditor": "Open in editor",
+    "preview": "Selected map preview",
+    "selectedMark": "Selected",
+    "clear": "Deselect"
+  },
+  "participants": {
+    "catalogAria": "Participant catalog",
+    "tabHeroes": "Heroes · {count}",
+    "tabUnits": "Creatures · {count}",
+    "search": "Search by name",
+    "raceFilter": "Filter by race",
+    "players": "Players",
+    "npc": "NPC heroes",
+    "noMatches": "Nothing found",
+    "emptyHeroes": "No heroes available",
+    "emptyUnits": "No creatures available",
+    "ally": "Ally",
+    "enemy": "Enemy",
+    "addAlly": "Add {name} to allies",
+    "addEnemy": "Add {name} to enemies",
+    "sideAria": "Side: {name}",
+    "quantityAria": "Quantity: {name}",
+    "quantityLess": "Fewer: {name}",
+    "quantityMore": "More: {name}",
+    "remove": "Remove {name}",
+    "emptyAllies": "Add allies from the catalog",
+    "emptyEnemies": "Add enemies from the catalog",
+    "autopick": "Enemy autopick",
+    "roster": "Roster",
+    "rosterTitle": "Sides roster",
+    "versus": "{ally} VS {enemy}",
+    "dprHelpAria": "About DPR, HP and KPI",
+    "dprHelpTitle": "What the numbers mean",
+    "dprHelpBody": "Under each name: DPR · HP · KPI. DPR is expected damage per round: attacks (hit chance × average damage), plus the highest-level spell school and non-magic main skills for heroes. HP is hit points, KPI is the overall combat rating used for balance."
   }
 }

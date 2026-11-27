@@ -28,17 +28,22 @@ export function HudChipTabs({
     items,
     ariaLabel,
     size = 'md',
+    wrap = false,
 }: {
     items: ChipItem[];
     ariaLabel: string;
     size?: 'md' | 'lg';
+    wrap?: boolean;
 }) {
     const chip = cn(HUD_CHIP_CLASS, size === 'lg' && CHIP_LG);
 
     return (
         <nav
             aria-label={ariaLabel}
-            className="hud-scroll-x -mx-1 flex gap-1.5 overflow-x-auto px-1 py-1"
+            className={cn(
+                '-mx-1 flex gap-1.5 px-1 py-1',
+                wrap ? 'flex-wrap' : 'hud-scroll-x overflow-x-auto'
+            )}
         >
             {items.map((it) =>
                 it.href ? (

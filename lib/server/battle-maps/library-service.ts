@@ -24,6 +24,7 @@ import { verifyBattleMapBackground } from '@/lib/server/battle-maps/background-u
 import { ContentError } from '@/lib/server/content/errors';
 import { resolveMapBackgroundForPersistence } from '@/lib/supabase/battle-map-storage';
 import { gridOf } from '@/lib/utils/battle/grid/geometry';
+import { isPreviewSafeBackground } from '@/lib/utils/battle/grid/map-editor';
 import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import {
     type EdgeChunks,
@@ -41,6 +42,12 @@ type Header = BattleMapFull['map'];
 
 export type OwnedBattleMap = BattleMapFull & { campaignId: string };
 
+const thumbOf = (header: unknown) => {
+    const background = backgroundOf(header);
+
+    return isPreviewSafeBackground(background) ? background : null;
+};
+
 const toBrief = (r: {
     id: string;
     name: string;
@@ -48,6 +55,7 @@ const toBrief = (r: {
     rows: number;
     mapVersion: number;
     updatedAt: Date;
+    header?: unknown;
 }): BattleMapBrief => ({
     id: r.id,
     name: r.name,
@@ -55,6 +63,7 @@ const toBrief = (r: {
     rows: r.rows,
     version: r.mapVersion,
     updatedAt: r.updatedAt.toISOString(),
+    thumb: thumbOf(r.header),
 });
 
 const payloadOf = (input: BattleMapInput) => {
@@ -122,6 +131,7 @@ export async function listMaps(campaignId: string): Promise<BattleMapBrief[]> {
             rows: true,
             mapVersion: true,
             updatedAt: true,
+            header: true,
         },
     });
 

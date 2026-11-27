@@ -47,7 +47,8 @@ export function BalanceSummary({
 
     return (
         <HudSection title={t('title')} className="mb-4">
-            <HudCard className="space-y-3" data-testid="balance-summary">
+            <div data-testid="balance-summary">
+<HudCard className="space-y-3">
                 {!fair || !scaling || scaling.verdict === 'empty' ? (
                     <p className="text-sm text-[var(--hud-muted)]">
                         {t('empty')}
@@ -108,6 +109,7 @@ export function BalanceSummary({
                     </>
                 )}
             </HudCard>
+</div>
         </HudSection>
     );
 }

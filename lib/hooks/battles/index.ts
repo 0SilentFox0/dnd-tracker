@@ -10,6 +10,10 @@ export {
     useBattleMapEditor,
 } from './setup/useBattleMapEditor';
 export {
+    type BattleMapSections,
+    useBattleMapSections,
+} from './setup/useBattleMapSections';
+export {
     type ParticipantActions,
     type ParticipantSelection,
 } from './setup/useBattleParticipants';
@@ -20,13 +24,20 @@ export {
     useBattleSetupInitial,
 } from './setup/useBattleSetup';
 export {
+    type CatalogTab,
+    useBattleSetupView,
+} from './setup/useBattleSetupView';
+export {
     type GridCalibrationController,
     useGridCalibration,
 } from './setup/useGridCalibration';
 export { useSetupUnitsFilter } from './setup/useSetupUnitsFilter';
 export { type BattleActionOptions, useBattleAction } from './useBattleAction';
 export { useBattleBriefs } from './useBattleBriefs';
-export { useBattleListSections } from './useBattleListSections';
+export {
+    type BattleListFilter,
+    useBattleListSections,
+} from './useBattleListSections';
 export * from './useBattles';
 export { useBattleSummary } from './useBattleSummary';
 export { useDeleteBattleCard } from './useDeleteBattleCard';

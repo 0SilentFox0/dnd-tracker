@@ -51,7 +51,7 @@ export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
     return (
         <HudSection
             title={t('title')}
-            className="space-y-4"
+            panel
             action={
                 <Button
                     type="button"
