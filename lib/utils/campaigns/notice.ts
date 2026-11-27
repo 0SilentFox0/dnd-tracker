@@ -22,3 +22,11 @@ export function parseCampaignNotice(
         ? (value as CampaignNotice)
         : null;
 }
+
+const CAMPAIGN_PATH = /^\/campaigns\/([^/]+)/;
+
+export function campaignIdFromPath(pathname: string | null): string | null {
+    const id = CAMPAIGN_PATH.exec(pathname ?? '')?.[1];
+
+    return id && id !== 'new' ? id : null;
+}
