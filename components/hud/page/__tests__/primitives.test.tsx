@@ -30,6 +30,19 @@ describe('HUD page primitives', () => {
         expect(container.firstElementChild?.className).toContain('hud-page');
     });
 
+    it('HudPage widths page/list/narrow/wide', () => {
+        const cls = (w?: 'page' | 'list' | 'narrow' | 'wide') =>
+            render(<HudPage width={w}>x</HudPage>).container.firstElementChild
+                ?.className ?? '';
+
+        expect(cls()).toContain('max-w-[75rem]');
+        expect(cls('list')).toContain('max-w-page');
+        expect(cls('narrow')).toContain('max-w-3xl');
+        expect(cls('wide')).not.toMatch(/max-w-/);
+        expect(cls()).toContain('px-4');
+        expect(cls()).toContain('sm:px-6');
+    });
+
     it('HudPageHeader renders title, subtitle and wrapping actions', () => {
         render(
             <HudPageHeader

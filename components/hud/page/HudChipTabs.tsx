@@ -3,6 +3,10 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 
+import {
+    HUD_CHIP_ACTIVE_CLASS,
+    HUD_CHIP_CLASS,
+} from '@/components/hud/page/chip-class';
 import { cn } from '@/lib/utils';
 
 interface ChipItem {
@@ -13,29 +17,19 @@ interface ChipItem {
     onSelect?: () => void;
 }
 
-export const HUD_CHIP_CLASS =
-    'flex h-8 shrink-0 items-center rounded-lg border border-hud-line px-3 text-[13px] text-hud-muted transition-[background-color,box-shadow,color,border-color] duration-150 hover:border-hud-muted hover:text-hud-ink';
-
-const CHIP_LG = 'h-11 min-h-11 px-4 text-sm';
-
-export const HUD_CHIP_ACTIVE_CLASS =
-    'bg-hud-panel-2 text-hud-ink shadow-[inset_0_-2px_0_var(--hud-accent)]';
-
 const scrollActiveIntoView = (el: HTMLElement | null) =>
     el?.scrollIntoView?.({ inline: 'center', block: 'nearest' });
 
 export function HudChipTabs({
     items,
     ariaLabel,
-    size = 'md',
     wrap = false,
 }: {
     items: ChipItem[];
     ariaLabel: string;
-    size?: 'md' | 'lg';
     wrap?: boolean;
 }) {
-    const chip = cn(HUD_CHIP_CLASS, size === 'lg' && CHIP_LG);
+    const chip = HUD_CHIP_CLASS;
 
     return (
         <nav

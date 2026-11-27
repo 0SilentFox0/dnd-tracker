@@ -67,7 +67,7 @@ export function TransferArtifactDialog({
             }
         >
             {roster.isLoading ? (
-                <LoadingState rows={3} label={t('loading')} />
+                <LoadingState count={3} label={t('loading')} />
             ) : recipients.length === 0 ? (
                 <EmptyState title={t('noHeroes')} />
             ) : (

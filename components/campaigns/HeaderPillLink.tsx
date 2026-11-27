@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 
-const PILL =
-    'flex h-8 items-center gap-1.5 rounded border border-hud-accent bg-hud-accent px-2.5 text-xs font-semibold tracking-[.08em] text-hud-accent-ink';
+import { buttonVariants } from '@/components/ui/button';
+import { ARIA_DISABLED_CLASS } from '@/components/ui/disabled';
+
+const PILL = `${buttonVariants({ variant: 'default', size: 'sm' })} shrink-0 whitespace-nowrap max-sm:px-2`;
 
 export function HeaderPillLink({
     href,
@@ -20,18 +22,19 @@ export function HeaderPillLink({
     const content = (
         <>
             <Icon className="size-4" />
-            <span className="hidden sm:inline">{label}</span>
-            <span className="sr-only sm:hidden">{srLabel}</span>
+            <span className="max-sm:sr-only">{label}</span>
         </>
     );
 
     if (!href)
         return (
             <span
+                role="link"
                 aria-disabled
                 data-slot="header-pill-link"
                 data-tour={dataTour}
-                className={`${PILL} opacity-70`}
+                aria-label={srLabel}
+                className={`${PILL} ${ARIA_DISABLED_CLASS}`}
             >
                 {content}
             </span>
@@ -42,7 +45,8 @@ export function HeaderPillLink({
             href={href}
             data-slot="header-pill-link"
             data-tour={dataTour}
-            className={`${PILL} hover:brightness-110`}
+            aria-label={srLabel}
+            className={PILL}
         >
             {content}
         </Link>

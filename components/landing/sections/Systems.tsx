@@ -59,7 +59,7 @@ export function Systems({ t }: { t: Translator }) {
                     return (
                         <article
                             key={id}
-                            className="ld-rise relative flex flex-col gap-3 rounded-2xl border border-hud-line bg-gradient-to-b from-hud-surface to-hud-page p-6 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]"
+                            className="ld-rise relative flex flex-col gap-3 rounded-xl border border-hud-line bg-gradient-to-b from-hud-surface to-hud-page p-6 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]"
                             style={{ '--c': i } as CSSProperties}
                         >
                             <span
@@ -83,7 +83,7 @@ export function Systems({ t }: { t: Translator }) {
                                         (k) => (
                                             <li
                                                 key={k}
-                                                className="rounded-md border border-hud-rule bg-hud-page px-2 py-1 text-xs text-hud-ink"
+                                                className="rounded-lg border border-hud-rule bg-hud-page px-2 py-1 text-xs text-hud-ink"
                                             >
                                                 <CountChip
                                                     label={t(

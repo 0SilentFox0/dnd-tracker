@@ -120,7 +120,7 @@ export function ChoiceListEditor({
                 return (
                     <Disclosure
                         key={keys[i]}
-                        className="rounded-md border border-hud-line/60"
+                        className="rounded-lg border border-hud-line/60"
                         triggerClassName="flex flex-wrap items-center gap-2 px-3 py-2 text-sm"
                         defaultOpen={fresh === i || value.length === 1}
                         summary={
@@ -262,7 +262,7 @@ export function ChoiceListEditor({
                                 </p>
                                 {choice.description &&
                                     hasMarkdownTable(choice.description) && (
-                                        <div className="rounded-md border border-hud-line/40 p-2">
+                                        <div className="rounded-lg border border-hud-line/40 p-2">
                                             <p className="text-xs text-hud-muted">
                                                 {t('list.preview')}
                                             </p>
@@ -310,7 +310,7 @@ export function ChoiceListEditor({
                                 />
                             )}
                             <Disclosure
-                                className="rounded-md border border-hud-line/30 px-3 py-2 text-sm"
+                                className="rounded-lg border border-hud-line/30 px-3 py-2 text-sm"
                                 triggerClassName="text-hud-muted"
                                 summary={t('header.technical')}
                             >

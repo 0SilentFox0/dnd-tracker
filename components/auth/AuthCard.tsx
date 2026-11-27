@@ -26,7 +26,7 @@ export function AuthCard({
 
     return (
         <HudPage
-            width="md"
+            width="narrow"
             className="auth-legacy flex min-h-[80vh] items-center justify-center"
         >
             <HudPanel className="w-full max-w-sm space-y-4">
@@ -42,7 +42,7 @@ export function AuthCard({
                 {error && (
                     <div
                         role="alert"
-                        className="rounded-md border border-hud-danger bg-[rgba(208,112,92,.1)] p-3 text-sm text-hud-danger"
+                        className="rounded-lg border border-hud-danger bg-[rgba(208,112,92,.1)] p-3 text-sm text-hud-danger"
                     >
                         {t('common.errorPrefix', { message: error })}
                     </div>

@@ -35,6 +35,7 @@ export function WeaponStep({
                     <HudButton
                         key={id}
                         type="button"
+                        data-ux-tile
                         disabled={locked}
                         onClick={() => actions.selectWeapon(a)}
                         className={cn(
@@ -50,10 +51,10 @@ export function WeaponStep({
                             <Swords className="size-7 shrink-0 text-hud-accent-fg" />
                         )}
                         <span className="min-w-0 flex-1">
-                            <span className="hud-sc block text-[17px] font-bold">
+                            <span className="hud-sc block text-lg font-bold">
                                 {a.name}
                             </span>
-                            <span className="block text-[13px] text-hud-soft">
+                            <span className="block text-sm text-hud-soft">
                                 {t(
                                     view.serverJudged
                                         ? 'toHitPercent'
@@ -97,7 +98,7 @@ export function WeaponStep({
                                 })}
                             </span>
                         </span>
-                        <span className="w-[72px] text-right text-[15px]">
+                        <span className="w-[72px] text-right text-base">
                             {preview?.formula ||
                                 a.damageDice ||
                                 (a.damageBonus !== undefined

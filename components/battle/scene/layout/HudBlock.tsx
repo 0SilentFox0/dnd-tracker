@@ -71,7 +71,7 @@ export function HudBlock({
                 detachedButton
                     ? `${HUD_GLASS} size-8 rounded-lg ${detachedButton}`
                     : collapsed
-                      ? `${HUD_GLASS} hud-sc px-3 text-[13px] tracking-[.08em]`
+                      ? `${HUD_GLASS} hud-sc px-3 text-sm tracking-[.08em]`
                       : 'w-10 border border-white/15 bg-black/30 hover:bg-white/10',
                 align === 'end' && 'self-end',
                 align === 'center' && 'self-center'

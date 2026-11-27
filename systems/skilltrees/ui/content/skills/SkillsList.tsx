@@ -67,7 +67,7 @@ export function SkillsList({
     );
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('title')}
                 subtitle={t('subtitle')}
@@ -138,7 +138,7 @@ export function SkillsList({
             {canEdit && <OnboardingHint id="dm.skills" />}
 
             {isLoading && skills.length === 0 ? (
-                <LoadingState rows={6} label={t('loading')} />
+                <LoadingState count={6} label={t('loading')} />
             ) : skills.length === 0 ? (
                 <EmptyState
                     icon={Sparkles}

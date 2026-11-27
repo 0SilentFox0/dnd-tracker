@@ -13,7 +13,7 @@ export function MapBackgroundPanel({ tool }: { tool: MapBackgroundTool }) {
         <div
             role="group"
             aria-label={t('tools.background')}
-            className="flex max-w-[calc(100%-1rem)] flex-col gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs text-hud-bone"
+            className="flex max-w-[calc(100%-1rem)] flex-col gap-1.5 rounded-lg border border-hud-rule bg-black/70 p-1.5 text-xs text-hud-bone"
         >
             <ImageUpload
                 value={tool.current ?? ''}

@@ -98,7 +98,7 @@ export function PlaceSearchBar({ markers, onPick }: PlaceSearchBarProps) {
                         results.map((m) => (
                             <li key={m.id}>
                                 <HudButton
-                                    className="w-full truncate rounded px-2 py-1 text-left text-sm text-hud-ink hover:bg-white/10"
+                                    className="w-full truncate rounded-sm px-2 py-1 text-left text-sm text-hud-ink hover:bg-white/10"
                                     onClick={() => onPick(m.id)}
                                 >
                                     {m.name}

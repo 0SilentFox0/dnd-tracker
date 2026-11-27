@@ -23,16 +23,16 @@ export function CharacteristicsGrid({ block, onRoll, canRoll }: Props) {
             {block.characteristics.map((c) => {
                 const body = (
                     <>
-                        <small className="block text-[10px] text-hud-muted">
+                        <small className="block text-xs text-hud-muted">
                             {tg(`${c.key}.short`)}
                         </small>
-                        <b className="block text-[17px] leading-5">{c.value}</b>
+                        <b className="block text-lg leading-5">{c.value}</b>
                         {c.mod !== 0 && (
-                            <small className="block text-[10px] text-hud-muted tabular-nums">
+                            <small className="block text-xs text-hud-muted tabular-nums">
                                 {signed(c.mod)}
                             </small>
                         )}
-                        <span className="block text-[15px] leading-5 font-semibold text-hud-muted tabular-nums">
+                        <span className="block text-base leading-5 font-semibold text-hud-muted tabular-nums">
                             {c.bonus}
                         </span>
                     </>

@@ -66,7 +66,7 @@ export function AcquaintanceJournal({
             {item.entries.map((e) => (
                 <div
                     key={e.id}
-                    className="flex items-start justify-between gap-2 rounded border border-hud-line p-2 text-sm"
+                    className="flex items-start justify-between gap-2 rounded-sm border border-hud-line p-2 text-sm"
                 >
                     <div>
                         <p>{e.text}</p>

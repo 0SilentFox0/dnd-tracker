@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
 const BASE =
-    'inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-md border px-2 text-xs transition-colors disabled:opacity-40';
+    'inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs transition-colors disabled:opacity-50';
 
 export const bubbleButton = (danger = false, className?: string) =>
     cn(

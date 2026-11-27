@@ -23,7 +23,7 @@ export function CompendiumMediaSummary({ media }: { media: MediaPlanSummary }) {
                     summary={
                         <span>
                             {t('import.media.skippedTitle')}{' '}
-                            <HudPill tone="muted">
+                            <HudPill tone="meta">
                                 {skipped.reduce(
                                     (sum, [, count]) => sum + (count ?? 0),
                                     0

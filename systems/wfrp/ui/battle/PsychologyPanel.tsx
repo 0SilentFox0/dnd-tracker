@@ -16,7 +16,7 @@ function PassionGlyph({ passion }: { passion: string }) {
 }
 
 const btn =
-    'flex items-center gap-1.5 h-9 w-full border border-white/25 px-2 text-left text-sm text-[var(--bone)] disabled:opacity-40';
+    'flex items-center gap-1.5 h-10 w-full border border-white/25 px-2 text-left text-sm text-[var(--bone)] disabled:opacity-50';
 
 export function PsychologyPanel({ hero }: HeroPanelProps) {
     const t = useTranslations('battleWfrp.ui.psychology');

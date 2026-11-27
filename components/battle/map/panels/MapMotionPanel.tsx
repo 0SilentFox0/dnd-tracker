@@ -17,7 +17,8 @@ const SLIDER_DEBOUNCE_MS = 250;
 
 const PRESET_KEYS = ['slow', 'medium', 'fast', 'veryFast'] as const;
 
-const ACTION = 'h-7 bg-black/60 px-2 text-xs text-hud-muted hover:text-hud-bone';
+const ACTION =
+    'h-7 bg-black/60 px-2 text-xs text-hud-muted hover:text-hud-bone';
 
 export function MapMotionPanel({ tool }: { tool: MapMotionTool }) {
     const t = useTranslations('battle.map');
@@ -58,7 +59,7 @@ export function MapMotionPanel({ tool }: { tool: MapMotionTool }) {
         <div
             role="group"
             aria-label={t('tools.motion')}
-            className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs text-hud-bone"
+            className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-lg border border-hud-rule bg-black/70 p-1.5 text-xs text-hud-bone"
         >
             {(['x', 'y'] as const).map((axis) => (
                 <HudToggleChip

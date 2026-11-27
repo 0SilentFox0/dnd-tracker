@@ -14,6 +14,6 @@ export function SpellComponentsLine({
     const line = useComponentsLine(spell);
 
     return line ? (
-        <p className={cn('text-xs text-hud-muted', className)}>{line}</p>
+        <p className={cn('text-sm text-hud-muted', className)}>{line}</p>
     ) : null;
 }

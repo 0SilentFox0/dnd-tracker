@@ -4,6 +4,8 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { ErrorState } from './ErrorState';
 import { LoadingState } from './LoadingState';
 
+import { BrokenD20 } from '@/components/common/illustrations';
+
 type QueryLike<T> = Pick<
     UseQueryResult<T>,
     'data' | 'isPending' | 'isError' | 'error' | 'refetch'
@@ -26,6 +28,7 @@ export function QueryState<T>({
         return (
             <ErrorState
                 error={query.error}
+                illustration={<BrokenD20 />}
                 onRetry={() => void query.refetch()}
             />
         );

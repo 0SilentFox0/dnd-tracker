@@ -94,7 +94,7 @@ export function UnitEditForm({
         >
             <QueryState
                 query={editor.query}
-                loading={<LoadingState rows={8} label={t('loading')} />}
+                loading={<LoadingState variant="form" label={t('loading')} />}
             >
                 {(unit) => (
                     <HudForm

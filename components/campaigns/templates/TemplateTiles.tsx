@@ -55,7 +55,7 @@ function TemplateGroupTile({ group }: { group: TemplateGroup<TemplateTile> }) {
             <Link href={`/campaigns/${variant.id}`} className="block space-y-2">
                 <h3 className="hud-sc text-lg text-hud-ink">{variant.name}</h3>
                 {variant.system && (
-                    <HudPill tone="silver">
+                    <HudPill tone="npc">
                         {tg(ruleSystemLabelKey(variant.system))}
                     </HudPill>
                 )}

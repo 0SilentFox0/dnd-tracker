@@ -43,7 +43,7 @@ export function MonsterStatblock({ block }: { block: UnitStatblock }) {
         <div className="space-y-1 text-xs text-muted-foreground">
             <div className="flex flex-wrap items-center gap-1.5">
                 {block.creatureType && (
-                    <span className="rounded border px-1.5 py-0.5">
+                    <span className="rounded-sm border px-1.5 py-0.5">
                         {creatureTypeLabel(block.creatureType)}
                     </span>
                 )}

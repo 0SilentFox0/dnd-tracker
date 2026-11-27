@@ -37,7 +37,7 @@ export function AbilityFlow({
 
     const chip = (part: FlowPart, key: string, body: string): ReactNode => {
         const className = cn(
-            'inline-flex min-w-0 items-baseline gap-1.5 rounded-md border bg-hud-field/60 px-2 py-0.5 text-left',
+            'inline-flex min-w-0 items-baseline gap-1.5 rounded-lg border bg-hud-field/60 px-2 py-0.5 text-left',
             compact ? 'text-xs' : 'text-sm',
             FLOW_BORDER[part],
             FLOW_TEXT[part]
@@ -45,7 +45,7 @@ export function AbilityFlow({
 
         const content = (
             <>
-                <span className="hud-sc shrink-0 text-[10px] tracking-wide uppercase">
+                <span className="hud-sc shrink-0 text-xs tracking-wide uppercase">
                     {t(part)}
                 </span>
                 <span className="min-w-0 text-hud-bone">{body}</span>

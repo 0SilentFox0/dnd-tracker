@@ -16,7 +16,7 @@
     padding: 26px;
     overflow: hidden;
     border: 1px solid var(--dashboard-line);
-    border-radius: 20px;
+    border-radius: var(--r-lg);
     color: var(--palette-art-ink);
 }
 .dashboard-hero-art { position: absolute; inset: 0; z-index: -1; }
@@ -29,7 +29,7 @@
 .dashboard-hero-settings { position: absolute; top: 16px; right: 16px; z-index: 2; }
 .dashboard-hero-settings > button { width: 40px; height: 40px; }
 .dashboard-hero-heading { padding-right: 48px; }
-.dashboard-kicker { font: 700 12px var(--font-hud-sc), serif; letter-spacing: .14em; }
+.dashboard-kicker { font: 600 var(--text-xs)/1rem var(--font-body), serif; letter-spacing: .14em; }
 .dashboard-hero h1 { margin-top: 10px; font: 700 clamp(26px, 3.2vw, 40px)/1.15 var(--font-hud-book), serif; overflow-wrap: anywhere; }
 .dashboard-description { margin-top: 8px; max-width: 760px; line-height: 1.5; }
 .dashboard-summary {
@@ -43,12 +43,13 @@
 }
 .dashboard-summary > div > span { font-size: 13px; padding: 4px 10px; }
 .dashboard-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-.dashboard-hero-actions > a { min-height: 44px; padding-inline: 18px; }
+.dashboard-hero-actions > a { min-height: 40px; padding-inline: 18px; }
+@media (pointer: coarse) { .dashboard-hero-actions > a { min-height: 44px; } }
 .dashboard-hero-actions > a, .dashboard-hero-settings > button {
     border-color: color-mix(in srgb, var(--palette-art-ink) 30%, transparent);
     background: color-mix(in srgb, var(--palette-art-shadow) 80%, transparent);
     color: var(--palette-art-ink);
-    border-radius: 10px;
+    border-radius: var(--r-md);
 }
 .dashboard-hero-actions > .dashboard-primary {
     border-color: var(--hud-accent);

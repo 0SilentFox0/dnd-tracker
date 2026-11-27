@@ -101,12 +101,12 @@ export function SkillCard({
                             />
                         )
                     ) : (
-                        <span className="metal-bronze flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] p-0.5 shadow-[inset_0_0_0_2px_var(--m2)] sm:size-14">
+                        <span className="metal-bronze flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] p-0.5 shadow-[inset_0_0_0_2px_var(--m2)] sm:size-14">
                             <EntityIcon
                                 src={skillIcon}
                                 name={skillName}
                                 size={56}
-                                className="hud-sc size-full rounded-[4px] bg-transparent text-lg text-hud-ink"
+                                className="hud-sc size-full rounded-sm bg-transparent text-lg text-hud-ink"
                             />
                         </span>
                     )}
@@ -148,7 +148,7 @@ export function SkillCard({
                     <p
                         className={`text-muted-foreground ${
                             printMode
-                                ? 'mb-1.5 text-[11px] leading-snug'
+                                ? 'mb-1.5 text-xs leading-snug'
                                 : 'mb-3 line-clamp-2 text-xs sm:text-sm'
                         }`}
                     >

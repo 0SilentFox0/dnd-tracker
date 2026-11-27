@@ -185,7 +185,7 @@ export function ClassLevelUpDialog({
                 {nextRow && (gained.length > 0 || picksCount > 0) && (
                     <section
                         aria-label={t('gainsLabel')}
-                        className="space-y-1 rounded-md border border-hud-rule p-2 text-sm"
+                        className="space-y-1 rounded-lg border border-hud-rule p-2 text-sm"
                     >
                         <h4 className="font-semibold">
                             {t('gains', { level: nextLevel })}

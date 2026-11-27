@@ -45,4 +45,30 @@ describe('HeroPortrait', () => {
         rerender(<HeroPortrait src={null} name="Арвен" canEdit />);
         expect(screen.getByText('characterProfile.portrait.add')).toBeTruthy();
     });
+
+    it('portrait-less card uses class icon and 128px area', () => {
+        const { container } = render(
+            <HeroPortrait
+                src={null}
+                name="Арвен"
+                variant="card"
+                classVisual={{ icon: '⚔', color: '#aa3333' }}
+            />
+        );
+
+        const area = container.querySelector(
+            '[data-slot="portrait-card-fallback"]'
+        ) as HTMLElement;
+
+        expect(area.className).toContain('h-32');
+        expect(area.style.getPropertyValue('--class-color')).toBe('#aa3333');
+        expect(area.className).toContain('color-mix');
+        expect(screen.getByText('⚔')).toBeTruthy();
+        expect(screen.queryByText('А')).toBeNull();
+    });
+
+    it('falls back to monogram without class', () => {
+        render(<HeroPortrait src={null} name="Арвен" variant="card" />);
+        expect(screen.getByText('А')).toBeTruthy();
+    });
 });

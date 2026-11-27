@@ -226,7 +226,7 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
             {state.truncated > 0 ? (
                 <div
                     role="status"
-                    className="flex items-center gap-3 rounded-md border px-3 py-1.5 text-sm"
+                    className="flex items-center gap-3 rounded-lg border px-3 py-1.5 text-sm"
                 >
                     <span>
                         {t('limits.truncated', {
@@ -251,7 +251,7 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
             {noEntities ? (
                 <div
                     role="status"
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed bg-card/50 px-3 py-2 text-sm"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-dashed bg-card/50 px-3 py-2 text-sm"
                 >
                     <Network
                         className="size-4 text-muted-foreground"

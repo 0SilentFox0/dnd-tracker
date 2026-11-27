@@ -26,7 +26,7 @@ export function BackgroundsList({
     const backgrounds = list.items;
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle', { count: backgrounds.length })}

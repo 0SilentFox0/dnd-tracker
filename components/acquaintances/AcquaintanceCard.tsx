@@ -62,7 +62,7 @@ export function AcquaintanceCard({
                     </h2>
                     {flags.isNew && <NewPill />}
                     {item.hidden && (
-                        <HudPill tone="muted">{t('card.hidden')}</HudPill>
+                        <HudPill tone="meta">{t('card.hidden')}</HudPill>
                     )}
                 </div>
                 {item.description && (

@@ -46,7 +46,7 @@ export const bannerPalette = (color: string | null) => {
 };
 
 const FRAME =
-    'relative aspect-[4/5] w-full overflow-hidden rounded-md border-0 bg-hud-raised';
+    'relative aspect-[4/5] w-full overflow-hidden rounded-lg border-0 bg-hud-raised';
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase() || '?';
 
@@ -130,7 +130,7 @@ export function SheetBanner({
                         <HeroPortrait
                             src={hero.avatar}
                             name={hero.name}
-                            className="aspect-[4/5] rounded-md border-0"
+                            className="aspect-[4/5] rounded-lg border-0"
                         />
                     )}
                 </div>

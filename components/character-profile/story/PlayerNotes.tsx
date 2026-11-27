@@ -40,7 +40,6 @@ export function PlayerNotes() {
                         type="button"
                         size="icon"
                         variant="ghost"
-                        className="size-10"
                         aria-label={t('edit')}
                         onClick={() => setDraft(notes ?? '')}
                     >

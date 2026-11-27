@@ -41,7 +41,7 @@ export function Mark({ count }: { count: 0 | 1 | 2 }) {
                 <i
                     key={i}
                     className={cn(
-                        'size-2 rotate-45 rounded-[1px] border-[1.5px]',
+                        'size-2 rotate-45 rounded-sm border-[1.5px]',
                         count
                             ? 'border-hud-accent bg-hud-accent'
                             : 'border-hud-muted'
@@ -84,7 +84,7 @@ export function AbilityCard({
             <span>{t('saveShort')}</span>
             <b
                 className={cn(
-                    'hud-num text-[17px]',
+                    'hud-num text-lg',
                     save.proficient ? 'text-hud-accent-fg' : 'text-hud-text'
                 )}
             >
@@ -94,7 +94,7 @@ export function AbilityCard({
     );
 
     const saveClass =
-        'flex min-h-11 w-full items-center justify-center gap-2 border-t border-hud-rule text-sm text-hud-muted';
+        'flex min-h-10 w-full items-center justify-center gap-2 pointer-coarse:min-h-11 border-t border-hud-rule text-sm text-hud-muted';
 
     return (
         <div
@@ -119,6 +119,7 @@ export function AbilityCard({
                     })
                 }
                 title={t('roll')}
+                tile
                 className="motion-press grid min-h-11 justify-items-center gap-1 px-1 pt-3.5 pb-3 hover:bg-hud-raised"
             >
                 {canRoll && <span className="sr-only">{t('roll')}: </span>}
@@ -134,10 +135,10 @@ export function AbilityCard({
                         {tg(`abilities.${a.key}.short`)}
                     </span>
                 </small>
-                <span className="hud-num text-4xl leading-none text-hud-ink sm:text-[42px]">
+                <span className="hud-num text-4xl leading-none text-hud-ink sm:text-3xl">
                     <Signed value={a.mod} />
                 </span>
-                <span className="hud-num rounded-[4px] border border-hud-line bg-hud-raised px-2.5 text-sm leading-6 text-hud-ink">
+                <span className="hud-num rounded-sm border border-hud-line bg-hud-raised px-2.5 text-sm leading-6 text-hud-ink">
                     {t('score', { n: a.score })}
                 </span>
             </RollableCell>
@@ -193,7 +194,7 @@ export function SkillRow({
                     })
                 }
                 title={t('roll')}
-                className="motion-press flex min-h-11 w-full items-center gap-3 px-2 text-left hover:bg-hud-raised"
+                className="motion-press flex min-h-10 w-full items-center gap-3 px-2 text-left hover:bg-hud-raised"
             >
                 {canRoll && <span className="sr-only">{t('roll')}: </span>}
                 <Mark count={level} />
@@ -215,7 +216,7 @@ export function SkillRow({
                 </span>
                 <span
                     className={cn(
-                        'hud-num w-9 text-right text-[17px]',
+                        'hud-num w-9 text-right text-lg',
                         level ? 'font-bold text-hud-ink' : 'text-hud-muted'
                     )}
                 >

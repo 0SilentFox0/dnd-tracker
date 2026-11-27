@@ -27,7 +27,9 @@ export function ArtToolBar({ art }: { art: Art }) {
 
     const { tool, brush } = art;
 
-    const toggle = (value: (typeof ART_TOOLS)[number] | 'stamp' | 'stamp-select') => {
+    const toggle = (
+        value: (typeof ART_TOOLS)[number] | 'stamp' | 'stamp-select'
+    ) => {
         art.clearNotice();
         art.setTool(tool === value ? null : value);
     };
@@ -42,7 +44,6 @@ export function ArtToolBar({ art }: { art: Art }) {
                 {ART_TOOLS.map((value) => (
                     <HudToggleChip
                         key={value}
-                        tall
                         active={tool === value}
                         title={t(`toolHint.${value}`)}
                         onClick={() => toggle(value)}
@@ -53,7 +54,6 @@ export function ArtToolBar({ art }: { art: Art }) {
                 {STAMP_TOOLS.map(({ value, labelKey }) => (
                     <HudToggleChip
                         key={value}
-                        tall
                         active={tool === value}
                         title={t(`toolHint.${value}`)}
                         onClick={() => toggle(value)}

@@ -46,7 +46,7 @@ const TOOLS = [
 const PINNABLE: readonly WorldTool[] = ['point', 'zone', 'entry', 'enemy'];
 
 const BUTTON =
-    'inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-hud-rule bg-[rgba(46,36,26,.95)] text-hud-ink transition-colors hover:bg-[rgba(70,54,38,.98)] disabled:opacity-40 disabled:hover:bg-[rgba(46,36,26,.95)] lg:size-10';
+    'inline-flex size-10 pointer-coarse:min-h-11 pointer-coarse:min-w-11 shrink-0 items-center justify-center rounded-lg border border-hud-rule bg-[rgba(46,36,26,.95)] text-hud-ink transition-colors hover:bg-[rgba(70,54,38,.98)] disabled:opacity-50 disabled:hover:bg-[rgba(46,36,26,.95)]';
 
 const LABELLED = 'xl:w-auto xl:gap-1.5 xl:px-3 xl:text-sm';
 
@@ -103,7 +103,7 @@ function ToolButton({
             <TooltipContent side="bottom">
                 {label}
                 {hotkey ? (
-                    <kbd className="ml-2 rounded border border-white/30 px-1 font-mono">
+                    <kbd className="ml-2 rounded-sm border border-white/30 px-1 font-mono">
                         {hotkey}
                     </kbd>
                 ) : null}
@@ -142,7 +142,7 @@ export function WorldToolbar({
         <TooltipProvider delayDuration={300}>
             <div
                 data-slot="world-toolbar"
-                className="rounded-md border border-hud-rule bg-hud-page/97"
+                className="rounded-lg border border-hud-rule bg-hud-page/97"
             >
                 <div className="flex flex-col lg:flex-row lg:items-center">
                     <div
@@ -271,7 +271,7 @@ export function WorldToolHint({
     return (
         <p
             role="status"
-            className="pointer-events-none w-max max-w-[min(22rem,calc(100vw-2rem))] rounded-md border border-hud-line bg-black/80 px-3 py-1.5 text-center text-xs text-hud-ink"
+            className="pointer-events-none w-max max-w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-hud-line bg-black/80 px-3 py-1.5 text-center text-xs text-hud-ink"
         >
             {t.rich(tool, { key, vertices })}
         </p>

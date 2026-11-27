@@ -56,7 +56,7 @@ export function CharacterLogTab() {
                 {entries.map((e) => (
                     <li
                         key={e.id}
-                        className="border-b border-hud-rule py-2.5 text-[13px] break-words text-hud-muted last:border-b-0"
+                        className="border-b border-hud-rule py-2.5 text-sm break-words text-hud-muted last:border-b-0"
                     >
                         {format.dateTime(new Date(e.createdAt), LOG_DATE)} ·{' '}
                         {e.actor?.displayName ?? t('system')} ·{' '}

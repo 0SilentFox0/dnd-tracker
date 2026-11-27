@@ -130,10 +130,10 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                                 onCommit={actions.setN}
                             />
                         </div>
-                        <div className="max-h-[68dvh] overflow-auto rounded-md p-2">
+                        <div className="max-h-[68dvh] overflow-auto rounded-lg p-2">
                             <div
                                 data-testid="calibration-surface"
-                                className="relative mx-auto shrink-0 touch-none overflow-hidden rounded-md border border-hud-rule select-none"
+                                className="relative mx-auto shrink-0 touch-none overflow-hidden rounded-lg border border-hud-rule select-none"
                                 style={{
                                     aspectRatio: `${image.width} / ${image.height}`,
                                     width: `calc(min(100%, 62dvh * ${image.width / image.height}) * ${zoom})`,
@@ -253,7 +253,6 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                                     type="button"
                                     variant="outline"
                                     size="icon"
-                                    className="size-8"
                                     disabled={!state.canNudge}
                                     aria-label={`${t(unit === 'px' ? 'nudgePx' : 'nudgeCell')}: ${t(key)}`}
                                     onClick={() =>

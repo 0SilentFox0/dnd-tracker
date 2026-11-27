@@ -59,7 +59,7 @@ export function AiComposer({
             data-slot="ai-composer"
         >
             {focusLabel ? (
-                <div className="flex items-center justify-between gap-2 rounded-md bg-muted px-2 py-1 text-xs">
+                <div className="flex items-center justify-between gap-2 rounded-lg bg-muted px-2 py-1 text-xs">
                     <span>{focusLabel}</span>
                     <HudButton
                         type="button"

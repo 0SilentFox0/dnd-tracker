@@ -52,7 +52,7 @@ function optionFor(
 }
 
 const CELL =
-    'relative flex aspect-square cursor-pointer flex-col items-center justify-center overflow-hidden rounded border-2 border-amber-700/80 bg-stone-900/60 p-1 text-center shadow-inner transition-colors hover:border-amber-600/90 hover:bg-stone-800/80 disabled:opacity-50';
+    'relative flex aspect-square cursor-pointer flex-col items-center justify-center overflow-hidden rounded-sm border-2 border-amber-700/80 bg-stone-900/60 p-1 text-center shadow-inner transition-colors hover:border-amber-600/90 hover:bg-stone-800/80 disabled:opacity-50';
 
 export function CharacterArtifactsSection({
     campaignId,
@@ -86,7 +86,7 @@ export function CharacterArtifactsSection({
     };
 
     return (
-        <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[4px] border border-hud-line bg-hud-panel shadow-sm">
+        <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-sm border border-hud-line bg-hud-panel shadow-sm">
             <div className="absolute inset-0">
                 <div className="absolute inset-0 bg-gradient-to-b from-stone-900/30 to-stone-950/50" />
             </div>
@@ -135,15 +135,15 @@ export function CharacterArtifactsSection({
                                                     src={current.icon}
                                                     name={current.name}
                                                     size={80}
-                                                    className="absolute inset-0 size-full rounded bg-muted/80 text-lg font-medium text-amber-200"
+                                                    className="absolute inset-0 size-full rounded-sm bg-muted/80 text-lg font-medium text-amber-200"
                                                 />
-                                                <span className="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-[9px] text-amber-200/90 uppercase">
+                                                <span className="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-xs text-amber-200/90 uppercase">
                                                     {label}
                                                 </span>
                                             </>
                                         ) : (
                                             <>
-                                                <span className="text-[10px] leading-tight text-amber-200/80 uppercase">
+                                                <span className="text-xs leading-tight text-amber-200/80 uppercase">
                                                     {label}
                                                 </span>
                                                 <span className="mt-0.5 w-full truncate text-xs font-medium text-amber-100">
@@ -199,7 +199,7 @@ export function CharacterArtifactsSection({
                                                         src={a.icon}
                                                         name={a.name}
                                                         size={20}
-                                                        className="size-5 rounded text-[10px] font-medium"
+                                                        className="size-5 rounded-sm text-xs font-medium"
                                                     />
                                                     <span className="truncate">
                                                         {a.name}

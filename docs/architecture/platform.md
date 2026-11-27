@@ -6,6 +6,10 @@
 
 `lib/supabase/{client,server,middleware}.ts`: `client.ts` from `"use client"` code, `server.ts` (cookie-aware) from server components / route handlers.
 
+## Unknown URLs
+
+`app/[...missing]/page.tsx` calls `notFound()` so a 404 renders per request; otherwise unmatched URLs got the build-time prerendered `_not-found` whose header lacked the real pathname/session, causing a hydration mismatch (React #418). `app/not-found.tsx` keeps its `useHydrated` gate; cost is one function call per unknown URL.
+
 ## Fonts
 
 Self-hosted (`public/fonts/*.woff2` + `@font-face` in `app/fonts.css`; latin+cyrillic subsets of OFL Google Fonts). Builds never fetch fonts — `next/font/google` broke Vercel builds and is banned by ESLint. First-paint faces are preloaded via `HUD_PRELOAD_FONTS`; files are cached immutable, so rename a file when its content changes.

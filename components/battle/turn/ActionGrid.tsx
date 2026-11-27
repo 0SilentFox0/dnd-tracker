@@ -29,10 +29,11 @@ const Tile = ({
     return (
         <HudButton
             type="button"
+            data-ux-tile
             disabled={used}
             onClick={onClick}
             className={cn(
-                'flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-40',
+                'flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-50',
                 primary
                     ? 'border-hud-accent bg-hud-panel-2'
                     : 'border-white/25 bg-black/55'
@@ -42,14 +43,14 @@ const Tile = ({
                 <Icon className="size-10 text-hud-accent-fg" />
             </span>
             <span className="min-w-0 flex-1">
-                <span className="hud-sc block text-[17px] leading-5 [overflow-wrap:anywhere]">
+                <span className="hud-sc block text-lg leading-5 [overflow-wrap:anywhere]">
                     {label}
                 </span>
             </span>
             {hotkey !== undefined && (
                 <kbd
                     aria-hidden
-                    className="shrink-0 rounded border border-white/25 px-1.5 text-xs text-hud-soft"
+                    className="shrink-0 rounded-sm border border-white/25 px-1.5 text-xs text-hud-soft"
                 >
                     {hotkey}
                 </kbd>
@@ -257,7 +258,7 @@ export function ActionGrid({
                     type="button"
                     disabled={pending}
                     onClick={() => void turn.actions.endTurn()}
-                    className="hud-sc mt-2 flex h-11 w-full items-center justify-center border border-white/15 text-[15px] tracking-[.08em] text-hud-soft disabled:opacity-50"
+                    className="hud-sc mt-2 flex h-10 w-full items-center justify-center border border-white/15 text-base tracking-[.08em] text-hud-soft disabled:opacity-50"
                 >
                     {t('endTurn')}
                 </HudButton>

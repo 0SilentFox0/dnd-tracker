@@ -25,7 +25,7 @@ export function UltimateRow({
             className="flex items-center gap-2 px-3 py-2 sm:px-4"
         >
             <div className="metal-mithril flex w-14 shrink-0 flex-col items-center gap-1">
-                <span className="hud-sc text-[11px] text-[var(--m2)]">
+                <span className="hud-sc text-xs text-[var(--m2)]">
                     {t('ultimate')}
                 </span>
             </div>

@@ -23,7 +23,7 @@ const BRUSH_SIZES = ['1', '2', '3'].map((size) => ({
 
 const SECTION = 'space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3';
 
-const HEADING = 'text-xs font-semibold tracking-wide text-hud-muted uppercase';
+const HEADING = 'hud-label';
 
 export function TilePalettePanel({
     workspace,
@@ -110,19 +110,19 @@ export function TilePalettePanel({
             <section className={SECTION}>
                 <div className="flex items-center justify-between gap-2">
                     <h3 className={HEADING}>{t('palette')}</h3>
-                    <span className="text-[11px] text-hud-muted">
+                    <span className="text-xs text-hud-muted">
                         {t('paletteCount', { count: visibleTiles.length })}
                     </span>
                 </div>
                 {selectedTile && (
-                    <div className="overflow-hidden rounded-md border border-hud-rule bg-black/20 p-2">
+                    <div className="overflow-hidden rounded-lg border border-hud-rule bg-black/20 p-2">
                         <p
                             className="mb-1 truncate text-xs font-medium"
                             aria-live="polite"
                         >
                             {tileLabel(selectedTile.key)}
                         </p>
-                        <div className="flex h-16 items-center justify-center rounded bg-black/30 p-1">
+                        <div className="flex h-16 items-center justify-center rounded-sm bg-black/30 p-1">
                             <TileAssetImage
                                 tile={selectedTile}
                                 alt={tileLabel(selectedTile.key)}
@@ -154,21 +154,21 @@ export function TilePalettePanel({
                             }
                             onClick={() => tileEditor.setSelectedTile(tile.id)}
                         >
-                            <span className="flex h-12 w-full items-center justify-center overflow-hidden rounded bg-black/30 p-1">
+                            <span className="flex h-12 w-full items-center justify-center overflow-hidden rounded-sm bg-black/30 p-1">
                                 <TileAssetImage
                                     tile={tile}
                                     alt=""
                                     className="max-h-full max-w-full object-contain"
                                 />
                             </span>
-                            <span className="line-clamp-2 w-full text-[11px] leading-tight">
+                            <span className="line-clamp-2 w-full text-xs leading-tight">
                                 {tileLabel(tile.key)}
                             </span>
                         </Button>
                     ))}
                 </div>
                 {visibleTiles.length === 0 && (
-                    <p className="rounded-md border border-dashed border-hud-rule p-4 text-center text-xs text-hud-muted">
+                    <p className="rounded-lg border border-dashed border-hud-rule p-4 text-center text-xs text-hud-muted">
                         {t('noResults')}
                     </p>
                 )}

@@ -53,7 +53,7 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
     return (
         <div className="flex flex-col gap-2">
             <div className="flex shrink-0 items-center justify-between gap-2">
-                <span className="hud-sc flex items-center gap-2 text-[15px] tracking-[.08em] text-hud-ink">
+                <span className="hud-sc flex items-center gap-2 text-base tracking-[.08em] text-hud-ink">
                     <ScrollText className="size-4" />
                     {t('title')}
                     {entries.length > 0 && (
@@ -64,7 +64,7 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
                 </span>
                 <HudButton
                     type="button"
-                    className="h-8 px-2 text-[13px] text-[var(--hud-muted)] hover:text-[var(--ink)]"
+                    className="h-8 px-2 text-sm text-[var(--hud-muted)] hover:text-[var(--ink)]"
                     onClick={onClose}
                 >
                     {t('close')}

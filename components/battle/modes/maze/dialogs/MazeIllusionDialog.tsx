@@ -197,7 +197,7 @@ export function MazeIllusionDialog({
                 {rows.map((row, groupIndex) => (
                     <section
                         key={groupIndex}
-                        className="space-y-3 rounded-md border border-hud-rule p-3"
+                        className="space-y-3 rounded-lg border border-hud-rule p-3"
                     >
                         <header className="flex items-center justify-between">
                             <h3 className="text-sm font-medium">
@@ -221,7 +221,7 @@ export function MazeIllusionDialog({
                         {row.heroes.map((member, memberIndex) => (
                             <div
                                 key={memberIndex}
-                                className="space-y-2 rounded border border-hud-rule/60 p-2"
+                                className="space-y-2 rounded-sm border border-hud-rule/60 p-2"
                             >
                                 <div className="flex gap-2">
                                     <SelectField

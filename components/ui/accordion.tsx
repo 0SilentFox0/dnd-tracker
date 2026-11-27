@@ -15,10 +15,7 @@ const AccordionItem = React.forwardRef<
     <AccordionPrimitive.Item
         ref={ref}
         data-slot="accordion-item"
-        className={cn(
-            'overflow-hidden border-b border-hud-rule',
-            className
-        )}
+        className={cn('overflow-hidden border-b border-hud-rule', className)}
         {...props}
     />
 ));

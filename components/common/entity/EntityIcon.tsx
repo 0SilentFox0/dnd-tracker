@@ -51,7 +51,7 @@ export function EntityIcon({
     return (
         <span
             className={cn(
-                'flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground',
+                'flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-muted-foreground',
                 className
             )}
         >

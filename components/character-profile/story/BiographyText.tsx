@@ -33,13 +33,13 @@ function Inline({ text }: { text: string }) {
 
 export function BiographyText({ text }: { text: string }) {
     return (
-        <div className="hud-book space-y-3.5 text-[16px] leading-[1.7] text-hud-bone">
+        <div className="hud-book space-y-3.5 text-base leading-[1.7] text-hud-bone">
             {parseBiography(text).map((b, i) => {
                 if (b.kind === 'heading') {
                     return (
                         <h3
                             key={i}
-                            className="hud-sc flex items-center gap-3 pt-3 text-[13px] tracking-[.14em] text-hud-ink uppercase after:h-px after:flex-1 after:bg-hud-rule first:pt-0"
+                            className="hud-sc flex items-center gap-3 pt-3 text-sm tracking-[.14em] text-hud-ink uppercase after:h-px after:flex-1 after:bg-hud-rule first:pt-0"
                         >
                             {b.text}
                         </h3>
@@ -50,7 +50,7 @@ export function BiographyText({ text }: { text: string }) {
                     return (
                         <blockquote
                             key={i}
-                            className="border-l-2 border-hud-line py-0.5 pl-4 text-[17px] whitespace-pre-line text-hud-bone italic"
+                            className="border-l-2 border-hud-line py-0.5 pl-4 text-lg whitespace-pre-line text-hud-bone italic"
                         >
                             <Inline text={b.text} />
                         </blockquote>
@@ -63,7 +63,7 @@ export function BiographyText({ text }: { text: string }) {
                             {b.items.map((item, j) => (
                                 <li
                                     key={j}
-                                    className="relative pl-5 before:absolute before:top-[.15em] before:left-0 before:text-[10px] before:text-hud-muted before:content-['◆']"
+                                    className="relative pl-5 before:absolute before:top-[.15em] before:left-0 before:text-xs before:text-hud-muted before:content-['◆']"
                                 >
                                     <Inline text={item} />
                                 </li>

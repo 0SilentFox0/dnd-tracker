@@ -66,6 +66,11 @@ export function DmCharacterCard({
             ? resolveClassEntries(character.classes, classMode.byId)
             : null;
 
+    const topClass = entries?.reduce<(typeof entries)[number] | null>(
+        (best, e) => (e.class && (!best || e.level > best.level) ? e : best),
+        null
+    )?.class;
+
     const ooc = rules?.outOfCombat;
 
     const maxHp =
@@ -105,6 +110,8 @@ export function DmCharacterCard({
                 src={character.avatar}
                 name={character.name}
                 className="max-h-72"
+                variant="card"
+                classVisual={topClass}
             />
             <div className="flex items-start gap-3">
                 <div className="min-w-0 flex-1 space-y-1">
@@ -117,7 +124,7 @@ export function DmCharacterCard({
                         {columns?.has('classes') && ` · ${character.class}`}
                     </p>
                     <div className="flex min-w-0 items-center gap-1.5">
-                        <HudPill tone={isNpc ? 'silver' : 'gold'}>
+                        <HudPill tone={isNpc ? 'npc' : 'meta'}>
                             {isNpc ? t('npcHero') : t('player')}
                         </HudPill>
                         {RerollToken &&
@@ -125,7 +132,7 @@ export function DmCharacterCard({
                             rerollTokenOn(rules) &&
                             character.inspiration && <RerollToken.CardMark />}
                         {levelReady && (
-                            <HudPill tone="gold">{t('levelReady')}</HudPill>
+                            <HudPill tone="accent">{t('levelReady')}</HudPill>
                         )}
                         {!isNpc && (
                             <span className="truncate text-xs text-hud-muted">

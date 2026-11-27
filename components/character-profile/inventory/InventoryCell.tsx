@@ -62,7 +62,7 @@ export function InventoryCell({
             onDrop={dnd?.onDrop}
             onClick={onClick}
             className={cn(
-                'relative flex aspect-square min-h-11 items-center justify-center overflow-hidden rounded-md text-hud-muted transition',
+                'relative flex aspect-square min-h-11 items-center justify-center overflow-hidden rounded-lg text-hud-muted transition',
                 thing
                     ? cn(
                           'border-2 bg-hud-field shadow-[inset_0_2px_6px_rgba(0,0,0,0.7),inset_0_0_0_1px_rgba(255,255,255,0.04)]',
@@ -71,8 +71,7 @@ export function InventoryCell({
                       )
                     : 'border border-dashed border-hud-rule bg-black/30 shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]',
                 state.selected && 'ring-2',
-                state.drop === 'accept' &&
-                    'border-hud-accent bg-hud-panel-2',
+                state.drop === 'accept' && 'border-hud-accent bg-hud-panel-2',
                 state.drop === 'dim' && 'opacity-40',
                 dnd?.draggable && 'cursor-grab active:cursor-grabbing'
             )}
@@ -87,7 +86,7 @@ export function InventoryCell({
                     />
                     {isNew && <NewPill className="absolute top-0.5 left-0.5" />}
                     {thing.badge && (
-                        <span className="absolute right-0.5 bottom-0.5 rounded bg-black/75 px-1 text-[10px] leading-4 text-hud-ink">
+                        <span className="absolute right-0.5 bottom-0.5 rounded-sm bg-black/75 px-1 text-xs leading-4 text-hud-ink">
                             {thing.badge}
                         </span>
                     )}

@@ -15,8 +15,8 @@ export function ImportCounts({ report }: { report: ImportReport }) {
                     key={s}
                     className={
                         s === 'error'
-                            ? 'rounded border border-red-500/40 px-2 py-0.5 text-red-400'
-                            : 'rounded border border-hud-muted/30 px-2 py-0.5'
+                            ? 'rounded-sm border border-red-500/40 px-2 py-0.5 text-red-400'
+                            : 'rounded-sm border border-hud-muted/30 px-2 py-0.5'
                     }
                 >
                     {`${t(`${s}.${report.dryRun ? 'planned' : 'done'}`)}: ${report.counts[s]}`}

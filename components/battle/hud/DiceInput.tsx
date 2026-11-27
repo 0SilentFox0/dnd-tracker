@@ -146,7 +146,7 @@ export function AiRollButton({
             type="button"
             onClick={onClick}
             className={cn(
-                'hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 border text-[15px] font-bold tracking-[.04em] whitespace-nowrap',
+                'hud-sc flex h-12 w-full items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em] whitespace-nowrap',
                 tone === 'parchment'
                     ? 'border-[#2a2018]/40 text-[#2a2018]'
                     : 'border-white/25 text-[var(--bone)]'

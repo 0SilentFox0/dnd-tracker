@@ -77,7 +77,7 @@ export function CampaignMembersList({
                     key={member.id}
                     className="flex min-w-0 items-center gap-2 border-b border-hud-raised py-2 last:border-b-0"
                 >
-                    <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-hud-line bg-hud-raised font-[var(--font-hud-book)] text-sm text-hud-ink">
+                    <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-hud-line bg-hud-raised text-sm font-[var(--font-hud-book)] text-hud-ink">
                         {member.user.avatar ? (
                             <OptimizedImage
                                 src={member.user.avatar}
@@ -90,7 +90,9 @@ export function CampaignMembersList({
                                     .toLocaleUpperCase()}
                             />
                         ) : (
-                            member.user.displayName.slice(0, 1).toLocaleUpperCase()
+                            member.user.displayName
+                                .slice(0, 1)
+                                .toLocaleUpperCase()
                         )}
                     </span>
                     <div className="min-w-0 flex-1">
@@ -98,7 +100,11 @@ export function CampaignMembersList({
                             {member.user.displayName}
                         </p>
                         <HudPill
-                            tone={member.role === CampaignRole.DM ? 'gold' : 'bone'}
+                            tone={
+                                member.role === CampaignRole.DM
+                                    ? 'role'
+                                    : 'meta'
+                            }
                             className="mt-1"
                         >
                             {member.role === CampaignRole.DM

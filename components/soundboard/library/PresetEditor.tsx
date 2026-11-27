@@ -34,7 +34,7 @@ function SlotTile({
                 aria-label={t('slot.replace', { n: index + 1 })}
                 onClick={onOpen}
             >
-                <span className="absolute top-1 left-1.5 text-[10px] text-hud-muted">
+                <span className="absolute top-1 left-1.5 text-xs text-hud-muted">
                     {index + 1}
                 </span>
                 {sound ? <FilledSlot sound={sound} /> : <span>+</span>}

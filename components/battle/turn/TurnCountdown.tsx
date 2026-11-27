@@ -40,13 +40,13 @@ export function TurnCountdown({
 
     return (
         <div className="relative mt-2 flex h-[52px] items-center gap-3 overflow-hidden border border-[var(--enemy)] bg-[var(--enemy)]/20 px-3.5">
-            <span className="flex-1 text-[15px] text-[var(--ink)]">
+            <span className="flex-1 text-base text-[var(--ink)]">
                 {t.rich('endsIn', { left, b: (chunks) => <b>{chunks}</b> })}
             </span>
             <HudButton
                 type="button"
                 onClick={onStay}
-                className="hud-sc h-9 border border-white/40 px-3.5 text-[15px] font-bold text-[var(--ink)]"
+                className="hud-sc h-10 border border-white/40 px-3.5 text-base font-bold text-[var(--ink)]"
             >
                 {t('stay')}
             </HudButton>

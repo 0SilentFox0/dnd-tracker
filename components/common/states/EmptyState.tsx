@@ -5,12 +5,14 @@ import { cn } from '@/lib/utils';
 
 export function EmptyState({
     icon: Icon,
+    illustration,
     title,
     description,
     action,
     className,
 }: {
     icon?: LucideIcon;
+    illustration?: ReactNode;
     title: string;
     description?: ReactNode;
     action?: ReactNode;
@@ -24,7 +26,12 @@ export function EmptyState({
                 className
             )}
         >
-            {Icon ? (
+            {illustration ? (
+                <div data-slot="empty-state-illustration" className="mb-1">
+                    {illustration}
+                </div>
+            ) : null}
+            {!illustration && Icon ? (
                 <Icon className="size-8 text-muted-foreground" aria-hidden />
             ) : null}
             <p data-slot="empty-state-title" className="font-medium">

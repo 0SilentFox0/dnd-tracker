@@ -120,7 +120,6 @@ export function AbilityScoresPicker({
                                         type="button"
                                         size="icon"
                                         variant="outline"
-                                        className="size-8"
                                         aria-label={t('lessAria', {
                                             ability: tg(
                                                 `abilities.${key}.label`
@@ -143,7 +142,6 @@ export function AbilityScoresPicker({
                                         type="button"
                                         size="icon"
                                         variant="outline"
-                                        className="size-8"
                                         aria-label={t('moreAria', {
                                             ability: tg(
                                                 `abilities.${key}.label`

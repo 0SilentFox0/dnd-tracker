@@ -86,7 +86,7 @@ export function D100Input({ onRoll }: { onRoll: (value: number) => void }) {
                 type="button"
                 disabled={value === undefined}
                 onClick={() => value !== undefined && onRoll(value)}
-                className="hud-sc h-[52px] w-full border border-white/25 text-[15px] font-bold tracking-[.04em] text-[var(--bone)] disabled:opacity-40"
+                className="hud-sc h-12 w-full border border-white/25 text-base font-bold tracking-[.04em] text-[var(--bone)] disabled:opacity-50"
             >
                 {t('roll')}
             </HudButton>

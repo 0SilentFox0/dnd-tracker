@@ -26,7 +26,7 @@ export function PuzzleBoard({
         <div
             ref={boardRef}
             data-testid="puzzle-board"
-            className="relative size-full touch-none overflow-hidden rounded border border-white/20 bg-white/5"
+            className="relative size-full touch-none overflow-hidden rounded-sm border border-white/20 bg-white/5"
         >
             {state.solved ? (
                 <Image
@@ -77,7 +77,7 @@ export function PuzzleBoard({
                                 rot={s.rot}
                             />
                             {other && s.holder && (
-                                <span className="absolute top-full left-1/2 -translate-x-1/2 rounded bg-black/70 px-1 text-xs whitespace-nowrap text-white">
+                                <span className="absolute top-full left-1/2 -translate-x-1/2 rounded-sm bg-black/70 px-1 text-xs whitespace-nowrap text-white">
                                     {s.holder.name}
                                 </span>
                             )}

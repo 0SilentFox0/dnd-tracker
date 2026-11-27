@@ -107,7 +107,7 @@ export function TrackList({
                             />
                             <TrackLink track={track} />
                             <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-hud-muted">
-                                <span className="rounded bg-white/5 px-1.5 py-0.5">
+                                <span className="rounded-sm bg-white/5 px-1.5 py-0.5">
                                     {kindLabel(track, fileKind)}
                                 </span>
                                 {time && <span>{time}</span>}
@@ -129,7 +129,7 @@ export function TrackList({
                                     aria-valuenow={Math.round(
                                         preview.progress * 100
                                     )}
-                                    className="h-1 overflow-hidden rounded bg-white/10"
+                                    className="h-1 overflow-hidden rounded-sm bg-white/10"
                                 >
                                     <div
                                         className="h-full bg-hud-accent"

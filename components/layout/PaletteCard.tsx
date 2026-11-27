@@ -30,13 +30,13 @@ export function PaletteCard({
             disabled={disabled}
             onClick={() => onSelect(id)}
             className={cn(
-                'h-auto flex-col items-stretch gap-2 whitespace-normal p-3',
+                'h-auto flex-col items-stretch gap-2 p-3 whitespace-normal',
                 selected && 'border-hud-accent'
             )}
         >
             <span
                 aria-hidden
-                className="flex flex-col gap-1.5 rounded-[4px] p-2"
+                className="flex flex-col gap-1.5 rounded-sm p-2"
                 style={{ background: p.page }}
             >
                 <span
@@ -60,7 +60,7 @@ export function PaletteCard({
                     style={{ background: p.muted }}
                 />
             </span>
-            <span className="hud-sc text-[17px]">{t(`names.${id}`)}</span>
+            <span className="hud-sc text-lg">{t(`names.${id}`)}</span>
         </Button>
     );
 }

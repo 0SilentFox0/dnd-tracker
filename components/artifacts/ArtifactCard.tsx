@@ -9,7 +9,7 @@ import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
 import { ArtifactDeleteButton } from '@/components/artifacts/ArtifactDeleteButton';
 import { ZoomableEntityIcon } from '@/components/common/entity/ZoomableEntityIcon';
 import { HudCard } from '@/components/hud/page';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -109,7 +109,7 @@ export function ArtifactCard({
 
     if (variant === 'compact') {
         return (
-            <div className="h-full rounded-md bg-hud-field p-2 shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
+            <div className="h-full rounded-lg bg-hud-field p-2 shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
                 <div className="flex items-start gap-3">
                     <ZoomableEntityIcon
                         src={artifact.icon}
@@ -150,21 +150,21 @@ export function ArtifactCard({
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-2">
                             {artifact.rarity && (
-                                <Badge variant="outline" className="text-xs">
+                                <HudPill className="text-xs">
                                     {rarityLabel}
-                                </Badge>
+                                </HudPill>
                             )}
                             {artifact.itemKind && (
-                                <Badge variant="outline" className="text-xs">
+                                <HudPill className="text-xs">
                                     {artifact.itemKind === 'property'
                                         ? t('card.kindProperty')
                                         : t('card.kindGear')}
-                                </Badge>
+                                </HudPill>
                             )}
                             {canEdit ? (
                                 slotSelect
                             ) : (
-                                <Badge variant="outline">{slotLabel}</Badge>
+                                <HudPill>{slotLabel}</HudPill>
                             )}
                         </div>
                     </div>
@@ -207,29 +207,23 @@ export function ArtifactCard({
                         {artifact.name}
                     </h3>
                     {artifact.rarity && (
-                        <Badge variant="outline" className="shrink-0">
-                            {rarityLabel}
-                        </Badge>
+                        <HudPill className="shrink-0">{rarityLabel}</HudPill>
                     )}
                 </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
                 {artifact.itemKind && (
-                    <Badge variant="outline" className="text-xs">
+                    <HudPill className="text-xs">
                         {artifact.itemKind === 'property'
                             ? t('card.kindProperty')
                             : t('card.kindGear')}
-                    </Badge>
+                    </HudPill>
                 )}
-                {canEdit ? (
-                    slotSelect
-                ) : (
-                    <Badge variant="outline">{slotLabel}</Badge>
-                )}
+                {canEdit ? slotSelect : <HudPill>{slotLabel}</HudPill>}
                 {artifact.artifactSet && (
-                    <Badge variant="outline">
+                    <HudPill>
                         {t('card.set', { name: artifact.artifactSet.name })}
-                    </Badge>
+                    </HudPill>
                 )}
             </div>
             {artifact.description && (

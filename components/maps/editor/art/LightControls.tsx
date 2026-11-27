@@ -47,7 +47,6 @@ export function LightControls({ art }: { art: Art }) {
                     {LIGHT_COLORS.map(({ id, color }) => (
                         <HudToggleChip
                             key={id}
-                            tall
                             active={light.color === color}
                             onClick={() => lights.update(light.id, { color })}
                         >

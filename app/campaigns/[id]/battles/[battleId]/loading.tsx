@@ -10,6 +10,7 @@ export default async function BattleLoading() {
     return (
         <div className="battle-hud flex min-h-[70dvh] items-center justify-center px-4">
             <LoadingState
+                variant="detail"
                 label={t('loading.battle')}
                 className="w-full max-w-md"
             />

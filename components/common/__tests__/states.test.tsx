@@ -31,6 +31,22 @@ const q = <T,>(
 describe('стани сторінки', () => {
     afterEach(cleanup);
 
+    it('EmptyState renders illustration slot', () => {
+        const { container } = render(
+            <EmptyState
+                icon={Swords}
+                illustration={<svg data-testid="ill" />}
+                title="T"
+            />
+        );
+
+        expect(screen.getByTestId('ill')).toBeTruthy();
+        expect(
+            container.querySelector('[data-slot="empty-state-illustration"]')
+        ).toBeTruthy();
+        expect(container.querySelectorAll('svg').length).toBe(1);
+    });
+
     it('EmptyState: заголовок, опис, дія', () => {
         render(
             <EmptyState
@@ -49,7 +65,7 @@ describe('стани сторінки', () => {
 
     it('LoadingState: N рядків-скелетонів і aria-busy', () => {
         const { container } = render(
-            <LoadingState rows={4} label="Завантаження скілів…" />
+            <LoadingState count={4} label="Завантаження скілів…" />
         );
 
         expect(
@@ -57,6 +73,26 @@ describe('стани сторінки', () => {
         ).toHaveLength(4);
         expect(screen.getByRole('status')).toHaveAttribute('aria-busy', 'true');
         expect(screen.getByText('Завантаження скілів…')).toHaveClass('sr-only');
+    });
+
+    it.each([
+        ['cards', 'skeleton-card', 2],
+        ['list', 'skeleton-list-item', 2],
+        ['detail', 'skeleton-paragraph', 4],
+        ['form', 'skeleton-field', 6],
+    ] as const)('LoadingState renders variant %s', (variant, slot, n) => {
+        const { container } = render(
+            <LoadingState variant={variant} count={2} />
+        );
+
+        expect(screen.getByRole('status')).toHaveAttribute(
+            'data-variant',
+            variant
+        );
+        expect(container.querySelectorAll(`[data-slot=${slot}]`)).toHaveLength(
+            n
+        );
+        expect(container.querySelector('.ds-skeleton')).not.toBeNull();
     });
 
     it('ErrorState: текст ApiError і повтор', () => {

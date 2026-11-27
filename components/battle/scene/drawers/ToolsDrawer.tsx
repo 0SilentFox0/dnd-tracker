@@ -30,8 +30,8 @@ const FIRST_ROW = '[&>div>div:first-child]';
 const MAP_TOOLS_SLOT = cn(
     'relative flex min-w-0 flex-col gap-2',
     `${FIRST_ROW}:grid ${FIRST_ROW}:grid-cols-2 ${FIRST_ROW}:gap-2`,
-    `${FIRST_ROW}>*:h-auto ${FIRST_ROW}>*:min-h-11 ${FIRST_ROW}>*:text-sm ${FIRST_ROW}>*:leading-tight ${FIRST_ROW}>*:whitespace-normal`,
-    '[&_button[aria-pressed]]:min-h-11 [&_button[aria-pressed]]:text-sm'
+    `${FIRST_ROW}>*:h-auto ${FIRST_ROW}>*:min-h-10 ${FIRST_ROW}>*:text-sm ${FIRST_ROW}>*:leading-tight ${FIRST_ROW}>*:whitespace-normal`,
+    '[&_button[aria-pressed]]:min-h-10 [&_button[aria-pressed]]:text-sm'
 );
 
 const SOUND_SECTION = cn(
@@ -41,7 +41,7 @@ const SOUND_SECTION = cn(
 
 const NextTurnIcon = actionIcon.nextTurn;
 
-const SECTION = 'hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]';
+const SECTION = 'hud-sc text-sm tracking-[.1em] text-[var(--hud-muted)]';
 
 export interface ToolsProps {
     onComplete?: () => void;
@@ -116,7 +116,6 @@ export function ToolsContent({
                 <section className="flex flex-col gap-2">
                     <h3 className={SECTION}>{td('view')}</h3>
                     <HudChipTabs
-                        size="lg"
                         ariaLabel={ts('viewMode')}
                         items={[
                             {
@@ -139,7 +138,6 @@ export function ToolsContent({
                 <section className="flex flex-col gap-2">
                     <h3 className={SECTION}>{td('view')}</h3>
                     <HudChipTabs
-                        size="lg"
                         ariaLabel={ts('viewMode')}
                         items={[
                             ...(battle.map
@@ -174,7 +172,6 @@ export function ToolsContent({
                         <section className="flex flex-col gap-2">
                             <h3 className={SECTION}>{td('mode')}</h3>
                             <HudChipTabs
-                                size="lg"
                                 ariaLabel={td('mode')}
                                 items={[
                                     {
@@ -213,13 +210,13 @@ export function ToolsContent({
                         aria-label={fxOn ? t('fxOn') : t('fxOff')}
                         aria-pressed={fxOn}
                         className={cn(
-                            'size-11 hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent',
+                            'size-10 hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent',
                             fxOn ? 'text-hud-accent-fg' : 'text-hud-muted'
                         )}
                     >
                         <Sparkles className="size-5" />
                     </HudIconButton>
-                    <BattlePlayerViewToggle className="size-11" />
+                    <BattlePlayerViewToggle className="size-10" />
                 </div>
             </section>
             {withSound && (withPlayer || soundboard) && (
@@ -239,7 +236,7 @@ export function ToolsContent({
                             type="button"
                             disabled={actions.nextTurn.isPending}
                             onClick={() => actions.nextTurn.mutate({})}
-                            className="hud-sc flex h-11 items-center justify-center gap-2 rounded-xl border border-white/20 text-sm tracking-[.08em] disabled:opacity-70"
+                            className="hud-sc flex h-10 items-center justify-center gap-2 rounded-xl border border-white/20 text-sm tracking-[.08em] disabled:opacity-50"
                         >
                             {actions.nextTurn.isPending ? (
                                 <Loader2
@@ -257,7 +254,7 @@ export function ToolsContent({
                         <HudButton
                             type="button"
                             onClick={onComplete}
-                            className="hud-sc h-11 rounded-xl border border-hud-line text-sm text-hud-ink hover:bg-hud-panel-2"
+                            className="hud-sc h-10 rounded-xl border border-hud-line text-sm text-hud-ink hover:bg-hud-panel-2"
                         >
                             {t('complete')}
                         </HudButton>
@@ -266,7 +263,7 @@ export function ToolsContent({
                         type="button"
                         data-tour="battle.reset"
                         onClick={() => void reset()}
-                        className="hud-sc h-11 rounded-xl border border-hud-danger/50 text-sm text-hud-danger hover:bg-hud-danger/10"
+                        className="hud-sc h-10 rounded-xl border border-hud-danger/50 text-sm text-hud-danger hover:bg-hud-danger/10"
                     >
                         {t('reset')}
                     </HudButton>
@@ -278,7 +275,7 @@ export function ToolsContent({
                         <HudButton
                             type="button"
                             onClick={() => onOpenDrawer('dm')}
-                            className="hud-sc h-11 flex-1 rounded-xl border border-white/20 text-sm"
+                            className="hud-sc h-10 flex-1 rounded-xl border border-white/20 text-sm"
                         >
                             {td('dmPanel')}
                         </HudButton>
@@ -287,7 +284,7 @@ export function ToolsContent({
                         <HudButton
                             type="button"
                             onClick={() => onOpenDrawer('reserve')}
-                            className="hud-sc h-11 flex-1 rounded-xl border border-white/20 text-sm"
+                            className="hud-sc h-10 flex-1 rounded-xl border border-white/20 text-sm"
                         >
                             {td('reserve')}
                         </HudButton>
@@ -296,7 +293,7 @@ export function ToolsContent({
             )}
             <Link
                 href={`/campaigns/${battle.campaignId}`}
-                className="hud-sc flex h-11 items-center text-sm text-hud-soft hover:text-hud-ink"
+                className="hud-sc flex h-10 items-center text-sm text-hud-soft hover:text-hud-ink"
             >
                 {t('toCampaign')}
             </Link>

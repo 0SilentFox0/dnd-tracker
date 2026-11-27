@@ -29,7 +29,7 @@ export function EncumbranceBar({
                 aria-valuemin={0}
                 aria-valuemax={limit}
                 aria-valuenow={carried}
-                className="mt-1 h-1.5 overflow-hidden rounded bg-hud-field"
+                className="mt-1 h-1.5 overflow-hidden rounded-sm bg-hud-field"
             >
                 <div
                     className={`h-full ${over ? 'bg-hud-danger' : 'bg-hud-accent'}`}

@@ -28,7 +28,12 @@ Details in `docs/architecture/ui-layers.md#дизайн-система-ds`.
 
 - Surfaces: `ds-panel` / `ds-inset` / `ds-raised` (or `HudPanel`); soft shadow instead of a panel border. Inputs/buttons keep a 1px border.
 - Active / selected / mastery / accent numbers: `text-hud-accent-fg`, `border-hud-accent`, `bg-hud-accent text-hud-accent-ink`. Crimson (`hud-crimson*`, `hud-hp*`) only for HP, damage, danger, destructive actions and errors; never hard-code crimson for an accent. The primary `Button` is gold.
-- Radii: controls `rounded-lg`, panels/overlays `rounded-xl`, tabs/chips `rounded-md`. No raw `rounded-[Npx]`.
+- Radii: controls, tabs and chips `rounded-lg`, panels/overlays `rounded-xl`, badges/checkbox `rounded-sm`. No raw `rounded-[Npx]`, `rounded-md/2xl/3xl` or bare `rounded`.
+- Type scale `text-xs..3xl` (12/14/16/18/22/28/40), nothing below 12px; no `text-[Npx]`. Labels: `.hud-label`.
+- Buttons: sizes 32/40/48 (`sm`/`default`/`lg`), no `secondary` variant; link-buttons via `buttonVariants`. Chips: `HUD_CHIP_CLASS`.
+- Badges: only `HudPill` (tones `role|meta|npc|accent|danger`). Disabled: `DISABLED_CLASS` / `ARIA_DISABLED_CLASS` (`components/ui/disabled.ts`).
+- Text on `panel`/`page` may use `text-hud-faint`; borders/dividers use `hud-faint-deco`. Skeletons: `LoadingState` (`variant`, `count`), never ad-hoc `animate-pulse`.
+- Page width via `HudPage width="page|list|narrow|wide"`; list + side panel via `HudSplit`. Off-scale hits are counted by the `ui-scale` ratchet (`pnpm ratchet:ui-scale`, only shrinks).
 - Every clickable element needs a hover state: use kit components, or add `ds-interactive` on a custom one.
 - Colours come from palette tokens (`tavern`, `parchment`), never hex; check both palettes (parchment accent is dark gold).
 - Account pages (`/profile`, `/settings/*`, `/library/sounds`, `/help`) render inside `AccountShell`; new entry = a row in `PROFILE_MENU`.

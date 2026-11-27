@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Skull } from 'lucide-react';
 
 import { DeleteAllButton } from '@/components/common/dialogs/DeleteAllButton';
+import { BlankTome } from '@/components/common/illustrations';
 import { EmptyState, LoadingState } from '@/components/common/states';
 import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
@@ -32,7 +32,7 @@ export function DMUnitsPageClient({
     const list = useUnitsList(campaignId, initialUnits);
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle', { count: list.units.length })}
@@ -98,10 +98,10 @@ export function DMUnitsPageClient({
             {canEdit && <OnboardingHint id="dm.units" />}
 
             {list.isLoading && list.units.length === 0 ? (
-                <LoadingState rows={6} label={t('page.loading')} />
+                <LoadingState count={6} label={t('page.loading')} />
             ) : list.units.length === 0 ? (
                 <EmptyState
-                    icon={Skull}
+                    illustration={<BlankTome />}
                     title={t('page.emptyTitle')}
                     description={t('page.emptyDescription')}
                 />

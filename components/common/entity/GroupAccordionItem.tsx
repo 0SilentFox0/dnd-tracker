@@ -67,7 +67,6 @@ export function GroupAccordionItem({
                     >
                         <ActionsMenu
                             actions={menuActions}
-                            triggerClassName="h-10 w-10 sm:h-12 sm:w-12"
                             iconClassName="h-5 w-5 sm:h-6 sm:w-6"
                             stopPropagation
                         />

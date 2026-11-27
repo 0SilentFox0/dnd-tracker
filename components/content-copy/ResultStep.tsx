@@ -43,7 +43,7 @@ function TargetReport({
         isReasonKey(reason) ? t(`reasons.${reason}`) : t('reasons.unknown');
 
     return (
-        <li className="space-y-1 rounded border border-hud-line/40 p-2 text-sm">
+        <li className="space-y-1 rounded-sm border border-hud-line/40 p-2 text-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-medium">{report.name}</span>
                 {!dryRun && (

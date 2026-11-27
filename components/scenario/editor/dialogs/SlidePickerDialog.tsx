@@ -84,7 +84,7 @@ export function SlidePickerDialog({
                             </div>
                         </>
                     )}
-                    {deckLoading && <LoadingState rows={2} />}
+                    {deckLoading && <LoadingState count={2} />}
                     {deck && (
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             {deck.slides.map((slide, i) => (
@@ -94,7 +94,7 @@ export function SlidePickerDialog({
                                     aria-label={
                                         slide.title ?? t('slideN', { n: i + 1 })
                                     }
-                                    className="overflow-hidden rounded border border-hud-rule"
+                                    className="overflow-hidden rounded-sm border border-hud-rule"
                                     onClick={() => {
                                         onPick({
                                             deckId: deck.id,

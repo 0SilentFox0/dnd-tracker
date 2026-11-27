@@ -22,6 +22,8 @@
     "levelShort": "рів. {level}",
     "effects": "Ефекти",
     "mechanics": "Механіка",
+    "brief": "Коротко",
+    "description": "Опис",
     "appearanceSkill": "Опис вигляду (як виглядає в грі)",
     "appearanceSpell": "Опис вигляду (як виглядає заклинання)",
     "appearancePlaceholderSkill": "Наприклад: яскрава вогняна сфера, що летить до цілі...",

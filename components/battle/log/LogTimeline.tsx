@@ -85,7 +85,7 @@ export function LogTimeline({
                     <HudButton
                         type="button"
                         onClick={toggleAll}
-                        className="text-[12px] text-[var(--hud-muted)] hover:text-[var(--ink)]"
+                        className="text-xs text-[var(--hud-muted)] hover:text-[var(--ink)]"
                     >
                         {allCollapsed ? t('expandAll') : t('collapseAll')}
                     </HudButton>

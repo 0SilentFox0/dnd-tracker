@@ -90,7 +90,7 @@ export function SpellEffectCard({
 
     return (
         <div
-            className="space-y-2 rounded-md border bg-muted/30 p-2"
+            className="space-y-2 rounded-lg border bg-muted/30 p-2"
             data-testid={`spell-only-${effect.kind}`}
         >
             <div className="flex items-start gap-2">

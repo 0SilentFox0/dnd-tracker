@@ -67,7 +67,7 @@ export function GraphListPanel({
                                     : tType(group.key)
                             }
                         >
-                            <h3 className="sticky top-0 z-10 flex items-center gap-1.5 bg-card px-1 py-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                            <h3 className="hud-label sticky top-0 z-10 flex items-center gap-1.5 bg-card px-1 py-1">
                                 <Icon
                                     className="size-3.5"
                                     style={{ color: style?.color }}
@@ -91,7 +91,7 @@ export function GraphListPanel({
                                                     ? 'true'
                                                     : undefined
                                             }
-                                            className={`flex w-full items-center gap-2 rounded px-1.5 py-1 text-left text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none ${item.id === selectedId ? 'bg-accent font-medium' : ''}`}
+                                            className={`flex w-full items-center gap-2 rounded-sm px-1.5 py-1 text-left text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none ${item.id === selectedId ? 'bg-accent font-medium' : ''}`}
                                             onClick={() => onPick(item.id)}
                                         >
                                             {item.image ? (

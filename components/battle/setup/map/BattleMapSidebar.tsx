@@ -28,15 +28,17 @@ import type { BattleMapEditor, BattleMapSections } from '@/lib/hooks/battles';
 import { cn } from '@/lib/utils';
 import type { BattleMapSection } from '@/lib/utils/battle/grid/map-sections';
 
-const GROUPS: { key: 'map' | 'draw' | 'special'; sections: BattleMapSection[] }[] =
-    [
-        {
-            key: 'map',
-            sections: ['grid', 'calibration', 'background', 'margins'],
-        },
-        { key: 'draw', sections: ['cells', 'edges'] },
-        { key: 'special', sections: ['mode', 'motion'] },
-    ];
+const GROUPS: {
+    key: 'map' | 'draw' | 'special';
+    sections: BattleMapSection[];
+}[] = [
+    {
+        key: 'map',
+        sections: ['grid', 'calibration', 'background', 'margins'],
+    },
+    { key: 'draw', sections: ['cells', 'edges'] },
+    { key: 'special', sections: ['mode', 'motion'] },
+];
 
 const ICONS: Record<BattleMapSection, LucideIcon> = {
     grid: Grid2X2,
@@ -49,8 +51,7 @@ const ICONS: Record<BattleMapSection, LucideIcon> = {
     motion: Waves,
 };
 
-const GROUP_LABEL =
-    'col-span-2 px-1 pt-1 text-[10px] font-semibold tracking-wide text-hud-muted uppercase';
+const GROUP_LABEL = 'col-span-2 px-1 pt-1 hud-label';
 
 function SectionBody({
     editor,
@@ -130,7 +131,8 @@ export function BattleMapSidebar({
                             {shown.map((id) => {
                                 const Icon = ICONS[id];
 
-                                const muted = stateOf(id)?.status === 'disabled';
+                                const muted =
+                                    stateOf(id)?.status === 'disabled';
 
                                 return (
                                     <TabsTrigger
@@ -140,7 +142,7 @@ export function BattleMapSidebar({
                                         title={t(`panels.${id}`)}
                                         aria-disabled={muted || undefined}
                                         className={cn(
-                                            'flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-md border border-hud-rule px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-hud-accent data-[state=active]:bg-hud-panel-2 data-[state=active]:text-hud-ink',
+                                            'flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-lg border border-hud-rule px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-hud-accent data-[state=active]:bg-hud-panel-2 data-[state=active]:text-hud-ink',
                                             muted && 'opacity-60'
                                         )}
                                     >

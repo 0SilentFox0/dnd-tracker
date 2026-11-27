@@ -19,7 +19,7 @@ export function WaitingNotice({
             )}
         >
             <Hourglass className="size-4 shrink-0 text-hud-muted" />
-            <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
+            <span className="hud-sc text-lg tracking-[.12em] text-[var(--ink)]">
                 {children}
             </span>
         </div>

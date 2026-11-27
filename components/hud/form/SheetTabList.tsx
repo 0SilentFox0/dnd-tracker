@@ -64,7 +64,7 @@ export function SheetTabList({
                         data-tab={tab.id}
                         ref={tab.id === value ? activeTab : undefined}
                         className={cn(
-                            'motion-press relative min-h-11 min-w-fit flex-1 shrink-0 gap-2 rounded-md px-3 text-[15px] font-medium text-hud-text hover:bg-hud-panel-2/60 hover:text-hud-ink data-[state=active]:bg-hud-panel-2! data-[state=active]:font-bold data-[state=active]:text-hud-ink! data-[state=active]:shadow-[inset_0_1px_0_var(--hud-hi),inset_0_-2px_0_var(--hud-accent)] [&_svg]:size-5 [&_svg]:text-hud-muted data-[state=active]:[&_svg]:text-hud-accent-fg',
+                            'motion-press relative min-h-11 min-w-fit flex-1 shrink-0 gap-2 rounded-lg px-3 text-base font-medium text-hud-text hover:bg-hud-panel-2/60 hover:text-hud-ink data-[state=active]:bg-hud-panel-2! data-[state=active]:font-bold data-[state=active]:text-hud-ink! data-[state=active]:shadow-[inset_0_1px_0_var(--hud-hi),inset_0_-2px_0_var(--hud-accent)] [&_svg]:size-5 [&_svg]:text-hud-muted data-[state=active]:[&_svg]:text-hud-accent-fg',
                             trigger
                         )}
                     >

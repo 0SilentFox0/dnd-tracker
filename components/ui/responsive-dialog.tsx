@@ -148,7 +148,7 @@ export function ResponsiveDialog({
                         <div className="space-y-1 px-4 pt-3 pb-2">
                             <Drawer.Title
                                 className={cn(
-                                    'hud-sc text-[28px] leading-tight font-normal text-hud-ink',
+                                    'hud-sc text-2xl leading-tight font-normal text-hud-ink',
                                     hud && HUD_TITLE
                                 )}
                             >

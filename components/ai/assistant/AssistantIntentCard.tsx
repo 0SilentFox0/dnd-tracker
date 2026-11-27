@@ -141,7 +141,7 @@ export function AssistantIntentCard({
                 </p>
             ))}
             {intent.preview.effects.map((effect, i) => (
-                <div className="rounded border p-2 break-words" key={i}>
+                <div className="rounded-sm border p-2 break-words" key={i}>
                     <p>
                         {t('intent.effectLine', {
                             label:

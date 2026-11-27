@@ -19,7 +19,6 @@ export function WallMaterialPicker({
             {WALL_MATERIALS.map(({ id }) => (
                 <HudToggleChip
                     key={id}
-                    tall
                     active={selected === id}
                     onClick={() => onSelect(id)}
                 >

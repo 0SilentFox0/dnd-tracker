@@ -1,12 +1,12 @@
 // @vitest-environment happy-dom
 import { act, cleanup, renderHook, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RulesForm } from '../RulesForm';
 import { useRulesSection } from '../useRulesSection';
 
-import '@/components/ui/__tests__/match-media';
 import '@/components/systems/registry';
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
@@ -24,6 +24,7 @@ vi.mock('next/navigation', () => ({
     useSearchParams: () => new URLSearchParams(nav.search),
 }));
 vi.mock('@/lib/hooks/common/useIsMobile', () => ({
+    DESKTOP_QUERY: '(min-width: 1024px)',
     useIsCompact: () => nav.mobile,
     useIsMobile: () => nav.mobile,
 }));
@@ -50,6 +51,8 @@ vi.mock('@/lib/hooks/campaigns/useCampaignRules', () => ({
     }),
 }));
 
+beforeEach(() => mockMatchMedia(false));
+
 afterEach(() => {
     cleanup();
     Object.assign(nav, { search: '', mobile: false });
@@ -65,7 +68,9 @@ describe('read-only rules demo', () => {
         expect(container.querySelector('pre')).toBeNull();
         expect(container.querySelector('fieldset[disabled]')).not.toBeNull();
         expect(screen.getByText('rules.page.demoReadOnly')).toBeTruthy();
-        expect(screen.queryByRole('button', { name: 'common.actions.save' })).toBeNull();
+        expect(
+            screen.queryByRole('button', { name: 'common.actions.save' })
+        ).toBeNull();
     });
 });
 

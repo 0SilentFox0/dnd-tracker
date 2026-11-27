@@ -205,7 +205,7 @@ export function FxLabPanel({
             </div>
             <p
                 data-testid="fx-status"
-                className="mt-1.5 h-4 text-[11px] text-hud-muted"
+                className="mt-1.5 h-4 text-xs text-hud-muted"
             >
                 {status}
             </p>

@@ -7,9 +7,9 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-spring: linear(0, 0.22 6%, 0.62 14%, 0.96 24%, 1.08 32%, 1.09 38%, 1.03 50%, 0.99 62%, 1 78%, 1);
-  --sheet-hp: var(--hud-danger);
-  --sheet-hp-ghost: color-mix(in srgb, var(--hud-danger) 38%, transparent);
-  --sheet-hp-track: color-mix(in srgb, var(--hud-danger) 14%, transparent);
+  --sheet-hp: var(--hud-hp);
+  --sheet-hp-ghost: color-mix(in srgb, var(--hud-hp) 38%, transparent);
+  --sheet-hp-track: color-mix(in srgb, var(--hud-hp) 14%, transparent);
   --sheet-track: color-mix(in srgb, var(--hud-ink) 14%, transparent);
   --sheet-hp-temp: color-mix(in srgb, var(--hud-ink) 55%, transparent);
 }

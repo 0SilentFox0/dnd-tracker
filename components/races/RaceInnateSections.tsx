@@ -17,14 +17,14 @@ function Described({
     const t = useTranslations('races');
 
     return (
-        <div className="space-y-1 rounded-md bg-hud-field px-2.5 py-2">
+        <div className="space-y-1 rounded-lg bg-hud-field px-2.5 py-2">
             <div className="flex items-center gap-2">
                 {icon && (
                     <EntityIcon
                         src={icon}
                         name={title}
                         size={32}
-                        className="size-8 shrink-0 rounded-md border border-hud-line"
+                        className="size-8 shrink-0 rounded-lg border border-hud-line"
                     />
                 )}
                 <p className="text-sm font-medium text-hud-ink">{title}</p>

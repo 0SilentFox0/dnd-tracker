@@ -22,7 +22,7 @@ html.dark .scenario-book:not([data-theme]) {
 .scenario-book .sb-bar-btns { display: flex; gap: 8px; align-items: center; flex: none; }
 .scenario-book .sb-bar-toc { display: inline-flex; align-items: center; gap: 6px; flex: none; }
 .scenario-book .sb-bar-nav { display: inline-flex; align-items: center; gap: 6px; flex: none; max-width: 180px; text-decoration: none; }
-.scenario-book .sb-bar-nav-label { font-size: 11px; opacity: .75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scenario-book .sb-bar-nav-label { font-size: 12px; opacity: .75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .scenario-book .sb-bar-more { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .scenario-book .sb-bar .toggle.is-primary { border-color: var(--blood); color: var(--blood); font-weight: 700; }
 @media (max-width: 640px) {
@@ -241,3 +241,7 @@ html.dark .scenario-book:not([data-theme]) {
   .scenario-book { background-image: none; }
   .scenario-book section + section::before { content: "· ❖ ·"; }
 }
+
+.scenario-book--page { background: transparent; background-image: none; }
+.scenario-book--page header.title,
+.scenario-book--page main { background-color: var(--page); background-image: radial-gradient(color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px); background-size: 3px 3px; }

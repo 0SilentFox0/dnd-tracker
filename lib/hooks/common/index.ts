@@ -19,13 +19,6 @@ export { useCrudMutation } from './useCrudMutation';
 export { useCssVarHeight } from './useCssVarHeight';
 export { useDebouncedCommit } from './useDebouncedCommit';
 export { useDebouncedValue } from './useDebouncedValue';
-export {
-    type DiceRollerPick,
-    type DiceRollResult,
-    ROLLER_MAX_COUNT,
-    ROLLER_SIDES,
-    useDiceRoller,
-} from './useDiceRoller';
 export { useElementSize } from './useElementSize';
 export { useErrorTotals } from './useErrorTotals';
 export { useExpiry } from './useExpiry';

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { type CSSProperties, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { ImageZoomDialog } from '@/components/common/entity/ImageZoomDialog';
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
@@ -14,6 +15,8 @@ interface HeroPortraitProps {
     name: string;
     className?: string;
     canEdit?: boolean;
+    variant?: 'sheet' | 'card';
+    classVisual?: { icon: string | null; color: string | null } | null;
 }
 
 const initials = (name: string) =>
@@ -29,15 +32,52 @@ export function HeroPortrait({
     name,
     className,
     canEdit,
+    variant = 'sheet',
+    classVisual,
 }: HeroPortraitProps) {
     const t = useTranslations('characterProfile.portrait');
 
     const [open, setOpen] = useState(false);
 
     const frame = cn(
-        'relative aspect-square w-full overflow-hidden rounded-2xl border border-hud-rule bg-hud-raised focus-visible:ring-2 focus-visible:outline-none',
+        'relative aspect-square w-full overflow-hidden rounded-xl border border-hud-rule bg-hud-raised focus-visible:ring-2 focus-visible:outline-none',
         className
     );
+
+    if (!src && variant === 'card') {
+        const color = classVisual?.color;
+
+        return (
+            <div
+                data-slot="portrait-card-fallback"
+                className={cn(
+                    'flex h-32 w-full items-center justify-center overflow-hidden rounded-xl border border-hud-rule bg-hud-raised',
+                    color &&
+                        'bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--class-color)_35%,var(--color-hud-panel-2)),var(--color-hud-panel))]',
+                    className
+                )}
+                style={
+                    color
+                        ? ({ '--class-color': color } as CSSProperties)
+                        : undefined
+                }
+            >
+                {classVisual?.icon ? (
+                    <EntityIcon
+                        src={classVisual.icon}
+                        name={name}
+                        size={96}
+                        emoji
+                        className="size-12 rounded-none bg-transparent text-4xl"
+                    />
+                ) : (
+                    <span className="hud-sc text-3xl text-hud-muted">
+                        {initials(name)}
+                    </span>
+                )}
+            </div>
+        );
+    }
 
     if (!src) {
         return (
@@ -60,6 +100,7 @@ export function HeroPortrait({
             <HudButton
                 type="button"
                 aria-label={t('open')}
+                data-ux-tile
                 onClick={() => setOpen(true)}
                 className={frame}
             >

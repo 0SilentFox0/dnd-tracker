@@ -36,7 +36,7 @@ interface SpellCardProps {
     'data-tour'?: string;
 }
 
-const ICON_BTN = 'size-7 shrink-0 text-hud-muted hover:text-hud-ink';
+const ICON_BTN = 'shrink-0 text-hud-muted hover:text-hud-ink';
 
 export function SpellCard({
     spell,
@@ -85,7 +85,7 @@ export function SpellCard({
             className="flex h-full flex-col gap-2"
         >
             <div className="flex items-start gap-3">
-                <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] shadow-[inset_0_0_0_2px_var(--color-hud-accent)]">
+                <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] shadow-[inset_0_0_0_2px_var(--color-hud-accent)]">
                     <ZoomableEntityIcon
                         src={spell.icon}
                         name={spell.name}
@@ -95,7 +95,7 @@ export function SpellCard({
                     />
                 </div>
                 <div className="min-w-0 flex-1">
-                    <h3 className="hud-sc truncate text-[15px] text-hud-ink">
+                    <h3 className="hud-sc truncate text-base text-hud-ink">
                         {spell.name}
                     </h3>
                     <div className="mt-1 flex flex-wrap gap-1">
@@ -114,7 +114,7 @@ export function SpellCard({
                     <div className="-mt-1 -mr-1 flex shrink-0">
                         <Button
                             variant="ghost"
-                            size="icon"
+                            size="icon-sm"
                             className={ICON_BTN}
                             asChild
                         >
@@ -129,7 +129,7 @@ export function SpellCard({
                         {spell.spellGroup && (
                             <Button
                                 variant="ghost"
-                                size="icon"
+                                size="icon-sm"
                                 className={ICON_BTN}
                                 onClick={() => onRemoveFromGroup?.(spell.id)}
                                 aria-label={t('removeFromGroup')}
@@ -142,7 +142,7 @@ export function SpellCard({
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="ghost"
-                                    size="icon"
+                                    size="icon-sm"
                                     className={ICON_BTN}
                                     aria-label={t('moveToGroup')}
                                     title={t('moveToGroup')}
@@ -174,25 +174,25 @@ export function SpellCard({
                 )}
             </div>
 
-            <p className="line-clamp-2 flex-1 text-xs text-hud-muted">
+            <p className="line-clamp-2 flex-1 text-sm text-hud-muted">
                 {spell.description}
             </p>
 
             <SpellComponentsLine spell={spell} className="line-clamp-2" />
 
-            <div className="flex min-w-0 items-center gap-1.5 border-t border-hud-raised pt-1.5 text-[11px] text-hud-muted">
+            <div className="flex min-w-0 items-center gap-1.5 border-t border-hud-raised pt-1.5 text-xs text-hud-muted">
                 <GroupIcon className="size-3 shrink-0" />
                 <span className="truncate">{groupName}</span>
                 <code
-                    className="ml-auto max-w-[45%] truncate font-mono text-[10px]"
+                    className="ml-auto max-w-[45%] truncate text-sm"
                     title={spell.id}
                 >
                     {copied ? t('copied') : spell.id}
                 </code>
                 <Button
                     variant="ghost"
-                    size="icon"
-                    className="size-6 shrink-0 text-hud-muted"
+                    size="icon-sm"
+                    className="shrink-0 text-hud-muted"
                     onClick={handleCopyId}
                     aria-label={copied ? t('copied') : t('copyId')}
                     title={copied ? t('copied') : t('copyId')}

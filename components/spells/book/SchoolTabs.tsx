@@ -55,13 +55,13 @@ export function SchoolTabs({
                             color: contrastTextColor(backgroundColor),
                         }}
                         className={cn(
-                            'hud-sc flex items-start justify-center px-3 pt-1 text-[13px] font-bold [clip-path:polygon(0_0,100%_0,100%_100%,50%_82%,0_100%)]',
+                            'hud-sc flex items-start justify-center px-3 pt-1 text-sm font-bold [clip-path:polygon(0_0,100%_0,100%_100%,50%_82%,0_100%)]',
                             active === t.name ? 'h-11' : 'h-8 hover:h-9'
                         )}
                     >
                         {t.label}
                         {count !== undefined && (
-                            <span className="ml-1 font-sans text-[11px]">
+                            <span className="ml-1 font-sans text-xs">
                                 {count}
                             </span>
                         )}

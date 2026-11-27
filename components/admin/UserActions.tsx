@@ -66,7 +66,6 @@ export function UserActions({
                 {user.bannedUntil ? (
                     <Button
                         variant="outline"
-                        className="min-h-10"
                         disabled={actions.unban.isPending}
                         onClick={async () => {
                             const ok = await confirm({
@@ -84,17 +83,12 @@ export function UserActions({
                         {t('unban')}
                     </Button>
                 ) : (
-                    <Button
-                        variant="outline"
-                        className="min-h-10"
-                        onClick={() => setDialog('ban')}
-                    >
+                    <Button variant="outline" onClick={() => setDialog('ban')}>
                         {t('ban')}
                     </Button>
                 )}
                 <Button
                     variant="outline"
-                    className="min-h-10"
                     disabled={actions.signOut.isPending}
                     onClick={async () => {
                         const ok = await confirm({
@@ -113,7 +107,6 @@ export function UserActions({
                 </Button>
                 <Button
                     variant="destructive"
-                    className="min-h-10"
                     onClick={() => setDialog('delete')}
                 >
                     {t('delete')}
@@ -131,16 +124,11 @@ export function UserActions({
                 title={t('banTitle', { name: user.displayName })}
                 footer={
                     <>
-                        <Button
-                            variant="ghost"
-                            className="min-h-10"
-                            onClick={close}
-                        >
+                        <Button variant="ghost" onClick={close}>
                             {t('cancel')}
                         </Button>
                         <Button
                             variant="destructive"
-                            className="min-h-10"
                             disabled={actions.ban.isPending}
                             onClick={() =>
                                 actions.ban.mutate(hours, { onSuccess: close })
@@ -180,7 +168,6 @@ export function UserActions({
                     <>
                         <Button
                             variant="ghost"
-                            className="min-h-10"
                             disabled={actions.remove.isPending}
                             onClick={close}
                         >
@@ -188,7 +175,6 @@ export function UserActions({
                         </Button>
                         <Button
                             variant="destructive"
-                            className="min-h-10"
                             disabled={
                                 !sameEmail(typed, user.email) ||
                                 actions.remove.isPending

@@ -43,7 +43,7 @@ export function YoutubePlayer({
                 <div
                     data-youtube-player
                     ref={ref}
-                    className="overflow-hidden rounded bg-black"
+                    className="overflow-hidden rounded-sm bg-black"
                     style={{
                         width: YOUTUBE_PLAYER_PX,
                         height: YOUTUBE_PLAYER_PX,

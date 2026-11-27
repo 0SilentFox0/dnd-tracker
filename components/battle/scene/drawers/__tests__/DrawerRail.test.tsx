@@ -73,13 +73,15 @@ describe('DrawerRail', () => {
 
         render(<DrawerRail active={null} onToggle={vi.fn()} />, { wrapper });
 
-        const rail = document.querySelector('[data-drawer-rail]') as HTMLElement;
+        const rail = document.querySelector(
+            '[data-drawer-rail]'
+        ) as HTMLElement;
 
         expect(rail.className).toContain('flex-row');
 
         for (const b of screen.getAllByRole('button')) {
             expect(b.textContent).toBe('');
-            expect(b.className).toContain('size-11');
+            expect(b.className).toContain('size-10');
         }
     });
 

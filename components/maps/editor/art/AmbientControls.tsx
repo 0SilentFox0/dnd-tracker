@@ -25,7 +25,6 @@ export function AmbientControls({ art }: { art: Art }) {
                     {AMBIENT_TINTS.map(({ id, color }) => (
                         <HudToggleChip
                             key={id}
-                            tall
                             active={ambient.tint === color}
                             onClick={() => art.setAmbient({ tint: color })}
                         >

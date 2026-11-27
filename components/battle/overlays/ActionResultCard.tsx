@@ -245,7 +245,7 @@ export function ActionResultCard() {
                 type="button"
                 aria-label={tu('close')}
                 onClick={close}
-                className="absolute top-1 right-1 flex size-7 items-center justify-center text-[var(--hud-muted)]"
+                className="absolute top-1 right-1 flex size-8 items-center justify-center text-[var(--hud-muted)]"
             >
                 <X className="size-4" />
             </HudButton>

@@ -6,12 +6,29 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme static {
-  --container-page: 72rem;
+  --container-page: 75rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.625rem;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 2.125rem;
+  --text-3xl: 2.5rem;
+  --text-3xl--line-height: 2.875rem;
+  --text-4xl: 2.75rem;
+  --text-4xl--line-height: 3.125rem;
   --color-hud-muted: var(--hud-muted, #9b9080);
   --color-hud-ink: var(--hud-ink, #efe5d2);
   --color-hud-bone: var(--hud-bone, #e6dccb);
   --color-hud-text: var(--hud-text, #e6dccb);
-  --color-hud-faint: var(--hud-faint, #6b6156);
+  --color-hud-faint: var(--hud-faint, #8c8272);
+  --color-hud-faint-deco: var(--hud-faint-deco, #6b6156);
   --color-hud-line: var(--hud-line, rgba(236, 228, 214, 0.17));
   --color-hud-field: var(--hud-field, #110d0a);
   --color-hud-rule: var(--hud-rule, rgba(236, 228, 214, 0.08));
@@ -28,7 +45,7 @@
   --color-hud-crimson-2: var(--hud-crimson-2, #7c1e1d);
   --color-hud-crimson-fg: var(--hud-crimson-fg, #e66a58);
   --color-hud-crimson-ink: var(--hud-crimson-ink, #fbefe9);
-  --color-hud-hp: var(--hud-hp, #c8382f);
+  --color-hud-hp: var(--hud-hp, #b8352c);
   --color-hud-hp-2: var(--hud-hp-2, #8a211c);
   --color-hud-panel: var(--palette-panel, #1a140f);
   --color-hud-panel-2: var(--palette-panel-2, #2a2218);
@@ -48,7 +65,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-body), Georgia, serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -79,7 +96,7 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
   --radius-xs: 4px;
-  --radius-sm: 6px;
+  --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 8px;
   --radius-xl: 12px;
@@ -88,7 +105,7 @@
   --radius-4xl: 16px;
 }
 
-/* Dashboard and library pages can use the extra room on large displays. */
+/* Library list pages (HudPage width="list") use the extra room on large displays. */
 @media (min-width: 96rem) {
   :root {
     --container-page: min(90vw, 160rem);
@@ -112,7 +129,10 @@
 
 :root {
   --radius: 8px;
-  --r: 10px;
+  --r-sm: var(--radius-sm);
+  --r-md: var(--radius-lg);
+  --r-lg: var(--radius-xl);
+  --r-pill: 9999px;
   --ease: 140ms ease;
   --focus: 0 0 0 2px var(--palette-page, #0d0a08), 0 0 0 4px var(--hud-ink, #efe5d2);
   --background: oklch(1 0 0);
@@ -280,7 +300,8 @@
     mix-blend-mode: var(--grain-mode, overlay);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  html[data-palette="tavern"] body::after {
+  html[data-palette] body::after,
+  body:has(.auth-legacy)::after {
     content: "";
     position: fixed;
     inset: 0;
@@ -291,13 +312,29 @@
       linear-gradient(rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.72)),
       url("/bg/vey-strait-2k.webp") 62% center / cover no-repeat;
   }
+  html[data-palette="parchment"] body::after {
+    background: url("/bg/vey-strait-2k.webp") 62% center / cover no-repeat;
+    filter: sepia(0.7) saturate(0.6) brightness(1.15);
+    mix-blend-mode: multiply;
+    opacity: 0.16;
+  }
   @media (min-width: 1921px) {
-    html[data-palette="tavern"] body::after {
+    html[data-palette="tavern"] body::after,
+    body:has(.auth-legacy)::after {
       background-image:
         radial-gradient(120% 90% at 50% 40%, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.62) 100%),
         linear-gradient(rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.72)),
         url("/bg/vey-strait-4k.webp");
     }
+    html[data-palette="parchment"] body::after {
+      background-image: url("/bg/vey-strait-4k.webp");
+    }
+  }
+  .auth-legacy input:-webkit-autofill,
+  .auth-legacy input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #110d0a inset;
+    -webkit-text-fill-color: var(--hud-ink);
+    caret-color: var(--hud-ink);
   }
   main,
   [role="main"],

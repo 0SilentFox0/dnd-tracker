@@ -45,7 +45,7 @@ export function RacialRow({
                         (dto.race[0] ?? '?')
                     )}
                 </span>
-                <span className="hud-sc text-[11px] text-[var(--m2)]">
+                <span className="hud-sc text-xs text-[var(--m2)]">
                     {t('row.racial')}
                 </span>
             </div>
@@ -76,7 +76,7 @@ export function RacialRow({
                                 onSelect={() => onSelect(state)}
                             />
                             {state.reason === 'racialLevel' && (
-                                <span className="text-[10px] text-hud-muted">
+                                <span className="text-xs text-hud-muted">
                                     {t('row.racialLevel', {
                                         level: RACIAL_MIN_LEVEL[level],
                                     })}

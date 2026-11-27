@@ -26,7 +26,7 @@ export function ClassesList({
     const { classes } = list;
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle', { count: classes.length })}

@@ -66,7 +66,7 @@ export function AdvanceRow({
                 type="button"
                 size="sm"
                 variant="outline"
-                className="ds-interactive min-h-9 w-full rounded-lg"
+                className="ds-interactive w-full rounded-lg"
                 disabled={cost === null || short || pending}
                 title={short ? t('needXp') : undefined}
                 onClick={onBuy}

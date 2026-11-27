@@ -69,7 +69,7 @@ export const LastActionTicker = memo(function LastActionTicker({
                 </span>
             )}
             {onOpenLog && (
-                <span className="ml-auto shrink-0 text-[13px] text-[var(--hud-muted)]">
+                <span className="ml-auto shrink-0 text-sm text-[var(--hud-muted)]">
                     {ts('openLog')}
                 </span>
             )}

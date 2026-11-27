@@ -48,9 +48,7 @@ export function GraphInspector({
     return (
         <div className="flex flex-col gap-3">
             <div>
-                <p className="text-xs text-muted-foreground uppercase">
-                    {kind}
-                </p>
+                <p className="hud-label">{kind}</p>
                 <p className="font-medium">{node.label}</p>
                 {node.missing ? (
                     <p className="text-sm text-destructive">
@@ -86,7 +84,7 @@ export function GraphInspector({
                         <li key={l.node.id}>
                             <HudButton
                                 type="button"
-                                className="flex w-full items-center gap-2 rounded px-1 py-0.5 text-left text-sm hover:bg-accent"
+                                className="flex w-full items-center gap-2 rounded-sm px-1 py-0.5 text-left text-sm hover:bg-accent"
                                 onClick={() => onSelect(l.node.id)}
                             >
                                 <span className="flex-1 truncate">
@@ -111,7 +109,7 @@ export function GraphInspector({
                             <li key={`${r.node.id}|${r.label}`}>
                                 <HudButton
                                     type="button"
-                                    className="flex w-full flex-col rounded px-1 py-0.5 text-left text-sm hover:bg-accent"
+                                    className="flex w-full flex-col rounded-sm px-1 py-0.5 text-left text-sm hover:bg-accent"
                                     onClick={() => onSelect(r.node.id)}
                                 >
                                     <span className="truncate">

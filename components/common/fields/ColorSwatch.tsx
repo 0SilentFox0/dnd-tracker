@@ -18,7 +18,7 @@ export function ColorSwatch({
     return (
         <label
             title={t('pick')}
-            className="relative size-9 shrink-0 cursor-pointer rounded-md border border-input focus-within:ring-2 focus-within:ring-ring"
+            className="relative size-9 shrink-0 cursor-pointer rounded-lg border border-input focus-within:ring-2 focus-within:ring-ring"
             style={{ background: color }}
         >
             <Input

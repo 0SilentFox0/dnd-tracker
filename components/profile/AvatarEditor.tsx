@@ -25,7 +25,8 @@ export function AvatarEditor({
 
     const { upload, remove, pending } = useAvatar();
 
-    const hasCustom = !!user.avatarUrl && isHostedOnProjectStorage(user.avatarUrl);
+    const hasCustom =
+        !!user.avatarUrl && isHostedOnProjectStorage(user.avatarUrl);
 
     const onRemove = async () => {
         const ok = await confirm({
@@ -42,14 +43,14 @@ export function AvatarEditor({
             <div className="ds-inset border border-hud-line p-1.5">
                 <UserAvatar
                     user={user}
-                    className="hud-sc size-28 rounded-[var(--r)] border-0 text-4xl sm:size-32"
+                    className="hud-sc size-28 rounded-xl border-0 text-4xl sm:size-32"
                     sizes="128px"
                 />
             </div>
             <div className="min-w-0 flex-1 space-y-2">
                 <div className="min-w-0">
                     {user.name && (
-                        <p className="hud-sc truncate text-[28px] text-hud-ink">
+                        <p className="hud-sc truncate text-2xl text-hud-ink">
                             {user.name}
                         </p>
                     )}

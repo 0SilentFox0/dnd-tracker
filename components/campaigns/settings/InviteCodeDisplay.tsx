@@ -34,8 +34,8 @@ export function InviteCodeDisplay({
             <code
                 className={
                     compact
-                        ? 'max-w-full truncate rounded bg-hud-field px-1.5 py-0.5 font-mono text-xs font-semibold text-hud-ink sm:text-sm'
-                        : 'rounded bg-hud-field px-2 py-1 font-mono text-lg font-semibold text-hud-ink'
+                        ? 'max-w-full truncate rounded-sm bg-hud-field px-1.5 py-0.5 font-mono text-xs font-semibold text-hud-ink sm:text-sm'
+                        : 'rounded-sm bg-hud-field px-2 py-1 font-mono text-lg font-semibold text-hud-ink'
                 }
             >
                 {inviteCode}
@@ -44,12 +44,18 @@ export function InviteCodeDisplay({
                 variant="ghost"
                 size="icon"
                 onClick={handleCopy}
-                className={'size-10 shrink-0'}
+                className={'shrink-0'}
                 title={t('settings.copyCode')}
                 aria-label={t('settings.copyCode')}
             >
                 {copied ? (
-                    <Check className={compact ? 'size-3.5 text-hud-accent-fg' : 'h-4 w-4 text-hud-accent-fg'} />
+                    <Check
+                        className={
+                            compact
+                                ? 'size-3.5 text-hud-accent-fg'
+                                : 'h-4 w-4 text-hud-accent-fg'
+                        }
+                    />
                 ) : (
                     <Copy className={compact ? 'size-3.5' : 'h-4 w-4'} />
                 )}

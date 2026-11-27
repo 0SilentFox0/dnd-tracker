@@ -24,7 +24,7 @@ function SlideView({
     const t = useTranslations('ai');
 
     return (
-        <div className="space-y-1 rounded border border-primary/40 p-2">
+        <div className="space-y-1 rounded-sm border border-primary/40 p-2">
             <Image
                 src={toMediaUrl(op.slide.imageUrl)}
                 alt={op.slide.title ?? t('proposal.slideAlt')}
@@ -32,7 +32,7 @@ function SlideView({
                 height={0}
                 sizes="100vw"
                 unoptimized
-                className="h-auto max-h-60 w-full rounded object-contain"
+                className="h-auto max-h-60 w-full rounded-sm object-contain"
             />
             <p className="text-xs text-muted-foreground">
                 {op.deckId && op.deckTitle

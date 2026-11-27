@@ -6,7 +6,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { AssistantPolicyControl } from '../assistant/AssistantPolicyControl';
 
 import { HudCard } from '@/components/hud/page';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -139,9 +139,9 @@ export function ApiTokenList({
                         )}
                         <div className="mt-1 flex flex-wrap gap-1">
                             {token.scopes.map((s) => (
-                                <Badge key={s} variant="outline">
+                                <HudPill key={s}>
                                     {t(`tokenScopes.${tokenScopeKey(s)}`)}
-                                </Badge>
+                                </HudPill>
                             ))}
                         </div>
                     </div>
@@ -207,7 +207,7 @@ export function ApiTokenList({
                 }
             >
                 {created ? (
-                    <code className="block rounded-md bg-hud-panel p-3 text-sm break-all text-hud-ink">
+                    <code className="block rounded-lg bg-hud-panel p-3 text-sm break-all text-hud-ink">
                         {created.token}
                     </code>
                 ) : (

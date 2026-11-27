@@ -86,7 +86,7 @@ export function ShowPageClient({
                                     on: t('playerView.on'),
                                     off: t('playerView.off'),
                                 }}
-                                className="rounded bg-black/50"
+                                className="rounded-sm bg-black/50"
                             />
                         )}
                         <FullscreenButton />

@@ -138,7 +138,7 @@ export function UnitSpellcastingFields({
                 return (
                     <section
                         key={grant.spellId}
-                        className="space-y-3 rounded border p-3"
+                        className="space-y-3 rounded-sm border p-3"
                     >
                         <div className="flex items-center justify-between gap-2">
                             <h4 className="font-medium">{name}</h4>

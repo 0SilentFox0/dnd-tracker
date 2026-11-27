@@ -15,7 +15,7 @@ import {
 import type { BattleParticipant } from '@/types/battle';
 
 const TARGET_BUTTON =
-    'border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-hud-muted disabled:opacity-40';
+    'border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-hud-muted disabled:opacity-50';
 
 function ReadiedAttackPicker({
     participant,
@@ -35,7 +35,7 @@ function ReadiedAttackPicker({
             <HudButton
                 type="button"
                 onClick={() => setOpen(true)}
-                className="hud-sc mt-2 flex h-11 w-full items-center justify-center gap-2 border border-[var(--enemy)] bg-[var(--enemy)]/25 text-[15px] tracking-[.08em] text-[var(--ink)]"
+                className="hud-sc mt-2 flex h-10 w-full items-center justify-center gap-2 border border-[var(--enemy)] bg-[var(--enemy)]/25 text-base tracking-[.08em] text-[var(--ink)]"
             >
                 <Crosshair className="size-5 text-[var(--bone)]" />
                 {t('title')}

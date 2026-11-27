@@ -1,9 +1,10 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Award, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import { DmCardGrid, DmListBody } from '@/components/common/entity/DmListBody';
+import { BlankTome } from '@/components/common/illustrations';
 import { EmptyState } from '@/components/common/states';
 import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { CreateFeatDialog } from '@/components/feats/CreateFeatDialog';
@@ -27,7 +28,7 @@ export function DMFeatsPageClient({
     const { feats, all, typeFilter } = list;
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle', { count: all.length })}
@@ -78,7 +79,7 @@ export function DMFeatsPageClient({
                 loadingLabel={t('page.loading')}
                 empty={
                     <EmptyState
-                        icon={Award}
+                        illustration={<BlankTome />}
                         title={t('page.emptyTitle')}
                         description={t('page.emptyDescription')}
                     />

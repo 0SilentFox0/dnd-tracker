@@ -18,7 +18,7 @@ export function SheetTopBar({ actions }: { actions?: ReactNode }) {
         <div className="flex min-h-12 items-center justify-between gap-3 border-b border-hud-rule px-4">
             <nav
                 aria-label={tb('label')}
-                className="flex min-w-0 items-center gap-2 text-[15px] text-hud-muted"
+                className="flex min-w-0 items-center gap-2 text-base text-hud-muted"
             >
                 <Link
                     href={`/campaigns/${campaignId}`}

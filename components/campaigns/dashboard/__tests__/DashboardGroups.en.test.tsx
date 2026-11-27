@@ -16,7 +16,10 @@ describe('DashboardGroups en', () => {
     it('renders English groups and tiles without raw keys', async () => {
         await renderWithIntl(
             <DashboardGroups campaignId="c1" isDM pendingDrafts={2} />,
-            { locale: 'en', namespaces: ['common', 'validation', 'dashboard'] }
+            {
+                locale: 'en',
+                namespaces: ['common', 'validation', 'dashboard', 'gameTerms'],
+            }
         );
 
         expect(

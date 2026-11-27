@@ -15,7 +15,7 @@ export function QuestProgress({ quest }: { quest: QuestView }) {
             <span className="text-xs text-hud-muted">
                 {t('progress', { done, total: quest.objectives.length })}
             </span>
-            <div className="h-1 overflow-hidden rounded bg-hud-field">
+            <div className="h-1 overflow-hidden rounded-sm bg-hud-field">
                 <div
                     className="h-full bg-hud-accent"
                     style={{

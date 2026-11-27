@@ -44,7 +44,7 @@ function AddButtons({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-9 w-full rounded-none hover:bg-hud-accent/15"
+                className="w-full rounded-none hover:bg-hud-accent/15"
                 aria-label={t('addAlly', { name })}
                 onClick={() => add(ParticipantSide.ALLY)}
             >
@@ -55,7 +55,7 @@ function AddButtons({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-9 w-full rounded-none hover:bg-hud-crimson/15"
+                className="w-full rounded-none hover:bg-hud-crimson/15"
                 aria-label={t('addEnemy', { name })}
                 onClick={() => add(ParticipantSide.ENEMY)}
             >
@@ -84,7 +84,7 @@ function QuantityStepper({
             className="flex min-w-0 flex-1 items-center justify-center border-l border-hud-rule"
         >
             <HudIconButton
-                className="h-9 w-7"
+                className="size-8"
                 aria-label={t('quantityLess', { name })}
                 disabled={value <= UNIT_QUANTITY.min}
                 onClick={() => onChange(clampUnitQuantity(value - 1))}
@@ -98,7 +98,7 @@ function QuantityStepper({
                 {value}
             </span>
             <HudIconButton
-                className="h-9 w-7"
+                className="size-8"
                 aria-label={t('quantityMore', { name })}
                 disabled={value >= UNIT_QUANTITY.max}
                 onClick={() => onChange(clampUnitQuantity(value + 1))}
@@ -154,16 +154,14 @@ export function CatalogRow({
                     {entity.name}
                 </span>
                 {stats && (
-                    <span className="hud-num grid w-full grid-cols-3 divide-x divide-hud-rule rounded-md bg-black/20 py-1 tabular-nums">
+                    <span className="hud-num grid w-full grid-cols-3 divide-x divide-hud-rule rounded-lg bg-black/20 py-1 tabular-nums">
                         {[
                             ['DPR', round1(stats.dpr)],
                             ['HP', stats.hp],
                             ['KPI', stats.kpi],
                         ].map(([label, value]) => (
                             <span key={label} className="flex flex-col">
-                                <span className="text-[9px] tracking-wider text-hud-muted uppercase">
-                                    {label}
-                                </span>
+                                <span className="hud-label">{label}</span>
                                 <span className="text-xs font-medium">
                                     {value}
                                 </span>

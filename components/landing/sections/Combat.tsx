@@ -45,7 +45,7 @@ export function Combat({ t, locale }: { t: Translator; locale: Locale }) {
                     ))}
                 </ol>
 
-                <div className="relative isolate mt-20 overflow-hidden rounded-2xl border border-hud-rule px-4 py-12 sm:px-8">
+                <div className="relative isolate mt-20 overflow-hidden rounded-xl border border-hud-rule px-4 py-12 sm:px-8">
                     <div className="absolute inset-0 -z-10 [background:radial-gradient(ellipse_at_50%_30%,rgba(120,80,200,.16),transparent_60%),#0e0b09]" />
                     <div className="mx-auto max-w-2xl space-y-2 text-center">
                         <h3 className="hud-sc text-2xl text-hud-ink sm:text-3xl">

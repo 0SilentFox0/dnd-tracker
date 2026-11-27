@@ -69,7 +69,7 @@ export default function ChoicesDialog({
             size="lg"
         >
             {!hero || !state || !refs.ready ? (
-                <LoadingState rows={3} label={t('loadingHero')} />
+                <LoadingState count={3} label={t('loadingHero')} />
             ) : (
                 <ChoiceWizard
                     campaignId={campaignId}

@@ -13,14 +13,16 @@ import { Button } from '@/components/ui/button';
 import { useIsAdmin } from '@/lib/hooks/admin';
 import { useSessionUser } from '@/lib/hooks/auth';
 
-export function HeaderActions({ mode = 'all' }: { mode?: 'all' | 'primary' | 'secondary' }) {
+export function HeaderActions({
+    mode = 'all',
+}: {
+    mode?: 'all' | 'primary' | 'secondary';
+}) {
     const t = useTranslations('common.header');
 
     const sessionUser = useSessionUser();
 
-    const isAdmin = useIsAdmin(
-        sessionUser?.email ? sessionUser.id : undefined
-    );
+    const isAdmin = useIsAdmin(sessionUser?.email ? sessionUser.id : undefined);
 
     return (
         <>
@@ -33,7 +35,7 @@ export function HeaderActions({ mode = 'all' }: { mode?: 'all' | 'primary' | 'se
                     asChild
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
+                    className="w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
                 >
                     <Link href="/admin">
                         <ShieldCheck className="size-5" />
@@ -41,17 +43,19 @@ export function HeaderActions({ mode = 'all' }: { mode?: 'all' | 'primary' | 'se
                     </Link>
                 </Button>
             )}
-            {mode !== 'secondary' && <Button
-                asChild
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
-            >
-                <Link href="/profile">
-                    <UserAvatar user={sessionUser} className="size-7" />
-                    <span className="sr-only">{t('profile')}</span>
-                </Link>
-            </Button>}
+            {mode !== 'secondary' && (
+                <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className="w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
+                >
+                    <Link href="/profile">
+                        <UserAvatar user={sessionUser} className="size-7" />
+                        <span className="sr-only">{t('profile')}</span>
+                    </Link>
+                </Button>
+            )}
         </>
     );
 }

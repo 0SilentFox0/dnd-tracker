@@ -89,7 +89,7 @@ export const LogEntryCard = memo(function LogEntryCard({
                 </span>
             </span>
             <div className="min-w-0 flex-1">
-                <div className="mb-0.5 flex items-baseline gap-1.5 text-[11.5px] leading-4">
+                <div className="mb-0.5 flex items-baseline gap-1.5 text-xs leading-4">
                     <span
                         className={cn(
                             'hud-sc font-bold',
@@ -107,13 +107,13 @@ export const LogEntryCard = memo(function LogEntryCard({
                             : t('triggers')}
                     </span>
                 </div>
-                <div className="text-[13.5px] leading-[18px] font-medium text-[var(--ink)]">
+                <div className="text-sm leading-[18px] font-medium text-[var(--ink)]">
                     {text(view.headline)}
                 </div>
                 {view.lines.map((line, n) => (
                     <div
                         key={n}
-                        className="mt-0.5 text-[12.5px] leading-[17px] text-hud-muted"
+                        className="mt-0.5 text-sm leading-[17px] text-hud-muted"
                     >
                         {text(line)}
                     </div>
@@ -124,7 +124,7 @@ export const LogEntryCard = memo(function LogEntryCard({
                         type="button"
                         aria-expanded={open}
                         onClick={() => onToggle(entry.actionIndex)}
-                        className="mt-1 flex items-center gap-1 text-[12px] text-[var(--hud-muted)] hover:text-[var(--ink)]"
+                        className="mt-1 flex items-center gap-1 text-xs text-[var(--hud-muted)] hover:text-[var(--ink)]"
                     >
                         <ChevronDown
                             className={cn(

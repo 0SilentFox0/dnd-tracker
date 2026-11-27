@@ -54,7 +54,7 @@ export function ZoneTriggerEditor({
     };
 
     return (
-        <div className="col-span-6 space-y-2 rounded-md border border-dashed p-2">
+        <div className="col-span-6 space-y-2 rounded-lg border border-dashed p-2">
             <div className="flex items-center gap-2">
                 <Switch
                     id={`${path}.on`}

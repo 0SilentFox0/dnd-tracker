@@ -41,9 +41,9 @@ export function HudFormPage({
         <div
             className={cn(
                 HUD_SURFACE,
-                'hud-form hud-form-page ornate mx-auto w-full sm:my-4 sm:rounded-[var(--r)] sm:bg-hud-panel sm:p-6 sm:shadow-[var(--hud-sh)]',
+                'hud-form hud-form-page ornate mx-auto w-full sm:my-4 sm:rounded-xl sm:bg-hud-panel sm:p-6 sm:shadow-[var(--hud-sh)]',
                 wide
-                    ? 'hud-form-wide min-h-dvh max-w-[1680px] sm:min-h-0'
+                    ? 'hud-form-wide min-h-dvh max-w-[75rem] sm:min-h-0'
                     : 'flex min-h-dvh max-w-3xl flex-col sm:min-h-0',
                 className
             )}
@@ -59,7 +59,7 @@ export function HudFormPage({
                     </Link>
                 )}
                 <header className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-0">
-                    <h1 className="hud-sc text-[28px] text-hud-ink">{title}</h1>
+                    <h1 className="hud-sc text-2xl text-hud-ink">{title}</h1>
                     {(aside || menu || (wide && side && sidePreview)) && (
                         <span className="flex items-center gap-2 text-xs text-hud-muted sm:text-sm sm:text-hud-soft">
                             {aside}

@@ -61,7 +61,7 @@ const H3 = ({
     side: ParticipantSide;
     children: React.ReactNode;
 }) => (
-    <h3 className="hud-sc flex h-8 items-center gap-2 border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
+    <h3 className="hud-sc flex h-8 items-center gap-2 border-b border-white/[.14] text-base font-bold tracking-[.1em] text-hud-soft">
         <SideDot side={side} />
         {children}
     </h3>

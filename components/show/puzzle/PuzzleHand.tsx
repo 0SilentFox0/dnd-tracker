@@ -41,7 +41,7 @@ export function PuzzleHand({ drag, piece, spec, imageUrl, onRotate }: Props) {
                 <HudButton
                     type="button"
                     aria-label={t('puzzle.rotateLeft')}
-                    className="size-8 rounded bg-black/70 text-white"
+                    className="size-8 rounded-sm bg-black/70 text-white"
                     onClick={() => onRotate(-45)}
                 >
                     ↺
@@ -49,7 +49,7 @@ export function PuzzleHand({ drag, piece, spec, imageUrl, onRotate }: Props) {
                 <HudButton
                     type="button"
                     aria-label={t('puzzle.rotateRight')}
-                    className="size-8 rounded bg-black/70 text-white"
+                    className="size-8 rounded-sm bg-black/70 text-white"
                     onClick={() => onRotate(45)}
                 >
                     ↻

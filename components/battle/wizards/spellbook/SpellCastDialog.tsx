@@ -160,7 +160,7 @@ function RollsStep({ book }: { book: Book }) {
                         onChange={(e) =>
                             actions.setInputCount(Number(e.target.value))
                         }
-                        className="w-20 rounded border border-hud-line bg-transparent px-2 py-1 text-right"
+                        className="w-20 rounded-sm border border-hud-line bg-transparent px-2 py-1 text-right"
                     />
                 </label>
             )}

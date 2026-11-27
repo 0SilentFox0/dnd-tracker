@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { DmEntityCard } from '@/components/common/entity/DmEntityCard';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import type { FeatData } from '@/types/choices';
 
 export function FeatCard({
@@ -29,19 +29,15 @@ export function FeatCard({
             onDelete={() => onDelete?.(feat.id)}
             canEdit={canEdit}
         >
-            <Badge variant="outline">{t(`types.${feat.type}`)}</Badge>
+            <HudPill>{t(`types.${feat.type}`)}</HudPill>
             {feat.prerequisite.level && (
-                <Badge variant="outline">
+                <HudPill>
                     {t('card.level', { level: feat.prerequisite.level })}
-                </Badge>
+                </HudPill>
             )}
-            {feat.repeatable && (
-                <Badge variant="outline">{t('card.repeatable')}</Badge>
-            )}
+            {feat.repeatable && <HudPill>{t('card.repeatable')}</HudPill>}
             {choices > 0 && (
-                <Badge variant="outline">
-                    {t('card.choices', { count: choices })}
-                </Badge>
+                <HudPill>{t('card.choices', { count: choices })}</HudPill>
             )}
         </DmEntityCard>
     );

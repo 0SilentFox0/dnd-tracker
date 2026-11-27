@@ -55,7 +55,7 @@ export function EditSkillClient({
             query={query}
             loading={
                 <HudFormPage header={{ title: t('editTitle') }}>
-                    <LoadingState rows={6} label={t('loading')} />
+                    <LoadingState count={6} label={t('loading')} />
                 </HudFormPage>
             }
         >

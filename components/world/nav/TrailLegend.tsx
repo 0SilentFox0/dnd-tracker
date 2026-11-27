@@ -48,7 +48,7 @@ export function TrailLegend({
     });
 
     return (
-        <div className="hud-surface max-w-full rounded-md border border-hud-rule bg-hud-surface/90 px-2 py-1 backdrop-blur-sm">
+        <div className="hud-surface max-w-full rounded-lg border border-hud-rule bg-hud-surface/90 px-2 py-1 backdrop-blur-sm">
             <HudChipTabs ariaLabel={t('legend')} items={items} />
         </div>
     );

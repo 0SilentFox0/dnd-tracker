@@ -19,7 +19,7 @@ export function LevelUpBadge({
     return (
         <div className="flex items-center justify-between gap-4">
             <div className="min-w-0 text-left lg:text-right">
-                <b className="hud-num block text-[28px] leading-none text-hud-ink lg:text-[34px]">
+                <b className="hud-num block text-2xl leading-none text-hud-ink lg:text-3xl">
                     +{free}
                 </b>
                 <span className="text-sm leading-tight text-hud-muted">

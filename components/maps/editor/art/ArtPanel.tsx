@@ -14,9 +14,7 @@ import { WallMaterialPicker } from './WallMaterialPicker';
 import { HudToggleChip } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import {
-    FLOOR_TOOLS,
-} from '@/lib/constants/map-art/lights';
+import { FLOOR_TOOLS } from '@/lib/constants/map-art/lights';
 import { BLOCKED_MATERIALS } from '@/lib/constants/map-art/materials';
 import {
     isStampTool,
@@ -32,7 +30,7 @@ type ArtSave = ReturnType<typeof useMapArtSave>;
 
 const SECTION = 'space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3';
 
-const HEADING = 'text-xs font-semibold tracking-wide text-hud-muted uppercase';
+const HEADING = 'hud-label';
 
 const NO_ART = {
     scene: null,
@@ -58,7 +56,6 @@ function BlockedMaterialPicker({ materials }: { materials: Art['materials'] }) {
             {options.map(({ id, label }) => (
                 <HudToggleChip
                     key={label}
-                    tall
                     active={materials.blocked === id}
                     onClick={() => materials.set({ blocked: id })}
                 >

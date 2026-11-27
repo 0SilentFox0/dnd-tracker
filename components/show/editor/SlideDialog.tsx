@@ -121,7 +121,7 @@ function SlideForm({
                     </label>
                 </>
             ) : (
-                <div className="aspect-video w-full overflow-hidden rounded bg-black">
+                <div className="aspect-video w-full overflow-hidden rounded-sm bg-black">
                     <OptimizedImage
                         src={slide.imageUrl}
                         alt=""

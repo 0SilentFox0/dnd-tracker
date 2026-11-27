@@ -30,7 +30,8 @@ export function MapQuickStart({
                             key={key}
                             type="button"
                             variant="outline"
-                            className="h-auto min-h-11 justify-start gap-3 py-2 text-left whitespace-normal"
+                            data-ux-tile
+                            className="h-auto justify-start gap-3 py-2 text-left whitespace-normal"
                             onClick={() => onPick(key)}
                         >
                             <Icon

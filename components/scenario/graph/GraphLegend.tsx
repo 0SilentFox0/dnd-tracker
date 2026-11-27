@@ -17,20 +17,22 @@ export function GraphLegend({ showSequence }: { showSequence: boolean }) {
 
     return (
         <div
-            className="pointer-events-none absolute bottom-2 left-2 flex max-w-[calc(100%-1rem)] flex-col gap-1 rounded-md border bg-card/85 px-3 py-2 text-[13px] text-muted-foreground backdrop-blur-sm"
+            className="pointer-events-none absolute bottom-2 left-2 flex max-w-[calc(100%-1rem)] flex-col gap-1 rounded-lg border bg-card/85 px-3 py-2 text-sm text-muted-foreground backdrop-blur-sm"
             aria-label={t('title')}
             role="group"
         >
             <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                {(['draft', 'ready', 'played', 'personal'] as const).map((s) => (
-                    <span key={s} className={item}>
-                        <span
-                            className="h-3.5 w-1 rounded-sm"
-                            style={{ background: GRAPH_STATUS_COLOR[s] }}
-                        />
-                        {t(s)}
-                    </span>
-                ))}
+                {(['draft', 'ready', 'played', 'personal'] as const).map(
+                    (s) => (
+                        <span key={s} className={item}>
+                            <span
+                                className="h-3.5 w-1 rounded-sm"
+                                style={{ background: GRAPH_STATUS_COLOR[s] }}
+                            />
+                            {t(s)}
+                        </span>
+                    )
+                )}
                 {showSequence ? (
                     <span className={item}>
                         <span className="inline-block h-0 w-4 border-t-2 border-[var(--color-hud-accent-fg)]" />

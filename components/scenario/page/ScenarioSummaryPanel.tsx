@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Loader2, Lock } from 'lucide-react';
 
 import { ErrorState } from '@/components/common/states';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import {
     useGenerateScenarioSummary,
@@ -65,7 +65,7 @@ export function ScenarioSummaryPanel({
             <div
                 role="status"
                 aria-label={t('loading')}
-                className="h-16 animate-pulse rounded bg-muted"
+                className="ds-skeleton h-16"
             />
         );
 
@@ -84,9 +84,7 @@ export function ScenarioSummaryPanel({
             {entry ? (
                 <>
                     {entry.stale ? (
-                        <Badge variant="outline" className="self-start">
-                            {t('stale')}
-                        </Badge>
+                        <HudPill className="self-start">{t('stale')}</HudPill>
                     ) : null}
                     <p>{entry.summary.overview}</p>
                     <SummaryList

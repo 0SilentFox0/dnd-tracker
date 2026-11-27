@@ -18,13 +18,13 @@ describe('JoinBattleButton', () => {
         await renderWithIntl(<JoinBattleButton />);
 
         expect(screen.getByText('ДО БОЮ')).toBeTruthy();
-        expect(screen.getByText('Приєднатися до бою')).toBeTruthy();
+        expect(screen.getByLabelText('Приєднатися до бою')).toBeTruthy();
     });
 
     it('renders the en label and aria text', async () => {
         await renderWithIntl(<JoinBattleButton />, { locale: 'en' });
 
         expect(screen.getByText('JOIN BATTLE')).toBeTruthy();
-        expect(screen.getByText('Join the battle')).toBeTruthy();
+        expect(screen.getByLabelText('Join the battle')).toBeTruthy();
     });
 });

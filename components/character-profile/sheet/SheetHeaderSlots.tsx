@@ -37,13 +37,7 @@ export function SheetDmActions({ onEdit }: { onEdit: () => void }) {
 
     return (
         <>
-            <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="min-h-10"
-                onClick={onEdit}
-            >
+            <Button type="button" size="sm" variant="outline" onClick={onEdit}>
                 <Pencil aria-hidden className="size-4" />
                 {tc('edit')}
             </Button>

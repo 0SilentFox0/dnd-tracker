@@ -122,7 +122,7 @@ export function PropertyFields({
     };
 
     return (
-        <div className="space-y-3 rounded-md border border-hud-line p-3">
+        <div className="space-y-3 rounded-lg border border-hud-line p-3">
             <div className="space-y-1">
                 <span className="text-xs text-muted-foreground">
                     {t('appliesTo')}

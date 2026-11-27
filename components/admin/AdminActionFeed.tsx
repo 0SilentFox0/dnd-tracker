@@ -11,8 +11,8 @@ import type { AdminSecurity } from '@/types/admin';
 const TONES = {
     ban: 'accent',
     delete: 'accent',
-    unban: 'fact',
-    signout: 'muted',
+    unban: 'meta',
+    signout: 'meta',
 } as const;
 
 const isKnown = (a: string): a is keyof typeof TONES => a in TONES;
@@ -47,7 +47,7 @@ export function AdminActionFeed({
                         className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2"
                     >
                         <HudPill
-                            tone={isKnown(a.action) ? TONES[a.action] : 'fact'}
+                            tone={isKnown(a.action) ? TONES[a.action] : 'meta'}
                         >
                             {isKnown(a.action)
                                 ? t(`actionTypes.${a.action}`)

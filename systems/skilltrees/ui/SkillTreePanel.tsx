@@ -17,23 +17,23 @@ export function SkillTreePanel({ manage }: PathPanelProps) {
     return (
         <>
             {personal && (
-                <section className="mb-3 flex gap-3 rounded-[10px] border border-hud-line bg-hud-field p-3">
+                <section className="mb-3 flex gap-3 rounded-xl border border-hud-line bg-hud-field p-3">
                     <EntityIcon
                         src={sheet.identity.avatar || personal.icon}
                         name={personal.name}
                         alt={sheet.identity.name}
                         size={48}
-                        className="hud-sc size-12 rounded-md border border-hud-line bg-hud-raised text-inherit"
+                        className="hud-sc size-12 rounded-lg border border-hud-line bg-hud-raised text-inherit"
                     />
                     <div className="min-w-0">
-                        <p className="text-[13px] text-hud-ink uppercase">
+                        <p className="text-sm text-hud-ink uppercase">
                             {t('personal')}
                         </p>
                         <h3 className="hud-sc text-base text-hud-ink">
                             {personal.name}
                         </h3>
                         {personal.description && (
-                            <p className="mt-1 text-[13px] leading-snug text-hud-soft">
+                            <p className="mt-1 text-sm leading-snug text-hud-soft">
                                 {personal.description}
                             </p>
                         )}

@@ -49,7 +49,7 @@ export function RecommendedSpells({
 
     return (
         <div role="group" aria-label={t('recommended')} className="min-w-0">
-            <h3 className="hud-sc mb-1.5 text-[12px] tracking-[.06em] text-[#ecd78d] [text-shadow:0_1px_3px_#000,0_0_2px_#000]">
+            <h3 className="hud-sc mb-1.5 text-xs tracking-[.06em] text-[#ecd78d] [text-shadow:0_1px_3px_#000,0_0_2px_#000]">
                 {level === null
                     ? t('recommended')
                     : t('recommendedTitle', {
@@ -77,7 +77,7 @@ export function RecommendedSpells({
                             className={compact ? 'size-11' : 'size-[66px]'}
                             iconClassName={compact ? 'size-9' : 'size-14'}
                         />
-                        <span className="max-w-full truncate text-[11px] leading-tight">
+                        <span className="max-w-full truncate text-xs leading-tight">
                             {s.name}
                         </span>
                     </HudButton>

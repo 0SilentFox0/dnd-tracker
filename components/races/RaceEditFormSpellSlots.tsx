@@ -17,7 +17,7 @@ export function RaceEditFormSpellSlots({
     const t = useTranslations('races');
 
     return (
-        <div className="rounded-md border p-4">
+        <div className="rounded-lg border p-4">
             <div className="mb-2 flex flex-wrap justify-between gap-x-4 border-b pb-2 text-sm font-semibold">
                 <div>{t('form.spellSlots.magicLevel')}</div>
                 <div>{t('form.spellSlots.maxSlots')}</div>

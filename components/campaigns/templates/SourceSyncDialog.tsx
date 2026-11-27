@@ -75,11 +75,7 @@ function itemDetails(i: SourceDiffItem, t: Translator): string[] {
 }
 
 const pillTone = (status: SourceDiffItem['status']) =>
-    status === 'conflict'
-        ? 'accent'
-        : status === 'deletedInSource' || status === 'deletedLocally'
-          ? 'muted'
-          : 'bone';
+    status === 'conflict' ? 'accent' : 'meta';
 
 interface SyncItemRowProps {
     item: SourceDiffItem;

@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { DmEntityCard } from '@/components/common/entity/DmEntityCard';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import type { BackgroundData } from '@/types/backgrounds';
 
 export function BackgroundCard({
@@ -30,9 +30,7 @@ export function BackgroundCard({
             canEdit={canEdit}
         >
             {choices > 0 && (
-                <Badge variant="outline">
-                    {t('card.choices', { count: choices })}
-                </Badge>
+                <HudPill>{t('card.choices', { count: choices })}</HudPill>
             )}
         </DmEntityCard>
     );

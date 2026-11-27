@@ -45,7 +45,7 @@ export function AiThreadChat({
             <p className="text-sm text-destructive">{query.error.message}</p>
         );
 
-    if (!messages) return <LoadingState rows={2} />;
+    if (!messages) return <LoadingState count={2} />;
 
     return (
         <AiThreadChatBody

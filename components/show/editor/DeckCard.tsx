@@ -46,7 +46,7 @@ export function DeckCard({
 
     return (
         <HudCard className="flex flex-col gap-2" data-tour={dataTour}>
-            <div className="flex aspect-video items-center justify-center overflow-hidden rounded bg-black/50">
+            <div className="flex aspect-video items-center justify-center overflow-hidden rounded-sm bg-black/50">
                 {deck.coverUrl ? (
                     <OptimizedImage
                         src={deck.coverUrl}

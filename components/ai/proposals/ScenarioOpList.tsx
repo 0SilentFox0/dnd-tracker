@@ -51,13 +51,13 @@ function Diff({
 
     return (
         <div className="grid grid-cols-1 gap-2 @[560px]:grid-cols-2">
-            <div className="rounded border p-2">
+            <div className="rounded-sm border p-2">
                 <p className="mb-1 text-xs text-muted-foreground">
                     {t('proposal.before', { label })}
                 </p>
                 <Doc doc={before} campaignId={campaignId} />
             </div>
-            <div className="rounded border border-primary/40 p-2">
+            <div className="rounded-sm border border-primary/40 p-2">
                 <p className="mb-1 text-xs text-muted-foreground">
                     {t('proposal.after', { label })}
                 </p>
@@ -99,7 +99,7 @@ function ChipsOnly({
     const t = useTranslations('ai');
 
     return (
-        <div className="rounded border border-primary/40 p-2">
+        <div className="rounded-sm border border-primary/40 p-2">
             <p className="mb-1 text-xs text-muted-foreground">
                 {t('proposal.chipsAdded', { label, count })}
             </p>
@@ -175,7 +175,7 @@ function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
 
     if (op.op === 'insertRow') {
         return (
-            <div className="rounded border border-primary/40 p-2">
+            <div className="rounded-sm border border-primary/40 p-2">
                 <p className="mb-1 text-xs text-muted-foreground">
                     {t('proposal.newRow')}
                 </p>
@@ -186,7 +186,7 @@ function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
 
     if (op.op === 'addSection') {
         return (
-            <div className="rounded border border-primary/40 p-2">
+            <div className="rounded-sm border border-primary/40 p-2">
                 <p className="mb-1 text-xs text-muted-foreground">
                     {t('proposal.newSection', { title: op.section.title })}
                 </p>
@@ -226,7 +226,7 @@ export function ScenarioOpList({
             {npcs.map((op, i) => (
                 <div
                     key={i}
-                    className="rounded border border-primary/40 p-2"
+                    className="rounded-sm border border-primary/40 p-2"
                     data-slot="ai-proposal-npc"
                 >
                     <p className="text-sm font-medium">

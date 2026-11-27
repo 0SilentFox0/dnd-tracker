@@ -80,7 +80,7 @@ export function AddTokenDialog({
                             aria-pressed={color === c}
                             onClick={() => setColor(c)}
                             className={cn(
-                                'flex h-11 flex-1 items-center justify-center gap-2 rounded border border-hud-raised text-sm',
+                                'flex h-11 flex-1 items-center justify-center gap-2 rounded-sm border border-hud-raised text-sm',
                                 color === c && 'border-hud-accent text-hud-ink'
                             )}
                         >
