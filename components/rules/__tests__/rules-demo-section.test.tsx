@@ -1,12 +1,12 @@
 // @vitest-environment happy-dom
 import { act, cleanup, renderHook, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RulesForm } from '../RulesForm';
 import { useRulesSection } from '../useRulesSection';
 
-import '@/components/ui/__tests__/match-media';
 import '@/components/systems/registry';
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
@@ -24,6 +24,7 @@ vi.mock('next/navigation', () => ({
     useSearchParams: () => new URLSearchParams(nav.search),
 }));
 vi.mock('@/lib/hooks/common/useIsMobile', () => ({
+    DESKTOP_QUERY: '(min-width: 1024px)',
     useIsCompact: () => nav.mobile,
     useIsMobile: () => nav.mobile,
 }));
@@ -49,6 +50,8 @@ vi.mock('@/lib/hooks/campaigns/useCampaignRules', () => ({
         isPending: false,
     }),
 }));
+
+beforeEach(() => mockMatchMedia(false));
 
 afterEach(() => {
     cleanup();

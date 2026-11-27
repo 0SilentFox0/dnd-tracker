@@ -19,9 +19,9 @@ export function FinalCta({ t }: { t: Translator }) {
             />
             <div className="absolute inset-0 -z-10 [background:radial-gradient(ellipse_at_center,rgba(11,9,8,.35),#0b0908_75%)]" />
             <LandingFog variant="final" />
-            <div className="ld-cta-light mx-auto max-w-2xl space-y-4 text-center">
+            <div className="ld-cta-light ld-reveal mx-auto max-w-2xl space-y-4 text-center">
                 <TrailMark className="mx-auto" />
-                <h2 className="hud-sc ld-reveal text-3xl text-hud-ink sm:text-4xl">
+                <h2 className="hud-sc text-3xl text-hud-ink sm:text-4xl">
                     {t('cta.title')}
                 </h2>
                 <p className="text-lg text-hud-bone">{t('cta.text')}</p>

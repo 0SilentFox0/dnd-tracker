@@ -11,7 +11,7 @@ import {
     ROLLER_MAX_COUNT,
     ROLLER_SIDES,
     useDiceRoller,
-} from '@/lib/hooks/common';
+} from '@/lib/hooks/common/useDiceRoller';
 import { cn } from '@/lib/utils';
 import type { DiceThrowSpec } from '@/lib/utils/battle/fx/dice';
 

@@ -24,9 +24,9 @@ describe('DISABLED_CLASS', () => {
     });
 
     it('Button disabled has no pointer-events-none', () => {
-        render(<Button disabled>Go</Button>);
+        render(<Button disabled>Plain</Button>);
 
-        const { className } = screen.getByText('Go');
+        const { className } = screen.getByText('Plain');
 
         expect(className).toContain(DISABLED_CLASS);
         expect(className).not.toMatch(/disabled:pointer-events-none/);

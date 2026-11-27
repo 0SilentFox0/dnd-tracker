@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 import { cleanup, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RulesForm } from '../RulesForm';
 
-import '@/components/ui/__tests__/match-media';
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 
 vi.unmock('next-intl');
 
@@ -49,6 +49,8 @@ vi.mock('@/lib/hooks/campaigns/useCampaignRules', () => ({
 }));
 
 describe('RulesForm (en)', () => {
+    beforeEach(() => mockMatchMedia(false));
+
     afterEach(cleanup);
 
     it('renders the morale section in English without raw keys', async () => {

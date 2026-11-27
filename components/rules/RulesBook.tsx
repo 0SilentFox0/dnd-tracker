@@ -212,7 +212,7 @@ export function RulesBook({
                                 />
                             }
                             aside={{
-                                title: t('aside.changed'),
+                                title: t('page.aside.changed'),
                                 width: 'sm',
                                 mobile: 'stack',
                                 content: (

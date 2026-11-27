@@ -61,7 +61,8 @@ describe('HeroPortrait', () => {
         ) as HTMLElement;
 
         expect(area.className).toContain('h-32');
-        expect(area.style.backgroundImage).toContain('color-mix');
+        expect(area.style.getPropertyValue('--class-color')).toBe('#aa3333');
+        expect(area.className).toContain('color-mix');
         expect(screen.getByText('⚔')).toBeTruthy();
         expect(screen.queryByText('А')).toBeNull();
     });

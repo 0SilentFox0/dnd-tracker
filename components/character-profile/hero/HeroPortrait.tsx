@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { type CSSProperties, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
@@ -52,13 +52,13 @@ export function HeroPortrait({
                 data-slot="portrait-card-fallback"
                 className={cn(
                     'flex h-32 w-full items-center justify-center overflow-hidden rounded-xl border border-hud-rule bg-hud-raised',
+                    color &&
+                        'bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--class-color)_35%,var(--color-hud-panel-2)),var(--color-hud-panel))]',
                     className
                 )}
                 style={
                     color
-                        ? {
-                              backgroundImage: `linear-gradient(to bottom, color-mix(in srgb, ${color} 35%, var(--color-hud-panel-2)), var(--color-hud-panel))`,
-                          }
+                        ? ({ '--class-color': color } as CSSProperties)
                         : undefined
                 }
             >

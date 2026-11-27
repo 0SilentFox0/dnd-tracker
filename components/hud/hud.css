@@ -157,14 +157,12 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
 
 /* wide monitors: widen the game shell, then scale it up (layout stays that of a 1800px screen) */
 @media (min-width: 1800px) {
-    .game-shell-inner,
-    .hud-page.hud-wide { max-width: 1680px; }
+    .game-shell-inner { max-width: 1680px; }
 }
 @media (min-width: 2400px) {
     .game-shell-header,
     .hud-page.hud-wide { zoom: 1.2; }
-    .game-shell-inner,
-    .hud-page.hud-wide { max-width: 1800px; }
+    .game-shell-inner { max-width: 1800px; }
 }
 @media (min-width: 3200px) {
     .game-shell-header,

@@ -69,15 +69,15 @@ export function SectionTitle({
         <div
             className={
                 left
-                    ? 'max-w-xl space-y-3'
-                    : 'mx-auto max-w-2xl space-y-3 text-center'
+                    ? 'ld-reveal max-w-xl space-y-3'
+                    : 'ld-reveal mx-auto max-w-2xl space-y-3 text-center'
             }
         >
             <TrailMark className={left ? undefined : 'mx-auto'} />
             <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                 {eyebrow}
             </p>
-            <h2 id={id} className="hud-sc ld-h2 ld-reveal text-hud-ink">
+            <h2 id={id} className="hud-sc ld-h2 text-hud-ink">
                 {title}
             </h2>
             {text && <p className="ld-lead text-hud-bone">{text}</p>}

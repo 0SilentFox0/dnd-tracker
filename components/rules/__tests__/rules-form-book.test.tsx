@@ -1,11 +1,11 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RulesForm } from '../RulesForm';
 
-import '@/components/ui/__tests__/match-media';
 import '@/components/systems/registry';
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
@@ -36,6 +36,8 @@ vi.mock('@/lib/hooks/campaigns/useCampaignRules', () => ({
         isPending: false,
     }),
 }));
+
+beforeEach(() => mockMatchMedia(false));
 
 afterEach(cleanup);
 
@@ -73,7 +75,7 @@ describe('RulesForm book layout', () => {
             name: /^rules\.page\.resetSection/,
         });
 
-        expect(resets).toHaveLength(1);
+        expect(resets).toHaveLength(2);
 
         fireEvent.click(resets[0]);
 

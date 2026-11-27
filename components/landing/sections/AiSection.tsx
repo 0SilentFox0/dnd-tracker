@@ -21,12 +21,12 @@ export function AiSection({ t }: { t: Translator }) {
                         </div>
                     </MediaFrame>
                 </div>
-                <div className="space-y-5">
+                <div className="ld-reveal space-y-5">
                     <TrailMark />
                     <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                         {t('ai.eyebrow')}
                     </p>
-                    <h2 className="hud-sc ld-reveal text-3xl text-hud-ink sm:text-4xl">
+                    <h2 className="hud-sc text-3xl text-hud-ink sm:text-4xl">
                         {t('ai.title')}
                     </h2>
                     <p className="text-lg text-hud-bone">{t('ai.text')}</p>
