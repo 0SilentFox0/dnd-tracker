@@ -37,6 +37,7 @@ export function ReferenceRowShell({
             tabIndex={tabIndex}
             aria-current={selected ? 'true' : undefined}
             onClick={onSelect}
+            data-ux-tile
             className={cn(
                 'flex h-14 w-full touch-manipulation items-center gap-3 px-3 text-left [contain-intrinsic-size:56px] [content-visibility:auto]',
                 selected &&

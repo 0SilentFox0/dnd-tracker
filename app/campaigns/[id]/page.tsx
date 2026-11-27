@@ -166,7 +166,7 @@ export default async function CampaignDetailPage({
                         />
                     </div>
                 )}
-                <div className="dashboard-hero-heading">
+                <div className="dashboard-hero-heading" data-ux-over-image>
                     <p className="dashboard-kicker">
                         {t('summary.title')} ·{' '}
                         {tGameTerms(`ruleSystem.${rules.system.key}`)}

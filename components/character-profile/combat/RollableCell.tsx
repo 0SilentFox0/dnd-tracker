@@ -8,6 +8,7 @@ export function RollableCell({
     title,
     ariaLabel,
     className,
+    tile,
     children,
 }: {
     canRoll: boolean;
@@ -15,6 +16,7 @@ export function RollableCell({
     title: string;
     ariaLabel?: string;
     className?: string;
+    tile?: boolean;
     children: ReactNode;
 }) {
     return canRoll ? (
@@ -23,6 +25,7 @@ export function RollableCell({
             title={title}
             aria-label={ariaLabel}
             onClick={onRoll}
+            data-ux-tile={tile || undefined}
             className={className}
         >
             {children}

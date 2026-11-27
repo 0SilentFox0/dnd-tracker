@@ -31,6 +31,7 @@ export function ZoomablePortrait({
         <>
             <HudButton
                 type="button"
+                data-ux-tile
                 aria-label={t('zoomAvatar', { name })}
                 onClick={() => setZoomed(true)}
                 className="cursor-zoom-in rounded-full"

@@ -100,6 +100,7 @@ export function HeroPortrait({
             <HudButton
                 type="button"
                 aria-label={t('open')}
+                data-ux-tile
                 onClick={() => setOpen(true)}
                 className={frame}
             >
