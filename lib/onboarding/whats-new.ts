@@ -6,6 +6,11 @@ export const WHATS_NEW_BUNDLED = 15;
 
 const CORE_WHATS_NEW: WhatsNewEntry[] = [
     {
+        id: '2026-11-27-scenario-auto-mentions',
+        date: '2026-11-27',
+        audience: 'dm',
+    },
+    {
         id: '2026-11-26-delete-account',
         date: '2026-11-26',
         audience: 'all',
