@@ -51,7 +51,7 @@ export default async function RootLayout({
                     />
                 ))}
             </head>
-            <body className={`font-geist ${hudFontClassName} antialiased`}>
+            <body className={`${hudFontClassName} antialiased`}>
                 <ScreenBackground />
                 <ClientLocaleProvider messages={messages}>
                     <QueryProvider>

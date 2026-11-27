@@ -1,4 +1,8 @@
+import '@/components/systems/registry';
+import '@/lib/server/systems/registry';
 import { NewCharacterForm } from '@/components/characters/NewCharacterForm';
+import { systemUiOf } from '@/components/systems';
+import { SystemGate } from '@/components/systems/SystemGate';
 import {
     CharacterType,
     type CharacterTypeValue,
@@ -24,11 +28,23 @@ export default async function NewCharacterPage({
             ? CharacterType.NPC_HERO
             : CharacterType.PLAYER;
 
+    const { system } = parseRules(campaign.rules);
+
+    const DraftForm = systemUiOf(system.key).DraftForm;
+
+    if (DraftForm) {
+        return (
+            <SystemGate system={system}>
+                <DraftForm campaignId={id} dm={{ characterType }} />
+            </SystemGate>
+        );
+    }
+
     return (
         <NewCharacterForm
             campaignId={id}
             characterType={characterType}
-            systemKey={parseRules(campaign.rules).system.key}
+            systemKey={system.key}
         />
     );
 }

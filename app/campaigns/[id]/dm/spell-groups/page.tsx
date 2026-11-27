@@ -17,7 +17,7 @@ export default async function DMSpellGroupsPage({
     const t = await getTranslator(await getRequestLocale(), 'spells');
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('schools.title')}
                 subtitle={t('schools.subtitle')}

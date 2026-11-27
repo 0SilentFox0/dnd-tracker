@@ -79,7 +79,7 @@ export function ReferenceRail({ filters, counts }: ReferenceRailProps) {
                 {search.value && (
                     <HudButton
                         onClick={() => search.set('')}
-                        className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-1 text-hud-muted hover:text-hud-ink"
+                        className="absolute top-1/2 right-3 -translate-y-1/2 rounded-sm p-1 text-hud-muted hover:text-hud-ink"
                         aria-label={t('search.clear')}
                     >
                         <X className="size-4" />
@@ -87,7 +87,10 @@ export function ReferenceRail({ filters, counts }: ReferenceRailProps) {
                 )}
             </div>
 
-            <p aria-live="polite" className="px-1 text-xs text-hud-muted">
+            <p
+                aria-live="polite"
+                className="px-1 text-xs text-hud-muted max-sm:text-sm"
+            >
                 {t('list.found', { count: counts.all })}
             </p>
 
@@ -103,12 +106,12 @@ export function ReferenceRail({ filters, counts }: ReferenceRailProps) {
                             onClick={() => section.set(value)}
                             className={cn(
                                 HUD_CHIP_CLASS,
-                                'gap-2 xl:h-9 xl:justify-between',
+                                'gap-2 xl:h-10 xl:justify-between',
                                 active && HUD_CHIP_ACTIVE_CLASS
                             )}
                         >
                             <span>{t(`tabs.${value}`)}</span>
-                            <span className="text-xs tabular-nums opacity-70">
+                            <span className="text-xs tabular-nums opacity-70 max-sm:text-sm">
                                 {counts[value]}
                             </span>
                         </HudButton>
@@ -131,31 +134,19 @@ export function ReferenceRail({ filters, counts }: ReferenceRailProps) {
                         </PopoverTrigger>
                         <PopoverContent className="w-72 space-y-3 p-3">
                             {fields}
-                            {hasActive && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={clearAll}
-                                >
-                                    {t('search.reset')}
-                                </Button>
-                            )}
                         </PopoverContent>
                     </Popover>
                 )}
             </div>
 
-            {isXl && (
-                <div className="space-y-3 pt-2">
-                    {fields}
-                    {hasActive && (
-                        <Button variant="ghost" size="sm" onClick={clearAll}>
-                            <X className="mr-1 size-4" />
-                            {t('search.reset')}
-                        </Button>
-                    )}
-                </div>
+            {hasActive && (
+                <Button variant="ghost" size="sm" onClick={clearAll}>
+                    <X className="mr-1 size-4" aria-hidden />
+                    {t('search.reset')}
+                </Button>
             )}
+
+            {isXl && <div className="space-y-3 pt-2">{fields}</div>}
         </div>
     );
 }

@@ -82,7 +82,7 @@ export function EffectCard({
 
     if (!def) {
         return (
-            <div className="rounded-md border border-dashed p-2 text-xs">
+            <div className="rounded-lg border border-dashed p-2 text-xs">
                 <div className="flex items-center justify-between font-medium">
                     {t('unknown')}
                     <Button
@@ -154,7 +154,7 @@ export function EffectCard({
         );
 
     return (
-        <div className="space-y-2 rounded-md border bg-muted/30 p-2">
+        <div className="space-y-2 rounded-lg border bg-muted/30 p-2">
             <div className="flex items-start gap-2">
                 <div className="flex-1">
                     <SelectField

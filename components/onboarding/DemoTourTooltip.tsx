@@ -39,7 +39,7 @@ export function DemoTourTooltip(props: TooltipRenderProps) {
                 <HudButton
                     type="button"
                     {...closeProps}
-                    className="-mt-1 -mr-1 shrink-0 rounded-md p-1 text-hud-muted transition-colors hover:text-hud-ink"
+                    className="-mt-1 -mr-1 shrink-0 rounded-lg p-1 text-hud-muted transition-colors hover:text-hud-ink"
                 >
                     <X className="size-4" aria-hidden />
                 </HudButton>

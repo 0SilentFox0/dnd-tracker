@@ -34,7 +34,7 @@ export function IngredientRow({
 
     return (
         <div
-            className="space-y-3 rounded-md border border-hud-line p-3"
+            className="space-y-3 rounded-lg border border-hud-line p-3"
             data-testid="ingredient-row"
         >
             <LabeledInput
@@ -108,7 +108,6 @@ export function IngredientRow({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="min-h-11"
                 onClick={onRemove}
             >
                 {t('remove')}

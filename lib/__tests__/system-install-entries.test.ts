@@ -11,47 +11,9 @@ import {
 
 // reach lookup only through client-safe reads (undefined/false before install); no root on static pages
 const STATIC_SAFE = [
-    'app/admin/page.tsx',
-    'app/admin/security/page.tsx',
-    'app/admin/users/[id]/page.tsx',
-    'app/admin/users/page.tsx',
-    'app/(auth)/forgot-password/page.tsx',
-    'app/(auth)/reset-password/page.tsx',
-    'app/(auth)/sign-in/[[...sign-in]]/page.tsx',
-    'app/(auth)/sign-up/[[...sign-up]]/page.tsx',
-    'app/(legal)/cookies/page.tsx',
-    'app/(legal)/privacy/page.tsx',
-    'app/(legal)/terms/page.tsx',
-    'app/campaigns/new/page.tsx',
     'app/dev/battle-map/page.tsx',
     'app/dev/fx-lab/page.tsx',
     'app/dev/fx-spells/page.tsx',
-    'app/help/[slug]/page.tsx',
-    'app/help/page.tsx',
-    'app/page.tsx',
-    'app/library/sounds/page.tsx',
-    'app/profile/page.tsx',
-    'app/settings/ai/page.tsx',
-    'app/settings/password/page.tsx',
-    'app/settings/preferences/page.tsx',
-    'app/settings/subscription/page.tsx',
-    'app/uk/cookies/page.tsx',
-    'app/uk/privacy/page.tsx',
-    'app/uk/terms/page.tsx',
-    'app/uk/page.tsx',
-];
-
-// reaches a lookup only through the hooks barrel (JoinCampaignDialog) and never calls `*Of`: no campaign, so no composition to gate on
-const CLIENT_LAZY = ['app/campaigns/page.tsx'];
-
-// layouts above every gate: they reach lookups only through guarded reads (`classesEnabled` checks `isInstalled`, `ruleSystemByKey` returns undefined before install)
-const LAYOUT_SAFE = [
-    'app/layout.tsx',
-    'app/campaigns/[id]/layout.tsx',
-    'app/help/layout.tsx',
-    'app/library/sounds/layout.tsx',
-    'app/profile/layout.tsx',
-    'app/settings/layout.tsx',
 ];
 
 const PAIR = {
@@ -188,11 +150,7 @@ describe('system install entries', () => {
     });
 
     it('every route and page that reaches a lookup reaches its root', () => {
-        const exempt = new Set([
-            ...STATIC_SAFE,
-            ...CLIENT_LAZY,
-            ...LAYOUT_SAFE,
-        ]);
+        const exempt = new Set([...STATIC_SAFE]);
 
         expect(
             unrooted(
@@ -205,7 +163,7 @@ describe('system install entries', () => {
     });
 
     it('the exemptions list only entries that still reach a lookup unrooted', () => {
-        const stale = [...STATIC_SAFE, ...CLIENT_LAZY, ...LAYOUT_SAFE].filter(
+        const stale = STATIC_SAFE.filter(
             (e) => unrooted([e], INSTALL_PAIRS, fsDeps()).length === 0
         );
 

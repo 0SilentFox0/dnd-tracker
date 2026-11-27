@@ -58,6 +58,9 @@ const data = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/hooks/campaigns', () => ({
+    useCampaignMembers: () => ({
+        members: [{ id: 'p1', displayName: 'Anna', email: 'a@x.io' }],
+    }),
     useCampaignRules: () => ({
         data: {
             system: { key: 'wfrp' },
@@ -105,10 +108,10 @@ const profile = {
     ],
 };
 
-const mount = () =>
+const mount = (dm?: { characterType: 'player' | 'npc_hero' }) =>
     render(
         <QueryClientProvider client={new QueryClient()}>
-            <WfrpDraftForm campaignId="c1" />
+            <WfrpDraftForm campaignId="c1" dm={dm} />
         </QueryClientProvider>
     );
 
@@ -285,5 +288,78 @@ describe('WfrpDraftForm', () => {
 
         expect(after[0]).toBe(before[1]);
         expect(after[1]).toBe(before[0]);
+    });
+
+    describe('DM variant', () => {
+        const toIdentity = () => {
+            fireEvent.click(screen.getByRole('radio', { name: /Human/ }));
+            fireEvent.click(next());
+            fireEvent.click(
+                screen.getByRole('button', { name: 'wfrpCreation.career.roll' })
+            );
+            fireEvent.click(next());
+            fireEvent.click(
+                screen.getByRole('button', { name: 'wfrpCreation.stats.roll' })
+            );
+            fireEvent.click(next());
+            fireEvent.click(
+                screen.getByRole('button', {
+                    name: 'wfrpCreation.talents.roll',
+                })
+            );
+            fireEvent.click(next());
+            fireEvent.change(
+                screen.getByLabelText(/wfrpCreation.identity.name/),
+                { target: { value: 'Hans' } }
+            );
+        };
+
+        const submitButton = () =>
+            screen.getByRole('button', { name: 'wfrpCreation.wizard.submit' });
+
+        it('player type needs a chosen player and links cancel to the DM list', async () => {
+            const { createWfrpDraft } = await import(
+                '@/systems/wfrp/api/characters'
+            );
+
+            mount({ characterType: 'player' });
+
+            expect(
+                screen
+                    .getByRole('link', { name: 'common.actions.cancel' })
+                    .getAttribute('href')
+            ).toBe('/campaigns/c1/dm/characters');
+
+            toIdentity();
+
+            expect(submitButton()).toHaveProperty('disabled', true);
+
+            fireEvent.change(screen.getByLabelText(/wfrpCreation.identity.player/), {
+                target: { value: 'p1' },
+            });
+
+            expect(submitButton()).toHaveProperty('disabled', false);
+
+            fireEvent.click(submitButton());
+
+            await vi.waitFor(() =>
+                expect(createWfrpDraft).toHaveBeenCalledWith(
+                    'c1',
+                    expect.objectContaining({
+                        owner: { type: 'player', controlledBy: 'p1' },
+                    })
+                )
+            );
+        });
+
+        it('npc hero shows no player picker', () => {
+            mount({ characterType: 'npc_hero' });
+            toIdentity();
+
+            expect(
+                screen.queryByLabelText(/wfrpCreation.identity.player/)
+            ).toBeNull();
+            expect(submitButton()).toHaveProperty('disabled', false);
+        });
     });
 });

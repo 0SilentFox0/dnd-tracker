@@ -126,7 +126,7 @@ export function MapMinimap({
                     <MapIcon />
                 </Button>
             ) : (
-                <div className="relative overflow-hidden rounded-md border border-white/30 bg-black/80 p-1 shadow-lg">
+                <div className="relative overflow-hidden rounded-lg border border-white/30 bg-black/80 p-1 shadow-lg">
                     <Image
                         src={src}
                         alt=""

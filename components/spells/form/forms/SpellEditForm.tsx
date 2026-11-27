@@ -112,7 +112,7 @@ export function SpellEditForm({
             <HudFormPage header={{ title: t('spellEditor.page.editTitle') }}>
                 <div className="px-4 py-3">
                     <LoadingState
-                        rows={6}
+                        count={6}
                         label={t('spellEditor.page.loading')}
                     />
                 </div>

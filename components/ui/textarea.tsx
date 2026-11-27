@@ -8,7 +8,7 @@ function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
         <textarea
             data-slot="textarea"
             className={cn(
-                'hud-body flex field-sizing-content outline-none disabled:cursor-not-allowed',
+                'hud-body flex field-sizing-content outline-none',
                 FIELD_CLASS,
                 TEXTAREA_CLASS,
                 className

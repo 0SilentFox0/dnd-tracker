@@ -3,6 +3,7 @@
 import * as React from 'react';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 
+import { DISABLED_CLASS } from '@/components/ui/disabled';
 import { cn } from '@/lib/utils';
 
 const Tabs = TabsPrimitive.Root;
@@ -14,7 +15,7 @@ const TabsList = React.forwardRef<
     <TabsPrimitive.List
         ref={ref}
         className={cn(
-            'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
+            'inline-flex h-auto items-center justify-center gap-1.5 rounded-lg bg-transparent p-0 text-hud-muted',
             className
         )}
         {...props}
@@ -30,7 +31,7 @@ const TabsTrigger = React.forwardRef<
     <TabsPrimitive.Trigger
         ref={ref}
         className={cn(
-            'inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap transition-[background-color,box-shadow,color] duration-150 hover:text-hud-ink disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-hud-panel-2 data-[state=active]:text-hud-ink data-[state=active]:font-bold data-[state=active]:shadow-[inset_0_1px_0_var(--hud-hi),inset_0_-2px_0_var(--hud-accent)]',
+            `hud-body inline-flex h-8 items-center justify-center rounded-lg border border-hud-line px-3 text-sm font-semibold whitespace-nowrap transition-[background-color,box-shadow,color,border-color] duration-150 hover:text-hud-ink pointer-coarse:min-h-10 ${DISABLED_CLASS} data-[state=active]:border-hud-accent data-[state=active]:bg-hud-accent/15 data-[state=active]:text-hud-accent-fg`,
             className
         )}
         {...props}

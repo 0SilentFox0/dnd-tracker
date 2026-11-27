@@ -8,9 +8,8 @@ import { RacePassiveBlock } from './RaceInnateSections';
 
 import { ActionsMenu } from '@/components/common/entity/ActionsMenu';
 import { ZoomableEntityIcon } from '@/components/common/entity/ZoomableEntityIcon';
-import { HudCard } from '@/components/hud/page';
+import { HudCard, HudPill } from '@/components/hud/page';
 import { useNoSkillSummary } from '@/components/systems/compose';
-import { Badge } from '@/components/ui/badge';
 import { abilityScoreTermKey } from '@/lib/constants/abilities';
 import { useMainSkills, useSkills } from '@/lib/hooks/skills';
 import {
@@ -141,18 +140,18 @@ export function RaceCard({
                 {(availableSkillsCount > 0 || disabledSkillsCount > 0) && (
                     <div className="flex flex-wrap gap-2">
                         {availableSkillsCount > 0 && (
-                            <Badge variant="outline">
+                            <HudPill>
                                 {t('card.skillsCount', {
                                     count: availableSkillsCount,
                                 })}
-                            </Badge>
+                            </HudPill>
                         )}
                         {disabledSkillsCount > 0 && (
-                            <Badge variant="outline">
+                            <HudPill>
                                 {t('card.disabledCount', {
                                     count: disabledSkillsCount,
                                 })}
-                            </Badge>
+                            </HudPill>
                         )}
                     </div>
                 )}
@@ -189,7 +188,7 @@ export function RaceCard({
                                         return (
                                             <div
                                                 key={ability.key}
-                                                className="flex items-center gap-1.5 rounded-md bg-hud-field px-2 py-1"
+                                                className="flex items-center gap-1.5 rounded-lg bg-hud-field px-2 py-1"
                                                 title={tg(
                                                     abilityScoreTermKey(
                                                         ability.key

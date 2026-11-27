@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ACQUAINTANCE_LIMITS } from '@/lib/constants/acquaintances';
 import { useCharacters } from '@/lib/hooks/characters';
+import { cn } from '@/lib/utils';
 import type { AcquaintanceKind } from '@/types/acquaintances';
 
 const KINDS: AcquaintanceKind[] = ['micro', 'character'];
@@ -60,7 +61,11 @@ export function AcquaintanceForm({
                         key={kind}
                         type="button"
                         size="sm"
-                        variant={fields.kind === kind ? 'secondary' : 'outline'}
+                        variant="outline"
+                        className={cn(
+                            fields.kind === kind &&
+                                'border-hud-accent text-hud-accent-fg'
+                        )}
                         aria-pressed={fields.kind === kind}
                         onClick={() => onChange({ kind })}
                     >

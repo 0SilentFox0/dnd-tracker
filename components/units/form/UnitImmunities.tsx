@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 
 import { HudSection } from '@/components/hud/form';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { getUnitImmunities } from '@/lib/utils/races/race-effects';
@@ -59,7 +59,7 @@ export function UnitImmunities({ formData, onChange }: UnitImmunitiesProps) {
                         {unitImmunities.map((immunity, index) => (
                             <div
                                 key={index}
-                                className="flex items-center gap-2 rounded-md bg-muted px-3 py-1"
+                                className="flex items-center gap-2 rounded-lg bg-muted px-3 py-1"
                             >
                                 <span className="text-sm">{immunity}</span>
                                 <Button
@@ -82,13 +82,9 @@ export function UnitImmunities({ formData, onChange }: UnitImmunitiesProps) {
                     <Label className="text-sm font-semibold">{t('all')}</Label>
                     <div className="flex flex-wrap gap-2">
                         {allImmunities.map((immunity, index) => (
-                            <Badge
-                                key={`all-${index}`}
-                                variant="outline"
-                                className="text-sm"
-                            >
+                            <HudPill key={`all-${index}`} className="text-sm">
                                 {immunity}
-                            </Badge>
+                            </HudPill>
                         ))}
                     </div>
                 </div>

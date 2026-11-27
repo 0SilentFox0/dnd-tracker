@@ -26,7 +26,7 @@ function Row({
             aria-pressed={selected}
             onClick={onClick}
             className={cn(
-                'w-full rounded px-2 py-1.5 text-left text-sm text-hud-bone hover:bg-white/10',
+                'w-full rounded-sm px-2 py-1.5 text-left text-sm text-hud-bone hover:bg-white/10',
                 selected && 'bg-hud-panel-2 text-hud-accent-fg'
             )}
         >
@@ -68,7 +68,7 @@ export function TrackPicker({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
             />
-            <div className="max-h-56 overflow-y-auto rounded border border-hud-rule p-1">
+            <div className="max-h-56 overflow-y-auto rounded-sm border border-hud-rule p-1">
                 <Row
                     selected={value === undefined}
                     onClick={() => onChange(undefined)}
@@ -92,7 +92,7 @@ export function TrackPicker({
                                         preview.playingId === track.id
                                     }
                                     className={cn(
-                                        'shrink-0 rounded p-1.5 text-hud-bone hover:bg-white/10',
+                                        'shrink-0 rounded-sm p-1.5 text-hud-bone hover:bg-white/10',
                                         preview.failedId === track.id &&
                                             'text-destructive'
                                     )}

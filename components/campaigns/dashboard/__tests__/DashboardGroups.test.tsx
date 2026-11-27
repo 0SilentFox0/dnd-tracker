@@ -20,7 +20,7 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
-const NAMESPACES = ['common', 'validation', 'dashboard'] as const;
+const NAMESPACES = ['common', 'validation', 'dashboard', 'gameTerms'] as const;
 
 const render = (ui: React.ReactElement) =>
     renderWithIntl(ui, { namespaces: NAMESPACES });
@@ -34,6 +34,23 @@ const FULL_CONTEXT = {
 };
 
 describe('DashboardGroups', () => {
+    it('rules tile links to /dm/rules', async () => {
+        await render(
+            <DashboardGroups
+                campaignId="c1"
+                isDM
+                pendingDrafts={0}
+                context={FULL_CONTEXT}
+            />
+        );
+
+        const tile = tileLinks().find((a) =>
+            a.getAttribute('href')?.endsWith('/dm/rules')
+        );
+
+        expect(tile?.getAttribute('href')).toBe('/campaigns/c1/dm/rules');
+    });
+
     it('DM page hosting its blocks shows only libraries and the reference', async () => {
         const { container } = await render(
             <DashboardGroups
@@ -45,11 +62,15 @@ describe('DashboardGroups', () => {
             />
         );
 
-        expect(screen.getByRole('heading', { name: 'Бібліотеки' })).toBeTruthy();
+        expect(
+            screen.getByRole('heading', { name: 'Бібліотеки' })
+        ).toBeTruthy();
         expect(screen.getByText('Довідник')).toBeTruthy();
         expect(screen.queryByText('Сценарій')).toBeNull();
         expect(screen.queryByText('Персонажі')).toBeNull();
-        expect(container.querySelector('[data-tour="dashboard.search"]')).toBeNull();
+        expect(
+            container.querySelector('[data-tour="dashboard.search"]')
+        ).toBeNull();
         expect(
             container.querySelector('[data-tour="dashboard.sections"]')
         ).toBeNull();

@@ -99,11 +99,11 @@ function SideSheet({
             hidden={!open}
             className={cn(
                 HUD_GLASS,
-                'absolute inset-y-0 right-0 z-40 flex w-[min(340px,100%)] flex-col rounded-none rounded-l-2xl border-r-0 pt-14'
+                'absolute inset-y-0 right-0 z-40 flex w-[min(340px,100%)] flex-col rounded-none rounded-l-xl border-r-0 pt-14'
             )}
         >
             <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-y border-white/15 pr-2 pl-4">
-                <h2 className="hud-sc text-[15px] font-bold tracking-[.1em] text-hud-ink">
+                <h2 className="hud-sc text-base font-bold tracking-[.1em] text-hud-ink">
                     {title}
                 </h2>
                 <HudIconButton
@@ -111,7 +111,8 @@ function SideSheet({
                     aria-label={t('close')}
                     title={t('close')}
                     onClick={() => onOpenChange(false)}
-                    className="size-10 text-[var(--ink)] hover:bg-white/10"
+                    size="md"
+                    className="text-[var(--ink)] hover:bg-white/10"
                 >
                     <X className="size-4" />
                 </HudIconButton>

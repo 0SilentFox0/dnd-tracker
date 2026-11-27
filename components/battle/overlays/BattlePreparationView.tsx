@@ -106,7 +106,7 @@ export function BattlePreparationView({
                             side: ParticipantSide.ALLY,
                             label: ts('allies'),
                             value: alliesCount,
-                            color: 'text-[#8fb0d0]',
+                            color: 'text-hud-info',
                         },
                         {
                             side: ParticipantSide.ENEMY,
@@ -119,7 +119,7 @@ export function BattlePreparationView({
                             key={stat.side}
                             className="flex flex-col items-center gap-3 border border-hud-line bg-hud-panel p-4 sm:p-6"
                         >
-                            <span className="hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]">
+                            <span className="hud-sc text-sm tracking-[.1em] text-[var(--hud-muted)]">
                                 {stat.label}
                             </span>
                             <span
@@ -145,7 +145,7 @@ export function BattlePreparationView({
                         <HudButton
                             type="button"
                             data-tour="battle.start"
-                            className="metal-gold metal-fill hud-sc h-16 w-full text-xl font-extrabold tracking-[.2em] transition-transform active:scale-95 disabled:opacity-70 sm:w-80 sm:text-2xl"
+                            className="metal-gold metal-fill hud-sc h-12 w-full text-xl font-extrabold tracking-[.2em] transition-transform active:scale-95 disabled:opacity-50 sm:w-80 sm:text-2xl"
                             onClick={onStartBattle}
                             disabled={isStarting || !canStart}
                         >

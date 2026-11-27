@@ -5,13 +5,13 @@ import { useTranslations } from 'next-intl';
 import { Trash2 } from 'lucide-react';
 
 import { spellLevelMetal } from '@/components/hud';
+import { HudPill } from '@/components/hud/page';
 import { SpellCard } from '@/components/spells/list/SpellCard';
 import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/lib/hooks/common';
 import { useDeleteSpellsByLevel } from '@/lib/hooks/spells';
@@ -80,11 +80,11 @@ export function SpellLevelAccordion({
                                 <span
                                     aria-hidden
                                     className={cn(
-                                        'metal-fill flex size-6 shrink-0 rotate-45 items-center justify-center rounded-[3px]',
+                                        'metal-fill flex size-6 shrink-0 rotate-45 items-center justify-center rounded-sm',
                                         spellLevelMetal(level)
                                     )}
                                 >
-                                    <span className="-rotate-45 text-[11px] font-semibold">
+                                    <span className="-rotate-45 text-xs font-semibold">
                                         {level}
                                     </span>
                                 </span>
@@ -92,12 +92,9 @@ export function SpellLevelAccordion({
                                     {levelLabel}
                                 </span>
                             </span>
-                            <Badge
-                                variant="secondary"
-                                className="ml-2 shrink-0"
-                            >
+                            <HudPill className="ml-2 shrink-0">
                                 {spells.length}
-                            </Badge>
+                            </HudPill>
                         </div>
                     </AccordionTrigger>
                     {canEdit && spells.length > 0 && (
@@ -109,7 +106,7 @@ export function SpellLevelAccordion({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-10 w-10 sm:h-12 sm:w-12"
+                                className="w-10 sm:w-12"
                                 onClick={() => void handleDelete()}
                                 title={t('deleteLevel.tooltip')}
                             >

@@ -35,6 +35,7 @@ export function ZoomablePortrait({
         <>
             <HudButton
                 type="button"
+                data-ux-tile
                 aria-label={t(onOpenDetails ? 'openDetails' : 'zoomAvatar', {
                     name,
                 })}

@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { formatDay } from '@/components/admin/UsersTable';
 import { HudPanel, HudSectionTitle } from '@/components/hud/page';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import type { AdminCampaignSummary } from '@/types/admin';
 
 const COUNTS = [
@@ -34,11 +34,9 @@ export function CampaignSummary({ data }: { data: AdminCampaignSummary }) {
                     <h2 className="text-lg font-semibold text-hud-ink">
                         {data.name}
                     </h2>
-                    <Badge variant="outline">{data.kind}</Badge>
-                    <Badge variant="outline">{data.status}</Badge>
-                    {data.system && (
-                        <Badge variant="outline">{data.system}</Badge>
-                    )}
+                    <HudPill>{data.kind}</HudPill>
+                    <HudPill>{data.status}</HudPill>
+                    {data.system && <HudPill>{data.system}</HudPill>}
                 </div>
                 <dl className="grid grid-cols-2 gap-2 text-base sm:grid-cols-4">
                     <div>

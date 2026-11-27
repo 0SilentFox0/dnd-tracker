@@ -57,12 +57,7 @@ export function ArtifactStatsEditor(props: ArtifactStatsEditorProps) {
                 </p>
             )}
             {(hasValue || !valid) && (
-                <Button
-                    type="button"
-                    variant="outline"
-                    className="min-h-11"
-                    onClick={clear}
-                >
+                <Button type="button" variant="outline" onClick={clear}>
                     {t('clear')}
                 </Button>
             )}

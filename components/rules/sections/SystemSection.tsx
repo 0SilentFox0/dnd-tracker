@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl';
+import { Lock } from 'lucide-react';
 
 import { ModuleWizard } from '../system/ModuleWizard';
 
@@ -34,19 +35,28 @@ export function SystemSection({
             <p className="mb-3 text-sm text-hud-muted">
                 {t('system.description')}
             </p>
-            <SelectField
-                id="rules-system-key"
-                aria-label={t('system.label')}
-                value={form.data.system.key}
-                onValueChange={(key) => form.set('system', { key })}
-                options={RULE_SYSTEM_KEYS.filter(
-                    (key) => key === system.key || SELECTABLE_KEYS.includes(key)
-                ).map((key) => ({
-                    value: key,
-                    label: tTerms(ruleSystemLabelKey(key)),
-                }))}
-                disabled={locked}
-            />
+            <div className="relative">
+                <SelectField
+                    id="rules-system-key"
+                    aria-label={t('system.label')}
+                    value={form.data.system.key}
+                    onValueChange={(key) => form.set('system', { key })}
+                    options={RULE_SYSTEM_KEYS.filter(
+                        (key) =>
+                            key === system.key || SELECTABLE_KEYS.includes(key)
+                    ).map((key) => ({
+                        value: key,
+                        label: tTerms(ruleSystemLabelKey(key)),
+                    }))}
+                    disabled={locked}
+                />
+                {locked && (
+                    <Lock
+                        aria-hidden
+                        className="pointer-events-none absolute top-1/2 right-9 size-4 -translate-y-1/2 text-hud-muted"
+                    />
+                )}
+            </div>
             {locked && (
                 <p className="mt-2 text-xs text-hud-muted">
                     {t('system.lockedHint')}

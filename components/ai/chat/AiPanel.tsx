@@ -118,7 +118,7 @@ export function AiPanel({
     let body: ReactNode;
 
     if (credentialsQuery.isLoading || threadsQuery.isLoading) {
-        body = <LoadingState rows={2} />;
+        body = <LoadingState count={2} />;
     } else if (!providers.length && !thread) {
         body = (
             <EmptyState

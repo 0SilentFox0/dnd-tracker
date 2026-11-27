@@ -74,7 +74,6 @@ export function QuickAttackCard({ quick }: { quick: QuickAttackModel }) {
                         {view.targets.map((p) => (
                             <HudToggleChip
                                 key={p.basicInfo.id}
-                                tall
                                 active={false}
                                 onClick={() =>
                                     actions.pickTarget(p.basicInfo.id)
@@ -98,7 +97,6 @@ export function QuickAttackCard({ quick }: { quick: QuickAttackModel }) {
                             return (
                                 <HudToggleChip
                                     key={id}
-                                    tall
                                     active={id === view.attackId}
                                     disabled={!reachable || busy}
                                     title={reason ? text(reason) : undefined}
@@ -132,7 +130,7 @@ export function QuickAttackCard({ quick }: { quick: QuickAttackModel }) {
                             type="button"
                             disabled={busy || !view.attackId}
                             onClick={actions.attack}
-                            className="hud-sc flex h-11 items-center justify-center gap-2 border border-hud-accent-2 bg-hud-accent font-bold text-hud-accent-ink disabled:opacity-50"
+                            className="hud-sc flex h-10 items-center justify-center gap-2 border border-hud-accent-2 bg-hud-accent font-bold text-hud-accent-ink disabled:opacity-50"
                         >
                             {status === 'sending' ? (
                                 <Loader2
@@ -148,7 +146,7 @@ export function QuickAttackCard({ quick }: { quick: QuickAttackModel }) {
                             type="button"
                             disabled={busy}
                             onClick={actions.wizard}
-                            className="h-11 border border-white/25 text-sm text-[var(--ink)] disabled:opacity-50"
+                            className="h-10 border border-white/25 text-sm text-[var(--ink)] disabled:opacity-50"
                         >
                             {t('wizard')}
                         </HudButton>

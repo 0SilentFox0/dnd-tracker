@@ -33,11 +33,11 @@ interface PathRowCardProps {
 }
 
 const STATE_TONE = {
-    current: 'gold',
+    current: 'accent',
     next: 'accent',
-    reached: 'muted',
-    future: 'muted',
-    template: 'muted',
+    reached: 'meta',
+    future: 'meta',
+    template: 'meta',
     waiting: 'accent',
 } as const;
 
@@ -60,7 +60,7 @@ function SubclassOptions({ progression }: { progression: ClassProgression }) {
                                     src={sub.icon}
                                     name={sub.name}
                                     size={20}
-                                    className="size-5 rounded text-xs"
+                                    className="size-5 rounded-sm text-xs"
                                 />
                             )}
                             {sub.name}
@@ -113,7 +113,7 @@ function PickLine({
         <HudButton
             type="button"
             onClick={() => onPick?.(pickStepKey(progression.classId, pick))}
-            className="min-h-10 w-full rounded-md border border-hud-line px-3 py-2 text-left text-sm text-hud-ink"
+            className="min-h-10 w-full rounded-lg border border-hud-line px-3 py-2 text-left text-sm text-hud-ink"
         >
             {label}
         </HudButton>
@@ -211,7 +211,7 @@ export function PathRowCard({
                 </h4>
                 <span className="flex items-center gap-1">
                     {row.state === 'future' && hasSubclassOnly(row, chosen) ? (
-                        <HudPill tone="muted">{t('subclassDepends')}</HudPill>
+                        <HudPill tone="meta">{t('subclassDepends')}</HudPill>
                     ) : null}
                     <HudPill tone={STATE_TONE[stateKey]}>
                         {t(`state.${stateKey}`)}
@@ -230,7 +230,7 @@ export function PathRowCard({
                         <div className="min-w-0 flex-1">
                             <p className="text-sm font-semibold break-words text-hud-ink">
                                 {item.name}{' '}
-                                <HudPill tone="muted">
+                                <HudPill tone="meta">
                                     {t('from', {
                                         cls: progression.className,
                                         level: row.level,
@@ -248,7 +248,7 @@ export function PathRowCard({
                                 type="button"
                                 aria-label={t('details', { name: item.name })}
                                 onClick={() => onDetail(item)}
-                                className="flex size-9 shrink-0 items-center justify-center rounded-md text-hud-muted hover:text-hud-ink"
+                                className="flex size-9 shrink-0 items-center justify-center rounded-lg text-hud-muted hover:text-hud-ink"
                             >
                                 <Info className="size-4" />
                             </HudButton>

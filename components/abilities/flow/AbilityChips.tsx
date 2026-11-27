@@ -48,9 +48,8 @@ export function AbilityChips({
                         aria-selected={on}
                         onClick={() => onSelect(a.id)}
                         className={cn(
-                            'flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
-                            on &&
-                                'text-hud-ink'
+                            'flex h-8 shrink-0 items-center rounded-full px-3 text-sm text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
+                            on && 'text-hud-ink'
                         )}
                     >
                         <span className="max-w-[10rem] truncate">
@@ -67,10 +66,11 @@ export function AbilityChips({
                 );
             })}
             <Button
+                size="sm"
                 type="button"
                 variant="ghost"
                 onClick={onAdd}
-                className="h-8 shrink-0 rounded-full px-3 text-[13px] text-hud-ink shadow-[inset_0_0_0_1px_var(--color-hud-line)] hover:bg-transparent hover:text-hud-ink"
+                className="shrink-0 rounded-full px-3 text-sm text-hud-ink shadow-[inset_0_0_0_1px_var(--color-hud-line)] hover:bg-transparent hover:text-hud-ink"
             >
                 {t('add')}
             </Button>

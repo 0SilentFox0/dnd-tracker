@@ -14,9 +14,11 @@ html[data-palette] body,
 }
 
 .hud-sc { font-family: var(--font-hud-sc), serif; font-weight: 700; }
-.hud-book { font-family: var(--font-hud-book), serif; }
+.hud-book { font-family: var(--font-hud-book), serif; font-variant-numeric: oldstyle-nums; }
 .hud-title { font-family: var(--font-title), Georgia, serif; font-weight: 700; }
 .hud-body { font-family: var(--font-body), Georgia, serif; }
+.hud-sc.text-xs, .hud-title.text-xs { font-family: var(--font-body), Georgia, serif; font-weight: 600; }
+.hud-label { font-family: var(--font-body), Georgia, serif; font-size: var(--text-xs); line-height: 1rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--color-hud-muted); }
 .hud-num { font-family: var(--font-num), "Arial Narrow", sans-serif; font-weight: 500; font-variant-numeric: lining-nums tabular-nums; }
 .metal-iron { --m1: #5d5f63; --m2: #8a8d92; --mt: #eeeeee; }
 .metal-bronze { --m1: #6e3f1c; --m2: #b07842; --mt: #fbe3c6; }
@@ -95,7 +97,9 @@ html[data-palette] body,
 .hud-surface [data-slot="empty-state"] { border-color: var(--hud-line, #4a3c2c); }
 .hud-surface [data-slot="empty-state"] [data-slot="empty-state-title"] { font-family: var(--font-hud-sc), serif; color: var(--hud-ink, #efe5d2); }
 .hud-surface [data-slot="error-state"] { border-color: rgba(208, 112, 92, 0.5); }
-.hud-surface [data-slot="skeleton-row"] { background: var(--palette-secondary, #1c1610); }
+.ds-skeleton { background: linear-gradient(90deg, var(--skeleton, #2a2218) 0%, var(--skeleton-hi, #3a3024) 50%, var(--skeleton, #2a2218) 100%); background-size: 200% 100%; animation: ds-skeleton-shimmer 1.4s ease-in-out infinite; }
+@keyframes ds-skeleton-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .ds-skeleton { animation: none; background: var(--skeleton, #2a2218); } }
 .hud-page { color: var(--hud-bone, #e6dccb); }
 .hud-form input[type="number"],
 .hud-page input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
@@ -149,27 +153,25 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
   outline-offset: 2px;
 }
 
-:root { --shell-header-h: 57px; }
+:root { --shell-header-h: 57px; --rail-w: 200px; --aside-w: 280px; --aside-w-md: 360px; }
 
 /* wide monitors: widen the game shell, then scale it up (layout stays that of a 1800px screen) */
 @media (min-width: 1800px) {
-    .game-shell-inner,
-    .hud-page.hud-wide { max-width: 1680px; }
+    .game-shell-inner { max-width: 1680px; }
 }
 @media (min-width: 2400px) {
     .game-shell-header,
     .hud-page.hud-wide { zoom: 1.2; }
-    .game-shell-inner,
-    .hud-page.hud-wide { max-width: 1800px; }
+    .game-shell-inner { max-width: 1800px; }
 }
 @media (min-width: 3200px) {
     .game-shell-header,
     .hud-page.hud-wide { zoom: 1.6; }
 }
 
-.ds-panel { background: var(--palette-panel); border-radius: var(--r); box-shadow: var(--hud-sh); }
-.ds-inset { background: var(--palette-inset); border-radius: var(--r); box-shadow: inset 0 1px 3px rgba(0,0,0,.45); }
-.ds-raised { background: var(--palette-panel-2); border-radius: var(--r); box-shadow: var(--hud-sh); }
+.ds-panel { background: var(--palette-panel); border-radius: var(--r-lg); box-shadow: var(--hud-sh); }
+.ds-inset { background: var(--palette-inset); border-radius: var(--r-md); box-shadow: inset 0 1px 3px rgba(0,0,0,.45); }
+.ds-raised { background: var(--palette-panel-2); border-radius: var(--r-lg); box-shadow: var(--hud-sh); }
 .ornate { position: relative; }
 .ornate::after { content: ""; position: absolute; inset: 6px; pointer-events: none; --c: color-mix(in srgb, var(--hud-muted) 70%, transparent);
   background: linear-gradient(var(--c),var(--c)) top left/16px 2px, linear-gradient(var(--c),var(--c)) top left/2px 16px,
@@ -223,7 +225,7 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
   .hud-form-wide:has(> .hud-form-actions) { grid-template-rows: none; }
 }
 @media (min-width: 1024px) and (max-width: 1279px) {
-  .hud-form-wide:has([data-rail-from="lg"]) { grid-template-columns: 200px minmax(0, 1fr) 320px; grid-template-areas: "head head actions" "rail notice side" "rail main side"; }
+  .hud-form-wide:has([data-rail-from="lg"]) { grid-template-columns: var(--rail-w) minmax(0, 1fr) 320px; grid-template-areas: "head head actions" "rail notice side" "rail main side"; }
   .hud-form-wide:has([data-rail-from="lg"]):not(:has(> .hud-form-side)) { grid-template-areas: "head head actions" "rail notice notice" "rail main main"; }
   .hud-form-wide:has([data-rail-from="lg"]) > .hud-form-actions { grid-column: 3; }
 }

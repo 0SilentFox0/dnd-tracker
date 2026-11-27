@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { formatDay } from '@/components/admin/UsersTable';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import type { AdminUserDetail } from '@/types/admin';
 
 export function UserHeader({ user }: { user: AdminUserDetail['user'] }) {
@@ -29,11 +29,11 @@ export function UserHeader({ user }: { user: AdminUserDetail['user'] }) {
                     {user.displayName}
                 </h2>
                 {user.bannedUntil && (
-                    <Badge variant="destructive">
+                    <HudPill tone="danger">
                         {t('bannedUntil', {
                             date: formatDay(user.bannedUntil),
                         })}
-                    </Badge>
+                    </HudPill>
                 )}
             </div>
             <p className="text-base text-hud-muted">{user.email}</p>

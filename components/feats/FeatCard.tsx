@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { DmEntityCard } from '@/components/common/entity/DmEntityCard';
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import { summarizeChoices } from '@/lib/utils/choices/summary';
 import type { FeatData } from '@/types/choices';
 
@@ -30,29 +30,27 @@ export function FeatCard({
             onDelete={() => onDelete?.(feat.id)}
             canEdit={canEdit}
         >
-            <Badge variant="outline">{t(`types.${feat.type}`)}</Badge>
+            <HudPill>{t(`types.${feat.type}`)}</HudPill>
             {feat.prerequisite.level && (
-                <Badge variant="outline">
+                <HudPill>
                     {t('card.level', { level: feat.prerequisite.level })}
-                </Badge>
+                </HudPill>
             )}
-            {feat.repeatable && (
-                <Badge variant="outline">{t('card.repeatable')}</Badge>
-            )}
+            {feat.repeatable && <HudPill>{t('card.repeatable')}</HudPill>}
             {choices.items.map((choice) => (
-                <Badge key={choice.id} variant="outline">
+                <HudPill key={choice.id}>
                     {choice.count > 1
                         ? t('card.choice', {
                               label: choice.label,
                               count: choice.count,
                           })
                         : choice.label}
-                </Badge>
+                </HudPill>
             ))}
             {choices.more > 0 && (
-                <Badge variant="outline">
+                <HudPill>
                     {t('card.choicesMore', { count: choices.more })}
-                </Badge>
+                </HudPill>
             )}
         </DmEntityCard>
     );

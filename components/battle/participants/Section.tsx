@@ -9,7 +9,7 @@ export function Section({
 }) {
     return (
         <section className="mt-4">
-            <h4 className="hud-sc flex h-5 items-center text-[13px] tracking-[.08em] text-[var(--hud-muted)]">
+            <h4 className="hud-sc flex h-5 items-center text-sm tracking-[.08em] text-[var(--hud-muted)]">
                 {title}
             </h4>
             {children}

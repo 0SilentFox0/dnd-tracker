@@ -133,7 +133,7 @@ export function SlotPicker({
                                 </span>
                             )}
                             {used && (
-                                <span className="text-[11px] text-[#b07842]">
+                                <span className="text-xs text-[#b07842]">
                                     {t('usedAt', { where: used })}
                                 </span>
                             )}

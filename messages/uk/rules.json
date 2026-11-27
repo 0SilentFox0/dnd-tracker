@@ -9,7 +9,9 @@
       "other": "Інше"
     },
     "changed": "Змінено",
-    "changedSections": "Змінено розділів: {count}",
+    "more": "+{count} ще",
+    "changes": "Зміни",
+    "noChanges": "Змін поки немає",
     "resetSection": "Скинути розділ",
     "filter": "Фільтр розділів",
     "demoReadOnly": "Лише перегляд",

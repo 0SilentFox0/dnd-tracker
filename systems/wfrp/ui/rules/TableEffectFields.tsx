@@ -242,7 +242,7 @@ export function EffectFields({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="min-h-11 min-w-11"
+                className="min-w-11"
                 aria-label={t('removeEffect')}
                 onClick={onRemove}
             >

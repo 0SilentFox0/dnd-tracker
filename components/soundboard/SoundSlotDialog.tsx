@@ -32,7 +32,7 @@ function SoundOption({
 
     return (
         <HudButton
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-hud-ink hover:bg-hud-panel-2"
+            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-hud-ink hover:bg-hud-panel-2"
             aria-label={t('slot.pick', { name: label })}
             onClick={() => onPick(sound)}
         >

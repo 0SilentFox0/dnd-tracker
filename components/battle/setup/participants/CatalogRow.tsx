@@ -49,23 +49,23 @@ function AddButtons({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-9 w-full rounded-none hover:bg-hud-accent/15"
+                className="w-full rounded-none hover:bg-hud-accent/15"
                 aria-label={t('addAlly', { name })}
                 onClick={() => add(ParticipantSide.ALLY)}
             >
                 <Shield className="text-hud-accent-fg" aria-hidden />
-                <span className="text-[11px]">{t('ally')}</span>
+                <span className="text-xs">{t('ally')}</span>
             </Button>
             <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-9 w-full rounded-none hover:bg-hud-crimson/15"
+                className="w-full rounded-none hover:bg-hud-crimson/15"
                 aria-label={t('addEnemy', { name })}
                 onClick={() => add(ParticipantSide.ENEMY)}
             >
                 <Swords className="text-hud-crimson-fg" aria-hidden />
-                <span className="text-[11px]">{t('enemy')}</span>
+                <span className="text-xs">{t('enemy')}</span>
             </Button>
         </>
     );
@@ -89,7 +89,6 @@ function QuantityStepper({
             className="flex min-w-0 flex-1 items-center justify-center border-l border-hud-rule"
         >
             <HudIconButton
-                className="h-9 w-7"
                 aria-label={t('quantityLess', { name })}
                 disabled={value <= UNIT_QUANTITY.min}
                 onClick={() => onChange(clampUnitQuantity(value - 1))}
@@ -103,7 +102,6 @@ function QuantityStepper({
                 {value}
             </span>
             <HudIconButton
-                className="h-9 w-7"
                 aria-label={t('quantityMore', { name })}
                 disabled={value >= UNIT_QUANTITY.max}
                 onClick={() => onChange(clampUnitQuantity(value + 1))}
@@ -159,7 +157,7 @@ export function CatalogRow({
                     {entity.name}
                 </span>
                 {stats && (
-                    <span className="hud-num grid w-full grid-cols-3 divide-x divide-hud-rule rounded-md bg-black/20 py-1 tabular-nums">
+                    <span className="hud-num grid w-full grid-cols-3 divide-x divide-hud-rule rounded-lg bg-black/20 py-1 tabular-nums">
                         {(
                             [
                                 ['dpr', 'DPR', round1(stats.dpr)],
@@ -170,7 +168,7 @@ export function CatalogRow({
                             <Tooltip key={key}>
                                 <TooltipTrigger asChild>
                                     <span className="flex flex-col">
-                                        <span className="text-[9px] tracking-wider text-hud-muted uppercase">
+                                        <span className="hud-label">
                                             {label}
                                         </span>
                                         <span className="text-xs font-medium">

@@ -36,7 +36,7 @@ const DetailsButton = forwardRef<
         <HudButton
             ref={ref}
             className={cn(
-                'relative inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-sm text-hud-muted hover:text-hud-ink',
+                'relative inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-sm text-hud-muted hover:text-hud-ink',
                 className
             )}
             {...props}
@@ -114,7 +114,7 @@ export function SetupHeader({
         <div className="flex min-w-0 flex-col gap-2 px-4 pt-2 pb-3">
             <Link
                 href={`/campaigns/${campaignId}/dm/battles`}
-                className="ds-interactive inline-flex w-fit items-center gap-1.5 rounded-md text-sm text-hud-muted hover:text-hud-ink"
+                className="ds-interactive inline-flex w-fit items-center gap-1.5 rounded-lg text-sm text-hud-muted hover:text-hud-ink"
             >
                 <ArrowLeft className="size-4" aria-hidden />
                 {t('backToList')}
@@ -138,7 +138,7 @@ export function SetupHeader({
                         onBlur={() => setTouched(true)}
                         onInvalid={() => setTouched(true)}
                         className={cn(
-                            'hud-sc h-auto rounded-none border-0 border-b border-hud-rule bg-transparent px-0 py-1 text-[22px] shadow-none focus-visible:border-hud-accent focus-visible:ring-0',
+                            'hud-sc h-auto rounded-none border-0 border-b border-hud-rule bg-transparent px-0 py-1 text-xl shadow-none focus-visible:border-hud-accent focus-visible:ring-0',
                             invalid && 'border-hud-crimson'
                         )}
                     />

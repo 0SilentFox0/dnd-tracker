@@ -30,7 +30,7 @@ export function Features({ t, locale }: { t: Translator; locale: Locale }) {
                             >
                                 <div
                                     data-ld-tilt
-                                    className="ld-tiltcard flex h-full flex-col gap-4 rounded-2xl border border-hud-line bg-gradient-to-b from-hud-surface to-hud-page p-4 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]"
+                                    className="ld-tiltcard flex h-full flex-col gap-4 rounded-xl border border-hud-line bg-gradient-to-b from-hud-surface to-hud-page p-4 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]"
                                 >
                                     <MediaFrame title={title}>
                                         <Screen

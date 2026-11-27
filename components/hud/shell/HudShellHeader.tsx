@@ -25,10 +25,11 @@ export function HudShellHeader({
                         <DropdownMenuTrigger asChild>
                             <Button
                                 type="button"
+                                id="hud-shell-menu-trigger"
                                 variant="outline"
                                 size="icon"
                                 aria-label={menu.label}
-                                className="h-10 w-10 shrink-0 border-hud-rule text-hud-ink"
+                                className="w-10 shrink-0 border-hud-rule text-hud-ink"
                             >
                                 <Menu className="size-4" />
                             </Button>
@@ -42,7 +43,7 @@ export function HudShellHeader({
                     </DropdownMenu>
                 )}
                 {breadcrumb}
-                <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2 [&_button]:min-h-10 [&_button]:min-w-10 [&_a]:min-h-10 [&_a]:min-w-10">
+                <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2 [&_a]:min-h-10 [&_a]:min-w-10 [&_button]:min-h-10 [&_button]:min-w-10">
                     {actions}
                 </div>
             </div>

@@ -88,7 +88,7 @@ export function AppearanceBlock({
                             size="sm"
                             disabled={saving}
                             onClick={submit}
-                            className="min-h-9 touch-manipulation"
+                            className="touch-manipulation"
                         >
                             {saving ? (
                                 <Loader2 className="size-4 animate-spin" />
@@ -101,7 +101,7 @@ export function AppearanceBlock({
                             variant="ghost"
                             disabled={saving}
                             onClick={() => setEditing(false)}
-                            className="min-h-9 touch-manipulation"
+                            className="touch-manipulation"
                         >
                             {tc('cancel')}
                         </Button>

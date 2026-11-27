@@ -68,7 +68,7 @@ export function AutopickCard({ hasAllies, races, balance }: AutopickCardProps) {
                         {suggested.length > 0 && (
                             <Button
                                 type="button"
-                                variant="secondary"
+                                variant="outline"
                                 onClick={actions.apply}
                             >
                                 {t('apply')}
@@ -76,7 +76,7 @@ export function AutopickCard({ hasAllies, races, balance }: AutopickCardProps) {
                         )}
                     </div>
                     {suggested.length > 0 && (
-                        <div className="rounded-md border p-3 text-sm">
+                        <div className="rounded-lg border p-3 text-sm">
                             <p className="mb-2 font-medium">
                                 {t('recommended')}
                             </p>

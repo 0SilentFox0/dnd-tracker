@@ -93,12 +93,13 @@ export const ParticipantRow = memo(function ParticipantRow({
         >
             <HudButton
                 type="button"
+                data-ux-tile
                 aria-label={participant.basicInfo.name}
                 onClick={() => onSelect(participant.basicInfo.id)}
-                className="absolute inset-0"
+                className="absolute inset-0 pointer-coarse:min-h-0"
             />
             <HitFrame change={change} />
-            <HitFloat change={change} className="top-2 left-6 text-[26px]" />
+            <HitFloat change={change} className="top-2 left-6 text-2xl" />
             <PortraitFx effects={effects} size={48}>
                 <Portrait
                     key={`portrait:${change?.id ?? ''}`}
@@ -114,7 +115,7 @@ export const ParticipantRow = memo(function ParticipantRow({
             </PortraitFx>
             <div className="min-w-0 flex-1">
                 {exact && participant.abilities.creatureType && (
-                    <div className="text-[10px] text-[var(--hud-muted)]">
+                    <div className="text-xs text-[var(--hud-muted)]">
                         {creatureTypeLabel(participant.abilities.creatureType)}
                     </div>
                 )}

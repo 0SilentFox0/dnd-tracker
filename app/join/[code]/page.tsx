@@ -66,7 +66,7 @@ export default async function JoinByLinkPage({
                 activeId="campaigns"
                 title={t('joinLink.title')}
             >
-                <HudPage width="md">
+                <HudPage width="narrow">
                     <HudPanel className="space-y-4">
                         {preview?.kind === 'joinable' ? (
                             <JoinByLinkPanel

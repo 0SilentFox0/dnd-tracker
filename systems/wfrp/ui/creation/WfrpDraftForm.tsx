@@ -15,6 +15,7 @@ import { HudButton } from '@/components/hud';
 import { HudFormPage } from '@/components/hud/form';
 import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
+import type { CharacterTypeValue } from '@/lib/constants/characters';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import type { WfrpDraftIdentityInput } from '@/systems/wfrp/api/types';
 import { useWfrpDraftForm, type WfrpDraftStepId } from '@/systems/wfrp/hooks';
@@ -31,12 +32,14 @@ interface WfrpDraftFormProps {
     campaignId: string;
     characterId?: string;
     initialIdentity?: unknown;
+    dm?: { characterType: CharacterTypeValue };
 }
 
 export function WfrpDraftForm({
     campaignId,
     characterId,
     initialIdentity,
+    dm,
 }: WfrpDraftFormProps) {
     const t = useTranslations('wfrpCreation.wizard');
 
@@ -48,6 +51,7 @@ export function WfrpDraftForm({
         campaignId,
         characterId,
         initialIdentity: initialIdentity as WfrpDraftIdentityInput | undefined,
+        dm,
     });
 
     const { step, submit, reveal } = form;
@@ -75,7 +79,12 @@ export function WfrpDraftForm({
     const ids = characterId ? (['identity'] as const) : STEP_ORDER;
 
     return (
-        <HudFormPage header={{ title: characterId ? t('titleEdit') : t('title'), aside: t('aside') }}>
+        <HudFormPage
+            header={{
+                title: characterId ? t('titleEdit') : t('title'),
+                aside: t('aside'),
+            }}
+        >
             <div className="flex flex-1 flex-col px-4 pt-4">
                 <div className="relative flex-1 pb-2">
                     {!characterId && (
@@ -128,13 +137,14 @@ export function WfrpDraftForm({
                     className="mt-4 sm:sticky sm:bottom-0 sm:border-t sm:bg-background/[.97] sm:pt-3"
                 >
                     {characterId || step.index === 0 ? (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="min-h-11"
-                            asChild
-                        >
-                            <Link href={`/campaigns/${campaignId}/character`}>
+                        <Button type="button" variant="outline" asChild>
+                            <Link
+                                href={
+                                    dm
+                                        ? `/campaigns/${campaignId}/dm/characters`
+                                        : `/campaigns/${campaignId}/character`
+                                }
+                            >
                                 {tc('actions.cancel')}
                             </Link>
                         </Button>
@@ -142,7 +152,6 @@ export function WfrpDraftForm({
                         <Button
                             type="button"
                             variant="outline"
-                            className="min-h-11"
                             onClick={step.back}
                             disabled={rolling}
                         >
@@ -152,7 +161,6 @@ export function WfrpDraftForm({
                     {last ? (
                         <Button
                             type="button"
-                            className="min-h-11"
                             onClick={submit.run}
                             disabled={
                                 !submit.canRun || submit.isPending || rolling
@@ -168,7 +176,6 @@ export function WfrpDraftForm({
                         !step.hideNext && (
                             <Button
                                 type="button"
-                                className="min-h-11"
                                 onClick={step.next}
                                 disabled={!step.canNext || rolling}
                             >

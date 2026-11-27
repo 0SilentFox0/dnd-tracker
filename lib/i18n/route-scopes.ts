@@ -168,6 +168,7 @@ export const ROUTE_SCOPES = {
         'abilityDisplay',
         'contentLibrary',
     ],
+    '[id]/dm/characters/new': [],
     '[id]/dm/characters/[characterId]': [
         'characterSheet',
         'abilityDisplay',
@@ -197,6 +198,7 @@ const ROUTE_SYSTEM_PAGE: Partial<Record<RouteKey, SystemScopeSlot>> = {
     '[id]/character': 'character',
     '[id]/character/draft': 'draft',
     '[id]/character/new': 'draft',
+    '[id]/dm/characters/new': 'draft',
     '[id]/dm/characters/[characterId]': 'dmCharacter',
     '[id]/dm/characters': 'dmCharacters',
     '[id]/dm/rules': 'dmRules',

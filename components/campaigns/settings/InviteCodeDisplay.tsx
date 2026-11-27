@@ -30,8 +30,8 @@ export function InviteCodeDisplay({
             <code
                 className={
                     compact
-                        ? 'max-w-full truncate rounded bg-hud-field px-1.5 py-0.5 font-mono text-xs font-semibold text-hud-ink sm:text-sm'
-                        : 'rounded bg-hud-field px-2 py-1 font-mono text-lg font-semibold text-hud-ink'
+                        ? 'max-w-full truncate rounded-sm bg-hud-field px-1.5 py-0.5 font-mono text-xs font-semibold text-hud-ink sm:text-sm'
+                        : 'rounded-sm bg-hud-field px-2 py-1 font-mono text-lg font-semibold text-hud-ink'
                 }
             >
                 {inviteCode}
@@ -40,7 +40,7 @@ export function InviteCodeDisplay({
                 variant="ghost"
                 size="icon"
                 onClick={() => void code.copy(inviteCode)}
-                className="size-10 shrink-0"
+                className="shrink-0"
                 title={t('settings.copyCode')}
                 aria-label={t('settings.copyCode')}
             >
@@ -54,7 +54,7 @@ export function InviteCodeDisplay({
                         `${window.location.origin}${inviteLinkPath(inviteCode)}`
                     )
                 }
-                className="size-10 shrink-0"
+                className="shrink-0"
                 title={link.copied ? t('settings.linkCopied') : t('settings.copyLink')}
                 aria-label={t('settings.copyLink')}
             >

@@ -33,7 +33,7 @@ export function RoundHeader({
             />
             {t('round', { round })}
             {collapsed && (
-                <span className="font-sans text-[11px] tracking-normal">
+                <span className="font-sans text-xs tracking-normal">
                     · {count}
                 </span>
             )}

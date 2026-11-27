@@ -33,7 +33,6 @@ describe('button DS', () => {
         for (const variant of [
             'default',
             'outline',
-            'secondary',
             'destructive',
             'ghost',
             'link',

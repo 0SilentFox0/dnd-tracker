@@ -52,10 +52,12 @@ export function ArtifactReferenceDetail({
                 }
             />
             {item.description && (
-                <p className="text-sm text-hud-bone">{item.description}</p>
+                <DetailSection title={t('card.description')}>
+                    {item.description}
+                </DetailSection>
             )}
             {item.effects.length > 0 && (
-                <DetailSection title={t('card.effects')}>
+                <DetailSection title={t('card.mechanics')}>
                     <AbilityFlowList lines={item.effects} />
                 </DetailSection>
             )}

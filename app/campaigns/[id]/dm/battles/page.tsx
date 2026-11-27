@@ -23,7 +23,7 @@ export default async function DMBattlesPage({
     const battles = await loadBattleListCards(id);
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('list.page.title')}
                 subtitle={t('list.page.subtitle')}

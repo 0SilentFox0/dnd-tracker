@@ -34,12 +34,13 @@ function UpdateMapButton({
 
     return (
         <Button
+            size="sm"
             variant="outline"
             disabled={!tool.available || tool.pending}
             title={tool.available ? undefined : t('upToDate')}
             onClick={() => void tool.run()}
             className={cn(
-                tall ? 'h-8' : 'h-7',
+                tall && 'h-10',
                 'bg-black/60 px-2 text-xs text-hud-muted',
                 tool.available && 'border-hud-accent text-hud-ink'
             )}
@@ -160,7 +161,6 @@ function BattleMapPanelContent({
                 <HudToggleChip
                     active={placement.active}
                     onClick={placement.toggle}
-                    tall={inRow}
                 >
                     {t('place')}
                 </HudToggleChip>
@@ -168,7 +168,6 @@ function BattleMapPanelContent({
                     <HudToggleChip
                         active={fogTool.active}
                         onClick={fogTool.toggle}
-                        tall={inRow}
                     >
                         {fogT('label')}
                     </HudToggleChip>
@@ -181,7 +180,6 @@ function BattleMapPanelContent({
                         active={scene.followTurn.on}
                         onClick={scene.followTurn.toggle}
                         title={cameraT('followHint')}
-                        tall={inRow}
                     >
                         {cameraT('follow')}
                     </HudToggleChip>
@@ -189,7 +187,6 @@ function BattleMapPanelContent({
                 <HudToggleChip
                     active={terrainTool.active}
                     onClick={terrainTool.toggle}
-                    tall={inRow}
                     hidden={!!ui?.hidesTerrain}
                 >
                     {t('terrain')}
@@ -199,7 +196,6 @@ function BattleMapPanelContent({
                         key={key}
                         active={tool.active}
                         onClick={tool.toggle}
-                        tall={inRow}
                     >
                         {t(key)}
                     </HudToggleChip>
@@ -319,9 +315,7 @@ function BattleMapPanelContent({
                 phone={phone}
             />
             {noHost ? tools : inRow && tools && createPortal(tools, slot)}
-            {phone
-                ? inRow && createPortal(fogControls, slot)
-                : fogControls}
+            {phone ? inRow && createPortal(fogControls, slot) : fogControls}
         </div>
     );
 }

@@ -94,7 +94,7 @@ export function HealthLabel({
     return (
         <span
             className={cn(
-                'ml-2 text-[13px] italic',
+                'ml-2 text-sm italic',
                 state === 'unhurt'
                     ? 'text-[var(--hud-muted)]'
                     : 'text-[#c98a7c]'

@@ -29,7 +29,7 @@ export function MainSkillsList({
         useMainSkillsList(campaignId, initialMainSkills);
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('title')}
                 subtitle={t('subtitle', { total })}

@@ -46,7 +46,7 @@ export function CharacterChoicesPanel({
     const choices = useCharacterChoices({ campaignId, characterId, onSaved });
 
     if (!refs.ready)
-        return <LoadingState rows={3} label={t('editor.loading')} />;
+        return <LoadingState count={3} label={t('editor.loading')} />;
 
     const edit = (next: ChoicesState) => {
         set(next);

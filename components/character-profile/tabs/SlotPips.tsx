@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { HudButton, spellLevelMetal } from '@/components/hud';
+import { DISABLED_CLASS } from '@/components/ui/disabled';
 import { spellLevelRoman } from '@/lib/constants/spells';
 import { useSlotToggle } from '@/lib/hooks/characters';
 import { cn } from '@/lib/utils';
@@ -55,7 +56,8 @@ export function SlotPips({
                             )
                         }
                         className={cn(
-                            'motion-press size-8 cursor-pointer rounded-full border border-hud-line focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60',
+                            DISABLED_CLASS,
+                            'motion-press size-8 cursor-pointer rounded-full border border-hud-line focus-visible:ring-2 focus-visible:outline-none',
                             filled
                                 ? cn('metal-fill', spellLevelMetal(level))
                                 : 'bg-transparent'

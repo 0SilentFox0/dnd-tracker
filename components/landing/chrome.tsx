@@ -52,7 +52,7 @@ export function LandingNav({
                             <Link
                                 prefetch={false}
                                 href="/campaigns"
-                                className="hud-sc metal-gold metal-fill rounded-md px-4 py-2 text-sm"
+                                className="hud-sc metal-gold metal-fill rounded-lg px-4 py-2 text-sm"
                             >
                                 {t('nav.myCampaigns')}
                             </Link>
@@ -62,14 +62,14 @@ export function LandingNav({
                                 <Link
                                     prefetch={false}
                                     href="/sign-in"
-                                    className="hud-sc hidden rounded-md px-3 py-2 text-sm text-hud-bone hover:text-hud-ink sm:block"
+                                    className="hud-sc hidden rounded-lg px-3 py-2 text-sm text-hud-bone hover:text-hud-ink sm:block"
                                 >
                                     {t('nav.signIn')}
                                 </Link>
                                 <Link
                                     prefetch={false}
                                     href="/sign-up"
-                                    className="hud-sc metal-gold metal-fill rounded-md px-4 py-2 text-sm"
+                                    className="hud-sc metal-gold metal-fill rounded-lg px-4 py-2 text-sm"
                                 >
                                     {t('nav.signUp')}
                                 </Link>

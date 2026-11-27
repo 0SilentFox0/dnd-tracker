@@ -39,7 +39,7 @@ const RAIL_QUERY = {
 } as const;
 
 const RAIL_TRIGGER =
-    'h-10 justify-start rounded-md px-3 text-left hover:bg-hud-raised data-[state=active]:bg-transparent data-[state=active]:shadow-[inset_2px_0_0_var(--hud-accent)]';
+    'h-10 justify-start rounded-lg border-transparent px-3 text-left hover:bg-hud-raised data-[state=active]:border-transparent data-[state=active]:bg-transparent data-[state=active]:text-hud-ink data-[state=active]:shadow-[inset_2px_0_0_var(--hud-accent)]';
 
 const Badge = ({ children }: { children: ReactNode }) => (
     <span className="ml-1.5 text-xs text-hud-soft tabular-nums">
@@ -129,7 +129,7 @@ export function HudTabs<T extends string>({
                                 <TabsTrigger
                                     value={tab.id}
                                     className={cn(
-                                        'hud-sc h-10 min-w-fit shrink-0 text-[15px] text-hud-muted',
+                                        'hud-sc h-10 min-w-fit shrink-0 text-base text-hud-muted',
                                         vertical || railMobile === 'list'
                                             ? RAIL_TRIGGER
                                             : 'flex-1 px-2.5',
@@ -176,7 +176,7 @@ export function HudTabs<T extends string>({
                                     key={tab.id}
                                     value={tab.id}
                                     className={cn(
-                                        'hud-sc h-10 min-w-fit flex-1 shrink-0 px-2.5 text-[15px] text-hud-muted',
+                                        'hud-sc h-10 min-w-fit flex-1 shrink-0 px-2.5 text-base text-hud-muted',
                                         styles.trigger
                                     )}
                                 >

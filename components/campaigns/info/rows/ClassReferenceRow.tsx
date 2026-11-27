@@ -39,7 +39,7 @@ export function ClassReferenceRow({
                                 src={s.icon}
                                 name={s.name}
                                 size={20}
-                                className="size-5 rounded-full border border-hud-line bg-hud-field text-[10px] text-hud-muted"
+                                className="size-5 rounded-full border border-hud-line bg-hud-field text-xs text-hud-muted"
                             />
                         ))}
                     </span>

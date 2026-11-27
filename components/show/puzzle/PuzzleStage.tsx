@@ -105,7 +105,7 @@ export function PuzzleStage({
                     <div className="absolute top-2 right-2 z-20 flex gap-2">
                         <Button
                             size="sm"
-                            variant="secondary"
+                            variant="outline"
                             onClick={() =>
                                 void control.send({ action: 'puzzleRelease' })
                             }

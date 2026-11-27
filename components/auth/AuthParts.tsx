@@ -19,7 +19,7 @@ export function AuthSuspense({ children }: { children: ReactNode }) {
         <Suspense
             fallback={
                 <HudPage
-                    width="md"
+                    width="narrow"
                     className="flex min-h-[80vh] items-center justify-center"
                 >
                     <HudPanel className="w-full max-w-sm text-center">
@@ -91,7 +91,7 @@ export function FormError({ message }: { message: string | null }) {
     return (
         <p
             role="alert"
-            className="rounded-md border border-hud-danger bg-[rgba(208,112,92,.1)] p-2 text-sm text-hud-danger"
+            className="rounded-lg border border-hud-danger bg-[rgba(208,112,92,.1)] p-2 text-sm text-hud-danger"
         >
             {message}
         </p>

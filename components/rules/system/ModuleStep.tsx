@@ -39,7 +39,7 @@ export function ModuleStep({
                 return (
                     <li
                         key={toggle.id}
-                        className="border-hud-border rounded-md border px-3 py-2"
+                        className="border-hud-border rounded-lg border px-3 py-2"
                     >
                         <SwitchField
                             id={`rules-module-${toggle.id}`}

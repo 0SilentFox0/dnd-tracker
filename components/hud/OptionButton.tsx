@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { DISABLED_CLASS } from '@/components/ui/disabled';
 import { cn } from '@/lib/utils';
 
 interface OptionButtonProps {
@@ -13,11 +14,11 @@ interface OptionButtonProps {
 }
 
 const BATTLE =
-    'ds-interactive border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-hud-muted disabled:opacity-40 aria-checked:bg-hud-panel-2 aria-checked:text-hud-ink aria-checked:shadow-[inset_0_-2px_0_var(--hud-accent)]';
+    'ds-interactive border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-hud-muted aria-checked:bg-hud-panel-2 aria-checked:text-hud-ink aria-checked:shadow-[inset_0_-2px_0_var(--hud-accent)]';
 
 const VARIANTS = {
     battle: BATTLE,
-    form: 'ds-interactive w-full rounded-lg border border-hud-line p-2 text-left text-sm text-hud-muted hover:border-hud-muted hover:text-hud-ink aria-checked:bg-hud-panel-2 aria-checked:text-hud-ink aria-checked:shadow-[inset_0_-2px_0_var(--hud-accent)] disabled:opacity-50',
+    form: 'ds-interactive w-full rounded-lg border border-hud-line p-2 text-left text-sm text-hud-muted hover:border-hud-muted hover:text-hud-ink aria-checked:bg-hud-panel-2 aria-checked:text-hud-ink aria-checked:shadow-[inset_0_-2px_0_var(--hud-accent)]',
 } as const;
 
 export function OptionButton({
@@ -36,7 +37,7 @@ export function OptionButton({
             aria-checked={checked}
             disabled={disabled}
             onClick={onClick}
-            className={cn(VARIANTS[variant], className)}
+            className={cn(VARIANTS[variant], DISABLED_CLASS, className)}
         >
             <span className="flex items-baseline justify-between gap-2">
                 <span className="font-medium">{title}</span>

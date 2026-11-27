@@ -315,7 +315,7 @@ export function RecipeGallery(props: RecipeGalleryProps) {
                                 </Button>
                                 <Button
                                     type="button"
-                                    variant="secondary"
+                                    variant="outline"
                                     className="w-full"
                                     onClick={() => setCopying(true)}
                                 >

@@ -71,7 +71,7 @@ export function HudBlock({
                 detachedButton
                     ? `${HUD_GLASS} size-8 rounded-lg ${detachedButton}`
                     : collapsed
-                      ? `${HUD_GLASS} hud-sc px-3 text-[13px] tracking-[.08em]`
+                      ? `${HUD_GLASS} hud-sc px-3 text-sm tracking-[.08em]`
                       : 'w-10 border border-white/15 bg-black/30 hover:bg-white/10',
                 align === 'end' && 'self-end',
                 align === 'center' && 'self-center'
@@ -110,7 +110,7 @@ export function HudRestoreButton() {
             type="button"
             aria-label={t('hotkey')}
             onClick={toggleHudAll}
-            className={`${HUD_GLASS} pointer-events-auto absolute right-3 bottom-3 z-50 flex size-8 items-center justify-center rounded-lg text-[var(--ink)] opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:outline-none`}
+            className={`${HUD_GLASS} pointer-events-auto absolute right-3 bottom-3 z-50 flex items-center justify-center rounded-lg text-[var(--ink)] opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:outline-none`}
         >
             <Eye className="size-4" aria-hidden />
         </HudIconButton>

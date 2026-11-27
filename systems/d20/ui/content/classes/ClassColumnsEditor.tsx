@@ -49,9 +49,7 @@ function ColumnValuesGrid({
                     key={level}
                     className="flex flex-col items-center gap-0.5"
                 >
-                    <span className="text-[10px] text-hud-muted">
-                        {level + 1}
-                    </span>
+                    <span className="text-xs text-hud-muted">{level + 1}</span>
                     <Input
                         aria-label={t('columns.cellLabel', {
                             n: index + 1,
@@ -115,83 +113,91 @@ export function ClassColumnsEditor({
         <div className="space-y-4">
             <p className="text-xs text-muted-foreground">{t('columns.hint')}</p>
             <div className="ds-list-grid">
-            {value.map((c, i) => (
-                <HudSection
-                    key={i}
-                    title={c.label || c.key}
-                    action={
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            aria-label={t('columns.remove', { n: i + 1 })}
-                            onClick={() =>
-                                onChange(value.filter((_, j) => j !== i))
-                            }
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    }
-                >
-                    <div className="grid gap-2 sm:grid-cols-2">
-                        <Input
-                            aria-label={t('columns.keyLabel', { n: i + 1 })}
-                            value={c.key}
-                            onChange={(e) => patch(i, { key: e.target.value })}
-                            placeholder="sneak-attack"
-                        />
-                        <Input
-                            aria-label={t('columns.nameLabel', { n: i + 1 })}
-                            value={c.label}
-                            onChange={(e) =>
-                                patch(i, { label: e.target.value })
-                            }
-                            placeholder="Sneak Attack"
-                        />
-                    </div>
-                    <ColumnValuesGrid
-                        column={c}
-                        index={i}
-                        onChange={(values) => patch(i, { values })}
-                    />
-                    <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
-                        <label className="flex items-center gap-2">
-                            <Checkbox
-                                aria-label={t('columns.poolLabel', {
-                                    n: i + 1,
-                                })}
-                                checked={!!c.pool}
-                                onCheckedChange={(v) => setPool(i, v === true)}
-                            />
-                            {t('columns.pool')}
-                        </label>
-                        {c.pool && (
-                            <SelectField
-                                aria-label={t('columns.restLabel', {
-                                    n: i + 1,
-                                })}
-                                triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
-                                value={c.pool.rest}
-                                onValueChange={(rest) =>
-                                    patch(i, {
-                                        pool: { rest: rest as 'short' | 'long' },
-                                    })
+                {value.map((c, i) => (
+                    <HudSection
+                        key={i}
+                        title={c.label || c.key}
+                        action={
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                aria-label={t('columns.remove', { n: i + 1 })}
+                                onClick={() =>
+                                    onChange(value.filter((_, j) => j !== i))
                                 }
-                                options={[
-                                    {
-                                        value: 'short',
-                                        label: t('columns.restShort'),
-                                    },
-                                    {
-                                        value: 'long',
-                                        label: t('columns.restLong'),
-                                    },
-                                ]}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        }
+                    >
+                        <div className="grid gap-2 sm:grid-cols-2">
+                            <Input
+                                aria-label={t('columns.keyLabel', { n: i + 1 })}
+                                value={c.key}
+                                onChange={(e) =>
+                                    patch(i, { key: e.target.value })
+                                }
+                                placeholder="sneak-attack"
                             />
-                        )}
-                    </div>
-                </HudSection>
-            ))}
+                            <Input
+                                aria-label={t('columns.nameLabel', {
+                                    n: i + 1,
+                                })}
+                                value={c.label}
+                                onChange={(e) =>
+                                    patch(i, { label: e.target.value })
+                                }
+                                placeholder="Sneak Attack"
+                            />
+                        </div>
+                        <ColumnValuesGrid
+                            column={c}
+                            index={i}
+                            onChange={(values) => patch(i, { values })}
+                        />
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
+                            <label className="flex items-center gap-2">
+                                <Checkbox
+                                    aria-label={t('columns.poolLabel', {
+                                        n: i + 1,
+                                    })}
+                                    checked={!!c.pool}
+                                    onCheckedChange={(v) =>
+                                        setPool(i, v === true)
+                                    }
+                                />
+                                {t('columns.pool')}
+                            </label>
+                            {c.pool && (
+                                <SelectField
+                                    aria-label={t('columns.restLabel', {
+                                        n: i + 1,
+                                    })}
+                                    triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
+                                    value={c.pool.rest}
+                                    onValueChange={(rest) =>
+                                        patch(i, {
+                                            pool: {
+                                                rest: rest as 'short' | 'long',
+                                            },
+                                        })
+                                    }
+                                    options={[
+                                        {
+                                            value: 'short',
+                                            label: t('columns.restShort'),
+                                        },
+                                        {
+                                            value: 'long',
+                                            label: t('columns.restLong'),
+                                        },
+                                    ]}
+                                />
+                            )}
+                        </div>
+                    </HudSection>
+                ))}
             </div>
             {value.length < MAX_CLASS_COLUMNS && (
                 <Button type="button" variant="outline" size="sm" onClick={add}>

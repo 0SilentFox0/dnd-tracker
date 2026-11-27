@@ -45,8 +45,8 @@ function ToolButton({
             aria-pressed={active}
             onClick={onClick}
             className={cn(
-                tall ? 'h-8' : 'h-7',
-                'shrink-0 rounded-md border bg-black/60 px-2 text-xs hover:bg-black/80',
+                tall ? 'h-10' : 'h-8',
+                'shrink-0 rounded-lg border bg-black/60 px-2 text-xs hover:bg-black/80',
                 active
                     ? 'border-hud-accent text-hud-ink'
                     : 'border-hud-rule text-hud-muted'
@@ -124,7 +124,7 @@ export function MazeToolbar({
                         { value: NO_HERO, label: t('toolbar.asHeroOff') },
                         ...heroes.map((h) => ({ value: h.id, label: h.name })),
                     ]}
-                    className={cn(tall ? 'h-8' : 'h-7', 'w-32 px-2 text-xs')}
+                    className={cn(tall ? 'h-10' : 'h-8', 'w-32 px-2 text-xs')}
                 />
             </label>
             {/* leaving the player view must not depend on whether the list fits under the trigger */}
@@ -189,7 +189,7 @@ export function MazeEditPalette({ tools }: { tools: MazeTools }) {
           : '';
 
     return (
-        <div className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs">
+        <div className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-lg border border-hud-rule bg-black/70 p-1.5 text-xs">
             {isEditTool(tool) &&
                 !awaitingExit &&
                 EDIT_TOOLS.map((value) => (

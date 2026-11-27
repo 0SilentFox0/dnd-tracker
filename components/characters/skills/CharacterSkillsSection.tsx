@@ -35,7 +35,7 @@ export function CharacterSkillsSection({
                                 onCheckedChange={() =>
                                     handlers.toggleSavingThrow(ability)
                                 }
-                                className="rounded"
+                                className="rounded-sm"
                             />
                             <span className="text-sm">
                                 {tg(`abilities.${ability}.label`)}
@@ -57,7 +57,7 @@ export function CharacterSkillsSection({
                                 onCheckedChange={() =>
                                     handlers.toggleSkill(skill)
                                 }
-                                className="rounded"
+                                className="rounded-sm"
                             />
                             <span className="text-sm">
                                 {tg(`dndSkills.${skill}`)}

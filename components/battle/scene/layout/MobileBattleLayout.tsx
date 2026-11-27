@@ -213,7 +213,7 @@ export function MobileBattleLayout({
                                 aria-expanded={menuShown}
                                 aria-haspopup="true"
                                 onClick={() => setMenuOpen((v) => !v)}
-                                className={`${HUD_GLASS} flex size-8 items-center justify-center rounded-lg text-[var(--ink)] focus-visible:ring-2 focus-visible:outline-none`}
+                                className={`${HUD_GLASS} flex items-center justify-center rounded-lg text-[var(--ink)] focus-visible:ring-2 focus-visible:outline-none`}
                             >
                                 <Ellipsis className="size-5" aria-hidden />
                             </HudIconButton>

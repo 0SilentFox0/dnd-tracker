@@ -34,7 +34,7 @@ export function DetailsButton({ title, text, className }: DetailsButtonProps) {
                     setOpen(true);
                 }}
                 className={cn(
-                    'rounded p-1 text-hud-muted hover:bg-hud-line/20',
+                    'rounded-sm p-1 text-hud-muted hover:bg-hud-line/20',
                     className
                 )}
             >

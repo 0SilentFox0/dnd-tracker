@@ -50,7 +50,7 @@ export function SideSheet({
                         className
                     )}
                 >
-                    <DialogPrimitive.Title className="hud-sc h-12 shrink-0 border-b border-hud-line px-4 text-[20px] leading-[48px] font-normal text-hud-ink">
+                    <DialogPrimitive.Title className="hud-sc h-12 shrink-0 border-b border-hud-line px-4 text-xl leading-[48px] font-normal text-hud-ink">
                         {title}
                     </DialogPrimitive.Title>
                     <div className="min-h-0 flex-1 overflow-y-auto p-4">

@@ -14,7 +14,12 @@ export function PasswordSettingsClient() {
         useUpdatePassword();
 
     return (
-        <HudFormPage header={{ title: hasPassword ? t('changeTitle') : t('setTitle'), aside: hasPassword ? t('changeSubtitle') : t('setSubtitle') }}>
+        <HudFormPage
+            header={{
+                title: hasPassword ? t('changeTitle') : t('setTitle'),
+                aside: hasPassword ? t('changeSubtitle') : t('setSubtitle'),
+            }}
+        >
             <HudSection className="mx-auto w-full max-w-sm space-y-4">
                 {session === 'checking' ? (
                     <LoadingState />
@@ -28,7 +33,7 @@ export function PasswordSettingsClient() {
                         {done && (
                             <p
                                 role="status"
-                                className="rounded-md border border-hud-good-dim bg-[rgba(127,168,106,.1)] p-2 text-sm text-hud-good"
+                                className="rounded-lg border border-hud-good-dim bg-[rgba(127,168,106,.1)] p-2 text-sm text-hud-good"
                             >
                                 {t('saved')}
                             </p>

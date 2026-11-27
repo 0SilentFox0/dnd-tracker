@@ -86,7 +86,7 @@ export function BranchRow({
                         </span>
                     )}
                 </span>
-                <span className="hud-sc text-[11px] text-[var(--m2)]">
+                <span className="hud-sc text-xs text-[var(--m2)]">
                     {levelText}
                 </span>
             </Button>

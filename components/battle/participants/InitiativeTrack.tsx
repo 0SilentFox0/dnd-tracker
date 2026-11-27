@@ -113,9 +113,9 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                         >
                             <span
                                 className={cn(
-                                    'hud-sc absolute text-[11px] text-[var(--hud-muted)]',
+                                    'hud-sc absolute rounded-sm bg-[color-mix(in_srgb,var(--palette-art-shadow)_72%,transparent)] px-1 text-xs text-[var(--hud-ink)]',
                                     vertical
-                                        ? 'top-1/2 left-0 -translate-x-full -translate-y-1/2 pr-1'
+                                        ? 'top-1/2 left-0 -translate-x-full -translate-y-1/2'
                                         : 'top-0 left-1/2 -translate-x-1/2 -translate-y-full'
                                 )}
                             >
@@ -130,6 +130,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                         data-flip={keys[i]}
                         data-current={e.current ? '' : undefined}
                         type="button"
+                        data-ux-tile
                         onClick={() => select(e.participant.basicInfo.id)}
                         className={cn(
                             'shrink-0',
@@ -167,8 +168,8 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                                     className={cn(
                                         'hud-sc truncate leading-none font-bold text-[#f3ead2] [text-shadow:0_1px_3px_#000,0_0_2px_#000]',
                                         compact
-                                            ? 'max-w-14 text-[11px]'
-                                            : 'max-w-20 text-[10px]'
+                                            ? 'max-w-14 text-xs'
+                                            : 'max-w-20 text-xs'
                                     )}
                                 >
                                     {e.participant.basicInfo.name}
@@ -187,7 +188,6 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                     onClick={() => setShowNext((v) => !v)}
                     className={cn(
                         'flex shrink-0 items-center justify-center rounded-full text-[var(--hud-muted)] hover:text-[var(--ink)]',
-                        compact ? 'size-5' : 'size-7',
                         showNext && 'text-hud-accent-fg'
                     )}
                 >

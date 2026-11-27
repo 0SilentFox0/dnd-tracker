@@ -7,7 +7,6 @@ import { ArtifactSetBlock } from './detail/ArtifactSetBlock';
 import { ClassReferenceDetail } from './detail/ClassReferenceDetail';
 import { SkillReferenceDetail } from './detail/SkillReferenceDetail';
 import { SpellReferenceDetail } from './detail/SpellReferenceDetail';
-import { ReferenceLayout } from './layout/ReferenceLayout';
 import { ReferenceList } from './layout/ReferenceList';
 import { ReferenceRail } from './layout/ReferenceRail';
 import { ArtifactReferenceRow } from './rows/ArtifactReferenceRow';
@@ -16,6 +15,7 @@ import { SkillReferenceRow } from './rows/SkillReferenceRow';
 import { SpellReferenceRow } from './rows/SpellReferenceRow';
 
 import { EmptyState } from '@/components/common/states';
+import { HudSplit } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import {
     type ReferenceEntry,
@@ -178,42 +178,43 @@ export function InfoReferenceClient({
     );
 
     return (
-        <ReferenceLayout
+        <HudSplit
             rail={<ReferenceRail filters={filters} counts={view.totals} />}
-            list={
-                <ReferenceList<ReferenceEntry>
-                    groups={view.groups.map((g) => ({
-                        key: g.key,
-                        accent: g.accent,
-                        items: g.entries,
-                        title:
-                            g.total > g.entries.length ? (
-                                <span className="flex items-center justify-between gap-2">
-                                    {g.title}
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => section.set(g.section)}
-                                    >
-                                        {t('list.showAll', {
-                                            count: g.total,
-                                        })}
-                                    </Button>
-                                </span>
-                            ) : (
-                                g.title
-                            ),
-                    }))}
-                    selected={selection.selected}
-                    onSelect={(key) => selection.select(key as RefKey)}
-                    keyOf={(e) => e.key}
-                    renderRow={rowOf}
-                />
-            }
-            detail={detail}
-            detailOpen={selection.isOpen}
-            onDetailClose={selection.clear}
-            detailTitle={entry?.item.name ?? ''}
-        />
+            aside={{
+                content: detail,
+                width: 'md',
+                title: entry?.item.name ?? t('detail.empty'),
+                mobile: { open: selection.isOpen, onClose: selection.clear },
+            }}
+        >
+            <ReferenceList<ReferenceEntry>
+                groups={view.groups.map((g) => ({
+                    key: g.key,
+                    accent: g.accent,
+                    items: g.entries,
+                    title:
+                        g.total > g.entries.length ? (
+                            <span className="flex items-center justify-between gap-2">
+                                {g.title}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => section.set(g.section)}
+                                >
+                                    {t('list.showAll', {
+                                        count: g.total,
+                                    })}
+                                </Button>
+                            </span>
+                        ) : (
+                            g.title
+                        ),
+                }))}
+                selected={selection.selected}
+                onSelect={(key) => selection.select(key as RefKey)}
+                keyOf={(e) => e.key}
+                renderRow={rowOf}
+            />
+        </HudSplit>
     );
 }

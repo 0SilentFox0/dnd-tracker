@@ -53,7 +53,7 @@ function FilledPad({
                     {label}
                 </span>
             </HudButton>
-            <span className="pointer-events-none absolute top-1 left-1.5 text-[10px] text-hud-muted">
+            <span className="pointer-events-none absolute top-1 left-1.5 text-xs text-hud-muted">
                 {index + 1}
             </span>
             <HudIconButton
@@ -96,7 +96,7 @@ export function SoundPad({
         'relative flex min-h-16 min-w-0 items-center justify-center rounded-lg border border-dashed border-hud-rule text-xs text-hud-muted';
 
     const number = (
-        <span className="absolute top-1 left-1.5 text-[10px]">{index + 1}</span>
+        <span className="absolute top-1 left-1.5 text-xs">{index + 1}</span>
     );
 
     return replacing ? (

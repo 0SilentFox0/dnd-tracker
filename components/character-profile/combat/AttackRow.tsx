@@ -34,13 +34,11 @@ function StatButton({
             aria-pressed={pressed}
             onClick={onClick}
             className={cn(
-                'motion-press flex min-h-11 min-w-20 flex-col items-center justify-center rounded-[4px] border px-3 text-center hover:bg-hud-raised',
+                'motion-press flex min-h-10 min-w-20 flex-col items-center justify-center rounded-sm border px-3 text-center hover:bg-hud-raised',
                 pressed ? 'border-hud-accent' : 'border-hud-line'
             )}
         >
-            <span className="text-xs tracking-[.08em] text-hud-muted uppercase">
-                {label}
-            </span>
+            <span className="hud-label">{label}</span>
             <b className="hud-num text-xl leading-tight text-hud-ink tabular-nums">
                 {value}
             </b>
@@ -106,7 +104,7 @@ export function AttackRow({
                                 },
                             })
                         }
-                        className="motion-press flex min-h-11 min-w-11 items-center justify-center rounded-[4px] border border-hud-line text-hud-accent-fg hover:bg-hud-raised"
+                        className="motion-press flex min-h-10 min-w-10 items-center justify-center rounded-sm border border-hud-line text-hud-accent-fg hover:bg-hud-raised"
                     >
                         <Dices aria-hidden className="size-5" />
                     </HudButton>
@@ -120,7 +118,7 @@ export function AttackRow({
                                 subject: { kind: 'damage', attackId: a.id },
                             })
                         }
-                        className="motion-press flex min-h-11 min-w-11 items-center justify-center rounded-[4px] border border-hud-line text-hud-danger hover:bg-hud-raised"
+                        className="motion-press flex min-h-10 min-w-10 items-center justify-center rounded-sm border border-hud-line text-hud-danger hover:bg-hud-raised"
                     >
                         <Flame aria-hidden className="size-5" />
                     </HudButton>

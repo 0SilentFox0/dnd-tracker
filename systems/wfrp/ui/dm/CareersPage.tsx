@@ -78,7 +78,7 @@ export function CareersPage({
     };
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle', { count: careers.length })}
@@ -91,7 +91,7 @@ export function CareersPage({
                             />
                             <Button
                                 onClick={() => open('new')}
-                                className="flex min-h-11 items-center gap-2"
+                                className="flex items-center gap-2"
                             >
                                 <Plus className="h-4 w-4" />
                                 {t('page.create')}
@@ -132,7 +132,7 @@ export function CareersPage({
                                         type="button"
                                         size="sm"
                                         variant="outline"
-                                        className="min-h-11 flex-1"
+                                        className="flex-1"
                                         onClick={() => open(career.id)}
                                     >
                                         <Edit className="mr-1 h-4 w-4" />
@@ -142,7 +142,7 @@ export function CareersPage({
                                         type="button"
                                         size="sm"
                                         variant="outline"
-                                        className="min-h-11 min-w-11"
+                                        className="min-w-11"
                                         aria-label={tc('delete')}
                                         onClick={() => void onDelete(career)}
                                     >

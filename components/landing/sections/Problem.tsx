@@ -25,14 +25,14 @@ export function Problem({ t }: { t: Translator }) {
             className="ld-lazy ld-panel px-4 py-20"
         >
             <div className="ld-container grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
-                <div className="space-y-5">
+                <div className="ld-reveal space-y-5">
                     <TrailMark />
                     <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                         {t('problem.eyebrow')}
                     </p>
                     <h2
                         id="pain-title"
-                        className="hud-sc ld-ink text-3xl text-hud-ink sm:text-4xl"
+                        className="hud-sc text-3xl text-hud-ink sm:text-4xl"
                     >
                         {t('problem.title')}
                     </h2>

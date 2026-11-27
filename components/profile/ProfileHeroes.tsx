@@ -67,7 +67,7 @@ export function ProfileHeroes({ heroes }: { heroes: ProfileCharacter[] }) {
                                     <span className="block truncate text-xs text-hud-muted">
                                         {t('heroLine', { level: h.level })}
                                     </span>
-                                    <span className="block truncate text-xs text-hud-faint">
+                                    <span className="block truncate text-xs text-hud-muted">
                                         {h.campaignName}
                                     </span>
                                 </span>

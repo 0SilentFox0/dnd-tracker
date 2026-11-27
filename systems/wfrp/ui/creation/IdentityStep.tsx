@@ -61,6 +61,25 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
                     ))}
                 </ul>
             )}
+            {form.dm?.needsPlayer && (
+                <FormField label={t('player')} htmlFor="wfrp-draft-player" required>
+                    <SelectField
+                        id="wfrp-draft-player"
+                        aria-label={t('player')}
+                        value={form.dm.ownerId}
+                        onValueChange={form.dm.setOwnerId}
+                        placeholder={t('playerPlaceholder')}
+                        options={form.dm.members.map((m) => ({
+                            value: m.id,
+                            label: m.email
+                                ? `${m.displayName} (${m.email})`
+                                : m.displayName,
+                        }))}
+                        required
+                        triggerClassName="min-h-11 w-full"
+                    />
+                </FormField>
+            )}
             <FormField label={t('name')} htmlFor="wfrp-draft-name" required>
                 <Input
                     id="wfrp-draft-name"
@@ -121,7 +140,6 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
                                     type="button"
                                     size="icon"
                                     variant="ghost"
-                                    className="size-11"
                                     aria-label={t('removeGoal')}
                                     onClick={() =>
                                         set({
@@ -149,7 +167,6 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
                     <Button
                         type="button"
                         variant="outline"
-                        className="min-h-11"
                         onClick={addGoal}
                         disabled={!goal.trim()}
                     >

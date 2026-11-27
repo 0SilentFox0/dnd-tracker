@@ -65,7 +65,7 @@ export function SideToggle({
                             <Icon className={cn('size-4', tone)} aria-hidden />
                             <span
                                 className={cn(
-                                    'text-[11px]',
+                                    'text-xs',
                                     layout === 'compact' ? 'sr-only' : 'ml-1'
                                 )}
                             >

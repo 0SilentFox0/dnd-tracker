@@ -45,7 +45,7 @@ export function SkillCardActionsMenu({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+                    className="w-8 shrink-0 text-muted-foreground hover:text-foreground"
                     aria-label={t('skills.card.menu')}
                 >
                     <MoreVertical className="h-4 w-4" />

@@ -40,7 +40,7 @@ export function SaveSection({
             <div className="flex items-center gap-2">
                 <SelectField
                     aria-label={t('abilityAria')}
-                    triggerClassName="h-9 w-auto rounded-md border border-hud-line bg-hud-field px-2 text-sm"
+                    triggerClassName="h-9 w-auto rounded-lg border border-hud-line bg-hud-field px-2 text-sm"
                     value={ability.save?.ability ?? ''}
                     onValueChange={(key) =>
                         setSave(

@@ -88,7 +88,7 @@ export function WorldNotesPanel({
                 {panel.shown.map((n) => (
                     <li
                         key={n.id}
-                        className="rounded-md border border-hud-rule bg-black/30 p-2 text-sm text-hud-ink"
+                        className="rounded-lg border border-hud-rule bg-black/30 p-2 text-sm text-hud-ink"
                     >
                         {panel.editing?.id === n.id ? (
                             <div className="flex flex-col gap-2">
@@ -185,7 +185,7 @@ export function WorldNotesPanel({
                                 value: h.id,
                                 label: h.name,
                             }))}
-                            triggerClassName="h-9 w-auto rounded-md border-hud-rule bg-black/40 px-2 text-sm text-hud-ink data-[size=default]:h-9 dark:bg-black/40"
+                            triggerClassName="h-9 w-auto rounded-lg border-hud-rule bg-black/40 px-2 text-sm text-hud-ink data-[size=default]:h-9 dark:bg-black/40"
                         />
                     ) : null}
                     <span

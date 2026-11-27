@@ -10,7 +10,7 @@ export function FormAlert({ children, className }: FormAlertProps) {
         <p
             role="alert"
             className={cn(
-                'rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-destructive',
+                'rounded-lg border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-destructive',
                 className
             )}
         >

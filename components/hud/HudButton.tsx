@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { DISABLED_CLASS } from '@/components/ui/disabled';
 import {
     Tooltip,
     TooltipContent,
@@ -16,7 +17,11 @@ const TONES = {
     gold: 'text-hud-accent-fg',
 } as const;
 
-const ICON_SIZES = { sm: 'size-8', md: 'size-10' } as const;
+const ICON_SIZES = {
+    sm: 'size-8',
+    md: 'size-10',
+    lg: 'size-12',
+} as const;
 
 export const HudButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, ...props }, ref) => (
@@ -24,7 +29,11 @@ export const HudButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ref={ref}
             type="button"
             data-slot="hud-button"
-            className={cn('ds-interactive cursor-pointer', className)}
+            className={cn(
+                'ds-interactive cursor-pointer pointer-coarse:min-h-11',
+                DISABLED_CLASS,
+                className
+            )}
             {...props}
         />
     )
@@ -50,7 +59,7 @@ export const HudIconButton = React.forwardRef<
             ref={ref}
             data-slot="hud-icon-button"
             className={cn(
-                'flex items-center justify-center',
+                'flex items-center justify-center pointer-coarse:min-w-11',
                 ICON_SIZES[size],
                 tone && TONES[tone],
                 className

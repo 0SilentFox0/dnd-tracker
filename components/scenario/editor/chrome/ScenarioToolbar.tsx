@@ -191,7 +191,7 @@ export function ScenarioToolbar({
                     value: k,
                     label: tCallouts(k),
                 }))}
-                triggerClassName="min-h-9 w-auto rounded border-[var(--rule)] bg-[var(--page)] px-2 py-1.5 text-sm text-[var(--ink)] shadow-none data-[size=default]:h-9 dark:bg-[var(--page)] dark:hover:bg-[var(--page)]"
+                triggerClassName="min-h-9 w-auto rounded-sm border-[var(--rule)] bg-[var(--page)] px-2 py-1.5 text-sm text-[var(--ink)] shadow-none data-[size=default]:h-9 dark:bg-[var(--page)] dark:hover:bg-[var(--page)]"
             />
             {state?.callout && (
                 <Input

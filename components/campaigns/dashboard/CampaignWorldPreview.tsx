@@ -28,19 +28,19 @@ export function CampaignWorldPreview({
             className="group block h-full rounded-xl outline-offset-2 focus-visible:outline-2"
         >
             <section
-                className="border-hud-rule group-hover:border-hud-muted flex h-full flex-col border-b pb-4 transition-colors"
+                className="flex h-full flex-col border-b border-hud-rule pb-4 transition-colors group-hover:border-hud-muted"
                 data-tour="dashboard.world-map"
             >
-                <h2 className="hud-sc text-hud-ink mb-3 flex items-baseline justify-between gap-2 text-[13px] tracking-[.06em]">
+                <h2 className="hud-sc mb-3 flex items-baseline justify-between gap-2 text-sm tracking-[.06em] text-hud-ink">
                     <span>{t('gameNavigation.world')}</span>
                     {worldMap && (
-                        <span className="text-hud-muted max-w-[65%] truncate text-xs font-normal tracking-normal">
+                        <span className="max-w-[65%] truncate text-xs font-normal tracking-normal text-hud-muted">
                             {worldMap.name}
                         </span>
                     )}
                 </h2>
                 {worldMap ? (
-                    <div className="border-hud-rule relative min-h-44 flex-1 overflow-hidden rounded-lg border">
+                    <div className="relative min-h-44 flex-1 overflow-hidden rounded-lg border border-hud-rule">
                         <OptimizedImage
                             src={worldMap.imageUrl}
                             alt=""
@@ -48,16 +48,16 @@ export function CampaignWorldPreview({
                             height={520}
                             className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                             fallback={
-                                <span className="bg-hud-raised text-hud-muted flex h-full items-center justify-center text-sm">
+                                <span className="flex h-full items-center justify-center bg-hud-raised text-sm text-hud-muted">
                                     {worldMap.name}
                                 </span>
                             }
                         />
                     </div>
                 ) : (
-                    <div className="border-hud-rule bg-hud-page/30 text-hud-muted flex min-h-44 flex-1 flex-col items-center justify-center gap-1 rounded-lg border border-dashed px-4 text-center text-sm">
+                    <div className="flex min-h-44 flex-1 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-hud-rule bg-hud-page/30 px-4 text-center text-sm text-hud-muted">
                         <span>{tDashboard('page.worldMap.empty')}</span>
-                        <span className="text-hud-ink font-medium">
+                        <span className="font-medium text-hud-ink">
                             {tDashboard('page.worldMap.create')}
                         </span>
                     </div>

@@ -88,7 +88,7 @@
   position: absolute;
   pointer-events: none;
   white-space: nowrap;
-  font-family: "Alegreya SC", Georgia, serif;
+  font-family: "Cormorant SC", Georgia, serif;
   font-variant: small-caps;
   letter-spacing: 0.2em;
   font-size: 14px;
@@ -166,7 +166,7 @@
   min-width: 18px;
   padding: 0 4px;
   border-radius: 9999px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 18px;
   text-align: center;
   color: var(--atlas-paper);
@@ -235,7 +235,7 @@
   transform: translateX(-50%);
   padding: 0 5px;
   border-radius: 9999px;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 14px;
   white-space: nowrap;
   color: #fff;
@@ -711,7 +711,7 @@ html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigge
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: .65rem;
+    font-size: .75rem;
     line-height: 1.15;
   }
 

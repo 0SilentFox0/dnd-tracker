@@ -65,7 +65,7 @@ export function JoinByLinkPanel({ code, campaign }: JoinByLinkPanelProps) {
             {error && (
                 <div
                     role="alert"
-                    className="flex items-center gap-2 rounded-md bg-hud-field p-3 text-sm text-hud-danger shadow-[inset_0_0_0_1px_var(--color-hud-danger)]"
+                    className="flex items-center gap-2 rounded-lg bg-hud-field p-3 text-sm text-hud-danger shadow-[inset_0_0_0_1px_var(--color-hud-danger)]"
                 >
                     <AlertCircle aria-hidden className="size-4 shrink-0" />
                     <span>{error}</span>

@@ -32,7 +32,7 @@ export function SpellSummary({
     return (
         <>
             <div className="hud-sc text-xl font-bold">{spell.name}</div>
-            <div className="mt-2 text-[15px]">
+            <div className="mt-2 text-base">
                 {state.targetIds.length > 0 && (
                     <p>
                         {tw('targets', {

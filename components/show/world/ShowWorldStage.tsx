@@ -78,7 +78,7 @@ export function ShowWorldStage({
                 />
             </div>
             {isDM && !readOnly && (
-                <p className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded bg-black/70 px-3 py-1 text-sm text-hud-bone">
+                <p className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-sm bg-black/70 px-3 py-1 text-sm text-hud-bone">
                     {t('dmNotice')}
                 </p>
             )}

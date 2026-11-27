@@ -70,7 +70,7 @@ export function AdvanceLedger({
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="min-h-11 shrink-0"
+                            className="shrink-0"
                             disabled={pending}
                             onClick={onUndo}
                         >

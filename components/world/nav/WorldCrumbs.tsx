@@ -27,7 +27,7 @@ export function WorldCrumbs({ maps, mapId, onOpen }: WorldCrumbsProps) {
                     {i > 0 ? (
                         <ChevronRight
                             aria-hidden
-                            className="size-3 shrink-0 text-hud-line"
+                            className="size-3 shrink-0 text-hud-faint-deco"
                         />
                     ) : null}
                     {i === path.length - 1 ? (

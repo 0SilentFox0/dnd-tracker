@@ -2,16 +2,17 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Gem } from 'lucide-react';
 
 import { ArtifactCard } from '@/components/artifacts/ArtifactCard';
 import { DeleteAllArtifactsButton } from '@/components/artifacts/DeleteAllArtifactsButton';
 import { SearchInput } from '@/components/common/fields/SearchInput';
+import { BlankTome } from '@/components/common/illustrations';
 import { EmptyState, LoadingState } from '@/components/common/states';
 import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { HudSection } from '@/components/hud/form';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { HudPill } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { systemUiOf } from '@/components/systems';
 import {
@@ -20,7 +21,6 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useArtifactsCatalog } from '@/lib/hooks/artifacts';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
@@ -52,7 +52,7 @@ export function DMArtifactsPageClient({
     const newHref = `/campaigns/${campaignId}/dm/artifacts/new`;
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('page.title')}
                 subtitle={t('page.subtitle')}
@@ -82,11 +82,11 @@ export function DMArtifactsPageClient({
             <OnboardingHint id="dm.artifacts" />
 
             {catalog.isLoading && catalog.isEmpty ? (
-                <LoadingState rows={6} label={t('page.loading')} />
+                <LoadingState count={6} label={t('page.loading')} />
             ) : catalog.isEmpty ? (
                 <EmptyState
                     className="bg-hud-panel"
-                    icon={Gem}
+                    illustration={<BlankTome />}
                     title={t('page.emptyTitle')}
                     description={t(
                         canEdit ? 'page.emptyHint' : 'page.emptyHintReadOnly'
@@ -148,12 +148,9 @@ export function DMArtifactsPageClient({
                                                 <AccordionTrigger className="px-4 hover:no-underline">
                                                     <span className="flex items-center gap-2">
                                                         {t(`slots.${slot}`)}
-                                                        <Badge
-                                                            variant="secondary"
-                                                            className="text-xs"
-                                                        >
+                                                        <HudPill className="text-xs">
                                                             {artifacts.length}
-                                                        </Badge>
+                                                        </HudPill>
                                                     </span>
                                                 </AccordionTrigger>
                                                 <AccordionContent className="px-3">

@@ -29,8 +29,8 @@ export function CampaignSummaryPanel({
                 <HudPill
                     tone={
                         campaign.status === CampaignStatus.ACTIVE
-                            ? 'gold'
-                            : 'muted'
+                            ? 'accent'
+                            : 'meta'
                     }
                 >
                     {t('status')} ·{' '}
@@ -38,12 +38,12 @@ export function CampaignSummaryPanel({
                         ? t('active')
                         : t('archived')}
                 </HudPill>
-                <HudPill tone="bone">
+                <HudPill tone="meta">
                     {t('maxLevel')} · {campaign.maxLevel}
                 </HudPill>
                 {memberCount && (
                     <HudPill
-                        tone="muted"
+                        tone="meta"
                         className="h-auto max-w-full min-w-0 shrink py-0.5 leading-4"
                     >
                         {memberCount}
@@ -52,9 +52,9 @@ export function CampaignSummaryPanel({
                 {isDM && campaign.inviteCode && (
                     <div
                         id="invite"
-                        className="border-hud-rule bg-hud-page/80 text-hud-ink flex min-w-0 max-w-full scroll-mt-20 items-center gap-1.5 rounded-full border px-2.5 py-0 text-xs sm:gap-2 sm:px-3 sm:text-sm"
+                        className="flex max-w-full min-w-0 scroll-mt-20 items-center gap-1.5 rounded-full border border-hud-rule bg-hud-page/80 px-2.5 py-0 text-xs text-hud-ink sm:gap-2 sm:px-3 sm:text-sm"
                     >
-                        <span className="text-hud-muted hidden shrink-0 sm:inline">
+                        <span className="hidden shrink-0 text-hud-muted sm:inline">
                             {t('inviteCode')}
                         </span>
                         <InviteCodeDisplay

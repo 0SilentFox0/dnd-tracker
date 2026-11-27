@@ -61,25 +61,25 @@ function SpellCardDetails({
 
     return (
         <>
-            <div className="flex-1 text-xs text-hud-muted [&_p]:mb-1.5">
+            <div className="flex-1 text-sm text-hud-muted [&_p]:mb-1.5">
                 <ScenarioRichText doc={descriptionDoc} campaignId={campaignId} />
             </div>
 
             <SpellComponentsLine spell={spell} />
 
-            <div className="flex min-w-0 items-center gap-1.5 border-t border-hud-raised pt-1.5 text-[11px] text-hud-muted">
+            <div className="flex min-w-0 items-center gap-1.5 border-t border-hud-raised pt-1.5 text-xs text-hud-muted">
                 <GroupIcon className="size-3 shrink-0" />
                 <span className="truncate">{groupName}</span>
                 <code
-                    className="ml-auto max-w-[45%] truncate font-mono text-[10px]"
+                    className="ml-auto max-w-[45%] truncate text-sm"
                     title={spell.id}
                 >
                     {copied ? t('copied') : spell.id}
                 </code>
                 <Button
                     variant="ghost"
-                    size="icon"
-                    className="size-6 shrink-0 text-hud-muted"
+                    size="icon-sm"
+                    className="shrink-0 text-hud-muted"
                     onClick={handleCopyId}
                     aria-label={copied ? t('copied') : t('copyId')}
                     title={copied ? t('copied') : t('copyId')}
@@ -91,7 +91,7 @@ function SpellCardDetails({
     );
 }
 
-const ICON_BTN = 'size-7 shrink-0 text-hud-muted hover:text-hud-ink';
+const ICON_BTN = 'shrink-0 text-hud-muted hover:text-hud-ink';
 
 export function SpellCard({
     spell,
@@ -136,7 +136,7 @@ export function SpellCard({
             <div className="flex items-start gap-3">
                 <div
                     className={cn(
-                        'relative flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] shadow-[inset_0_0_0_2px_var(--color-hud-accent)]',
+                        'relative flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] shadow-[inset_0_0_0_2px_var(--color-hud-accent)]',
                         expanded ? 'size-16' : 'size-10'
                     )}
                 >
@@ -154,7 +154,7 @@ export function SpellCard({
                     />
                 </div>
                 <div className="min-w-0 flex-1">
-                    <h3 className="hud-sc truncate text-[15px] text-hud-ink">
+                    <h3 className="hud-sc truncate text-base text-hud-ink">
                         {spell.name}
                     </h3>
                     <div className="mt-1 flex flex-wrap gap-1">
@@ -167,7 +167,7 @@ export function SpellCard({
                         {!expanded && (
                             <HudPill
                                 icon={<GroupIcon className="size-3" />}
-                                tone="muted"
+                                tone="meta"
                             >
                                 {groupName}
                             </HudPill>
@@ -180,7 +180,7 @@ export function SpellCard({
                 <div className="-mt-1 -mr-1 flex shrink-0">
                     <Button
                         variant="ghost"
-                        size="icon"
+                        size="icon-sm"
                         className={ICON_BTN}
                         onClick={() => setExpanded((v) => !v)}
                         aria-expanded={expanded}
@@ -198,7 +198,7 @@ export function SpellCard({
                         <>
                             <Button
                                 variant="ghost"
-                                size="icon"
+                                size="icon-sm"
                                 className={ICON_BTN}
                                 asChild
                             >
@@ -213,7 +213,7 @@ export function SpellCard({
                             {spell.spellGroup && (
                                 <Button
                                     variant="ghost"
-                                    size="icon"
+                                    size="icon-sm"
                                     className={ICON_BTN}
                                     onClick={() =>
                                         onRemoveFromGroup?.(spell.id)

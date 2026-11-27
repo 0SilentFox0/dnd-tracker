@@ -45,7 +45,7 @@ export function PendingDraftsPanel({ campaignId }: { campaignId: string }) {
                                             tCard('unassigned')}
                                     </p>
                                     {c.reviewNote && (
-                                        <HudPill tone="silver">
+                                        <HudPill tone="npc">
                                             {t('returnedWithNote')}
                                         </HudPill>
                                     )}

@@ -33,7 +33,7 @@ export function RollingField({
                 {spinning ? (
                     <div
                         aria-hidden
-                        className="hud-roll-display flex h-9 w-full items-center truncate rounded-md border border-input bg-transparent px-3 text-sm"
+                        className="hud-roll-display flex h-9 w-full items-center truncate rounded-lg border border-input bg-transparent px-3 text-sm"
                     >
                         {display}
                     </div>

@@ -1,6 +1,7 @@
 import type { ComponentType, ReactNode } from 'react';
 
 import type { SpellFormFieldsProps } from '@/components/spells/form/fields/SpellFormBasicFields';
+import type { CharacterTypeValue } from '@/lib/constants/characters';
 import type { useAttackWizard, useSpellBook } from '@/lib/hooks/battle';
 import type { TurnGateControls } from '@/lib/hooks/battle';
 import type { SystemConditionBody } from '@/lib/hooks/battles';
@@ -82,6 +83,7 @@ export interface DraftFormProps {
     campaignId: string;
     characterId?: string;
     initialIdentity?: unknown;
+    dm?: { characterType: CharacterTypeValue };
 }
 
 export type DmPageView =

@@ -46,7 +46,7 @@ function QuickStatInput({
         <div className="min-w-0 space-y-1">
             <Label
                 htmlFor={field.id}
-                className="block truncate text-[11px] font-normal text-hud-muted"
+                className="block truncate text-xs font-normal text-hud-muted"
             >
                 {label}
             </Label>
@@ -143,7 +143,7 @@ export function UnitQuickStatsEditor({
                     inputProps={{ placeholder: '2d6+3', title: t('diceHint') }}
                 />
             ) : (
-                <p className="self-end text-[11px] leading-tight text-hud-muted">
+                <p className="self-end text-xs leading-tight text-hud-muted">
                     {t('noAttacks')}
                 </p>
             )}

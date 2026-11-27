@@ -44,7 +44,7 @@ export function TalentsStep({ form }: { form: WfrpDraftFormState }) {
                             <>
                                 <Button
                                     type="button"
-                                    className="min-h-11 w-full sm:w-auto"
+                                    className="w-full sm:w-auto"
                                     onClick={roll}
                                 >
                                     {t('roll')}

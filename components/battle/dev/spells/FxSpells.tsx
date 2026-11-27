@@ -84,14 +84,14 @@ export function FxSpells({ spells }: { spells: SpellCardData[] }) {
                                 data-testid="fx-spells-book"
                                 className="hud-book mt-3 rounded-xl bg-[#e9dec5] p-4 text-[#2a2018]"
                             >
-                                <p className="text-[13px] text-[#7a6650] italic">
+                                <p className="text-sm text-[#7a6650] italic">
                                     This is how the spell looks in the spellbook
                                     and the reference
                                 </p>
                                 <p className="hud-sc text-lg font-bold">
                                     {picked.name}
                                 </p>
-                                <label className="mt-1 flex items-center gap-2 text-[13px]">
+                                <label className="mt-1 flex items-center gap-2 text-sm">
                                     <Checkbox
                                         checked={bookLook}
                                         onCheckedChange={(v) =>

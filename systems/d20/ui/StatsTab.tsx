@@ -38,7 +38,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
         return (
             <section
                 aria-label={t('abilities')}
-                className="overflow-hidden rounded-[4px] border border-hud-line bg-hud-rule shadow-sm"
+                className="overflow-hidden rounded-sm border border-hud-line bg-hud-rule shadow-sm"
             >
                 <div className="grid grid-cols-3 gap-px lg:grid-cols-6">
                     {sheet.abilities.map((a, i) => (
@@ -71,7 +71,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
     ].filter(Boolean);
 
     const panel =
-        'overflow-hidden rounded-[4px] border border-hud-line bg-hud-panel shadow-sm';
+        'overflow-hidden rounded-sm border border-hud-line bg-hud-panel shadow-sm';
 
     return (
         <div className="flex flex-col gap-6">
@@ -94,7 +94,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                     {t('skills')}
                 </HudSheetHeading>
                 <div className={cn(panel, 'px-3')}>
-                    <ul className="-mb-px grid gap-x-8 text-[15px] md:grid-cols-2">
+                    <ul className="-mb-px grid gap-x-8 text-base md:grid-cols-2">
                         {sortedSkills.map((s) => (
                             <SkillRow key={s.key} skill={s} roll={roll} />
                         ))}
@@ -136,7 +136,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                     <div
                         className={cn(
                             panel,
-                            'divide-y divide-hud-rule px-4 text-[15px] text-hud-text'
+                            'divide-y divide-hud-rule px-4 text-base text-hud-text'
                         )}
                     >
                         {notes.map((n) => (

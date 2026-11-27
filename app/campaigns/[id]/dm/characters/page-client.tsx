@@ -80,7 +80,7 @@ export function DMCharactersClient({
     const newHref = type ? `${base}/new?type=${type}` : `${base}/new`;
 
     return (
-        <HudPage>
+        <HudPage width="list">
             <HudPageHeader
                 title={t('title')}
                 subtitle={t('subtitle')}
@@ -142,7 +142,7 @@ export function DMCharactersClient({
 
             <QueryState
                 query={page.query}
-                loading={<LoadingState rows={6} label={t('loading')} />}
+                loading={<LoadingState count={6} label={t('loading')} />}
                 empty={
                     <EmptyState
                         icon={Users}

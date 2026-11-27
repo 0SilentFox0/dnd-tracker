@@ -31,6 +31,8 @@ export function SpellReferenceDetail({
 }: SpellReferenceDetailProps) {
     const t = useTranslations('reference.card');
 
+    const tSpells = useTranslations('spells');
+
     const translate = useTranslator();
 
     const effects = useAbilityText().lines(item.effects);
@@ -55,14 +57,13 @@ export function SpellReferenceDetail({
                         <DetailChip>
                             {t('levelShort', { level: item.level })}
                         </DetailChip>
-                        {item.groupName && (
-                            <DetailChip>{item.groupName}</DetailChip>
-                        )}
                     </>
                 }
             />
             {item.description && (
-                <p className="text-sm text-hud-bone">{item.description}</p>
+                <DetailSection title={t('description')}>
+                    {item.description}
+                </DetailSection>
             )}
             <AppearanceBlock
                 text={isDM ? appearance : (item.appearanceDescription ?? '')}
@@ -82,6 +83,11 @@ export function SpellReferenceDetail({
                             <li key={i}>{e}</li>
                         ))}
                     </ul>
+                </DetailSection>
+            )}
+            {item.groupName && (
+                <DetailSection title={tSpells('groupDialog.title')}>
+                    {item.groupName}
                 </DetailSection>
             )}
             {item.rules && (

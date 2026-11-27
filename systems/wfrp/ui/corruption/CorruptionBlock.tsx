@@ -27,7 +27,7 @@ export function CorruptionBlock() {
                 <p className="flex flex-wrap items-center gap-2 text-sm text-hud-ink">
                     {t('points', { points: c.points, threshold: c.threshold })}
                     {c.points > c.threshold && (
-                        <span className="rounded border border-hud-danger px-1.5 text-xs text-hud-danger">
+                        <span className="rounded-sm border border-hud-danger px-1.5 text-xs text-hud-danger">
                             {t('overThreshold')}
                         </span>
                     )}
@@ -35,7 +35,7 @@ export function CorruptionBlock() {
                 {c.soulLost && (
                     <p
                         role="status"
-                        className="rounded border border-hud-danger px-2 py-1 text-sm text-hud-danger"
+                        className="rounded-sm border border-hud-danger px-2 py-1 text-sm text-hud-danger"
                     >
                         {t('soulLost', {
                             name: sheet.identity.name,
@@ -53,7 +53,7 @@ export function CorruptionBlock() {
                                 className="space-y-1 text-sm text-hud-bone"
                             >
                                 <p>
-                                    <span className="border-hud-border mr-2 rounded border px-1.5 text-xs text-hud-ink">
+                                    <span className="border-hud-border mr-2 rounded-sm border px-1.5 text-xs text-hud-ink">
                                         {t(`kinds.${m.kind}`)}
                                     </span>
                                     {text(m.text)}

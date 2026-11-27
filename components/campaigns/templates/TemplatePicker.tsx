@@ -209,10 +209,10 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
                         />
                     )}
                     {selected && isRecommended(selected) && (
-                        <HudPill tone="bone">{t('recommended')}</HudPill>
+                        <HudPill tone="meta">{t('recommended')}</HudPill>
                     )}
                     {selected?.system && (
-                        <HudPill tone="silver">
+                        <HudPill tone="npc">
                             {tg(ruleSystemLabelKey(selected.system))}
                         </HudPill>
                     )}
@@ -224,7 +224,7 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
                         </p>
                     )}
                     {selected?.credits && (
-                        <p className="line-clamp-2 text-[11px] leading-4 text-hud-muted/80">
+                        <p className="line-clamp-2 text-xs leading-4 text-hud-muted/80">
                             {selected.credits}
                         </p>
                     )}

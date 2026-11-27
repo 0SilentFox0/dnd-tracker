@@ -131,7 +131,7 @@ export function Breadcrumbs() {
     const homeCrumb = allSegments[0] !== 'campaigns' || allSegments.length > 1;
 
     return (
-        <nav aria-label={t('label')} className="min-w-0 text-[13px] text-hud-muted">
+        <nav aria-label={t('label')} className="min-w-0 text-sm text-hud-muted">
             <ol className="flex min-w-0 flex-nowrap items-center gap-1 whitespace-nowrap">
                 {homeCrumb && (
                     <li className="hidden shrink-0 items-center gap-1 sm:flex">
@@ -142,7 +142,7 @@ export function Breadcrumbs() {
                             <Home className="h-3.5 w-3.5" />
                             <span className="sr-only">{tHeader('home')}</span>
                         </Link>
-                        <ChevronRight className="h-3 w-3 text-hud-line" />
+                        <ChevronRight className="h-3 w-3 text-hud-faint-deco" />
                     </li>
                 )}
                 {crumbs.map((crumb, index) => (
@@ -166,7 +166,7 @@ export function Breadcrumbs() {
                             </Link>
                         )}
                         {!crumb.isLast && (
-                            <ChevronRight className="h-3 w-3 shrink-0 text-hud-line" />
+                            <ChevronRight className="h-3 w-3 shrink-0 text-hud-faint-deco" />
                         )}
                     </li>
                 ))}

@@ -35,7 +35,7 @@ export function RestApiPanel({ campaignId }: { campaignId: string }) {
                     ),
                 })}
             </p>
-            <pre className="overflow-x-auto rounded-md bg-black/30 p-3 text-xs text-hud-ink">
+            <pre className="overflow-x-auto rounded-lg bg-black/30 p-3 text-xs text-hud-ink">
                 {curl}
             </pre>
         </HudPanel>

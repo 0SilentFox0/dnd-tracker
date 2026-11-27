@@ -27,7 +27,7 @@ function ReserveList() {
 
         return (
             <div key={side}>
-                <div className="hud-sc flex items-center gap-2 pt-2 text-[13px] tracking-[.1em] text-[var(--hud-muted)]">
+                <div className="hud-sc flex items-center gap-2 pt-2 text-sm tracking-[.1em] text-[var(--hud-muted)]">
                     <SideDot side={side} />
                     {t(label)}
                 </div>
@@ -53,7 +53,7 @@ export function ReserveGroup() {
 
     return (
         <section aria-label={t('aria')}>
-            <h3 className="hud-sc flex h-8 items-center border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
+            <h3 className="hud-sc flex h-8 items-center border-b border-white/[.14] text-base font-bold tracking-[.1em] text-hud-soft">
                 {t('title', { count: reserve.length })}
             </h3>
             <ReserveList />

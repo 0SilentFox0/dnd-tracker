@@ -51,7 +51,7 @@ function ArtifactRow({
                         src={a.icon}
                         name={a.name}
                         size={36}
-                        className="hud-sc size-9 rounded-md border border-hud-line bg-transparent text-inherit"
+                        className="hud-sc size-9 rounded-lg border border-hud-line bg-transparent text-inherit"
                     />
                 </span>
                 <span className="min-w-0">
@@ -132,7 +132,7 @@ export function GrantArtifactDialog({
             }
         >
             {form.isLoading ? (
-                <LoadingState rows={3} />
+                <LoadingState count={3} />
             ) : picked && form.detail ? (
                 <div className="space-y-2">
                     {property && (

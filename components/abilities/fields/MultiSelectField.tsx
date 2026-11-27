@@ -3,6 +3,7 @@
 import type { FieldProps } from './FieldRenderer';
 
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export function MultiSelectField({
     id,
@@ -32,9 +33,11 @@ export function MultiSelectField({
                     key={o.value}
                     type="button"
                     size="sm"
-                    variant={
-                        selected.includes(o.value) ? 'secondary' : 'outline'
-                    }
+                    variant="outline"
+                    className={cn(
+                        selected.includes(o.value) &&
+                            'border-hud-accent text-hud-accent-fg'
+                    )}
                     aria-pressed={selected.includes(o.value)}
                     onClick={() => toggle(o.value)}
                 >

@@ -32,13 +32,13 @@ export function WhatsNewButton() {
             <Button
                 variant="ghost"
                 size="icon"
-                className="relative h-9 w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
+                className="relative w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
                 onClick={() => onOpenChange(true)}
             >
                 <Gift className="h-4 w-4" />
                 <span className="sr-only">{t('ui.button')}</span>
                 {unseen.length > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 min-w-4 rounded-full bg-hud-accent px-1 text-[13px] leading-4 text-hud-accent-ink">
+                    <span className="absolute -top-0.5 -right-0.5 min-w-4 rounded-full bg-hud-accent px-1 text-sm leading-4 text-hud-accent-ink">
                         {unseen.length}
                     </span>
                 )}

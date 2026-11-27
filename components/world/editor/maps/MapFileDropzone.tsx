@@ -90,7 +90,7 @@ export function MapFileDropzone({
                         height={0}
                         sizes="100vw"
                         unoptimized
-                        className="h-auto max-h-40 w-auto rounded object-contain"
+                        className="h-auto max-h-40 w-auto rounded-sm object-contain"
                     />
                 ) : (
                     <ImagePlus className="size-7 text-hud-muted" aria-hidden />

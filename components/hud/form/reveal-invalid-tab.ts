@@ -1,3 +1,5 @@
+'use client';
+
 import { type SyntheticEvent, useRef } from 'react';
 
 const invalidControls = (root: ParentNode) =>

@@ -38,7 +38,6 @@ export function AdminNav() {
             <div className="md:hidden">
                 <HudChipTabs
                     ariaLabel={t('tabs.label')}
-                    size="lg"
                     items={ITEMS.map(({ key, href }) => ({
                         key,
                         href,

@@ -118,7 +118,7 @@ describe('BattleMapPanel', () => {
         fireEvent.click(toggle);
 
         expect(toggle.getAttribute('aria-pressed')).toBe('true');
-        expect(toggle.className).toContain('var(--hud-accent)');
+        expect(toggle.className).toContain('bg-hud-accent/15');
     });
 
     it('гравець не бачить перемикача', () => {

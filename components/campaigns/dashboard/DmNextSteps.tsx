@@ -34,7 +34,7 @@ export function DmNextSteps({
             className="flex flex-col border-b border-hud-rule pb-4"
             data-tour="dashboard.dm-next-steps"
         >
-            <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-ink">
+            <h2 className="hud-sc mb-3 text-sm tracking-[.06em] text-hud-ink">
                 {t('nextSteps.title')}
             </h2>
             <TooltipProvider>
@@ -45,6 +45,7 @@ export function DmNextSteps({
                                 <Button
                                     asChild
                                     variant="outline"
+                                    data-ux-tile
                                     className={TILE}
                                 >
                                     <Link
@@ -66,7 +67,7 @@ export function DmNextSteps({
                             </TooltipContent>
                         </Tooltip>
                     ))}
-                    <Button asChild variant="outline" className={TILE}>
+                    <Button asChild variant="outline" data-ux-tile className={TILE}>
                         <Link
                             href={`/campaigns/${campaignId}/dm/compendium`}
                             aria-label={t('page.compendium.link')}

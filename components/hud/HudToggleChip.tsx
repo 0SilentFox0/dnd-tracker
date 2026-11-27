@@ -1,5 +1,10 @@
 import type { ComponentProps } from 'react';
 
+import {
+    HUD_CHIP_ACTIVE_CLASS,
+    HUD_CHIP_CLASS,
+} from '@/components/hud/page/chip-class';
+import { DISABLED_CLASS } from '@/components/ui/disabled';
 import { cn } from '@/lib/utils';
 
 type HudToggleChipProps = Omit<
@@ -7,12 +12,10 @@ type HudToggleChipProps = Omit<
     'type' | 'aria-pressed'
 > & {
     active: boolean;
-    tall?: boolean;
 };
 
 export function HudToggleChip({
     active,
-    tall = false,
     className,
     ...props
 }: HudToggleChipProps) {
@@ -21,11 +24,10 @@ export function HudToggleChip({
             type="button"
             aria-pressed={active}
             className={cn(
-                tall ? 'h-8' : 'h-7',
-                'rounded-lg border px-2 text-xs ds-interactive hover:border-hud-muted disabled:cursor-not-allowed disabled:opacity-50',
-                active
-                    ? 'border-hud-line bg-hud-panel-2 text-hud-ink shadow-[inset_0_-2px_0_var(--hud-accent)]'
-                    : 'border-hud-line text-hud-muted hover:text-hud-ink',
+                HUD_CHIP_CLASS,
+                'ds-interactive',
+                DISABLED_CLASS,
+                active && HUD_CHIP_ACTIVE_CLASS,
                 className
             )}
             {...props}

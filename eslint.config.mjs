@@ -731,9 +731,10 @@ const eslintConfig = defineConfig([
                                 '!@/lib/hooks/campaigns/useModuleDraft',
                                 '!@/lib/hooks/abilities/useAbilityComposition',
                                 '!@/lib/hooks/auth/useHasSessionCookie',
+                                '!@/lib/hooks/common/useDiceRoller',
                             ],
                             message:
-                                'Хуки — лише з барелю домену (@/lib/hooks/<domain>). useRecipeValues, useBattleMapPlayground, useSpellMechanics, useModuleDraft, useAbilityComposition (тягнуть zod і реєстр правил в entry-чанки) та useHasSessionCookie (барель auth тягне Supabase у чанк лендінгу) лишаються поза барелем.',
+                                'Хуки — лише з барелю домену (@/lib/hooks/<domain>). useRecipeValues, useBattleMapPlayground, useSpellMechanics, useModuleDraft, useAbilityComposition (тягнуть zod і реєстр правил в entry-чанки) та useHasSessionCookie (барель auth тягне Supabase у чанк лендінгу) та useDiceRoller (тягне реєстр систем через dice FX) лишаються поза барелем.',
                         },
                     ],
                 },

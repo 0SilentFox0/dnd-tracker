@@ -3,7 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { cleanIdentity, serverIssueCodes } from './draft-form-helpers';
 
-import { characterKeys } from '@/lib/hooks/characters';
+import type { CharacterTypeValue } from '@/lib/constants/characters';
+import { characterKeys, characterWriteKeys } from '@/lib/hooks/characters';
 import {
     createWfrpDraft,
     updateWfrpDraftIdentity,
@@ -21,6 +22,7 @@ export interface WfrpDraftSubmitOptions {
     speciesId?: string;
     picks: CreationPicks;
     canRun: boolean;
+    dm?: { characterType: CharacterTypeValue; controlledBy: string };
 }
 
 export function useWfrpDraftSubmit({
@@ -30,6 +32,7 @@ export function useWfrpDraftSubmit({
     speciesId,
     picks,
     canRun,
+    dm,
 }: WfrpDraftSubmitOptions) {
     const router = useRouter();
 
@@ -51,15 +54,31 @@ export function useWfrpDraftSubmit({
                 stats: picks.stats,
                 talents: picks.talents,
                 ...(picks.canon && { canon: picks.canon }),
+                ...(dm && {
+                    owner: {
+                        type: dm.characterType,
+                        controlledBy: dm.controlledBy,
+                    },
+                }),
             };
 
             return createWfrpDraft(campaignId, body);
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({
-                queryKey: characterKeys.sheet(campaignId),
-            });
-            router.push(`/campaigns/${campaignId}/character`);
+            const keys = dm
+                ? characterWriteKeys(campaignId)
+                : [characterKeys.sheet(campaignId)];
+
+            await Promise.all(
+                keys.map((queryKey) =>
+                    queryClient.invalidateQueries({ queryKey })
+                )
+            );
+            router.push(
+                dm
+                    ? `/campaigns/${campaignId}/dm/characters?type=${dm.characterType}`
+                    : `/campaigns/${campaignId}/character`
+            );
         },
     });
 

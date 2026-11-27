@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 
 import { HudCard } from '@/components/hud/page';
+import { HudPill } from '@/components/hud/page';
 import { SpellIcon } from '@/components/spells/SpellIcon';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useSpellMechanics } from '@/lib/hooks/spells/useSpellMechanics';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -40,7 +40,10 @@ export function SelectedSpellsList({
             <div className="grid grid-cols-1 gap-3">
                 {selectedSpells.map((spell) => {
                     return (
-                        <HudCard key={spell.id} className="relative min-w-0 overflow-hidden">
+                        <HudCard
+                            key={spell.id}
+                            className="relative min-w-0 overflow-hidden"
+                        >
                             <div className="flex items-start gap-3">
                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted sm:h-16 sm:w-16">
                                     <SpellIcon
@@ -70,20 +73,16 @@ export function SelectedSpellsList({
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-1">
-                                        <Badge
-                                            variant="secondary"
-                                            className="max-w-full whitespace-normal break-words text-left text-xs"
-                                        >
+                                        <HudPill className="max-w-full text-left text-xs break-words whitespace-normal">
                                             {tg(`spellLevels.${spell.level}`)}
-                                        </Badge>
+                                        </HudPill>
                                         {mechanics(spell).map((label) => (
-                                            <Badge
+                                            <HudPill
                                                 key={label}
-                                                variant="outline"
-                                                className="max-w-full whitespace-normal break-words text-left text-xs"
+                                                className="max-w-full text-left text-xs break-words whitespace-normal"
                                             >
                                                 {label}
-                                            </Badge>
+                                            </HudPill>
                                         ))}
                                     </div>
                                 </div>

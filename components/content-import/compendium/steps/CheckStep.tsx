@@ -23,7 +23,7 @@ export function CheckStep({
 
     const [tab, setTab] = useState<ReportTab | null>(null);
 
-    if (!preview || phase === 'previewing') return <LoadingState rows={6} />;
+    if (!preview || phase === 'previewing') return <LoadingState count={6} />;
 
     const { report } = preview;
 

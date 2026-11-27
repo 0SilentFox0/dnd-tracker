@@ -128,13 +128,13 @@ export function SheetIdentityPanel({
                         className="col-start-2 grid min-w-0 content-center gap-1.5 self-center lg:mb-5 lg:pt-2"
                         style={stagger(0)}
                     >
-                        <p className="hud-title flex flex-wrap text-sm text-hud-muted lg:text-[19px]">
+                        <p className="hud-title flex flex-wrap text-sm text-hud-muted lg:text-xl">
                             {who.map((part, i) => (
                                 <span key={i} className="whitespace-nowrap">
                                     {i > 0 && (
                                         <span
                                             aria-hidden
-                                            className="px-1 text-hud-line lg:px-2"
+                                            className="px-1 text-hud-faint-deco lg:px-2"
                                         >
                                             ·
                                         </span>
@@ -149,7 +149,7 @@ export function SheetIdentityPanel({
                                 </span>
                             ))}
                         </p>
-                        <h1 className="hud-title text-[28px] leading-none text-balance [overflow-wrap:anywhere] text-hud-ink lg:text-[clamp(40px,4.4vw,60px)] lg:leading-[.95]">
+                        <h1 className="hud-title text-2xl leading-none text-balance [overflow-wrap:anywhere] text-hud-ink lg:text-[56px] lg:leading-[.95]">
                             {shown.name}
                         </h1>
                         {lead && (
@@ -170,7 +170,7 @@ export function SheetIdentityPanel({
                                             aria-expanded={open}
                                             aria-controls="sheet-lead"
                                             onClick={() => setOpen((v) => !v)}
-                                            className="min-h-10 cursor-pointer text-[15px] font-bold text-hud-accent-fg underline decoration-hud-line decoration-2 underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+                                            className="min-h-10 cursor-pointer text-base font-bold text-hud-accent-fg underline decoration-hud-line decoration-2 underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
                                         >
                                             {open
                                                 ? tc('showLess')
@@ -181,7 +181,7 @@ export function SheetIdentityPanel({
                                         <HudButton
                                             type="button"
                                             onClick={onHistory}
-                                            className="min-h-10 cursor-pointer text-[15px] font-bold text-hud-ink underline decoration-hud-line decoration-2 underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+                                            className="min-h-10 cursor-pointer text-base font-bold text-hud-ink underline decoration-hud-line decoration-2 underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
                                         >
                                             {t('tabs.story')}
                                         </HudButton>

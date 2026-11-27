@@ -2,21 +2,27 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
+import { BrokenD20 } from '@/components/common/illustrations';
 import { EmptyState } from '@/components/common/states';
 import { HudPage, HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import { useMarkNotFound } from '@/lib/hooks/common';
+import { useHydrated, useMarkNotFound } from '@/lib/hooks/common';
 import { campaignIdFromPath } from '@/lib/utils/campaigns/notice';
 
 export default function NotFound() {
     const t = useTranslations('common');
 
+    const router = useRouter();
+
     const pathname = usePathname();
 
-    const campaignId = campaignIdFromPath(pathname);
+    const hydrated = useHydrated();
+
+    // the 404 SSR has no real pathname, so pathname UI waits for hydration
+    const campaignId = hydrated ? campaignIdFromPath(pathname) : null;
 
     const isCampaignPage =
         !!campaignId && pathname.split('/').filter(Boolean).length === 2;
@@ -36,12 +42,24 @@ export default function NotFound() {
     }, [title]);
 
     return (
-        <HudPage width="md">
+        <HudPage width="narrow">
             <HudPanel>
                 <EmptyState
+                    illustration={<BrokenD20 />}
                     title={title}
+                    description={t('notFound.description')}
                     action={
-                        <div className="flex flex-wrap justify-center gap-2">
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                            <Button
+                                variant="outline"
+                                onClick={() =>
+                                    window.history.length > 1
+                                        ? router.back()
+                                        : router.push('/campaigns')
+                                }
+                            >
+                                {t('notFound.back')}
+                            </Button>
                             {campaignId && !isCampaignPage && (
                                 <Button asChild>
                                     <Link href={`/campaigns/${campaignId}`}>

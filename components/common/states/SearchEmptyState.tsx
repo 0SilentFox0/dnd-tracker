@@ -1,8 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { SearchX } from 'lucide-react';
 
+import { LanternSearch } from '@/components/common/illustrations';
 import { EmptyState } from '@/components/common/states';
 import { Button } from '@/components/ui/button';
 
@@ -17,7 +17,7 @@ export function SearchEmptyState({
 
     return (
         <EmptyState
-            icon={SearchX}
+            illustration={<LanternSearch />}
             title={t('noResults', { query: query.trim() })}
             action={
                 <Button variant="outline" onClick={onClear}>

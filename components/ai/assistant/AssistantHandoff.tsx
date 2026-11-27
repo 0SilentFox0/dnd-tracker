@@ -83,7 +83,7 @@ export function AssistantHandoff({
     return (
         <section
             aria-label={t('handoff.ariaLabel')}
-            className="space-y-3 rounded border p-3"
+            className="space-y-3 rounded-sm border p-3"
         >
             <p>{handoff.reason}</p>
             <Link className="underline" href={handoff.href}>

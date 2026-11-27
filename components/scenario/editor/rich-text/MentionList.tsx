@@ -54,7 +54,7 @@ export function MentionList({
 
     return (
         <div
-            className="hud-surface max-h-72 w-72 overflow-y-auto rounded-md border border-[#3a2f20] bg-[#14110d] p-1 text-sm shadow-xl"
+            className="hud-surface max-h-72 w-72 overflow-y-auto rounded-lg border border-[#3a2f20] bg-[#14110d] p-1 text-sm shadow-xl"
             role="listbox"
         >
             {items.length === 0 && (
@@ -68,7 +68,7 @@ export function MentionList({
                     type="button"
                     role="option"
                     aria-selected={i === index}
-                    className={`flex w-full items-center justify-between gap-2 rounded px-2 py-1.5 text-left ${i === index ? 'bg-white/10' : ''}`}
+                    className={`flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-left ${i === index ? 'bg-white/10' : ''}`}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => pick(item)}
                 >

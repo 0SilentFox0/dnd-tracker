@@ -3,7 +3,7 @@
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 
-const SLIDER = 'w-full accent-hud-accent disabled:opacity-40';
+const SLIDER = 'w-full accent-hud-accent disabled:opacity-50';
 
 export function RangeRow({
     id,

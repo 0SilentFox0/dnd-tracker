@@ -200,6 +200,56 @@ describe.each(PALETTES)('%s palette WCAG contrast', (id) => {
         expect(failures).toEqual([]);
     });
 
+    it('faint passes 4.5 on panel and page', () => {
+        for (const surface of ['--palette-panel', '--palette-page'])
+            expect(
+                contrastRatio(tokens['--hud-faint'], tokens[surface])
+            ).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('accent-2 passes on panel and panel-2', () => {
+        for (const surface of ['--palette-panel', '--palette-panel-2'])
+            expect(
+                contrastRatio(tokens['--hud-accent-2'], tokens[surface])
+            ).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('crimson-ink on hp and hp-2 is at least 5', () => {
+        for (const fill of ['--hud-hp', '--hud-hp-2'])
+            expect(
+                contrastRatio(tokens['--hud-crimson-ink'], tokens[fill])
+            ).toBeGreaterThanOrEqual(5);
+    });
+
+    it('danger, info and good pass on panel', () => {
+        for (const token of ['--hud-danger', '--hud-info', '--hud-good'])
+            expect(
+                contrastRatio(tokens[token], tokens['--palette-panel'])
+            ).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('muted on inset (placeholder) passes 4.5', () => {
+        expect(
+            contrastRatio(tokens['--hud-muted'], tokens['--palette-inset'])
+        ).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('faint-deco is a visible divider on panel', () => {
+        expect(
+            contrastRatio(tokens['--hud-faint-deco'], tokens['--palette-panel'])
+        ).toBeGreaterThanOrEqual(1.5);
+    });
+
+    it('derives sheet hp colours from hud-hp', () => {
+        const motion = readFileSync(
+            join(process.cwd(), 'app/motion.css'),
+            'utf8'
+        );
+
+        expect(motion).toContain('--sheet-hp: var(--hud-hp)');
+        expect(motion).not.toMatch(/--sheet-hp[\w-]*:[^;]*--hud-danger/);
+    });
+
     it('exposes the same hex values through PALETTE_PREVIEW', () => {
         expect(PALETTE_PREVIEW[id]).toEqual({
             page: tokens['--palette-page'],

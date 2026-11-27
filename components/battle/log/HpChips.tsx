@@ -11,7 +11,7 @@ export function HpChips({ hp }: { hp: LogEntryView['hp'] }) {
                 <span
                     key={h.id}
                     className={cn(
-                        'rounded-sm px-1.5 text-[12px] leading-[18px]',
+                        'rounded-sm px-1.5 text-xs leading-[18px]',
                         h.delta < 0
                             ? 'bg-hud-danger/15 text-hud-bad'
                             : 'bg-hud-good-dim/15 text-hud-good'

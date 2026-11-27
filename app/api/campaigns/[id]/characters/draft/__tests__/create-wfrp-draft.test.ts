@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { prisma } from '@/lib/db';
+import { lockPlayerDrafts } from '@/lib/server/characters/draft-lock';
 import { resolveAvatarForPersistence } from '@/lib/supabase/avatar-storage';
 import * as apiAuth from '@/lib/utils/api/api-auth';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
@@ -26,6 +27,8 @@ vi.mock('@/lib/db', () => {
             })),
         },
         characterInventory: { create: vi.fn() },
+        user: { findUnique: vi.fn() },
+        campaignMember: { findFirst: vi.fn() },
         race: { findFirst: vi.fn() },
         career: { findMany: vi.fn() },
         feat: { findMany: vi.fn() },
@@ -80,9 +83,14 @@ const tier = (over: object = {}) => ({
     ...over,
 });
 
-const asUser = (role: string, rules: object = LEGACY_RULES) =>
+const asUser = (
+    role: string,
+    rules: object = LEGACY_RULES,
+    isDM = false
+) =>
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
         userId: 'u1',
+        isDM,
         campaign: {
             id: 'camp',
             maxLevel: 20,
@@ -320,6 +328,88 @@ describe('createWfrpDraft', () => {
 
             expect(res.status).toBe(400);
             expect((await res.json()).issues).toContain('CAREER_SKILLS');
+            expect(prisma.character.create).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('DM creation', () => {
+        const dmBody = (owner: object) => body({ owner });
+
+        const created = () =>
+            (
+                vi.mocked(prisma.character.create).mock.calls[0][0] as {
+                    data: Record<string, unknown>;
+                }
+            ).data;
+
+        beforeEach(() => {
+            asUser('dm', LEGACY_RULES, true);
+            vi.mocked(prisma.user.findUnique).mockResolvedValue({
+                id: 'p1',
+            } as never);
+            vi.mocked(prisma.campaignMember.findFirst).mockResolvedValue({
+                id: 'm1',
+            } as never);
+        });
+
+        it('creates an active player hero for the chosen member', async () => {
+            const res = await post(
+                dmBody({ type: 'player', controlledBy: 'p1' })
+            );
+
+            expect(res.status).toBe(200);
+            expect(created()).toMatchObject({
+                type: 'player',
+                status: 'active',
+                controlledBy: 'p1',
+            });
+            expect(lockPlayerDrafts).not.toHaveBeenCalled();
+        });
+
+        it('creates an npc hero controlled by the DM', async () => {
+            const res = await post(
+                dmBody({ type: 'npc_hero', controlledBy: '' })
+            );
+
+            expect(res.status).toBe(200);
+            expect(created()).toMatchObject({
+                type: 'npc_hero',
+                status: 'active',
+                controlledBy: 'u1',
+            });
+        });
+
+        it('ignores the one-draft limit for the DM path', async () => {
+            vi.mocked(prisma.character.count).mockResolvedValue(1);
+
+            const res = await post(
+                dmBody({ type: 'player', controlledBy: 'p1' })
+            );
+
+            expect(res.status).toBe(200);
+        });
+
+        it('a player owner outside the campaign -> 400, no row', async () => {
+            vi.mocked(prisma.campaignMember.findFirst).mockResolvedValue(
+                null as never
+            );
+
+            const res = await post(
+                dmBody({ type: 'player', controlledBy: 'p1' })
+            );
+
+            expect(res.status).toBe(400);
+            expect(prisma.character.create).not.toHaveBeenCalled();
+        });
+
+        it('a non-DM sending owner -> 403', async () => {
+            asUser('player');
+
+            const res = await post(
+                dmBody({ type: 'player', controlledBy: 'p1' })
+            );
+
+            expect(res.status).toBe(403);
             expect(prisma.character.create).not.toHaveBeenCalled();
         });
     });

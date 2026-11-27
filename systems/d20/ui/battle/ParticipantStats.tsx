@@ -42,7 +42,7 @@ export function ParticipantStats({
                 known.evidence.map((e, i) => (
                     <div
                         key={i}
-                        className="flex min-h-8 items-center text-[13px] text-[var(--hud-muted)]"
+                        className="flex min-h-8 items-center text-sm text-[var(--hud-muted)]"
                     >
                         {t('evidence', {
                             hit: e.hit ? 'hit' : 'miss',

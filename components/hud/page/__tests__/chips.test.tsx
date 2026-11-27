@@ -17,11 +17,18 @@ describe('HudStatChip', () => {
 });
 
 describe('HudPill', () => {
-    it('renders metal tones with the metal-fill class', () => {
-        render(<HudPill tone="gold">Активний</HudPill>);
+    it('renders the role tone with the metal-fill class', () => {
+        render(<HudPill tone="role">Активний</HudPill>);
 
         expect(screen.getByText('Активний').className).toContain('metal-gold');
         expect(screen.getByText('Активний').className).toContain('metal-fill');
+    });
+
+    it('is 24px tall with a 4px radius', () => {
+        render(<HudPill>x</HudPill>);
+
+        expect(screen.getByText('x').className).toContain('h-6');
+        expect(screen.getByText('x').className).toContain('rounded-sm');
     });
 
     it('renders an icon before the text', () => {

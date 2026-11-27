@@ -34,4 +34,18 @@ describe('HudShellHeader', () => {
 
         expect(screen.getByRole('button', { name: 'menu' })).toBeTruthy();
     });
+
+    it('gives the menu trigger a fixed id so SSR and client agree', () => {
+        render(
+            <HudShellHeader
+                menu={{ label: 'menu', content: <div>items</div> }}
+                breadcrumb={null}
+                actions={null}
+            />
+        );
+
+        expect(screen.getByRole('button', { name: 'menu' }).id).toBe(
+            'hud-shell-menu-trigger'
+        );
+    });
 });

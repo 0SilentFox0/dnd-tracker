@@ -84,6 +84,7 @@ export function BonusActionPicker({
                         canOffHandAttack(participant, battle.rules) && (
                             <HudButton
                                 type="button"
+                                data-ux-tile
                                 disabled={isPending}
                                 onClick={() => {
                                     onOpenChange(false);
@@ -105,6 +106,7 @@ export function BonusActionPicker({
                                 <HudButton
                                     key={a.key}
                                     type="button"
+                                    data-ux-tile
                                     disabled={cooldownLeft > 0 || isPending}
                                     onClick={() => pick(a)}
                                     className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left disabled:opacity-50"
@@ -115,7 +117,7 @@ export function BonusActionPicker({
                                             alt=""
                                             width={40}
                                             height={40}
-                                            className="size-10 shrink-0 rounded object-cover"
+                                            className="size-10 shrink-0 rounded-sm object-cover"
                                         />
                                     ) : (
                                         <Zap className="size-10 shrink-0 p-2 text-hud-accent-fg" />
@@ -126,7 +128,10 @@ export function BonusActionPicker({
                                             {cooldownLeft > 0 && (
                                                 <span className="ml-2 text-xs font-normal text-hud-soft">
                                                     {t('bonus.cooldown', {
-                                                        duration: formatDuration(cooldownLeft),
+                                                        duration:
+                                                            formatDuration(
+                                                                cooldownLeft
+                                                            ),
                                                     })}
                                                 </span>
                                             )}
@@ -175,7 +180,7 @@ export function BonusActionPicker({
                             type="button"
                             disabled={picked.length === 0 || isPending}
                             onClick={aiming.confirm}
-                            className="hud-sc flex h-12 w-full items-center justify-center border border-hud-accent disabled:opacity-40"
+                            className="hud-sc flex h-12 w-full items-center justify-center border border-hud-accent disabled:opacity-50"
                         >
                             {t('bonus.confirm', { picked: picked.length, max })}
                         </HudButton>

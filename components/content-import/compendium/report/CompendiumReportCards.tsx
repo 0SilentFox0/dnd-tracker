@@ -73,7 +73,7 @@ export function BlockerCard({
         <li className="space-y-2 rounded-lg bg-hud-bad/10 p-2">
             <p>
                 <strong>{group.title}</strong>{' '}
-                <HudPill tone="muted">
+                <HudPill tone="meta">
                     {t('report.groupRecords', { count: group.items.length })}
                 </HudPill>
             </p>
@@ -143,7 +143,7 @@ export function IssueGroupCard({
                 summary={
                     <span>
                         <strong>{group.title}</strong>{' '}
-                        <HudPill tone="muted">{group.items.length}</HudPill>
+                        <HudPill tone="meta">{group.items.length}</HudPill>
                     </span>
                 }
             >
@@ -210,11 +210,11 @@ export function RowCard({
                 summary={
                     <span className="space-y-1">
                         {kind && (
-                            <span className="block text-[11px] text-hud-muted uppercase">
+                            <span className="block text-xs text-hud-muted uppercase">
                                 {kind}
                             </span>
                         )}
-                        <span className="hud-sc block text-[15px] break-words text-hud-ink">
+                        <span className="hud-sc block text-base break-words text-hud-ink">
                             {kind ? `«${name}»${owner}` : name}
                         </span>
                         {source && (
@@ -226,7 +226,7 @@ export function RowCard({
                             <HudPill
                                 tone={
                                     row.status === 'unchanged'
-                                        ? 'muted'
+                                        ? 'meta'
                                         : 'accent'
                                 }
                             >
@@ -234,7 +234,7 @@ export function RowCard({
                             </HudPill>
                             <HudPill>{coverageLabel(t, row.coverage)}</HudPill>
                             {actions.length > 0 && (
-                                <HudPill tone="bone">
+                                <HudPill tone="meta">
                                     {t('report.manualActionsCount', {
                                         count: actions.length,
                                     })}

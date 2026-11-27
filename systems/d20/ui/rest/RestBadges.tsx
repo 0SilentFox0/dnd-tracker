@@ -15,12 +15,12 @@ export function RestBadges({ sheet }: RestBadgesProps) {
     return (
         <>
             {rest.exhaustion > 0 && (
-                <HudPill tone="silver">
+                <HudPill tone="npc">
                     {t('exhaustion', { level: rest.exhaustion })}
                 </HudPill>
             )}
             {rest.inspiration && (
-                <HudPill tone="gold">{t('inspiration')}</HudPill>
+                <HudPill tone="accent">{t('inspiration')}</HudPill>
             )}
         </>
     );

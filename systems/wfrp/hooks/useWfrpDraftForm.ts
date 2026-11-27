@@ -14,7 +14,11 @@ import { useWfrpDraftRolls } from './useWfrpDraftRolls';
 import { useWfrpDraftSubmit } from './useWfrpDraftSubmit';
 import { useWfrpSpecies } from './useWfrpSpecies';
 
-import { useCampaignRules } from '@/lib/hooks/campaigns';
+import {
+    CharacterType,
+    type CharacterTypeValue,
+} from '@/lib/constants/characters';
+import { useCampaignMembers, useCampaignRules } from '@/lib/hooks/campaigns';
 import { useRollReveal } from '@/lib/hooks/characters';
 import { useFeats } from '@/lib/hooks/feats';
 import { useRaces } from '@/lib/hooks/races';
@@ -42,6 +46,7 @@ export interface WfrpDraftFormOptions {
     campaignId: string;
     characterId?: string;
     initialIdentity?: WfrpDraftIdentityInput;
+    dm?: { characterType: CharacterTypeValue };
     rng?: Rng;
 }
 
@@ -49,6 +54,7 @@ export function useWfrpDraftForm({
     campaignId,
     characterId,
     initialIdentity,
+    dm,
     rng = cryptoRandom,
 }: WfrpDraftFormOptions) {
     const { system } = useRuleSystem({ campaignId });
@@ -72,6 +78,12 @@ export function useWfrpDraftForm({
     const reveal = useRollReveal<string>();
 
     const identityOnly = !!characterId;
+
+    const [ownerId, setOwnerId] = useState('');
+
+    const { members } = useCampaignMembers(dm ? campaignId : '');
+
+    const needsPlayer = dm?.characterType === CharacterType.PLAYER;
 
     const steps = identityOnly
         ? (['identity'] as WfrpDraftStepId[])
@@ -171,7 +183,8 @@ export function useWfrpDraftForm({
             draft.talents.rolled.length === talentCount,
         identity:
             identity.name.trim().length > 0 &&
-            (identityOnly || (!!preview && preview.ok)),
+            (identityOnly || (!!preview && preview.ok)) &&
+            (!needsPlayer || !!ownerId),
     };
 
     const stepErrors = (id: WfrpDraftStepId) =>
@@ -209,6 +222,10 @@ export function useWfrpDraftForm({
         speciesId,
         picks,
         canRun: valid.identity,
+        dm: dm && {
+            characterType: dm.characterType,
+            controlledBy: needsPlayer ? ownerId : '',
+        },
     });
 
     return {
@@ -320,5 +337,11 @@ export function useWfrpDraftForm({
         },
         reveal,
         submit,
+        dm: dm && {
+            needsPlayer,
+            members,
+            ownerId,
+            setOwnerId,
+        },
     };
 }

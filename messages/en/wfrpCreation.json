@@ -80,6 +80,8 @@
   "identity": {
     "hint": "Name and story. Mechanics are already set.",
     "name": "Name",
+    "player": "Player",
+    "playerPlaceholder": "Choose a player",
     "namePlaceholder": "What is the hero called?",
     "alignment": "Alignment",
     "alignmentPlaceholder": "Choose an alignment",

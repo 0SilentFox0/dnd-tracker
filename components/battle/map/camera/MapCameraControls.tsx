@@ -48,7 +48,7 @@ export function MapCameraControls({
                 variant="ghost"
                 aria-label={t('zoomOut')}
                 onClick={onZoomOut}
-                className={cn(phone && 'size-11')}
+                className={cn(phone && '')}
             >
                 <Minus />
             </Button>
@@ -56,7 +56,7 @@ export function MapCameraControls({
                 role="status"
                 aria-label={t('zoomLevel')}
                 className={cn(
-                    'min-w-12 px-1 text-center text-[13px] text-[var(--ink)] tabular-nums',
+                    'min-w-12 px-1 text-center text-sm text-[var(--ink)] tabular-nums',
                     phone && 'sr-only'
                 )}
             >
@@ -68,7 +68,7 @@ export function MapCameraControls({
                 variant="ghost"
                 aria-label={t('zoomIn')}
                 onClick={onZoomIn}
-                className={cn(phone && 'size-11')}
+                className={cn(phone && '')}
             >
                 <Plus />
             </Button>
@@ -81,7 +81,7 @@ export function MapCameraControls({
                     aria-pressed={userMoved}
                     onClick={onRecenter}
                     className={cn(
-                        phone && 'size-11',
+                        phone && '',
                         userMoved && 'text-hud-accent-fg'
                     )}
                 >

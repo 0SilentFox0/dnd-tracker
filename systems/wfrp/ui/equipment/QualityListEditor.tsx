@@ -79,9 +79,7 @@ export function QualityListEditor({
     };
 
     const patchRef = (index: number, patch: Partial<QualityRef>) =>
-        onChange(
-            value.map((r, i) => (i === index ? { ...r, ...patch } : r))
-        );
+        onChange(value.map((r, i) => (i === index ? { ...r, ...patch } : r)));
 
     const setValue = (index: number, next: number | undefined) =>
         patchRef(index, { value: next });
@@ -196,7 +194,6 @@ export function QualityListEditor({
                                 type="button"
                                 size="icon"
                                 variant="ghost"
-                                className="size-11"
                                 aria-label={t('removeQuality', {
                                     name: tq(r.key),
                                 })}
@@ -224,7 +221,6 @@ export function QualityListEditor({
                 <Button
                     type="button"
                     variant="outline"
-                    className="min-h-11"
                     onClick={add}
                     disabled={!pick}
                 >

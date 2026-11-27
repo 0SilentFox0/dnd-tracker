@@ -88,7 +88,7 @@ export function AlignmentGrid({
                                             <span aria-hidden className="block">
                                                 {t(`${key}.short`)}
                                             </span>
-                                            <span className="block text-[0.65rem] font-normal leading-tight text-[var(--hud-muted)]">
+                                            <span className="block text-xs font-normal leading-tight text-[var(--hud-muted)]">
                                                 {t(`${key}.name`)}
                                             </span>
                                         </>

@@ -42,23 +42,23 @@ export function TurnCountdown({
 
     return (
         <div className="relative mt-2 flex min-h-[52px] flex-wrap items-center gap-x-3 gap-y-1 overflow-hidden border border-[var(--enemy)] bg-[var(--enemy)]/20 px-3.5 py-1.5">
-            <span className="flex-1 text-[15px] text-[var(--ink)]">
+            <span className="flex-1 text-base text-[var(--ink)]">
                 {t.rich('endsIn', { left, b: (chunks) => <b>{chunks}</b> })}
-                <span role="alert" className="block text-[12px] opacity-80">
+                <span role="alert" className="block text-xs opacity-80">
                     {t('reason')}
                 </span>
             </span>
             <HudButton
                 type="button"
                 onClick={onStay}
-                className="hud-sc h-9 border border-white/40 px-3.5 text-[15px] font-bold text-[var(--ink)]"
+                className="hud-sc h-10 border border-white/40 px-3.5 text-base font-bold text-[var(--ink)]"
             >
                 {t('stay')}
             </HudButton>
             <HudButton
                 type="button"
                 onClick={onDisable}
-                className="hud-sc h-9 border border-white/20 px-3 text-[13px] text-[var(--ink)]"
+                className="hud-sc h-8 border border-white/20 px-3 text-sm text-[var(--ink)]"
             >
                 {t('disable')}
             </HudButton>

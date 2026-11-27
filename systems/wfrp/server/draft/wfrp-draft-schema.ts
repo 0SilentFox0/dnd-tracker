@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { GoalKind } from '@/lib/constants/characters';
+import { CharacterType, GoalKind } from '@/lib/constants/characters';
 import type {
     WfrpDraftIdentityInput,
     WfrpDraftInput,
@@ -46,6 +46,13 @@ const canon = z
     })
     .optional();
 
+const owner = z
+    .object({
+        type: z.enum([CharacterType.PLAYER, CharacterType.NPC_HERO]),
+        controlledBy: z.string().max(100),
+    })
+    .optional();
+
 const identity = {
     name: z.string().trim().min(1).max(100),
     alignment: z.string().max(100).optional(),
@@ -76,4 +83,5 @@ export const wfrpDraftSchema = z.object({
     ]),
     talents: z.array(z.string().min(1).max(100)).max(5),
     canon,
+    owner,
 }) satisfies z.ZodType<WfrpDraftInput>;

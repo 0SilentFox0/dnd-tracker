@@ -33,7 +33,7 @@ function IconButton({
             aria-label={label}
             disabled={disabled}
             onClick={onClick}
-            className="flex size-7 items-center justify-center rounded text-hud-muted hover:bg-white/10 hover:text-hud-bone disabled:opacity-30"
+            className="flex size-7 items-center justify-center rounded-sm text-hud-muted hover:bg-white/10 hover:text-hud-bone disabled:opacity-50"
         >
             <Icon className="size-4" />
         </HudButton>
@@ -56,7 +56,7 @@ export function SlideGrid({
             {slides.map((slide, i) => (
                 <li
                     key={slide.id}
-                    className="overflow-hidden rounded border border-hud-rule bg-black/40"
+                    className="overflow-hidden rounded-sm border border-hud-rule bg-black/40"
                 >
                     <HudButton
                         type="button"
@@ -71,13 +71,13 @@ export function SlideGrid({
                             height={180}
                             className="size-full object-contain"
                         />
-                        <span className="absolute top-1 left-1 rounded bg-black/70 px-1.5 text-xs text-hud-bone">
+                        <span className="absolute top-1 left-1 rounded-sm bg-black/70 px-1.5 text-xs text-hud-bone">
                             {i + 1}
                         </span>
                         {slide.kind === 'puzzle' && (
                             <span
                                 aria-label={t('grid.puzzle')}
-                                className="absolute bottom-1 left-1 rounded bg-black/70 p-0.5 text-hud-ink"
+                                className="absolute bottom-1 left-1 rounded-sm bg-black/70 p-0.5 text-hud-ink"
                             >
                                 <Puzzle className="size-3.5" />
                             </span>
@@ -85,7 +85,7 @@ export function SlideGrid({
                         {slide.trackId && (
                             <span
                                 aria-label={t('grid.hasTrack')}
-                                className="absolute top-1 right-1 rounded bg-black/70 p-0.5 text-hud-ink"
+                                className="absolute top-1 right-1 rounded-sm bg-black/70 p-0.5 text-hud-ink"
                             >
                                 <Music className="size-3.5" />
                             </span>

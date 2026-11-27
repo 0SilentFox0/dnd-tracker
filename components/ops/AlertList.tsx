@@ -3,14 +3,14 @@
 import { useFormatter, useTranslations } from 'next-intl';
 import { OctagonAlert, TriangleAlert } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
+import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import type { OpsAlertsResponse, OpsMuteMinutes } from '@/types/ops';
 
 const BADGE = {
-    ok: 'secondary',
-    warn: 'outline',
-    crit: 'destructive',
+    ok: 'meta',
+    warn: 'accent',
+    crit: 'danger',
 } as const;
 
 export function AlertList({
@@ -56,8 +56,8 @@ export function AlertList({
                             >
                                 <div className="min-w-0 space-y-1">
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <Badge
-                                            variant={BADGE[r.status]}
+                                        <HudPill
+                                            tone={BADGE[r.status]}
                                             className="gap-1"
                                         >
                                             {r.status === 'crit' ? (
@@ -72,7 +72,7 @@ export function AlertList({
                                                 />
                                             )}
                                             {t(`status.${r.status}`)}
-                                        </Badge>
+                                        </HudPill>
                                         <code className="text-sm">{r.id}</code>
                                     </div>
                                     <p className="text-base text-muted-foreground">

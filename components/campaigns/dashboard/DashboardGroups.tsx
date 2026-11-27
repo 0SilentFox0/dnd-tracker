@@ -15,8 +15,10 @@ import {
 } from '@/lib/constants/campaign-dashboard';
 import { NOTIFICATION_TILE_TYPES } from '@/lib/constants/notifications';
 import { useNotifications } from '@/lib/hooks/notifications';
+import { ruleSystemLabelKey } from '@/lib/i18n/system-scope';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { hasUnread } from '@/lib/utils/notifications/select';
+import { composition } from '@/lib/utils/rules/systems/catalog';
 
 const GRID = 'grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3';
 
@@ -41,6 +43,8 @@ export function DashboardGroups({
     libraryCounts?: Record<string, number>;
 }) {
     const t = useTranslator('dashboard');
+
+    const tTerms = useTranslator('gameTerms');
 
     const isPlayer = !isDM && !isDemo;
 
@@ -74,16 +78,32 @@ export function DashboardGroups({
                   })
                 : sectionSubtitle;
 
+        const rulesSystem = s.key === 'rules' ? context.system : undefined;
+
+        const moduleCount = rulesSystem
+            ? composition(rulesSystem).modules.length
+            : 0;
+
         return (
             <HudTile
                 key={s.key}
                 href={s.href(campaignId)}
                 icon={<Icon className="size-5" />}
                 title={t(`sections.${s.key}.title`)}
-                subtitle={subtitle}
+                subtitle={
+                    rulesSystem
+                        ? tTerms(ruleSystemLabelKey(rulesSystem.key))
+                        : subtitle
+                }
                 badge={
-                    libraryCounts?.[s.key] !== undefined ? (
-                        <HudPill tone="muted">{libraryCounts[s.key]}</HudPill>
+                    rulesSystem ? (
+                        moduleCount > 0 ? (
+                            <HudPill tone="meta">
+                                {t('rulesModules', { count: moduleCount })}
+                            </HudPill>
+                        ) : undefined
+                    ) : libraryCounts?.[s.key] !== undefined ? (
+                        <HudPill tone="meta">{libraryCounts[s.key]}</HudPill>
                     ) : isPlayer &&
                       hasUnread(
                           notifications,
@@ -111,11 +131,11 @@ export function DashboardGroups({
         <div className="space-y-4">
             {mainItems.length > 0 && (
                 <div
-                    className="border-hud-rule space-y-3 border-b pb-4"
+                    className="space-y-3 border-b border-hud-rule pb-4"
                     data-tour="dashboard.sections"
                 >
                     {isPlayer && (
-                        <h2 className="hud-sc text-hud-ink text-[13px] tracking-[.06em]">
+                        <h2 className="hud-sc text-sm tracking-[.06em] text-hud-ink">
                             {t('groups.player')}
                         </h2>
                     )}
@@ -124,10 +144,10 @@ export function DashboardGroups({
             )}
             {libraryItems.length > 0 && (
                 <div
-                    className="border-hud-rule space-y-3 border-b pb-4"
+                    className="space-y-3 border-b border-hud-rule pb-4"
                     data-tour="dashboard.group-libraries"
                 >
-                    <h2 className="hud-sc text-hud-ink text-[13px] tracking-[.06em]">
+                    <h2 className="hud-sc text-sm tracking-[.06em] text-hud-ink">
                         {t('groups.libraries')}
                     </h2>
                     <div className={libraryGrid(libraryItems.length)}>
