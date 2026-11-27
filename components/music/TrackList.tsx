@@ -25,6 +25,7 @@ export interface TrackListActions {
     onEdit(track: CampaignTrack): void;
     onDelete(track: CampaignTrack): void;
     onMove(id: string, dir: -1 | 1): void;
+    onDuration?(id: string, sec: number): void;
 }
 
 function kindLabel(track: CampaignTrack, fileLabel: string) {
@@ -106,7 +107,10 @@ export function TrackList({
                                 <span className="rounded bg-white/5 px-1.5 py-0.5">
                                     {kindLabel(track, fileKind)}
                                 </span>
-                                <TrackDuration track={track} />
+                                <TrackDuration
+                                    track={track}
+                                    onDuration={actions.onDuration}
+                                />
                                 {failed && (
                                     <span
                                         role="alert"

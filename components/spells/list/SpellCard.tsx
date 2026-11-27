@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ChevronDown, Copy, Move, Pencil, Sparkles, X } from 'lucide-react';
+import { ChevronDown, Copy, type LucideIcon, Move, Pencil, Sparkles, X } from 'lucide-react';
 
 import { SpellPrintCard } from './SpellPrintCard';
 
@@ -40,6 +40,57 @@ interface SpellCardProps {
     'data-tour'?: string;
 }
 
+function SpellCardDetails({
+    spell,
+    campaignId,
+    groupName,
+    GroupIcon,
+}: {
+    spell: Spell;
+    campaignId: string;
+    groupName: string;
+    GroupIcon: LucideIcon;
+}) {
+    const t = useTranslations('spells.card');
+
+    const { copied, copy } = useCopyToClipboard();
+
+    const descriptionDoc = useSpellDescriptionDoc(spell.description ?? '');
+
+    const handleCopyId = () => void copy(spell.id);
+
+    return (
+        <>
+            <div className="flex-1 text-xs text-hud-muted [&_p]:mb-1.5">
+                <ScenarioRichText doc={descriptionDoc} campaignId={campaignId} />
+            </div>
+
+            <SpellComponentsLine spell={spell} />
+
+            <div className="flex min-w-0 items-center gap-1.5 border-t border-hud-raised pt-1.5 text-[11px] text-hud-muted">
+                <GroupIcon className="size-3 shrink-0" />
+                <span className="truncate">{groupName}</span>
+                <code
+                    className="ml-auto max-w-[45%] truncate font-mono text-[10px]"
+                    title={spell.id}
+                >
+                    {copied ? t('copied') : spell.id}
+                </code>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-6 shrink-0 text-hud-muted"
+                    onClick={handleCopyId}
+                    aria-label={copied ? t('copied') : t('copyId')}
+                    title={copied ? t('copied') : t('copyId')}
+                >
+                    <Copy className="size-3" />
+                </Button>
+            </div>
+        </>
+    );
+}
+
 const ICON_BTN = 'size-7 shrink-0 text-hud-muted hover:text-hud-ink';
 
 export function SpellCard({
@@ -61,19 +112,13 @@ export function SpellCard({
 
     const mechanics = useSpellMechanics();
 
-    const { copied, copy } = useCopyToClipboard();
-
     const [expanded, setExpanded] = useState(false);
-
-    const descriptionDoc = useSpellDescriptionDoc(spell.description ?? '');
 
     if (printMode) return <SpellPrintCard spell={spell} />;
 
     const groupName = spell.spellGroup?.name || tg('ungrouped.spellGroup');
 
     const GroupIcon = getSpellGroupIcon(spell.spellGroup);
-
-    const handleCopyId = () => void copy(spell.id);
 
     return (
         <HudCard
@@ -220,37 +265,12 @@ export function SpellCard({
             </div>
 
             {expanded && (
-                <>
-                    <div className="flex-1 text-xs text-hud-muted [&_p]:mb-1.5">
-                        <ScenarioRichText
-                            doc={descriptionDoc}
-                            campaignId={campaignId}
-                        />
-                    </div>
-
-                    <SpellComponentsLine spell={spell} />
-
-                    <div className="flex min-w-0 items-center gap-1.5 border-t border-hud-raised pt-1.5 text-[11px] text-hud-muted">
-                        <GroupIcon className="size-3 shrink-0" />
-                        <span className="truncate">{groupName}</span>
-                        <code
-                            className="ml-auto max-w-[45%] truncate font-mono text-[10px]"
-                            title={spell.id}
-                        >
-                            {copied ? t('copied') : spell.id}
-                        </code>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-6 shrink-0 text-hud-muted"
-                            onClick={handleCopyId}
-                            aria-label={copied ? t('copied') : t('copyId')}
-                            title={copied ? t('copied') : t('copyId')}
-                        >
-                            <Copy className="size-3" />
-                        </Button>
-                    </div>
-                </>
+                <SpellCardDetails
+                    spell={spell}
+                    campaignId={campaignId}
+                    groupName={groupName}
+                    GroupIcon={GroupIcon}
+                />
             )}
         </HudCard>
     );

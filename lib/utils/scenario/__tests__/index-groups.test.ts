@@ -41,4 +41,21 @@ describe('groupIndex', () => {
         expect(groups.heroes.map((p) => p.id)).toEqual(['h']);
         expect(groups.notes.map((p) => p.id)).toEqual(['n']);
     });
+
+    it('фільтр лишає наскрізні номери повного списку', () => {
+        const pages = [
+            page({ id: 'a', title: 'Таверна', arc: 'Перша', sortOrder: 0 }),
+            page({ id: 'b', title: 'Місто', arc: 'Перша', sortOrder: 1 }),
+            page({ id: 'c', title: 'Замок', arc: 'Друга', sortOrder: 2 }),
+            page({ id: 'n', kind: 'note', sortOrder: 0 }),
+        ];
+
+        const groups = groupIndex(pages, new Set(['c', 'n']));
+
+        expect(
+            groups.arcs.map((g) => g.pages.map((p) => `${p.id}${p.number}`))
+        ).toEqual([['c3']]);
+        expect(groups.notes.map((p) => p.id)).toEqual(['n']);
+        expect(groups.heroes).toEqual([]);
+    });
 });

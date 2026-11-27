@@ -82,4 +82,14 @@ describe('useTrackDuration', () => {
         expect(audios).toHaveLength(0);
         expect(result.current).toBeNull();
     });
+
+    it('reports the probed duration once to the persist callback', () => {
+        vi.stubGlobal('Audio', FakeAudio);
+
+        const onDuration = vi.fn();
+
+        renderHook(() => useTrackDuration(track(), true, onDuration));
+        act(() => audios[0].listeners.loadedmetadata());
+        expect(onDuration).toHaveBeenCalledWith('t1', 187);
+    });
 });

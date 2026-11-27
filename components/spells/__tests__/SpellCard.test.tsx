@@ -5,6 +5,21 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SpellCard } from '@/components/spells/list/SpellCard';
 import type { Spell } from '@/types/spells';
 
+const parseDescription = vi.hoisted(() => vi.fn());
+
+vi.mock('@/lib/hooks/spells', async (orig) => {
+    const actual = await orig<typeof import('@/lib/hooks/spells')>();
+
+    return {
+        ...actual,
+        useSpellDescriptionDoc: (text: string) => {
+            parseDescription(text);
+
+            return actual.useSpellDescriptionDoc(text);
+        },
+    };
+});
+
 vi.mock('@/components/common/entity/OptimizedImage', () => ({
     OptimizedImage: () => null,
 }));
@@ -72,5 +87,14 @@ describe('SpellCard description', () => {
         expect(
             screen.getByText('Sensory Effect.').closest('strong')
         ).not.toBeNull();
+    });
+
+    it('parses the description only once the card is expanded', () => {
+        parseDescription.mockClear();
+        render(<SpellCard spell={imported} campaignId="c1" spellGroups={[]} />);
+        expect(parseDescription).not.toHaveBeenCalled();
+
+        fireEvent.click(screen.getByLabelText('spells.card.expand'));
+        expect(parseDescription).toHaveBeenCalled();
     });
 });

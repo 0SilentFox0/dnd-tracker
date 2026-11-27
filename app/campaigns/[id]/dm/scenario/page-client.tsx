@@ -102,7 +102,10 @@ export function ScenarioIndexPageClient({
                                 ) : (
                                     <ScenarioIndex
                                         campaignId={campaignId}
-                                        pages={visible}
+                                        pages={list}
+                                        visibleIds={
+                                            new Set(visible.map((p) => p.id))
+                                        }
                                         onMove={
                                             canEdit && !filter.trim()
                                                 ? (id, dir, siblings) =>
