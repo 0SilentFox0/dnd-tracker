@@ -7,6 +7,7 @@ import type {
 } from '@/systems/wfrp/api/types';
 import { SKILL_ADVANCE_KEY_RE } from '@/systems/wfrp/rules/characteristics/constants';
 import { CHARACTERISTIC_KEYS } from '@/systems/wfrp/rules/characteristics/keys';
+import { WFRP_DRAFT_GOALS_MAX } from '@/systems/wfrp/rules/creation/story/types';
 
 const roll = z.array(z.number().int()).max(12);
 
@@ -22,7 +23,7 @@ const goals = z
             ]),
         })
     )
-    .max(5)
+    .max(WFRP_DRAFT_GOALS_MAX)
     .optional();
 
 const skillKey = z.string().regex(SKILL_ADVANCE_KEY_RE);

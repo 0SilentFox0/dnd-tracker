@@ -17,13 +17,13 @@ const appearance = {
 
 describe('useStoryQuiz', () => {
     it('roll sets the translated table row', () => {
-        const { result } = renderHook(() => useStoryQuiz({ rng: fixedRng(37) }));
+        const { result } = renderHook(() =>
+            useStoryQuiz({ rng: fixedRng(37) })
+        );
 
         act(() => result.current.roll('origin'));
 
-        expect(result.current.answers.origin).toBe(
-            'wfrpStory.tables.origin.4'
-        );
+        expect(result.current.answers.origin).toBe('wfrpStory.tables.origin.4');
     });
 
     it('rolls appearance numbers and translated colours', () => {
@@ -41,15 +41,15 @@ describe('useStoryQuiz', () => {
     });
 
     it('rollAll keeps filled answers', () => {
-        const { result } = renderHook(() => useStoryQuiz({ rng: fixedRng(37) }));
+        const { result } = renderHook(() =>
+            useStoryQuiz({ rng: fixedRng(37) })
+        );
 
         act(() => result.current.set('origin', 'my own'));
         act(() => result.current.rollAll());
 
         expect(result.current.answers.origin).toBe('my own');
-        expect(result.current.answers.family).toBe(
-            'wfrpStory.tables.family.4'
-        );
+        expect(result.current.answers.family).toBe('wfrpStory.tables.family.4');
     });
 
     it('drops the appearance block without a profile appearance', () => {
@@ -81,5 +81,43 @@ describe('useStoryQuiz', () => {
 
         expect(c.background).toContain('wfrpStory.sentences.origin');
         expect(c.goals).toEqual([{ text: 'S', kind: 'secret' }]);
+    });
+
+    it('stale appearance answers do not reach the biography', () => {
+        const { result, rerender } = renderHook(
+            ({ a }: { a?: typeof appearance }) =>
+                useStoryQuiz({ rng: fixedRng(1), appearance: a }),
+            { initialProps: { a: appearance as typeof appearance | undefined } }
+        );
+
+        act(() => result.current.set('age', '30'));
+        act(() => result.current.set('origin', 'X'));
+
+        expect(result.current.compose().background).toContain(
+            'wfrpStory.sentences.age'
+        );
+
+        rerender({ a: undefined });
+
+        const { background } = result.current.compose();
+
+        expect(background).not.toContain('wfrpStory.sentences.age');
+        expect(background).toContain('wfrpStory.sentences.origin');
+        expect(result.current.answers.age).toBeUndefined();
+    });
+
+    it('resets appearance answers when the species appearance changes', () => {
+        const { result, rerender } = renderHook(
+            ({ a }: { a: typeof appearance }) =>
+                useStoryQuiz({ rng: fixedRng(1), appearance: a }),
+            { initialProps: { a: appearance } }
+        );
+
+        act(() => result.current.set('age', '30'));
+        act(() => result.current.set('origin', 'X'));
+        rerender({ a: { ...appearance, age: { base: 50, dice: 2 } } });
+
+        expect(result.current.answers.age).toBeUndefined();
+        expect(result.current.answers.origin).toBe('X');
     });
 });

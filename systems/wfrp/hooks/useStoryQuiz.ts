@@ -8,6 +8,7 @@ import { rollAppearance } from '@/systems/wfrp/rules/creation/story/appearance';
 import { composeStory } from '@/systems/wfrp/rules/creation/story/compose';
 import { rollStory } from '@/systems/wfrp/rules/creation/story/tables';
 import {
+    APPEARANCE_QUESTIONS,
     type RolledQuestionId,
     STORY_BLOCKS,
     STORY_QUESTIONS,
@@ -44,6 +45,24 @@ export function useStoryQuiz({
                 : STORY_BLOCKS.filter((b) => b.id !== 'appearance'),
         [appearance]
     );
+
+    const appearanceKey = appearance ? JSON.stringify(appearance) : '';
+
+    const [seenKey, setSeenKey] = useState(appearanceKey);
+
+    if (seenKey !== appearanceKey) {
+        setSeenKey(appearanceKey);
+        setAnswers((prev) =>
+            Object.fromEntries(
+                Object.entries(prev).filter(
+                    ([id]) =>
+                        !(APPEARANCE_QUESTIONS as readonly string[]).includes(
+                            id
+                        )
+                )
+            )
+        );
+    }
 
     const textFor = useCallback(
         (id: StoryQuestionId): string | undefined => {
@@ -103,13 +122,21 @@ export function useStoryQuiz({
         [run, blocks, answers]
     );
 
-    const compose = useCallback(
-        () =>
-            composeStory(answers, (id, answer) =>
-                t(`sentences.${id}` as 'sentences.origin', { answer })
+    const compose = useCallback(() => {
+        const visible = new Set<StoryQuestionId>(
+            blocks.flatMap((b) => b.questions)
+        );
+
+        return composeStory(
+            Object.fromEntries(
+                Object.entries(answers).filter(([id]) =>
+                    visible.has(id as StoryQuestionId)
+                )
             ),
-        [answers, t]
-    );
+            (id, answer) =>
+                t(`sentences.${id}` as 'sentences.origin', { answer })
+        );
+    }, [answers, blocks, t]);
 
     return { answers, set, roll, rollAll, blocks, compose };
 }

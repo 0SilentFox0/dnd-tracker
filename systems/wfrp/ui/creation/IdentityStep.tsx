@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ALIGNMENTS } from '@/lib/constants/alignment';
 import { useAlignmentLabel } from '@/lib/hooks/characters';
 import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
+import { WFRP_DRAFT_GOALS_MAX } from '@/systems/wfrp/rules/creation/story';
 
 export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
     const t = useTranslations('wfrpCreation.identity');
@@ -35,7 +36,7 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
     const addGoal = () => {
         const text = goal.trim();
 
-        if (!text) return;
+        if (!text || goals.length >= WFRP_DRAFT_GOALS_MAX) return;
 
         set({ goals: [...goals, { text, kind: 'personal' }] });
         setGoal('');
@@ -64,7 +65,11 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
                 </ul>
             )}
             {form.dm?.needsPlayer && (
-                <FormField label={t('player')} htmlFor="wfrp-draft-player" required>
+                <FormField
+                    label={t('player')}
+                    htmlFor="wfrp-draft-player"
+                    required
+                >
                     <SelectField
                         id="wfrp-draft-player"
                         aria-label={t('player')}
@@ -178,7 +183,9 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
                         type="button"
                         variant="outline"
                         onClick={addGoal}
-                        disabled={!goal.trim()}
+                        disabled={
+                            !goal.trim() || goals.length >= WFRP_DRAFT_GOALS_MAX
+                        }
                     >
                         {t('addGoal')}
                     </Button>

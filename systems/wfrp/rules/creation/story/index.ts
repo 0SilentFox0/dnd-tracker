@@ -9,4 +9,5 @@ export {
     type StoryAnswers,
     type StoryBlockId,
     type StoryQuestionId,
+    WFRP_DRAFT_GOALS_MAX,
 } from './types';

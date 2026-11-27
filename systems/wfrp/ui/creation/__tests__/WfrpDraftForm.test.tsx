@@ -245,8 +245,13 @@ describe('WfrpDraftForm', () => {
             </QueryClientProvider>
         );
 
-        expect(screen.getByText('wfrpCreation.identity.reopenNote')).toBeTruthy();
+        expect(
+            screen.getByText('wfrpCreation.identity.reopenNote')
+        ).toBeTruthy();
         expect(screen.queryByText('wfrpStory.hint')).toBeNull();
+        expect(
+            screen.queryByText('wfrpCreation.wizard.steps.story')
+        ).toBeNull();
     });
 
     it('shows translated per-code messages for server issues and falls back to the general text', async () => {
@@ -389,9 +394,12 @@ describe('WfrpDraftForm', () => {
 
             expect(submitButton()).toHaveProperty('disabled', true);
 
-            fireEvent.change(screen.getByLabelText(/wfrpCreation.identity.player/), {
-                target: { value: 'p1' },
-            });
+            fireEvent.change(
+                screen.getByLabelText(/wfrpCreation.identity.player/),
+                {
+                    target: { value: 'p1' },
+                }
+            );
 
             expect(submitButton()).toHaveProperty('disabled', false);
 
@@ -407,14 +415,42 @@ describe('WfrpDraftForm', () => {
             );
         });
 
-        it('shows the story step before identity', () => {
+        it('renders a usable story step before identity', () => {
             mount({ characterType: 'npc_hero' });
-            toIdentity();
+            fireEvent.click(screen.getByRole('radio', { name: /Human/ }));
+            fireEvent.click(next());
+            fireEvent.click(
+                screen.getByRole('button', { name: 'wfrpCreation.career.roll' })
+            );
+            fireEvent.click(next());
+            fireEvent.click(
+                screen.getByRole('button', { name: 'wfrpCreation.stats.roll' })
+            );
+            fireEvent.click(next());
+            fireEvent.click(
+                screen.getByRole('button', {
+                    name: 'wfrpCreation.talents.roll',
+                })
+            );
+            fireEvent.click(next());
+
+            expect(screen.getByText('wfrpStory.hint')).toBeTruthy();
+
+            fireEvent.click(
+                screen.getByRole('button', {
+                    name: 'wfrpStory.roll wfrpStory.questions.origin',
+                })
+            );
+            fireEvent.click(next());
 
             expect(screen.queryByText('wfrpStory.hint')).toBeNull();
             expect(
-                screen.getByText('wfrpCreation.wizard.steps.story')
-            ).toBeTruthy();
+                (
+                    screen.getByLabelText(
+                        /wfrpCreation.identity.background/
+                    ) as HTMLTextAreaElement
+                ).value
+            ).toContain('wfrpStory.sentences.origin');
         });
 
         it('npc hero shows no player picker', () => {

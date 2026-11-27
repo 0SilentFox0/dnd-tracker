@@ -11,8 +11,19 @@ describe('composeStory', () => {
             goals: [],
             truncated: false,
         });
-        expect(composeStory({ origin: '  ', hair: '' }, phrase).background).toBe(
-            ''
+        expect(
+            composeStory({ origin: '  ', hair: '' }, phrase).background
+        ).toBe('');
+    });
+
+    it('strips trailing sentence punctuation from answers', () => {
+        const { background } = composeStory(
+            { origin: 'a village by the sea.', family: 'who?!', faith: '...' },
+            phrase
+        );
+
+        expect(background).toBe(
+            '[origin:a village by the sea] [family:who]\n\n[faith:...]'
         );
     });
 

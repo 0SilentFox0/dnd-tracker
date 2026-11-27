@@ -12,6 +12,7 @@ import {
     updateWfrpDraftIdentity,
 } from '@/systems/wfrp/api/characters';
 import { DEFAULT_ADVANCEMENT_RULES } from '@/systems/wfrp/rules/advancement/rules';
+import { WFRP_DRAFT_GOALS_MAX } from '@/systems/wfrp/rules/creation/story';
 
 const push = vi.hoisted(() => vi.fn());
 
@@ -418,6 +419,33 @@ describe('useWfrpDraftForm', () => {
             expect(
                 result.current.identity.values.goals?.map((g) => g.text)
             ).toEqual(['Typed', 'Second']);
+        });
+
+        it('never exceeds the server goal limit when quiz goals meet typed ones', () => {
+            const result = toStory();
+
+            act(() => result.current.story.set('ambitionLong', 'A'));
+            act(() => result.current.story.set('ambitionShort', 'B'));
+            act(() => result.current.story.set('secret', 'C'));
+            act(() =>
+                result.current.identity.set({
+                    goals: [
+                        { text: 'T1', kind: 'personal' },
+                        { text: 'T2', kind: 'personal' },
+                        { text: 'T3', kind: 'personal' },
+                    ],
+                })
+            );
+            forward(result);
+
+            expect(result.current.identity.values.goals).toHaveLength(
+                WFRP_DRAFT_GOALS_MAX
+            );
+            expect(
+                result.current.identity.values.goals
+                    ?.slice(0, 3)
+                    .map((g) => g.text)
+            ).toEqual(['T1', 'T2', 'T3']);
         });
 
         it('warns about a too long story and submits a background within 4000', async () => {

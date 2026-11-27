@@ -50,7 +50,9 @@ describe('IdentityStep', () => {
 
         expect(screen.queryByText('wfrpStory.replace')).toBeNull();
 
-        rerender(<IdentityStep form={withQuiz({ canReplace: true }, replace)} />);
+        rerender(
+            <IdentityStep form={withQuiz({ canReplace: true }, replace)} />
+        );
         fireEvent.click(screen.getByText('wfrpStory.replace'));
 
         expect(replace).toHaveBeenCalled();
@@ -60,5 +62,55 @@ describe('IdentityStep', () => {
         render(<IdentityStep form={withQuiz({ truncated: true })} />);
 
         expect(screen.getByText('wfrpStory.truncated')).toBeTruthy();
+    });
+
+    it('disables adding goals at the limit', () => {
+        const at = (n: number) =>
+            ({
+                step: { total: 5 },
+                preview: null,
+                identity: {
+                    values: {
+                        name: 'Hans',
+                        goals: Array.from({ length: n }, (_, i) => ({
+                            text: `g${i}`,
+                            kind: 'personal',
+                        })),
+                    },
+                    set: vi.fn(),
+                    quiz: {
+                        truncated: false,
+                        canReplace: false,
+                        replace: vi.fn(),
+                    },
+                },
+            }) as never;
+
+        const { rerender } = render(<IdentityStep form={at(4)} />);
+
+        fireEvent.change(
+            screen.getByLabelText('wfrpCreation.identity.goalPlaceholder'),
+            {
+                target: { value: 'new' },
+            }
+        );
+
+        expect(
+            (
+                screen.getByText(
+                    'wfrpCreation.identity.addGoal'
+                ) as HTMLButtonElement
+            ).disabled
+        ).toBe(false);
+
+        rerender(<IdentityStep form={at(5)} />);
+
+        expect(
+            (
+                screen.getByText(
+                    'wfrpCreation.identity.addGoal'
+                ) as HTMLButtonElement
+            ).disabled
+        ).toBe(true);
     });
 });

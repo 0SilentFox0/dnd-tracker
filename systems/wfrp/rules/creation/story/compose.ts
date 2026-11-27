@@ -10,15 +10,18 @@ export const GOAL_QUESTIONS = {
     secret: 'secret',
 } as const satisfies Partial<Record<StoryQuestionId, GoalKind>>;
 
-const isGoalQuestion = (id: StoryQuestionId): id is keyof typeof GOAL_QUESTIONS =>
-    id in GOAL_QUESTIONS;
+const isGoalQuestion = (
+    id: StoryQuestionId
+): id is keyof typeof GOAL_QUESTIONS => id in GOAL_QUESTIONS;
 
 function truncateAtWord(text: string): string {
     const head = text.slice(0, BACKGROUND_LIMIT + 1);
 
     const cut = head.search(/\s\S*$/);
 
-    return (cut > 0 ? head.slice(0, cut) : head.slice(0, BACKGROUND_LIMIT)).trimEnd();
+    return (
+        cut > 0 ? head.slice(0, cut) : head.slice(0, BACKGROUND_LIMIT)
+    ).trimEnd();
 }
 
 export function composeStory(
@@ -50,13 +53,17 @@ export function composeStory(
                 continue;
             }
 
-            sentences.push(phrase(id, answer));
+            sentences.push(
+                phrase(id, answer.replace(/[.!?…\s]+$/u, '') || answer)
+            );
         }
 
         if (sentences.length) paragraphs.push(sentences.join(' '));
     }
 
-    for (const id of Object.keys(GOAL_QUESTIONS) as (keyof typeof GOAL_QUESTIONS)[]) {
+    for (const id of Object.keys(
+        GOAL_QUESTIONS
+    ) as (keyof typeof GOAL_QUESTIONS)[]) {
         const text = answers[id]?.trim();
 
         if (text) goals.push({ text, kind: GOAL_QUESTIONS[id] });

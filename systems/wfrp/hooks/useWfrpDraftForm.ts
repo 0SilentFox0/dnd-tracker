@@ -39,6 +39,7 @@ import {
     CAREER_ROLLS,
     DISTRIBUTION_CAP,
 } from '@/systems/wfrp/rules/creation';
+import { WFRP_DRAFT_GOALS_MAX } from '@/systems/wfrp/rules/creation/story';
 import { editionOf } from '@/systems/wfrp/rules/edition';
 
 export type { WfrpDraftStepId };
@@ -184,9 +185,9 @@ export function useWfrpDraftForm({
 
         const kept = current.filter((g) => !quizGoals.includes(g.text));
 
-        const fresh = composed.goals.filter(
-            (g) => !kept.some((x) => x.text === g.text)
-        );
+        const fresh = composed.goals
+            .filter((g) => !kept.some((x) => x.text === g.text))
+            .slice(0, Math.max(0, WFRP_DRAFT_GOALS_MAX - kept.length));
 
         setQuizGoals(fresh.map((g) => g.text));
         setIdentity((prev) => ({
