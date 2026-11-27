@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { type DrawerKey, railKeys } from './rail-items';
 
-import { HUD_GLASS, HudButton, HudIconButton } from '@/components/hud';
+import { HUD_GLASS, HudIconButton } from '@/components/hud';
 import { actionIcon } from '@/components/hud/icons/battle';
 import { useBattleScene } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';

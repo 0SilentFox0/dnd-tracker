@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 import { SideDot } from '@/components/battle/hud';
-import { HudButton, HudIconButton } from '@/components/hud';
+import { HudIconButton } from '@/components/hud';
 import { SelectField } from '@/components/ui/select-field';
 import { CombatStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import {
