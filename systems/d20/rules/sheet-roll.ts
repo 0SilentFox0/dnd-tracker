@@ -1,7 +1,7 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { Translator } from '@/lib/i18n/translator';
 import { ContentError } from '@/lib/utils/api/content-error';
-import { calculateAttackBonus } from '@/lib/utils/battle/attack';
+import { calculateAttackBonus } from '@/lib/utils/battle/attack/bonus';
 import { rollAttackDamage } from '@/lib/utils/battle/damage/roll-attack';
 import type { Ruleset } from '@/lib/utils/rules';
 import { rollCheck } from '@/systems/d20/rules/checks/roll-check';
