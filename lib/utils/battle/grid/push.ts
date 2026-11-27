@@ -1,7 +1,7 @@
 import { edgeBlocks } from './edges';
-import { gridOf } from './geometry';
+import { footprint, gridOf } from './geometry';
 import { hexAwayStep } from './hex';
-import { canStand } from './occupancy';
+import { canStand, footprintSizeOf } from './occupancy';
 
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridKind, GridPoint } from '@/types/battle-grid';
@@ -27,6 +27,8 @@ export function pushAway(
 ): { position: GridPoint; steps: number } {
     const grid = gridOf(map);
 
+    const size = footprintSizeOf(target, grid);
+
     let position = target.battleData.position as GridPoint;
 
     let steps = 0;
@@ -36,7 +38,15 @@ export function pushAway(
 
         if (next.x === position.x && next.y === position.y) break;
 
-        if (edgeBlocks(map, position, next, 'move')) break;
+        const dx = next.x - position.x;
+
+        const dy = next.y - position.y;
+
+        const crossingBlocked = footprint(position, size, grid).some((c) =>
+            edgeBlocks(map, c, { x: c.x + dx, y: c.y + dy }, 'move')
+        );
+
+        if (crossingBlocked) break;
 
         if (!canStand(map, participants, target, next)) break;
 
