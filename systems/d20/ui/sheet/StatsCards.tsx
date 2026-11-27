@@ -36,12 +36,12 @@ export interface RollProps {
 
 export function Mark({ count }: { count: 0 | 1 | 2 }) {
     return (
-        <span aria-hidden className="flex w-5 shrink-0 items-center gap-0.5">
+        <span aria-hidden className="flex w-6 shrink-0 items-center gap-0.5">
             {Array.from({ length: count || 1 }, (_, i) => (
                 <i
                     key={i}
                     className={cn(
-                        'size-2 rotate-45 rounded-[1px] border-[1.5px]',
+                        'size-2.5 rotate-45 rounded-[1px] border-2',
                         count
                             ? 'border-hud-accent bg-hud-accent'
                             : 'border-hud-muted'

@@ -225,13 +225,14 @@ function TempButton({ hp }: { hp: Hp }) {
                 type="button"
                 aria-label={tv('temp')}
                 className={cn(
-                    'motion-press inline-flex min-h-10 min-w-10 cursor-pointer items-center justify-center gap-1 rounded-[4px] border border-hud-line px-2 text-[15px] text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:outline-none',
+                    'motion-press inline-flex min-h-10 min-w-10 cursor-pointer whitespace-nowrap items-center justify-center gap-1 rounded-[4px] border border-hud-line px-2 text-[15px] text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:outline-none',
                     !hp.temp && 'ml-auto'
                 )}
                 onClick={() => setTempOpen(true)}
             >
                 <Shield aria-hidden className="size-4" />
                 <Plus aria-hidden className="size-4" />
+                {tv('temp')}
             </HudButton>
             <TempHpDialog
                 hp={hp}
