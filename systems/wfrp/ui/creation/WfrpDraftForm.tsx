@@ -15,6 +15,7 @@ import { HudButton } from '@/components/hud';
 import { HudFormPage } from '@/components/hud/form';
 import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
+import type { CharacterTypeValue } from '@/lib/constants/characters';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import type { WfrpDraftIdentityInput } from '@/systems/wfrp/api/types';
 import { useWfrpDraftForm, type WfrpDraftStepId } from '@/systems/wfrp/hooks';
@@ -31,12 +32,14 @@ interface WfrpDraftFormProps {
     campaignId: string;
     characterId?: string;
     initialIdentity?: unknown;
+    dm?: { characterType: CharacterTypeValue };
 }
 
 export function WfrpDraftForm({
     campaignId,
     characterId,
     initialIdentity,
+    dm,
 }: WfrpDraftFormProps) {
     const t = useTranslations('wfrpCreation.wizard');
 
@@ -48,6 +51,7 @@ export function WfrpDraftForm({
         campaignId,
         characterId,
         initialIdentity: initialIdentity as WfrpDraftIdentityInput | undefined,
+        dm,
     });
 
     const { step, submit, reveal } = form;
@@ -134,7 +138,13 @@ export function WfrpDraftForm({
                 >
                     {characterId || step.index === 0 ? (
                         <Button type="button" variant="outline" asChild>
-                            <Link href={`/campaigns/${campaignId}/character`}>
+                            <Link
+                                href={
+                                    dm
+                                        ? `/campaigns/${campaignId}/dm/characters`
+                                        : `/campaigns/${campaignId}/character`
+                                }
+                            >
                                 {tc('actions.cancel')}
                             </Link>
                         </Button>

@@ -80,6 +80,8 @@
   "identity": {
     "hint": "Ім'я та історія героя. Механіку вже визначено.",
     "name": "Ім'я",
+    "player": "Гравець",
+    "playerPlaceholder": "Оберіть гравця",
     "namePlaceholder": "Як звати героя?",
     "alignment": "Світогляд",
     "alignmentPlaceholder": "Оберіть світогляд",

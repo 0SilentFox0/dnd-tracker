@@ -7,6 +7,7 @@ import { CampaignRole } from '@/lib/constants/campaigns';
 import { CharacterStatus, CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { EMPTY_INVENTORY } from '@/lib/server/characters/core/derive-character-defaults';
+import { resolveCharacterOwner } from '@/lib/server/characters/core/resolve-character-owner';
 import { mergeDraftGoals } from '@/lib/server/characters/draft-goals';
 import { lockPlayerDrafts } from '@/lib/server/characters/draft-lock';
 import { resolveAvatarForPersistence } from '@/lib/supabase/avatar-storage';
@@ -42,6 +43,8 @@ export async function createWfrpDraft(
 
     if (data instanceof NextResponse) return data;
 
+    if (data.owner && !access.isDM) return errorResponse(API_ERRORS.DM_ONLY, 403);
+
     const role =
         campaign.members.find((m) => m.userId === access.userId)?.role ?? '';
 
@@ -58,9 +61,22 @@ export async function createWfrpDraft(
               ? API_ERRORS.DRAFT_ALREADY_EXISTS
               : null;
 
-    const early = reject(await prisma.character.count({ where: ownDrafts }));
+    const dmOwner = data.owner
+        ? await resolveCharacterOwner(campaignId, access.userId, {
+              type: data.owner.type,
+              controlledBy: data.owner.controlledBy,
+          })
+        : null;
 
-    if (early) return errorResponse(early, 400);
+    if (dmOwner && 'error' in dmOwner) return dmOwner.error;
+
+    if (!dmOwner) {
+        const early = reject(
+            await prisma.character.count({ where: ownDrafts })
+        );
+
+        if (early) return errorResponse(early, 400);
+    }
 
     const race = await prisma.race.findFirst({
         where: { id: data.speciesId, campaignId },
@@ -133,13 +149,15 @@ export async function createWfrpDraft(
         return errorResponse(avatar.message, 400, undefined, avatar.params);
 
     const result = await prisma.$transaction(async (tx) => {
-        await lockPlayerDrafts(tx, campaignId, access.userId);
+        if (!dmOwner) {
+            await lockPlayerDrafts(tx, campaignId, access.userId);
 
-        const rejection = reject(
-            await tx.character.count({ where: ownDrafts })
-        );
+            const rejection = reject(
+                await tx.character.count({ where: ownDrafts })
+            );
 
-        if (rejection) return errorResponse(rejection, 400);
+            if (rejection) return errorResponse(rejection, 400);
+        }
 
         const created = await tx.character.create({
             data: {
@@ -151,9 +169,11 @@ export async function createWfrpDraft(
                 background: data.background ?? null,
                 goals: mergeDraftGoals(undefined, data.goals) as never,
                 campaignId,
-                type: CharacterType.PLAYER,
-                status: CharacterStatus.PENDING,
-                controlledBy: access.userId,
+                type: data.owner?.type ?? CharacterType.PLAYER,
+                status: dmOwner
+                    ? CharacterStatus.ACTIVE
+                    : CharacterStatus.PENDING,
+                controlledBy: dmOwner?.controlledBy ?? access.userId,
                 level: 1,
                 characteristics: plan.characteristics as never,
                 experience: plan.experience,

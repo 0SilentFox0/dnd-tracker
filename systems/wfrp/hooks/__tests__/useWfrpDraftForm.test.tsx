@@ -23,6 +23,7 @@ vi.mock('@/systems/wfrp/api/characters', () => ({
 }));
 
 vi.mock('@/lib/hooks/campaigns', () => ({
+    useCampaignMembers: () => ({ members: [] }),
     useCampaignRules: () => ({
         data: {
             system: { key: 'wfrp' },
