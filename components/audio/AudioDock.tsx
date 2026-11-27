@@ -117,7 +117,7 @@ export function AudioDock({
                                 title: track?.title ?? t('player.label'),
                             })}
                             onClick={() => setChoice(true)}
-                            className="flex max-w-48 items-center gap-1.5 rounded-full border border-hud-rule bg-black/85 px-3 py-1.5 text-xs text-hud-bone shadow-lg"
+                            className="flex h-8 max-w-48 items-center gap-1.5 rounded-full border border-hud-rule bg-black/85 px-3 text-xs text-hud-bone shadow-lg"
                         >
                             <NowPlayingLabel
                                 title={track?.title ?? t('player.label')}

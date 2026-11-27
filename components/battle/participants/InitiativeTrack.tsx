@@ -113,9 +113,9 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                         >
                             <span
                                 className={cn(
-                                    'hud-sc absolute text-xs text-[var(--hud-muted)]',
+                                    'hud-sc absolute rounded-sm bg-[color-mix(in_srgb,var(--palette-art-shadow)_72%,transparent)] px-1 text-xs text-[var(--hud-ink)]',
                                     vertical
-                                        ? 'top-1/2 left-0 -translate-x-full -translate-y-1/2 pr-1'
+                                        ? 'top-1/2 left-0 -translate-x-full -translate-y-1/2'
                                         : 'top-0 left-1/2 -translate-x-1/2 -translate-y-full'
                                 )}
                             >

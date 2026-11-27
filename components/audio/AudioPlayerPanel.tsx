@@ -68,7 +68,7 @@ export function AudioPlayerPanel({
                     data-tour="music.collapse"
                     aria-label={t('player.collapse')}
                     onClick={view.onCollapse}
-                    className="text-hud-muted hover:text-hud-bone"
+                    className="flex size-8 items-center justify-center text-hud-muted hover:text-hud-bone"
                 >
                     <ChevronDown className="size-4" />
                 </HudButton>

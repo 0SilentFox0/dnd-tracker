@@ -87,7 +87,10 @@ export function ReferenceRail({ filters, counts }: ReferenceRailProps) {
                 )}
             </div>
 
-            <p aria-live="polite" className="px-1 text-xs text-hud-muted">
+            <p
+                aria-live="polite"
+                className="px-1 text-xs text-hud-muted max-sm:text-sm"
+            >
                 {t('list.found', { count: counts.all })}
             </p>
 
@@ -108,7 +111,7 @@ export function ReferenceRail({ filters, counts }: ReferenceRailProps) {
                             )}
                         >
                             <span>{t(`tabs.${value}`)}</span>
-                            <span className="text-xs tabular-nums opacity-70">
+                            <span className="text-xs tabular-nums opacity-70 max-sm:text-sm">
                                 {counts[value]}
                             </span>
                         </HudButton>

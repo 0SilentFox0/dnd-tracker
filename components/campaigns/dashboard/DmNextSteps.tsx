@@ -37,6 +37,7 @@ export function DmNextSteps({
                         asChild
                         key={key}
                         variant="outline"
+                        data-ux-tile
                         className={TILE}
                     >
                         <Link href={href(campaignId)}>
@@ -50,7 +51,7 @@ export function DmNextSteps({
                         </Link>
                     </Button>
                 ))}
-                <Button asChild variant="outline" className={TILE}>
+                <Button asChild variant="outline" data-ux-tile className={TILE}>
                     <Link
                         href={`/campaigns/${campaignId}/dm/compendium`}
                         aria-label={t('page.compendium.link')}

@@ -29,7 +29,7 @@ export function HudPill({
         <span
             data-tone={tone}
             className={cn(
-                'hud-body inline-flex h-6 shrink-0 items-center gap-1 rounded-sm px-2 text-xs leading-none font-semibold whitespace-nowrap [&>svg]:size-3',
+                'hud-body inline-flex h-6 shrink-0 items-center gap-1 rounded-sm px-2 text-xs leading-none font-semibold whitespace-nowrap max-sm:text-sm [&>svg]:size-3',
                 TONE[tone],
                 className
             )}

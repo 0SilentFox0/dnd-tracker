@@ -8,7 +8,7 @@ import { HudButton } from '@/components/hud';
 import { HudPill } from '@/components/hud/page';
 
 const MORE_CLASS =
-    'inline-flex h-6 items-center rounded-sm px-2 text-xs font-semibold text-hud-accent-fg shadow-[inset_0_0_0_1px_var(--color-hud-accent)] hover:bg-hud-accent/15';
+    'inline-flex h-8 items-center rounded-sm px-2 text-sm font-semibold text-hud-accent-fg shadow-[inset_0_0_0_1px_var(--color-hud-accent)] hover:bg-hud-accent/15';
 
 export function ChipRow<T>({
     items,

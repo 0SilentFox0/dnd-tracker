@@ -55,7 +55,7 @@ export function ReferenceRowShell({
                 <span className="hud-sc block truncate text-base leading-tight text-hud-ink">
                     {name}
                 </span>
-                <span className="block truncate text-xs text-hud-muted">
+                <span className="block truncate text-xs text-hud-muted max-sm:text-sm">
                     {meta}
                 </span>
             </span>
