@@ -245,7 +245,9 @@
     "starting": "GATHERING THE ARMY...",
     "start": "TO BATTLE!",
     "waiting": "🗡️ Await the DM's order...",
-    "needOne": "At least one participant must be on the field"
+    "needOne": "At least one participant must be on the field",
+    "teamAllies": "Allied team",
+    "teamEnemies": "Enemy team"
   },
   "resultScreen": {
     "stats": {

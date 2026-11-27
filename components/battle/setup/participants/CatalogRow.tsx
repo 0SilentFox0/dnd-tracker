@@ -8,6 +8,11 @@ import { SideToggle } from './SideToggle';
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudButton, HudIconButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { clampUnitQuantity, UNIT_QUANTITY } from '@/lib/constants/battle-units';
 import { cn } from '@/lib/utils';
@@ -49,7 +54,7 @@ function AddButtons({
                 onClick={() => add(ParticipantSide.ALLY)}
             >
                 <Shield className="text-hud-accent-fg" aria-hidden />
-                <span className="sr-only">{t('ally')}</span>
+                <span className="text-[11px]">{t('ally')}</span>
             </Button>
             <Button
                 type="button"
@@ -60,7 +65,7 @@ function AddButtons({
                 onClick={() => add(ParticipantSide.ENEMY)}
             >
                 <Swords className="text-hud-crimson-fg" aria-hidden />
-                <span className="sr-only">{t('enemy')}</span>
+                <span className="text-[11px]">{t('enemy')}</span>
             </Button>
         </>
     );
@@ -156,18 +161,25 @@ export function CatalogRow({
                 {stats && (
                     <span className="hud-num grid w-full grid-cols-3 divide-x divide-hud-rule rounded-md bg-black/20 py-1 tabular-nums">
                         {[
-                            ['DPR', round1(stats.dpr)],
-                            ['HP', stats.hp],
-                            ['KPI', stats.kpi],
-                        ].map(([label, value]) => (
-                            <span key={label} className="flex flex-col">
-                                <span className="text-[9px] tracking-wider text-hud-muted uppercase">
-                                    {label}
-                                </span>
-                                <span className="text-xs font-medium">
-                                    {value}
-                                </span>
-                            </span>
+                            ['dpr', 'DPR', round1(stats.dpr)],
+                            ['hp', 'HP', stats.hp],
+                            ['kpi', 'KPI', stats.kpi],
+                        ].map(([key, label, value]) => (
+                            <Tooltip key={key}>
+                                <TooltipTrigger asChild>
+                                    <span className="flex flex-col">
+                                        <span className="text-[9px] tracking-wider text-hud-muted uppercase">
+                                            {label}
+                                        </span>
+                                        <span className="text-xs font-medium">
+                                            {value}
+                                        </span>
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-56 text-xs">
+                                    {t(`stat.${key}`)}
+                                </TooltipContent>
+                            </Tooltip>
                         ))}
                     </span>
                 )}

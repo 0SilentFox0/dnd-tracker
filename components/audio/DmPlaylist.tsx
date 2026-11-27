@@ -228,31 +228,35 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
             </HudButton>
             {open && (
                 <>
-                    <div className="mt-2 flex flex-col gap-1">
-                        <UploadTrackButton
-                            pending={library.isBusy}
-                            onFile={(file) => void library.upload(file)}
-                            size="sm"
-                            className="w-full"
-                        />
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={library.isBusy}
-                            onClick={() => setYoutubeOpen(true)}
-                            className="w-full"
-                        >
-                            <Plus />
-                            {t('music.youtube.add')}
-                        </Button>
-                    </div>
-                    <AddYoutubeTrackDialog
-                        open={youtubeOpen}
-                        onOpenChange={setYoutubeOpen}
-                        pending={library.isBusy}
-                        onSubmit={library.addYoutube}
-                    />
+                    {!dm.readOnly && (
+                        <>
+                            <div className="mt-2 flex flex-col gap-1">
+                                <UploadTrackButton
+                                    pending={library.isBusy}
+                                    onFile={(file) => void library.upload(file)}
+                                    size="sm"
+                                    className="w-full"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={library.isBusy}
+                                    onClick={() => setYoutubeOpen(true)}
+                                    className="w-full"
+                                >
+                                    <Plus />
+                                    {t('music.youtube.add')}
+                                </Button>
+                            </div>
+                            <AddYoutubeTrackDialog
+                                open={youtubeOpen}
+                                onOpenChange={setYoutubeOpen}
+                                pending={library.isBusy}
+                                onSubmit={library.addYoutube}
+                            />
+                        </>
+                    )}
                     <PlaylistFilters
                         view={view}
                         total={library.tracks.length}

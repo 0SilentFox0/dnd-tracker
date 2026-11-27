@@ -56,4 +56,16 @@ describe('useSetupUnitsFilter', () => {
 
         expect(result.current.groups.size).toBe(3);
     });
+
+    it('фільтр за рівнем звужує групи й дає чіпи', () => {
+        const { result } = renderHook(() => useSetupUnitsFilter(units));
+
+        expect(result.current.levelChips.map((c) => c.level)).toEqual([1, 2]);
+
+        act(() => result.current.toggleLevel(2));
+
+        expect([...result.current.groups.keys()]).toEqual(['Goblinoid']);
+        expect(result.current.groups.get('Goblinoid')).toHaveLength(1);
+        expect(result.current.isFiltered).toBe(true);
+    });
 });

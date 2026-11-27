@@ -24,6 +24,7 @@ import {
     useBattleScene,
     useFxEnabled,
     useModeAutoSkip,
+    usePrepRoster,
     useSpellBookPrefetch,
 } from '@/lib/hooks/battle';
 import {
@@ -127,6 +128,12 @@ export function BattleScreen() {
 
     usePlayerViewKey(playerView.toggle, playerView.available);
 
+    const roster = usePrepRoster(
+        battle.campaignId,
+        battle.participants,
+        isDM && battle.status === BattleStatus.PREPARED
+    );
+
     const { notices: systemNotices, dialogs: systemDialogs } =
         useSystemBattleUi();
 
@@ -190,6 +197,7 @@ export function BattleScreen() {
                         onStartBattle={() => actions.start.mutate({})}
                         isStarting={actions.start.isPending}
                         canStart={onFieldCount(battle.participants) > 0}
+                        roster={roster}
                     />
                     <BattlePlayerViewToggle className="fixed top-3 right-3 z-50" />
                     <Link
