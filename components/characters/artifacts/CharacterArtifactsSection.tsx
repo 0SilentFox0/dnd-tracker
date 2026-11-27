@@ -137,13 +137,13 @@ export function CharacterArtifactsSection({
                                                     size={80}
                                                     className="absolute inset-0 size-full rounded bg-muted/80 text-lg font-medium text-amber-200"
                                                 />
-                                                <span className="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-[9px] text-amber-200/90 uppercase">
+                                                <span className="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-xs text-amber-200/90 uppercase">
                                                     {label}
                                                 </span>
                                             </>
                                         ) : (
                                             <>
-                                                <span className="text-[10px] leading-tight text-amber-200/80 uppercase">
+                                                <span className="text-xs leading-tight text-amber-200/80 uppercase">
                                                     {label}
                                                 </span>
                                                 <span className="mt-0.5 w-full truncate text-xs font-medium text-amber-100">
@@ -199,7 +199,7 @@ export function CharacterArtifactsSection({
                                                         src={a.icon}
                                                         name={a.name}
                                                         size={20}
-                                                        className="size-5 rounded text-[10px] font-medium"
+                                                        className="size-5 rounded text-xs font-medium"
                                                     />
                                                     <span className="truncate">
                                                         {a.name}

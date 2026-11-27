@@ -29,7 +29,7 @@ export const BattleOverBanner = memo(function BattleOverBanner() {
             className="mx-4 mt-2 flex min-h-10 w-[calc(100%-2rem)] items-center justify-center gap-3 border-y border-hud-line bg-hud-panel-2 px-3 py-1.5 text-center"
         >
             <Trophy className="size-4 shrink-0 text-hud-muted" />
-            <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
+            <span className="hud-sc text-lg tracking-[.12em] text-[var(--ink)]">
                 {ts('over')}
             </span>
             {last && (

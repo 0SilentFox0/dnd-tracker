@@ -129,7 +129,7 @@ export function HudTabs<T extends string>({
                                 <TabsTrigger
                                     value={tab.id}
                                     className={cn(
-                                        'hud-sc h-10 min-w-fit shrink-0 text-[15px] text-hud-muted',
+                                        'hud-sc h-10 min-w-fit shrink-0 text-base text-hud-muted',
                                         vertical || railMobile === 'list'
                                             ? RAIL_TRIGGER
                                             : 'flex-1 px-2.5',
@@ -176,7 +176,7 @@ export function HudTabs<T extends string>({
                                     key={tab.id}
                                     value={tab.id}
                                     className={cn(
-                                        'hud-sc h-10 min-w-fit flex-1 shrink-0 px-2.5 text-[15px] text-hud-muted',
+                                        'hud-sc h-10 min-w-fit flex-1 shrink-0 px-2.5 text-base text-hud-muted',
                                         styles.trigger
                                     )}
                                 >

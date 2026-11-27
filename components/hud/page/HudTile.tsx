@@ -30,7 +30,7 @@ export function HudTile({
             )}
             <span className="min-w-0">
                 <span
-                    className={`hud-sc block ${compact ? 'line-clamp-2 text-xs break-words hyphens-auto' : 'truncate text-[15px]'} text-hud-ink`}
+                    className={`hud-sc block ${compact ? 'line-clamp-2 text-xs break-words hyphens-auto' : 'truncate text-base'} text-hud-ink`}
                 >
                     {title}
                 </span>

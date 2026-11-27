@@ -118,7 +118,7 @@ export function ProgressionPanel({
                                 onSelect={select}
                             />
                             {view.branches.length > 0 && (
-                                <h3 className="hud-sc mx-4 mt-3.5 mb-1.5 text-[13px] tracking-[.12em] text-hud-muted uppercase">
+                                <h3 className="hud-sc mx-4 mt-3.5 mb-1.5 text-sm tracking-[.12em] text-hud-muted uppercase">
                                     {t('branches')}
                                 </h3>
                             )}

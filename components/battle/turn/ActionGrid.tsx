@@ -42,7 +42,7 @@ const Tile = ({
                 <Icon className="size-10 text-hud-accent-fg" />
             </span>
             <span className="min-w-0 flex-1">
-                <span className="hud-sc block text-[17px] leading-5 [overflow-wrap:anywhere]">
+                <span className="hud-sc block text-lg leading-5 [overflow-wrap:anywhere]">
                     {label}
                 </span>
             </span>
@@ -257,7 +257,7 @@ export function ActionGrid({
                     type="button"
                     disabled={pending}
                     onClick={() => void turn.actions.endTurn()}
-                    className="hud-sc mt-2 flex h-11 w-full items-center justify-center border border-white/15 text-[15px] tracking-[.08em] text-hud-soft disabled:opacity-50"
+                    className="hud-sc mt-2 flex h-11 w-full items-center justify-center border border-white/15 text-base tracking-[.08em] text-hud-soft disabled:opacity-50"
                 >
                     {t('endTurn')}
                 </HudButton>

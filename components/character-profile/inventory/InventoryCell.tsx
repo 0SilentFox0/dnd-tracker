@@ -87,7 +87,7 @@ export function InventoryCell({
                     />
                     {isNew && <NewPill className="absolute top-0.5 left-0.5" />}
                     {thing.badge && (
-                        <span className="absolute right-0.5 bottom-0.5 rounded bg-black/75 px-1 text-[10px] leading-4 text-hud-ink">
+                        <span className="absolute right-0.5 bottom-0.5 rounded bg-black/75 px-1 text-xs leading-4 text-hud-ink">
                             {thing.badge}
                         </span>
                     )}

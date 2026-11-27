@@ -39,7 +39,7 @@ export function LevelBookmarks({
                         }
                         onClick={() => onLevel(l)}
                         className={cn(
-                            'hud-sc flex h-14 flex-col items-center justify-center gap-1 pb-1.5 text-[13px] [clip-path:polygon(0_0,100%_0,100%_100%,50%_86%,0_100%)]',
+                            'hud-sc flex h-14 flex-col items-center justify-center gap-1 pb-1.5 text-sm [clip-path:polygon(0_0,100%_0,100%_100%,50%_86%,0_100%)]',
                             spellLevelMetal(l),
                             'metal-fill',
                             level === l ? '-ml-2 w-10' : 'w-8'
@@ -48,7 +48,7 @@ export function LevelBookmarks({
                         <span className="flex flex-col items-center rounded-sm bg-[var(--palette-card,#1a140f)] px-1 text-[var(--palette-foreground,#e6dccb)]">
                             {spellLevelRoman(l)}
                             {!hideSlots && (
-                                <span className="font-sans text-[11px]">
+                                <span className="font-sans text-xs">
                                     {l === 0 ? '∞' : slotOf(l)}
                                 </span>
                             )}

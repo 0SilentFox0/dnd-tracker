@@ -31,7 +31,7 @@ export function CampaignWorldPreview({
                 className="border-hud-rule group-hover:border-hud-muted flex h-full flex-col border-b pb-4 transition-colors"
                 data-tour="dashboard.world-map"
             >
-                <h2 className="hud-sc text-hud-ink mb-3 flex items-baseline justify-between gap-2 text-[13px] tracking-[.06em]">
+                <h2 className="hud-sc text-hud-ink mb-3 flex items-baseline justify-between gap-2 text-sm tracking-[.06em]">
                     <span>{t('gameNavigation.world')}</span>
                     {worldMap && (
                         <span className="text-hud-muted max-w-[65%] truncate text-xs font-normal tracking-normal">

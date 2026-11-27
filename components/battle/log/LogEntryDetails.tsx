@@ -42,7 +42,7 @@ function DamageTable({ rows }: { rows: DamageBreakdownRow[] }) {
                             >
                                 {text(r.label)}
                                 {r.source && (
-                                    <span className="ml-1 text-[10px] text-hud-muted">
+                                    <span className="ml-1 text-xs text-hud-muted">
                                         · {text(r.source)}
                                     </span>
                                 )}

@@ -29,7 +29,7 @@ import type {
 } from '@/lib/hooks/battle-maps';
 
 const GROUP_LABEL =
-    'col-span-2 px-1 pt-1 text-[10px] font-semibold tracking-wide text-hud-muted uppercase';
+    'col-span-2 px-1 pt-1 text-xs font-semibold tracking-wide text-hud-muted uppercase';
 
 export function EditorSidebar({
     draft,

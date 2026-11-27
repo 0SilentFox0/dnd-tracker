@@ -87,10 +87,10 @@ export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
                             s.pact && 'border-dashed'
                         )}
                     >
-                        <span className="hud-sc text-[13px] leading-none font-bold">
+                        <span className="hud-sc text-sm leading-none font-bold">
                             {s.roman}
                         </span>
-                        <span className="text-[9px] leading-none">
+                        <span className="text-xs leading-none">
                             {s.current}/{s.max}
                         </span>
                     </HudButton>

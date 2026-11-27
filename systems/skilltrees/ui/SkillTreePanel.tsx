@@ -26,14 +26,14 @@ export function SkillTreePanel({ manage }: PathPanelProps) {
                         className="hud-sc size-12 rounded-md border border-hud-line bg-hud-raised text-inherit"
                     />
                     <div className="min-w-0">
-                        <p className="text-[13px] text-hud-ink uppercase">
+                        <p className="text-sm text-hud-ink uppercase">
                             {t('personal')}
                         </p>
                         <h3 className="hud-sc text-base text-hud-ink">
                             {personal.name}
                         </h3>
                         {personal.description && (
-                            <p className="mt-1 text-[13px] leading-snug text-hud-soft">
+                            <p className="mt-1 text-sm leading-snug text-hud-soft">
                                 {personal.description}
                             </p>
                         )}

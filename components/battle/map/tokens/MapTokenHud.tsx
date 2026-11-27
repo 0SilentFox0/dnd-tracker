@@ -122,7 +122,7 @@ function MapTokenHudImpl({
                     type="button"
                     variant="outline"
                     data-map-return
-                    className="hud-sc pointer-events-auto absolute top-0 left-1/2 z-10 h-auto -translate-x-1/2 rounded-md border-white/20 bg-black/80 px-2 py-0.5 text-[11px] font-bold whitespace-nowrap text-[var(--ink)] shadow-none hover:bg-black hover:text-[var(--ink)]"
+                    className="hud-sc pointer-events-auto absolute top-0 left-1/2 z-10 h-auto -translate-x-1/2 rounded-md border-white/20 bg-black/80 px-2 py-0.5 text-xs font-bold whitespace-nowrap text-[var(--ink)] shadow-none hover:bg-black hover:text-[var(--ink)]"
                     onPointerDown={(e) => e.stopPropagation()}
                     onClick={(e) => {
                         e.stopPropagation();

@@ -9,10 +9,10 @@ export function SheetLevelPlate({ level }: { level: number }) {
 
     return (
         <div className="pointer-events-none absolute -bottom-[13px] left-1/2 z-10 flex h-[26px] -translate-x-1/2 items-baseline gap-1.5 rounded-sm bg-hud-surface px-2 whitespace-nowrap text-hud-ink shadow-[0_0_0_1px_var(--color-hud-line),0_6px_14px_-4px_rgba(0,0,0,.7)] lg:-bottom-[18px] lg:h-9 lg:px-3.5">
-            <b className="hud-num text-base leading-[26px] lg:text-[22px] lg:leading-9">
+            <b className="hud-num text-base leading-[26px] lg:text-xl lg:leading-9">
                 {level}
             </b>
-            <span className="hud-title text-xs text-hud-muted lg:text-[15px]">
+            <span className="hud-title text-xs text-hud-muted lg:text-base">
                 {t('levelLabel')}
             </span>
         </div>
@@ -51,7 +51,7 @@ export function SheetXpBar({
     return (
         <div className="grid gap-2">
             <div className="flex items-baseline justify-between gap-3">
-                <span className="text-[15px] font-bold text-hud-ink tabular-nums">
+                <span className="text-base font-bold text-hud-ink tabular-nums">
                     {value}
                 </span>
                 {note && (

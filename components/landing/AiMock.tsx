@@ -5,7 +5,7 @@ import type { Translator } from '@/lib/i18n/translator';
 export function AiMock({ t }: { t: Translator }) {
     return (
         <div className="grid aspect-[16/10] grid-cols-[1fr_1.15fr] text-left">
-            <div className="space-y-2 overflow-hidden border-r border-hud-rule p-3 text-[11px] leading-relaxed text-hud-bone sm:text-xs">
+            <div className="space-y-2 overflow-hidden border-r border-hud-rule p-3 text-xs leading-relaxed text-hud-bone sm:text-xs">
                 <p className="hud-sc text-sm text-hud-ink">
                     {t('ai.mock.pageTitle')}
                 </p>
@@ -18,7 +18,7 @@ export function AiMock({ t }: { t: Translator }) {
                 </p>
                 <p className="text-hud-muted">{t('ai.mock.pageTail')}</p>
             </div>
-            <div className="flex flex-col gap-2 bg-hud-page p-3 text-[11px] sm:text-xs">
+            <div className="flex flex-col gap-2 bg-hud-page p-3 text-xs sm:text-xs">
                 <p className="flex items-center gap-1.5 text-[var(--ld-gold)]">
                     <Sparkles aria-hidden className="size-3.5" />
                     <span className="hud-sc">{t('ai.mock.panelTitle')}</span>

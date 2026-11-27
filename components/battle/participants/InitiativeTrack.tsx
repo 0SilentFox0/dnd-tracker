@@ -113,7 +113,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                         >
                             <span
                                 className={cn(
-                                    'hud-sc absolute text-[11px] text-[var(--hud-muted)]',
+                                    'hud-sc absolute text-xs text-[var(--hud-muted)]',
                                     vertical
                                         ? 'top-1/2 left-0 -translate-x-full -translate-y-1/2 pr-1'
                                         : 'top-0 left-1/2 -translate-x-1/2 -translate-y-full'
@@ -167,8 +167,8 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                                     className={cn(
                                         'hud-sc truncate leading-none font-bold text-[#f3ead2] [text-shadow:0_1px_3px_#000,0_0_2px_#000]',
                                         compact
-                                            ? 'max-w-14 text-[11px]'
-                                            : 'max-w-20 text-[10px]'
+                                            ? 'max-w-14 text-xs'
+                                            : 'max-w-20 text-xs'
                                     )}
                                 >
                                     {e.participant.basicInfo.name}

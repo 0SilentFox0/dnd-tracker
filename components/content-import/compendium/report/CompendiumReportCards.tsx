@@ -210,11 +210,11 @@ export function RowCard({
                 summary={
                     <span className="space-y-1">
                         {kind && (
-                            <span className="block text-[11px] text-hud-muted uppercase">
+                            <span className="block text-xs text-hud-muted uppercase">
                                 {kind}
                             </span>
                         )}
-                        <span className="hud-sc block text-[15px] break-words text-hud-ink">
+                        <span className="hud-sc block text-base break-words text-hud-ink">
                             {kind ? `«${name}»${owner}` : name}
                         </span>
                         {source && (

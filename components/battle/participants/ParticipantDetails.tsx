@@ -69,9 +69,9 @@ function EffectRow({ effect: e }: { effect: ActiveEffect }) {
                 <EffectIcon effect={e} size={36} />
             </span>
             <div className="min-w-0 flex-1">
-                <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]">
+                <div className="flex justify-between text-base font-medium text-[var(--ink)]">
                     <span>{text(effectName(e))}</span>
-                    <span className="text-[13px] font-normal text-[var(--hud-muted)]">
+                    <span className="text-sm font-normal text-[var(--hud-muted)]">
                         {e.zone
                             ? t('zone')
                             : e.permanent
@@ -84,13 +84,13 @@ function EffectRow({ effect: e }: { effect: ActiveEffect }) {
                     .map((line) => (
                         <p
                             key={line}
-                            className="mt-0.5 text-[13px] leading-[18px] text-hud-soft"
+                            className="mt-0.5 text-sm leading-[18px] text-hud-soft"
                         >
                             {line}
                         </p>
                     ))}
                 {e.source && (
-                    <p className="text-[13px] leading-[18px] text-hud-soft">
+                    <p className="text-sm leading-[18px] text-hud-soft">
                         {t('from', {
                             source: e.source.abilityName
                                 ? `${e.source.abilityName} (${e.source.name})`
@@ -146,7 +146,7 @@ function ParticipantDetailsBody({
                 <HitFrame change={change} />
                 <HitFloat
                     change={change}
-                    className="top-0 left-4 text-[26px]"
+                    className="top-0 left-4 text-2xl"
                 />
                 <ZoomablePortrait
                     flashKey={`portrait:${change?.id ?? ''}`}
@@ -156,7 +156,7 @@ function ParticipantDetailsBody({
                     className={cn(!change?.impact && hitFlashClass(change))}
                 />
                 <div>
-                    <div className="hud-sc text-[22px] leading-7 font-bold">
+                    <div className="hud-sc text-xl leading-7 font-bold">
                         {participant.basicInfo.name}
                     </div>
                     {exact ? (

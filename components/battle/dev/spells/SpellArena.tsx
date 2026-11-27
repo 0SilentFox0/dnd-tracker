@@ -129,7 +129,7 @@ export function SpellArena({ ref }: { ref?: Ref<SpellArenaHandle> }) {
             </div>
             <p
                 data-testid="fx-spells-status"
-                className="min-h-4 text-[11px] text-hud-muted"
+                className="min-h-4 text-xs text-hud-muted"
             >
                 {status}
             </p>

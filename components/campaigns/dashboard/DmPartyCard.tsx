@@ -30,7 +30,7 @@ export function DmPartyCard({
             <HudSection
                 header={
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <h2 className="hud-sc text-hud-ink text-[13px] tracking-[.06em]">
+                        <h2 className="hud-sc text-hud-ink text-sm tracking-[.06em]">
                             {t('party.title')}
                         </h2>
                         <p className="text-hud-muted flex items-center gap-3 text-xs">
@@ -92,10 +92,10 @@ export function DmPartyCard({
                                             </span>
                                         </span>
                                         <span className="min-w-0">
-                                            <span className="hud-sc text-hud-ink block break-words text-[15px] leading-tight">
+                                            <span className="hud-sc text-hud-ink block break-words text-base leading-tight">
                                                 {hero.name}
                                             </span>
-                                            <span className="text-hud-muted mt-0.5 block truncate text-[13px]">
+                                            <span className="text-hud-muted mt-0.5 block truncate text-sm">
                                                 {[hero.race, hero.class]
                                                     .filter(Boolean)
                                                     .join(' · ')}

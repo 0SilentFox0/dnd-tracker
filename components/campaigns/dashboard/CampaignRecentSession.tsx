@@ -31,7 +31,7 @@ export function CampaignRecentSession({
             className="border-hud-rule border-b pb-4"
             data-tour="dashboard.recent-session"
         >
-            <h2 className="hud-sc text-hud-ink mb-3 text-[13px] tracking-[.06em]">
+            <h2 className="hud-sc text-hud-ink mb-3 text-sm tracking-[.06em]">
                 {t('recentSession.title')}
             </h2>
             {session ? (

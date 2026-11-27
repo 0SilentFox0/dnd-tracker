@@ -4,7 +4,7 @@
 .skill-tree-editor th { font-family: var(--font-hud-sc), serif; font-weight: 500; font-size: 13px; letter-spacing: 0.08em; color: #8f8473; text-align: left; padding: 2px 4px; }
 .skill-tree-editor tbody th:first-child, .skill-tree-editor thead th:first-child { position: sticky; left: 0; z-index: 1; background: #0d0a08; }
 .skill-tree-editor .editor-branch { min-width: 112px; color: #efe5d2; font-size: 15px; }
-.skill-tree-editor .editor-branch small { display: block; font-family: var(--font-hud-sans), sans-serif; font-size: 11px; color: #8f8473; letter-spacing: 0; }
+.skill-tree-editor .editor-branch small { display: block; font-family: var(--font-hud-sans), sans-serif; font-size: 12px; color: #8f8473; letter-spacing: 0; }
 .skill-tree-editor .editor-branch-actions { display: flex; gap: 4px; margin-top: 2px; }
 .skill-tree-editor .editor-branch-actions button { min-width: 28px; min-height: 28px; color: #b8ab95; }
 .skill-tree-editor .editor-cell { height: 56px; width: 100%; min-width: 104px; display: flex; align-items: center; gap: 8px; padding: 6px; background: rgba(20, 16, 12, 0.8); box-shadow: inset 0 0 0 1px rgba(230, 220, 203, 0.1); text-align: left; }

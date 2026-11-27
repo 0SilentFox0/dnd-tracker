@@ -53,7 +53,7 @@ export function SummaryStep({
             {view.steps.length > 0 && (
                 <div className="hud-sc flex h-12 items-center justify-between text-lg font-bold">
                     <span>{t('estimate')}</span>
-                    <span className="text-[26px]">{view.estimate}</span>
+                    <span className="text-2xl">{view.estimate}</span>
                 </div>
             )}
             {view.cunning && (

@@ -160,6 +160,5 @@ section > .ld-container, section > div > .ld-container { width: min(100%, var(--
   --hud-ink: #efe5d2; --hud-bone: #e6dccb; --hud-muted: #9b9080; --hud-line: #756b5f; --hud-rule: #746b63;
   --palette-page: #0b0908; --palette-panel: rgba(17,14,11,.82); --hud-text: #e3d8c6;
   --ld-gold: #c9b37a; --ld-gold-bright: #ffe08a; --ld-gold-strong: #e6c25a;
-  --font-hud-sc: "Alegreya SC", Georgia, serif; --font-hud-sans: "Alegreya Sans", system-ui, sans-serif;
 }
 [data-landing] .hud-sc, .auth-legacy .hud-sc { letter-spacing: .04em; }

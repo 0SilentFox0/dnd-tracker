@@ -84,7 +84,7 @@ export function AbilityCard({
             <span>{t('saveShort')}</span>
             <b
                 className={cn(
-                    'hud-num text-[17px]',
+                    'hud-num text-lg',
                     save.proficient ? 'text-hud-accent-fg' : 'text-hud-text'
                 )}
             >
@@ -134,7 +134,7 @@ export function AbilityCard({
                         {tg(`abilities.${a.key}.short`)}
                     </span>
                 </small>
-                <span className="hud-num text-4xl leading-none text-hud-ink sm:text-[42px]">
+                <span className="hud-num text-4xl leading-none text-hud-ink sm:text-3xl">
                     <Signed value={a.mod} />
                 </span>
                 <span className="hud-num rounded-[4px] border border-hud-line bg-hud-raised px-2.5 text-sm leading-6 text-hud-ink">
@@ -215,7 +215,7 @@ export function SkillRow({
                 </span>
                 <span
                     className={cn(
-                        'hud-num w-9 text-right text-[17px]',
+                        'hud-num w-9 text-right text-lg',
                         level ? 'font-bold text-hud-ink' : 'text-hud-muted'
                     )}
                 >

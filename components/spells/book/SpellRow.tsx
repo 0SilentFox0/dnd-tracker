@@ -76,7 +76,7 @@ export function SpellRow({
             </span>
             <span className="min-w-0 flex-1">
                 <span className="flex min-w-0 items-center gap-2">
-                    <span className="hud-sc truncate text-[17px] font-bold">
+                    <span className="hud-sc truncate text-lg font-bold">
                         {spell.name}
                     </span>
                     {badge && (
@@ -93,7 +93,7 @@ export function SpellRow({
                 </span>
             </span>
             {formula && spell.dice ? (
-                <span className="spell-book-accent w-20 text-right text-[15px]">
+                <span className="spell-book-accent w-20 text-right text-base">
                     {formula}
                 </span>
             ) : null}

@@ -84,7 +84,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                     {t('skills')}
                 </HudSheetHeading>
                 <div className={cn(panel, 'px-3')}>
-                    <ul className="-mb-px grid gap-x-8 text-[15px] md:grid-cols-2">
+                    <ul className="-mb-px grid gap-x-8 text-base md:grid-cols-2">
                         {sheet.skills.map((s) => (
                             <SkillRow key={s.key} skill={s} roll={roll} />
                         ))}
@@ -126,7 +126,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                     <div
                         className={cn(
                             panel,
-                            'divide-y divide-hud-rule px-4 text-[15px] text-hud-text'
+                            'divide-y divide-hud-rule px-4 text-base text-hud-text'
                         )}
                     >
                         {notes.map((n) => (

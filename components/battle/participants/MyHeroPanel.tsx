@@ -93,7 +93,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                     />
                 </PortraitFx>
                 <div className="min-w-0 flex-1">
-                    <div className="hud-sc flex h-6 items-center justify-between text-[19px] font-bold text-[var(--ink)]">
+                    <div className="hud-sc flex h-6 items-center justify-between text-xl font-bold text-[var(--ink)]">
                         <span className="flex min-w-0 items-baseline gap-2">
                             <span className="truncate">
                                 {hero.basicInfo.name}
@@ -132,7 +132,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                     </div>
                     <HealthBar participant={hero} exact className="h-1.5" />
                     {!compact && (
-                        <div className="mt-1.5 flex h-6 items-center gap-4 text-[15px] text-hud-text">
+                        <div className="mt-1.5 flex h-6 items-center gap-4 text-base text-hud-text">
                             <span className="flex items-center gap-1.5">
                                 <Heart className="size-4 text-[var(--enemy)]" />
                                 <HpFigure

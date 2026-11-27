@@ -83,7 +83,7 @@ export function EnemyCard({
             )}
         >
             <div className="flex items-center gap-2">
-                <span className="rounded-full bg-red-700 px-2 text-[10px] leading-4 text-white">
+                <span className="rounded-full bg-red-700 px-2 text-xs leading-4 text-white">
                     {te('dmOnly')}
                 </span>
                 <span className="flex-1" />

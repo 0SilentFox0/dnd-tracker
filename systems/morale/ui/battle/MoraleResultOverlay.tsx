@@ -14,7 +14,7 @@ const die =
     'hud-sc flex items-center justify-center font-extrabold [clip-path:polygon(50%_0,100%_38%,82%_100%,18%_100%,0_38%)] animate-[hud-dropin_.7s_cubic-bezier(.16,1,.3,1)_both]';
 
 const cta =
-    'hud-sc mt-8 flex h-[52px] w-full max-w-xs items-center justify-center text-[17px] font-bold tracking-[.06em]';
+    'hud-sc mt-8 flex h-[52px] w-full max-w-xs items-center justify-center text-lg font-bold tracking-[.06em]';
 
 /** Morale goes full screen because it decides the turn; attack and spell results stay in the corner card (ActionResultCard). */
 export function MoraleResultOverlay() {
@@ -55,12 +55,12 @@ export function MoraleResultOverlay() {
                 <div
                     className={cn(
                         die,
-                        'relative mb-5 size-[88px] bg-[#e8c77a] text-[40px] text-[var(--palette-primary-foreground,#2a1d05)]'
+                        'relative mb-5 size-[88px] bg-[#e8c77a] text-3xl text-[var(--palette-primary-foreground,#2a1d05)]'
                     )}
                 >
                     {data.d10}
                 </div>
-                <div className="hud-sc relative animate-[hud-rise_.7s_.25s_both] text-[40px] leading-[44px] font-extrabold tracking-[.08em] text-[#f3dc9a] [text-shadow:0_0_24px_rgba(232,199,122,.6)]">
+                <div className="hud-sc relative animate-[hud-rise_.7s_.25s_both] text-3xl leading-[44px] font-extrabold tracking-[.08em] text-[#f3dc9a] [text-shadow:0_0_24px_rgba(232,199,122,.6)]">
                     {t('extraTitle')}
                 </div>
                 <div className="relative mt-3 animate-[hud-fade_.5s_.6s_both] text-base">
@@ -108,12 +108,12 @@ export function MoraleResultOverlay() {
             <div
                 className={cn(
                     die,
-                    'mb-5 size-[88px] bg-[#3a3a40] text-[40px] text-[#c9c9cf]'
+                    'mb-5 size-[88px] bg-[#3a3a40] text-3xl text-[#c9c9cf]'
                 )}
             >
                 {data.d10}
             </div>
-            <div className="hud-sc animate-[hud-shake-title_.5s_.45s_both] text-[40px] font-extrabold tracking-[.14em] text-[#b9b9c0]">
+            <div className="hud-sc animate-[hud-shake-title_.5s_.45s_both] text-3xl font-extrabold tracking-[.14em] text-[#b9b9c0]">
                 {t('skipTitle')}
             </div>
             <div className="mt-3 text-base">

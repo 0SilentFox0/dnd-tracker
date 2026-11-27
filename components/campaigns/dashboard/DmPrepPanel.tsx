@@ -29,7 +29,7 @@ export function DmPrepPanel({
 
     return (
         <HudPanel className="flex flex-col" data-tour="dashboard.dm-prep">
-            <h2 className="hud-sc text-hud-ink mb-3 text-[13px] tracking-[.06em]">
+            <h2 className="hud-sc text-hud-ink mb-3 text-sm tracking-[.06em]">
                 {t('prep.title')}
             </h2>
             <div className="flex min-h-0 flex-1 flex-col gap-2">

@@ -39,7 +39,7 @@ export function OfferList({
 
     return (
         <section id="progression-offers" className="pb-2">
-            <h3 className="hud-sc mx-4 mt-3.5 mb-1.5 text-[13px] tracking-[.12em] text-hud-muted uppercase">
+            <h3 className="hud-sc mx-4 mt-3.5 mb-1.5 text-sm tracking-[.12em] text-hud-muted uppercase">
                 {t('heading')}
             </h3>
             {filter && (
@@ -110,7 +110,7 @@ export function OfferList({
                                         {tag}
                                     </span>
                                     {skill?.summary[0] && (
-                                        <span className="mt-1 block text-[13px] leading-snug text-hud-soft">
+                                        <span className="mt-1 block text-sm leading-snug text-hud-soft">
                                             {abilityText.flowsText(
                                                 skill.summary
                                             )}

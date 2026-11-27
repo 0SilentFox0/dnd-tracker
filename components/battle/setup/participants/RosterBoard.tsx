@@ -57,7 +57,7 @@ function SideColumn({
             aria-label={t(`sides.${side}.title`)}
             className="min-w-0 space-y-2"
         >
-            <h3 className="hud-sc flex items-center gap-2 text-[13px] tracking-[.06em] text-hud-muted">
+            <h3 className="hud-sc flex items-center gap-2 text-sm tracking-[.06em] text-hud-muted">
                 <span
                     aria-hidden
                     className={cn(
@@ -126,7 +126,7 @@ export function RosterBoard({
                 <Disclosure
                     summary={t('autopick')}
                     headingLevel={3}
-                    triggerClassName="hud-sc min-h-9 text-[13px] tracking-[.06em] text-hud-muted"
+                    triggerClassName="hud-sc min-h-9 text-sm tracking-[.06em] text-hud-muted"
                     className="border-b-0"
                     contentClassName="pt-2"
                 >

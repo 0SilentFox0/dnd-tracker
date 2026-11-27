@@ -26,7 +26,7 @@ export function RacePassive() {
 
     return (
         <section className="mb-3 rounded-[4px] border border-hud-line bg-hud-panel px-5 py-4 shadow-sm max-sm:px-4">
-            <p className="mb-2 flex items-center gap-2 text-[13px] text-hud-ink uppercase">
+            <p className="mb-2 flex items-center gap-2 text-sm text-hud-ink uppercase">
                 <EntityIcon
                     src={sheet.identity.raceIcon}
                     name={sheet.identity.race}

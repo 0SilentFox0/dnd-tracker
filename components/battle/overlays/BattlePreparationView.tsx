@@ -63,7 +63,7 @@ export function BattlePreparationView({
                             key={idx}
                             className="flex flex-col items-center gap-1 border border-hud-line bg-hud-panel p-4 sm:p-6"
                         >
-                            <span className="hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]">
+                            <span className="hud-sc text-sm tracking-[.1em] text-[var(--hud-muted)]">
                                 {stat.label}
                             </span>
                             <span

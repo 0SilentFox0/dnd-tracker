@@ -59,7 +59,7 @@ export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
                 disabled={anyPending}
                 aria-expanded={open}
                 onClick={() => setOpen((v) => !v)}
-                className="hud-sc flex h-11 w-full items-center justify-center border border-white/25 bg-black/55 text-[15px] tracking-[.08em] text-[var(--ink)] disabled:opacity-50"
+                className="hud-sc flex h-11 w-full items-center justify-center border border-white/25 bg-black/55 text-base tracking-[.08em] text-[var(--ink)] disabled:opacity-50"
             >
                 {t('picker')}
             </HudButton>

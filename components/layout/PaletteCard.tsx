@@ -60,7 +60,7 @@ export function PaletteCard({
                     style={{ background: p.muted }}
                 />
             </span>
-            <span className="hud-sc text-[17px]">{t(`names.${id}`)}</span>
+            <span className="hud-sc text-lg">{t(`names.${id}`)}</span>
         </Button>
     );
 }

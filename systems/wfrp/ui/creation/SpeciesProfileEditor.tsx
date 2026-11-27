@@ -135,7 +135,7 @@ export function SpeciesProfileEditor({
             className="space-y-4 rounded-lg border border-hud-line p-3"
         >
             <div>
-                <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-ink">
+                <h2 className="hud-sc text-sm tracking-[.06em] text-hud-ink">
                     {t('title')}
                 </h2>
                 <p className="text-sm text-hud-muted">{t('hint')}</p>

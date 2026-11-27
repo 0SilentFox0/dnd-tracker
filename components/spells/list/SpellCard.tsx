@@ -95,7 +95,7 @@ export function SpellCard({
                     />
                 </div>
                 <div className="min-w-0 flex-1">
-                    <h3 className="hud-sc truncate text-[15px] text-hud-ink">
+                    <h3 className="hud-sc truncate text-base text-hud-ink">
                         {spell.name}
                     </h3>
                     <div className="mt-1 flex flex-wrap gap-1">
@@ -180,11 +180,11 @@ export function SpellCard({
 
             <SpellComponentsLine spell={spell} className="line-clamp-2" />
 
-            <div className="flex min-w-0 items-center gap-1.5 border-t border-hud-raised pt-1.5 text-[11px] text-hud-muted">
+            <div className="flex min-w-0 items-center gap-1.5 border-t border-hud-raised pt-1.5 text-xs text-hud-muted">
                 <GroupIcon className="size-3 shrink-0" />
                 <span className="truncate">{groupName}</span>
                 <code
-                    className="ml-auto max-w-[45%] truncate font-mono text-[10px]"
+                    className="ml-auto max-w-[45%] truncate font-mono text-xs"
                     title={spell.id}
                 >
                     {copied ? t('copied') : spell.id}

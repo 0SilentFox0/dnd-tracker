@@ -36,7 +36,7 @@ export function BiographyEditor({
     return (
         <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-                <span className="hud-sc text-[13px] tracking-[.06em] text-hud-ink">
+                <span className="hud-sc text-sm tracking-[.06em] text-hud-ink">
                     {t('title')}
                 </span>
                 <Button
@@ -57,7 +57,7 @@ export function BiographyEditor({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 rows={12}
-                className="font-[family-name:var(--font-hud-book)] text-[15px]"
+                className="font-[family-name:var(--font-hud-book)] text-base"
             />
             <p className="text-xs text-hud-muted">{t('hint')}</p>
         </div>

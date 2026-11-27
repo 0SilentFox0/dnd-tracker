@@ -138,7 +138,7 @@ export function SetupHeader({
                         onBlur={() => setTouched(true)}
                         onInvalid={() => setTouched(true)}
                         className={cn(
-                            'hud-sc h-auto rounded-none border-0 border-b border-hud-rule bg-transparent px-0 py-1 text-[22px] shadow-none focus-visible:border-hud-accent focus-visible:ring-0',
+                            'hud-sc h-auto rounded-none border-0 border-b border-hud-rule bg-transparent px-0 py-1 text-xl shadow-none focus-visible:border-hud-accent focus-visible:ring-0',
                             invalid && 'border-hud-crimson'
                         )}
                     />

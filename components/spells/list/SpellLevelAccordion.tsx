@@ -84,7 +84,7 @@ export function SpellLevelAccordion({
                                         spellLevelMetal(level)
                                     )}
                                 >
-                                    <span className="-rotate-45 text-[11px] font-semibold">
+                                    <span className="-rotate-45 text-xs font-semibold">
                                         {level}
                                     </span>
                                 </span>

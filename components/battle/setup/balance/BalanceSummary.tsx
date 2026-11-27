@@ -20,7 +20,7 @@ function Stat({
 }) {
     return (
         <div className="min-w-0">
-            <div className="hud-sc text-[11px] tracking-[.06em] text-[var(--hud-muted)]">
+            <div className="hud-sc text-xs tracking-[.06em] text-[var(--hud-muted)]">
                 {label}
             </div>
             <div className="text-sm">{children}</div>

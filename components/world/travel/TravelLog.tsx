@@ -58,7 +58,7 @@ function TravelEntry({ e }: { e: WorldTravelEntry }) {
                 {when ? (
                     <time
                         dateTime={e.createdAt}
-                        className="ml-auto text-[11px] text-hud-muted"
+                        className="ml-auto text-xs text-hud-muted"
                     >
                         {when}
                     </time>

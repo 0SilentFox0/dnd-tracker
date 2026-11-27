@@ -110,7 +110,7 @@ export function TilePalettePanel({
             <section className={SECTION}>
                 <div className="flex items-center justify-between gap-2">
                     <h3 className={HEADING}>{t('palette')}</h3>
-                    <span className="text-[11px] text-hud-muted">
+                    <span className="text-xs text-hud-muted">
                         {t('paletteCount', { count: visibleTiles.length })}
                     </span>
                 </div>
@@ -161,7 +161,7 @@ export function TilePalettePanel({
                                     className="max-h-full max-w-full object-contain"
                                 />
                             </span>
-                            <span className="line-clamp-2 w-full text-[11px] leading-tight">
+                            <span className="line-clamp-2 w-full text-xs leading-tight">
                                 {tileLabel(tile.key)}
                             </span>
                         </Button>

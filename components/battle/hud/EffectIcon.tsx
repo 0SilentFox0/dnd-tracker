@@ -38,7 +38,7 @@ export function EffectIcon({
     if (face && (effect.source?.personal || !icon)) {
         return (
             <span
-                className="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-current bg-black/40 text-[9px] font-bold"
+                className="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-current bg-black/40 text-xs font-bold"
                 style={{ width: size, height: size }}
             >
                 {face.avatar ? (

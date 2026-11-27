@@ -49,7 +49,7 @@ export function AvatarEditor({
             <div className="min-w-0 flex-1 space-y-2">
                 <div className="min-w-0">
                     {user.name && (
-                        <p className="hud-sc truncate text-[28px] text-hud-ink">
+                        <p className="hud-sc truncate text-2xl text-hud-ink">
                             {user.name}
                         </p>
                     )}

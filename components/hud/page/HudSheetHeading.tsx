@@ -22,7 +22,7 @@ export function HudSheetHeading({
                 {children}
             </h2>
             {legend && (
-                <small className="inline-flex items-center gap-2 text-[13px] text-hud-muted">
+                <small className="inline-flex items-center gap-2 text-xs text-hud-muted">
                     {legend}
                 </small>
             )}

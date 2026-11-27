@@ -149,7 +149,7 @@ export function GoalList() {
                                     {g.title && (
                                         <span
                                             className={cn(
-                                                'hud-sc text-[15px]',
+                                                'hud-sc text-base',
                                                 g.status === GoalStatus.ACTIVE
                                                     ? 'text-hud-bone'
                                                     : 'text-hud-muted line-through'
@@ -161,7 +161,7 @@ export function GoalList() {
                                     {g.kind && (
                                         <span
                                             className={cn(
-                                                'rounded border px-1.5 text-[10px] tracking-[.06em] uppercase',
+                                                'rounded border px-1.5 text-xs tracking-[.06em] uppercase',
                                                 g.kind === GoalKind.SECRET
                                                     ? 'border-hud-danger text-hud-danger'
                                                     : 'border-hud-line text-hud-ink'
@@ -171,7 +171,7 @@ export function GoalList() {
                                         </span>
                                     )}
                                     {g.author === GoalAuthor.PLAYER && (
-                                        <span className="inline-block rounded border border-hud-info px-1 text-[10px] text-hud-info">
+                                        <span className="inline-block rounded border border-hud-info px-1 text-xs text-hud-info">
                                             {t('fromPlayer')}
                                         </span>
                                     )}

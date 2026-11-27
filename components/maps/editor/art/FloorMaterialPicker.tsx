@@ -70,7 +70,7 @@ export function FloorMaterialPicker({
                                 className="max-h-full max-w-full object-contain"
                             />
                         </span>
-                        <span className="line-clamp-2 w-full text-[11px] leading-tight">
+                        <span className="line-clamp-2 w-full text-xs leading-tight">
                             {label(tile.key)}
                         </span>
                     </Button>

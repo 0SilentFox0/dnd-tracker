@@ -5,5 +5,4 @@ export const hudFontClassName = 'font-hud';
 export const HUD_PRELOAD_FONTS = [
     '/fonts/CormorantSC-Bold-cyrillic.woff2',
     '/fonts/Alegreya-Variable.woff2',
-    '/fonts/AlegreyaSC-Bold.woff2',
 ];

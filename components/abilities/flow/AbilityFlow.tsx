@@ -45,7 +45,7 @@ export function AbilityFlow({
 
         const content = (
             <>
-                <span className="hud-sc shrink-0 text-[10px] tracking-wide uppercase">
+                <span className="hud-sc shrink-0 text-xs tracking-wide uppercase">
                     {t(part)}
                 </span>
                 <span className="min-w-0 text-hud-bone">{body}</span>

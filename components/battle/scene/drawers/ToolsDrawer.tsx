@@ -41,7 +41,7 @@ const SOUND_SECTION = cn(
 
 const NextTurnIcon = actionIcon.nextTurn;
 
-const SECTION = 'hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]';
+const SECTION = 'hud-sc text-sm tracking-[.1em] text-[var(--hud-muted)]';
 
 export interface ToolsProps {
     onComplete?: () => void;

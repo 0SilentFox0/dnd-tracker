@@ -56,7 +56,7 @@ export function MapCameraControls({
                 role="status"
                 aria-label={t('zoomLevel')}
                 className={cn(
-                    'min-w-12 px-1 text-center text-[13px] text-[var(--ink)] tabular-nums',
+                    'min-w-12 px-1 text-center text-sm text-[var(--ink)] tabular-nums',
                     phone && 'sr-only'
                 )}
             >

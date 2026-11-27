@@ -76,7 +76,7 @@ function CatalogGroup({
             onOpenChange={(open) => store.set(!open)}
             summary={title}
             headingLevel={3}
-            triggerClassName="hud-sc min-h-9 py-1 text-[13px] tracking-[.06em] text-hud-muted"
+            triggerClassName="hud-sc min-h-9 py-1 text-sm tracking-[.06em] text-hud-muted"
             className="border-b-0"
         >
             <div className="grid grid-cols-[repeat(auto-fill,8.5rem)] items-start gap-3 pb-3">

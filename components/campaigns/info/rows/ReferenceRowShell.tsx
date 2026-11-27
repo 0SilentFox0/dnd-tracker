@@ -51,7 +51,7 @@ export function ReferenceRowShell({
                 fallback={icon.fallback}
             />
             <span className="min-w-0 flex-1">
-                <span className="hud-sc block truncate text-[15px] leading-tight text-hud-ink">
+                <span className="hud-sc block truncate text-base leading-tight text-hud-ink">
                     {name}
                 </span>
                 <span className="block truncate text-xs text-hud-muted">

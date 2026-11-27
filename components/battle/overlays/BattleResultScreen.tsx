@@ -40,7 +40,7 @@ function HeroCard({ hero }: { hero: BattleSummaryHero }) {
                         className="size-10 shrink-0 rounded-full object-cover"
                     />
                 )}
-                <span className="hud-sc min-w-0 flex-1 truncate text-[17px] tracking-[.06em] text-[var(--ink)]">
+                <span className="hud-sc min-w-0 flex-1 truncate text-lg tracking-[.06em] text-[var(--ink)]">
                     {hero.name}
                 </span>
                 <span
@@ -57,10 +57,10 @@ function HeroCard({ hero }: { hero: BattleSummaryHero }) {
             <dl className="mt-2 grid grid-cols-4 gap-2 text-center">
                 {STATS.map((key) => (
                     <div key={key} className="flex flex-col-reverse">
-                        <dt className="text-[11px] text-[var(--hud-muted)]">
+                        <dt className="text-xs text-[var(--hud-muted)]">
                             {t(`stats.${key}`)}
                         </dt>
-                        <dd className="hud-sc text-[20px] font-bold text-[var(--ink)]">
+                        <dd className="hud-sc text-xl font-bold text-[var(--ink)]">
                             {hero[key]}
                         </dd>
                     </div>
@@ -109,7 +109,7 @@ export function BattleResultScreen() {
             <div className="my-auto flex w-full max-w-xl flex-col items-center">
                 <h2
                     className={cn(
-                        'hud-sc text-[44px] font-extrabold tracking-[.14em]',
+                        'hud-sc text-3xl font-extrabold tracking-[.14em]',
                         HEADLINE[outcomeKey]
                     )}
                 >
@@ -147,7 +147,7 @@ export function BattleResultScreen() {
                     ) : (
                         <Link
                             href={exitHref}
-                            className="hud-sc flex h-[52px] items-center justify-center border border-hud-accent bg-hud-accent text-[17px] font-bold tracking-[.06em] text-hud-accent-ink"
+                            className="hud-sc flex h-[52px] items-center justify-center border border-hud-accent bg-hud-accent text-lg font-bold tracking-[.06em] text-hud-accent-ink"
                         >
                             {t('exit')}
                         </Link>
@@ -155,7 +155,7 @@ export function BattleResultScreen() {
                     <HudButton
                         type="button"
                         onClick={() => resultScreen.setOpen(false)}
-                        className="hud-sc flex h-11 items-center justify-center border border-white/[.25] text-[15px] tracking-[.06em] text-[var(--ink)]"
+                        className="hud-sc flex h-11 items-center justify-center border border-white/[.25] text-base tracking-[.06em] text-[var(--ink)]"
                     >
                         {t('review')}
                     </HudButton>

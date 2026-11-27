@@ -80,7 +80,7 @@ export function HudGameShell({
                 breadcrumb={
                     <nav
                         aria-label={t('breadcrumb')}
-                        className="flex min-w-0 items-center gap-1 text-[13px]"
+                        className="flex min-w-0 items-center gap-1 text-sm"
                     >
                         <Link
                             href="/campaigns"

@@ -174,7 +174,7 @@ export function CompendiumDependencies({
                             key={row.key}
                         >
                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                <strong className="hud-sc min-w-0 text-[15px] text-hud-ink">
+                                <strong className="hud-sc min-w-0 text-base text-hud-ink">
                                     {row.name}
                                 </strong>
                                 <span className="text-xs text-hud-muted">

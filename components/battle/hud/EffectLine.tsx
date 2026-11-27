@@ -41,7 +41,7 @@ function EffectChip({
                     tabIndex={0}
                     aria-label={`${name}: ${summary.join('; ')}`}
                     className={cn(
-                        'relative flex h-5 cursor-help items-center gap-1.5 text-[13px] leading-5 whitespace-nowrap',
+                        'relative flex h-5 cursor-help items-center gap-1.5 text-sm leading-5 whitespace-nowrap',
                         tone(effect)
                     )}
                 >
@@ -62,7 +62,7 @@ function EffectChip({
             <TooltipContent
                 side="bottom"
                 sideOffset={4}
-                className="max-w-64 border border-white/15 bg-[#17130f] text-[13px] leading-[18px] text-hud-text shadow-lg [&>span]:hidden"
+                className="max-w-64 border border-white/15 bg-[#17130f] text-sm leading-[18px] text-hud-text shadow-lg [&>span]:hidden"
             >
                 <div className="font-medium text-[var(--ink)]">{name}</div>
                 {summary.map((line) => (
@@ -112,7 +112,7 @@ export function EffectLine({
                             : t('showAll', { count: effects.length })
                     }
                     onClick={() => setExpanded((v) => !v)}
-                    className="relative cursor-pointer rounded px-1 text-[13px] leading-5 whitespace-nowrap text-[var(--hud-muted)] hover:bg-white/10 hover:text-hud-text"
+                    className="relative cursor-pointer rounded px-1 text-sm leading-5 whitespace-nowrap text-[var(--hud-muted)] hover:bg-white/10 hover:text-hud-text"
                 >
                     {open ? t('less') : `+${effects.length - max}`}
                 </HudButton>

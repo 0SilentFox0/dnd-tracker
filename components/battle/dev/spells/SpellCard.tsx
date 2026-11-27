@@ -19,7 +19,7 @@ import { useText } from '@/lib/i18n/use-text';
 function FxField({ label, children }: { label: string; children: ReactNode }) {
     return (
         <div className="min-w-0">
-            <dt className="text-[10px] tracking-wide text-hud-muted uppercase">
+            <dt className="text-xs tracking-wide text-hud-muted uppercase">
                 {label}
             </dt>
             <dd className="flex items-center gap-1.5 text-xs text-hud-bone">
@@ -59,7 +59,7 @@ export function SpellCard({
                             <h3 className="hud-sc font-bold text-hud-ink">
                                 {spell.name}
                             </h3>
-                            <p className="text-[11px] text-hud-muted">
+                            <p className="text-xs text-hud-muted">
                                 level {spell.level} · {spell.school} ·{' '}
                                 {text(spell.targeting)}
                             </p>

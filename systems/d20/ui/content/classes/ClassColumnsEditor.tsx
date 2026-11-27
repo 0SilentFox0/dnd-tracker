@@ -49,7 +49,7 @@ function ColumnValuesGrid({
                     key={level}
                     className="flex flex-col items-center gap-0.5"
                 >
-                    <span className="text-[10px] text-hud-muted">
+                    <span className="text-xs text-hud-muted">
                         {level + 1}
                     </span>
                     <Input

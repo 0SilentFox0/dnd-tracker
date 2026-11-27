@@ -68,7 +68,7 @@ export function ClassSection({
                                 <EntityIcon
                                     src={chosenSubclass?.icon}
                                     name={subclass}
-                                    className="size-5 text-[10px]"
+                                    className="size-5 text-xs"
                                 />
                                 {t('sectionSubclass', { subclass })}
                             </span>

@@ -21,7 +21,7 @@ export function CombatRow({
     const expandable = !!lines && lines.length > 1;
 
     return (
-        <div className="border-b border-hud-rule text-[15px] last:border-b-0">
+        <div className="border-b border-hud-rule text-base last:border-b-0">
             <HudButton
                 type="button"
                 disabled={!expandable}

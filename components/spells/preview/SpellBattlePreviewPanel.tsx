@@ -39,7 +39,7 @@ function Chip({
     return (
         <span
             className={cn(
-                'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] leading-4',
+                'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs leading-4',
                 book
                     ? 'spell-book-preview-pill'
                     : 'border-hud-line bg-hud-raised'
@@ -118,7 +118,7 @@ export default function SpellBattlePreviewPanel({
         <section
             aria-label={t('fx.aria')}
             className={cn(
-                'fx-preview text-[13px] not-italic',
+                'fx-preview text-sm not-italic',
                 book
                     ? 'spell-book-preview'
                     : 'rounded-xl border border-hud-line bg-hud-page/95 p-2.5 text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-edge-faint)]',
@@ -193,7 +193,7 @@ export default function SpellBattlePreviewPanel({
                         type="button"
                         onClick={replay}
                         className={cn(
-                            'ml-auto inline-flex min-h-7 items-center gap-1 rounded-full px-2.5 text-[11px]',
+                            'ml-auto inline-flex min-h-7 items-center gap-1 rounded-full px-2.5 text-xs',
                             book
                                 ? 'spell-book-preview-title shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--book-accent)_60%,transparent)] hover:bg-[color-mix(in_srgb,var(--book-accent)_10%,transparent)]'
                                 : 'text-hud-ink shadow-[inset_0_0_0_1px_var(--color-hud-edge)] hover:bg-hud-raised'

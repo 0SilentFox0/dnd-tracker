@@ -148,7 +148,7 @@ export function SkillCard({
                     <p
                         className={`text-muted-foreground ${
                             printMode
-                                ? 'mb-1.5 text-[11px] leading-snug'
+                                ? 'mb-1.5 text-xs leading-snug'
                                 : 'mb-3 line-clamp-2 text-xs sm:text-sm'
                         }`}
                     >

@@ -35,7 +35,7 @@ function ReadiedAttackPicker({
             <HudButton
                 type="button"
                 onClick={() => setOpen(true)}
-                className="hud-sc mt-2 flex h-11 w-full items-center justify-center gap-2 border border-[var(--enemy)] bg-[var(--enemy)]/25 text-[15px] tracking-[.08em] text-[var(--ink)]"
+                className="hud-sc mt-2 flex h-11 w-full items-center justify-center gap-2 border border-[var(--enemy)] bg-[var(--enemy)]/25 text-base tracking-[.08em] text-[var(--ink)]"
             >
                 <Crosshair className="size-5 text-[var(--bone)]" />
                 {t('title')}

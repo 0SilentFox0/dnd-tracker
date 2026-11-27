@@ -28,7 +28,7 @@ export function DmNextSteps({
             className="border-hud-rule flex flex-col border-b pb-4"
             data-tour="dashboard.dm-next-steps"
         >
-            <h2 className="hud-sc text-hud-ink mb-3 text-[13px] tracking-[.06em]">
+            <h2 className="hud-sc text-hud-ink mb-3 text-sm tracking-[.06em]">
                 {t('nextSteps.title')}
             </h2>
             <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-3">

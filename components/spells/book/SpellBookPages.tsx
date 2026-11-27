@@ -80,7 +80,7 @@ export function SpellBookPages({
                                 onPick={filter.setSchool}
                             />
                         )}
-                        <div className="spell-book-muted text-[13px] italic">
+                        <div className="spell-book-muted text-sm italic">
                             {t('title')}
                         </div>
                         <div className="hud-sc flex items-center gap-3 text-2xl leading-8 font-bold">
@@ -141,7 +141,7 @@ export function EmptySpellBook({ text }: { text: string }) {
                 'flex min-h-56 flex-col items-center justify-center gap-2 px-6 py-10 text-center'
             )}
         >
-            <div className="spell-book-muted text-[13px] italic">
+            <div className="spell-book-muted text-sm italic">
                 {t('title')}
             </div>
             <p className="hud-sc text-lg leading-6">{text}</p>
@@ -202,7 +202,7 @@ export function SpellDetail({
                     />
                 </span>
                 <div>
-                    <div className="hud-sc text-[26px] leading-[30px] font-bold">
+                    <div className="hud-sc text-2xl leading-[30px] font-bold">
                         {spell.name}
                     </div>
                     <div className="spell-book-muted text-sm italic">
@@ -220,7 +220,7 @@ export function SpellDetail({
             )}
             {spell.description && (
                 <p
-                    className="mt-4 border-l-4 pl-4 text-[19px] leading-7 font-medium italic"
+                    className="mt-4 border-l-4 pl-4 text-xl leading-7 font-medium italic"
                     style={{
                         borderColor: spellSchoolColor(spell.spellGroup),
                         color: 'var(--book-ink, #3b2716)',
@@ -245,7 +245,7 @@ export function SpellDetail({
                 </div>
             )}
             {spell.appearanceDescription && (
-                <p className="spell-book-accent mt-5 text-[17px] leading-6 first-letter:float-left first-letter:pt-1 first-letter:pr-1.5 first-letter:font-[family-name:var(--font-hud-sc)] first-letter:text-[52px] first-letter:leading-[44px]">
+                <p className="spell-book-accent mt-5 text-lg leading-6 first-letter:float-left first-letter:pt-1 first-letter:pr-1.5 first-letter:font-[family-name:var(--font-hud-sc)] first-letter:text-[52px] first-letter:leading-[44px]">
                     {spell.appearanceDescription}
                 </p>
             )}

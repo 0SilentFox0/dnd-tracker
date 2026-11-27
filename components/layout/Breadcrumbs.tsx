@@ -125,7 +125,7 @@ export function Breadcrumbs() {
     const homeCrumb = allSegments[0] !== 'campaigns' || allSegments.length > 1;
 
     return (
-        <nav aria-label={t('label')} className="min-w-0 text-[13px] text-hud-muted">
+        <nav aria-label={t('label')} className="min-w-0 text-sm text-hud-muted">
             <ol className="flex min-w-0 flex-nowrap items-center gap-1 whitespace-nowrap">
                 {homeCrumb && (
                     <li className="hidden shrink-0 items-center gap-1 sm:flex">

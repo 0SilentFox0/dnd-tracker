@@ -22,7 +22,7 @@ export const AwaitingDmBanner = memo(function AwaitingDmBanner() {
         return (
             <div className={BOX}>
                 <Hourglass className="size-4 shrink-0 text-hud-muted" />
-                <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
+                <span className="hud-sc text-lg tracking-[.12em] text-[var(--ink)]">
                     {t('awaitingDm')}
                 </span>
             </div>
@@ -37,7 +37,7 @@ export const AwaitingDmBanner = memo(function AwaitingDmBanner() {
             className={`${BOX} w-[calc(100%-2rem)]`}
         >
             <Hourglass className="size-4 shrink-0 text-hud-muted" />
-            <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
+            <span className="hud-sc text-lg tracking-[.12em] text-[var(--ink)]">
                 {t('awaitingYou')}
             </span>
         </HudButton>

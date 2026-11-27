@@ -183,7 +183,7 @@ export function ShowDeckStrip({
                                         height={72}
                                         className="h-[63px] w-28 object-cover"
                                     />
-                                    <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/80 to-transparent px-1.5 pt-3 pb-0.5 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
+                                    <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/80 to-transparent px-1.5 pt-3 pb-0.5 text-xs text-white opacity-0 transition group-hover:opacity-100">
                                         {i + 1}.{' '}
                                         {slide.title ?? t('deckStrip.untitled')}
                                     </span>
