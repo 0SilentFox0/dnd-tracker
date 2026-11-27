@@ -25,6 +25,7 @@ export function HudShellHeader({
                         <DropdownMenuTrigger asChild>
                             <Button
                                 type="button"
+                                id="hud-shell-menu-trigger"
                                 variant="outline"
                                 size="icon"
                                 aria-label={menu.label}
