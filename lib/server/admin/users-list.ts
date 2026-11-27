@@ -103,34 +103,8 @@ const cursorSql = (sort: keyof typeof SORTS, c: Cursor): Prisma.Sql => {
     })`;
 };
 
-export async function listAdminUsers(query: Query): Promise<AdminUsersPage> {
-    const sort = query.sort ?? 'created';
-
-    const authMetaAvailable = await hasAuthSchema();
-
-    const filter = await filterSql(query.filter ?? 'all');
-
-    if (!filter) return { rows: [], next: null, authMetaAvailable };
-
-    const q = query.q?.trim();
-
-    const search = q
-        ? Prisma.sql`and (x.email ilike ${`%${q}%`} or x."displayName" ilike ${`%${q}%`} or x.id = ${q})`
-        : Prisma.empty;
-
-    const cursor = decodeCursor(query.cursor);
-
-    const after = cursor
-        ? Prisma.sql`and ${cursorSql(sort, cursor)}`
-        : Prisma.empty;
-
-    const { column, nullable } = SORTS[sort];
-
-    const order = Prisma.raw(
-        `x."${column}" desc${nullable ? ' nulls last' : ''}, x.id desc`
-    );
-
-    const raw = await prisma.$queryRaw<Raw[]>`
+const fetchRows = (where: Prisma.Sql, order: Prisma.Sql, limit: number) => {
+    return prisma.$queryRaw<Raw[]>`
         with camp as (
             select "dmUserId" as uid,
                 count(*) filter (where kind = 'campaign')::int as "campaignsDm",
@@ -168,22 +142,15 @@ export async function listAdminUsers(query: Query): Promise<AdminUsersPage> {
             left join chars on chars.uid = u.id
             left join act on act.uid = u.id
         ) x
-        where ${filter} ${search} ${after}
+        where ${where}
         order by ${order}
-        limit ${PAGE_SIZE + 1}`;
+        limit ${limit}`;
+};
 
-    const page = raw.slice(0, PAGE_SIZE);
+const toRows = async (raw: Raw[]): Promise<AdminUserRow[]> => {
+    const meta = await readAuthMeta(raw.map((r) => r.id));
 
-    const last = page[page.length - 1];
-
-    const next =
-        raw.length > PAGE_SIZE && last
-            ? encodeCursor({ v: sortValue(sort, last), id: last.id })
-            : null;
-
-    const meta = await readAuthMeta(page.map((r) => r.id));
-
-    const rows: AdminUserRow[] = page.map((r) => ({
+    return raw.map((r) => ({
         id: r.id,
         email: r.email,
         displayName: r.displayName,
@@ -202,6 +169,59 @@ export async function listAdminUsers(query: Query): Promise<AdminUsersPage> {
         sharedIp: r.sharedIp,
         subscription: null,
     }));
+};
+
+export async function listAdminUsers(query: Query): Promise<AdminUsersPage> {
+    const sort = query.sort ?? 'created';
+
+    const authMetaAvailable = await hasAuthSchema();
+
+    const filter = await filterSql(query.filter ?? 'all');
+
+    if (!filter) return { rows: [], next: null, authMetaAvailable };
+
+    const q = query.q?.trim();
+
+    const search = q
+        ? Prisma.sql`and (x.email ilike ${`%${q}%`} or x."displayName" ilike ${`%${q}%`} or x.id = ${q})`
+        : Prisma.empty;
+
+    const cursor = decodeCursor(query.cursor);
+
+    const after = cursor
+        ? Prisma.sql`and ${cursorSql(sort, cursor)}`
+        : Prisma.empty;
+
+    const { column, nullable } = SORTS[sort];
+
+    const order = Prisma.raw(
+        `x."${column}" desc${nullable ? ' nulls last' : ''}, x.id desc`
+    );
+
+    const raw = await fetchRows(
+        Prisma.sql`${filter} ${search} ${after}`,
+        order,
+        PAGE_SIZE + 1
+    );
+
+    const page = raw.slice(0, PAGE_SIZE);
+
+    const last = page[page.length - 1];
+
+    const next =
+        raw.length > PAGE_SIZE && last
+            ? encodeCursor({ v: sortValue(sort, last), id: last.id })
+            : null;
+
+    const rows = await toRows(page);
 
     return { rows, next, authMetaAvailable };
+}
+
+export async function getAdminUserRow(
+    id: string
+): Promise<AdminUserRow | null> {
+    const raw = await fetchRows(Prisma.sql`x.id = ${id}`, Prisma.sql`x.id`, 1);
+
+    return (await toRows(raw))[0] ?? null;
 }

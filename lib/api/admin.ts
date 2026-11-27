@@ -1,8 +1,10 @@
 import { request } from './client';
 
 import type {
+    AdminCampaignSummary,
     AdminOverview,
     AdminRange,
+    AdminUserDetail,
     AdminUsersPage,
     AdminUsersQuery,
 } from '@/types/admin';
@@ -27,3 +29,11 @@ export const getAdminUsers = (
 
     return request<AdminUsersPage>(`/api/admin/users?${params}`);
 };
+
+export const getAdminUser = (id: string) =>
+    request<AdminUserDetail>(`/api/admin/users/${encodeURIComponent(id)}`);
+
+export const getAdminCampaign = (id: string) =>
+    request<AdminCampaignSummary>(
+        `/api/admin/campaigns/${encodeURIComponent(id)}`
+    );

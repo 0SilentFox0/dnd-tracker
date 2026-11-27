@@ -106,7 +106,10 @@ describe.skipIf(!isLocalDevDatabaseEnv())('listAdminUsers', () => {
         expect(first.rows).toHaveLength(50);
         expect(first.next).not.toBeNull();
 
-        const second = await listAdminUsers({ q: tag, cursor: first.next as string });
+        const second = await listAdminUsers({
+            q: tag,
+            cursor: first.next as string,
+        });
 
         expect(second.rows).toHaveLength(5);
         expect(second.next).toBeNull();
