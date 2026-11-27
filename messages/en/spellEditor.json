@@ -76,7 +76,9 @@
       "enemy": "Enemies",
       "ally": "Allies",
       "all": "Everyone in the area"
-    }
+    },
+    "advancedShow": "Advanced settings",
+    "advancedHide": "Hide advanced settings"
   },
   "effects": {
     "title": "Effects",

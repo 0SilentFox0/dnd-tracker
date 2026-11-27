@@ -80,6 +80,8 @@ export function SpellEditForm({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (updateSpellMutation.isPending) return;
+
         const problem = spellFormIssue(formData);
 
         if (problem) {
