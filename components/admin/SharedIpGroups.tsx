@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { Network } from 'lucide-react';
 
+import { HudPill } from '@/components/hud/page';
 import type { AdminSecurity } from '@/types/admin';
 
 export function SharedIpGroups({
@@ -16,33 +18,39 @@ export function SharedIpGroups({
         return <p className="text-sm text-hud-muted">{t('sharedIpsEmpty')}</p>;
 
     return (
-        <ul className="space-y-3">
+        <ul className="grid grid-cols-1 gap-3 xl:grid-cols-2">
             {groups.map((g) => (
-                <li key={g.ip} className="border-t border-hud-line pt-2">
+                <li
+                    key={g.ip}
+                    className="space-y-2 rounded-lg border border-hud-line p-3"
+                >
                     <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <span className="font-mono">{g.ip}</span>
-                        <span className="text-hud-muted">
-                            {g.country ?? '—'}
+                        <Network
+                            aria-hidden
+                            className="size-4 shrink-0 text-hud-accent-fg"
+                        />
+                        <span className="font-mono font-semibold text-hud-ink">
+                            {g.ip}
                         </span>
-                        <span className="text-hud-muted">
+                        <HudPill tone="muted">{g.country ?? '—'}</HudPill>
+                        {g.crowd && <HudPill tone="accent">{t('crowd')}</HudPill>}
+                        <span className="ml-auto text-xs text-hud-muted">
                             {t('sharedDays', { n: g.sharedDays })}
                         </span>
-                        {g.crowd && (
-                            <span className="rounded border border-hud-line px-1.5 text-xs">
-                                {t('crowd')}
-                            </span>
-                        )}
                     </div>
-                    <ul className="mt-1 space-y-0.5 text-sm">
+                    <ul className="divide-y divide-hud-rule text-sm">
                         {g.accounts.map((a) => (
-                            <li key={a.userId}>
+                            <li
+                                key={a.userId}
+                                className="flex flex-wrap items-baseline justify-between gap-x-3 py-1"
+                            >
                                 <Link
                                     href={`/admin/users/${a.userId}`}
-                                    className="underline"
+                                    className="min-w-0 break-all underline"
                                 >
                                     {a.displayName} ({a.email})
-                                </Link>{' '}
-                                <span className="text-hud-muted">
+                                </Link>
+                                <span className="text-xs whitespace-nowrap text-hud-muted">
                                     {a.device ?? '—'} ·{' '}
                                     {t('activeDays', { n: a.days })}
                                 </span>
