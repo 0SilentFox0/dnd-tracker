@@ -106,6 +106,25 @@ describe('DmCharacterCard HP', () => {
     });
 });
 
+describe('DmCharacterCard baked max HP', () => {
+    afterEach(cleanup);
+
+    it('prefers the server baked maxHp over the base formula', () => {
+        mocks.rules.mockReturnValue({
+            data: defaultRulesFor({ key: 'dnd5e' }),
+        });
+        mocks.system.mockReturnValue({
+            key: 'dnd5e',
+            system: RULE_SYSTEM_REGISTRY.dnd5e,
+            ready: true,
+        });
+        mocks.classMode.mockReturnValue({ enabled: false, byId: {} });
+        renderCard({ ...character, maxHp: 77 });
+
+        expect(screen.getByText('77')).toBeTruthy();
+    });
+});
+
 describe('DmCharacterCard before the rules load', () => {
     afterEach(cleanup);
 

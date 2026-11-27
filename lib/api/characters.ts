@@ -90,7 +90,12 @@ export const getCharacterSheet = (campaignId: string, characterId: string) =>
 
 export async function getCharacters(
     campaignId: string,
-    opts?: { type?: CharacterTypeValue; status?: 'pending'; compact?: boolean }
+    opts?: {
+        type?: CharacterTypeValue;
+        status?: 'pending';
+        compact?: boolean;
+        maxHp?: boolean;
+    }
 ): Promise<CharacterListItem[]> {
     const params = new URLSearchParams();
 
@@ -99,6 +104,8 @@ export async function getCharacters(
     if (opts?.status) params.set('status', opts.status);
 
     if (opts?.compact) params.set('compact', '1');
+
+    if (opts?.maxHp) params.set('maxHp', '1');
 
     const qs = params.toString();
 

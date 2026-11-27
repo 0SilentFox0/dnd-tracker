@@ -7,6 +7,9 @@ import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rule
 
 vi.mock('@/lib/utils/api/api-auth', () => ({ requireCampaignAccess: vi.fn() }));
 vi.mock('@/lib/db', () => ({ prisma: { character: { findMany: vi.fn() } } }));
+vi.mock('@/lib/server/characters/operations/list-max-hp', () => ({
+    bakedMaxHpById: vi.fn(async () => new Map([['h1', 15]])),
+}));
 
 const list = async (qs = '') => {
     const { listCharacters } = await import(
@@ -63,5 +66,41 @@ describe('listCharacters status filter', () => {
 
         expect(arg?.where).toMatchObject({ status: 'pending' });
         expect(arg?.select).toMatchObject({ reviewNote: true });
+    });
+});
+
+describe('listCharacters baked maxHp', () => {
+    const access = (isDM: boolean) =>
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+            userId: 'u',
+            isDM,
+            campaign: { rules: DEFAULT_RULES, maxLevel: 20 },
+        } as never);
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(prisma.character.findMany).mockResolvedValue([
+            { id: 'h1', name: 'A' },
+            { id: 'h2', name: 'B' },
+        ] as never);
+    });
+
+    it('DM with maxHp=1 gets the baked value where it was built', async () => {
+        access(true);
+
+        const body = await (await list('?maxHp=1')).json();
+
+        expect(body[0].maxHp).toBe(15);
+        expect(body[1].maxHp).toBeUndefined();
+    });
+
+    it('no flag or non-DM: no maxHp', async () => {
+        access(true);
+
+        expect((await (await list()).json())[0].maxHp).toBeUndefined();
+
+        access(false);
+
+        expect((await (await list('?maxHp=1')).json())[0].maxHp).toBeUndefined();
     });
 });

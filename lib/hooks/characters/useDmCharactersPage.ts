@@ -32,7 +32,7 @@ export function useDmCharactersPage(
 
     const tc = useTranslations('common.actions');
 
-    const query = useCharacters(campaignId, type ? { type } : undefined);
+    const query = useCharacters(campaignId, { ...(type && { type }), maxHp: true });
 
     const search = useSearch(query.data ?? EMPTY, characterFields);
 

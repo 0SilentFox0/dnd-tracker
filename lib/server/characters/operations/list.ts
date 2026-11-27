@@ -6,6 +6,7 @@ import {
     defineCharacterOperation,
     memberScope,
 } from '../operation-runner';
+import { bakedMaxHpById } from './list-max-hp';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
@@ -83,6 +84,7 @@ const listSchema = z.object({
     type: z.string().nullish(),
     compact: z.boolean().optional(),
     status: z.string().nullish(),
+    maxHp: z.boolean().optional(),
 });
 
 export const listOperation = defineCharacterOperation({
@@ -97,8 +99,9 @@ export const listOperation = defineCharacterOperation({
             searchParams.get('compact') === '1' ||
             searchParams.get('compact') === 'true',
         status: searchParams.get('status'),
+        maxHp: searchParams.get('maxHp') === '1',
     }),
-    run: async ({ access, campaignId }, { type, compact, status }) => {
+    run: async ({ access, campaignId }, { type, compact, status, maxHp }) => {
         const pending = status === CharacterStatus.PENDING;
 
         if (pending && !access.isDM)
@@ -135,21 +138,28 @@ export const listOperation = defineCharacterOperation({
             orderBy,
         });
 
+        const baked =
+            maxHp && access.isDM && !pending
+                ? await bakedMaxHpById(
+                      rows.map((r) => r.id),
+                      access.campaign
+                  )
+                : null;
+
         return redactListedLedgers(
-            rows.map((row) =>
-                token
-                    ? {
-                          ...row,
-                          inspiration:
-                              readStoredColumn(
-                                  access.campaign.rules,
-                                  row,
-                                  STORED_COLUMN.inspiration,
-                                  'boolean'
-                              ) ?? false,
-                      }
-                    : row
-            ),
+            rows.map((row) => ({
+                ...row,
+                ...(baked?.has(row.id) && { maxHp: baked.get(row.id) }),
+                ...(token && {
+                    inspiration:
+                        readStoredColumn(
+                            access.campaign.rules,
+                            row,
+                            STORED_COLUMN.inspiration,
+                            'boolean'
+                        ) ?? false,
+                }),
+            })),
             access,
             ruleSystemOf(access.campaign.rules)
         ).map(flattenStoredColumns);
