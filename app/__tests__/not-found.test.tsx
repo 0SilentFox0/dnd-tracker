@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { renderToString } from 'react-dom/server';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -58,5 +59,14 @@ describe('not-found', () => {
         expect(
             screen.getByRole('link', { name: 'common.notFound.campaign' })
         ).toBeTruthy();
+    });
+
+    it('server render ignores the pathname so it matches the first client render', () => {
+        pathname = '/campaigns/c1/foo';
+
+        const html = renderToString(<NotFound />);
+
+        expect(html).not.toContain('common.notFound.campaign');
+        expect(html).toContain('common.notFound.home');
     });
 });

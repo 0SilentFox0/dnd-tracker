@@ -9,7 +9,7 @@ import { BrokenD20 } from '@/components/common/illustrations';
 import { EmptyState } from '@/components/common/states';
 import { HudPage, HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import { useMarkNotFound } from '@/lib/hooks/common';
+import { useHydrated, useMarkNotFound } from '@/lib/hooks/common';
 import { campaignIdFromPath } from '@/lib/utils/campaigns/notice';
 
 export default function NotFound() {
@@ -19,7 +19,10 @@ export default function NotFound() {
 
     const pathname = usePathname();
 
-    const campaignId = campaignIdFromPath(pathname);
+    const hydrated = useHydrated();
+
+    // the 404 SSR has no real pathname, so pathname UI waits for hydration
+    const campaignId = hydrated ? campaignIdFromPath(pathname) : null;
 
     const isCampaignPage =
         !!campaignId && pathname.split('/').filter(Boolean).length === 2;
