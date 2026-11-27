@@ -168,6 +168,18 @@ export const DEMO_DASHBOARD_SECTIONS: DashboardSection[] = [
     })),
 ];
 
+export function demoDashboardSectionsFor(
+    ctx: DashboardContext
+): DashboardSection[] {
+    const visible = new Set(dmDashboardSectionsFor(ctx).map((s) => s.key));
+
+    return DEMO_DASHBOARD_SECTIONS.filter(
+        (s) =>
+            visible.has(s.key) ||
+            !DM_DASHBOARD_SECTIONS.some((dmSection) => dmSection.key === s.key)
+    );
+}
+
 /** Sections the DM dashboard shows inside hero, squad or quick-actions blocks. */
 export const DM_HOSTED_SECTION_KEYS: readonly string[] = [
     'scenario',

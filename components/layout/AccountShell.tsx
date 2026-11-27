@@ -21,8 +21,13 @@ const NAV = [
 
 type HeaderT = ReturnType<typeof useTranslations<'common.header'>>;
 
-export function accountNavItems(t: HeaderT): GameShellNavItem[] {
-    return NAV.map(({ id, href }) => ({
+const DM_ONLY_NAV = new Set(['soundLibrary']);
+
+export function accountNavItems(
+    t: HeaderT,
+    dmTools = true
+): GameShellNavItem[] {
+    return NAV.filter((e) => dmTools || !DM_ONLY_NAV.has(e.id)).map(({ id, href }) => ({
         id,
         href,
         label: t(id as Parameters<HeaderT>[0]),
@@ -37,12 +42,18 @@ export function accountActiveId(pathname: string): string {
     return match?.id ?? 'profile';
 }
 
-export function AccountShell({ children }: { children: ReactNode }) {
+export function AccountShell({
+    children,
+    dmTools = true,
+}: {
+    children: ReactNode;
+    dmTools?: boolean;
+}) {
     const t = useTranslations('common.header');
 
     const pathname = usePathname() ?? '';
 
-    const items = accountNavItems(t);
+    const items = accountNavItems(t, dmTools);
 
     const activeId = accountActiveId(pathname);
 
@@ -50,7 +61,10 @@ export function AccountShell({ children }: { children: ReactNode }) {
         <GameShellClient
             items={items}
             activeId={activeId}
-            title={items.find((i) => i.id === activeId)?.label ?? t('profile')}
+            title={
+                accountNavItems(t).find((i) => i.id === activeId)?.label ??
+                t('profile')
+            }
         >
             <div className="hud-surface mx-auto w-full max-w-[1400px] overflow-x-clip px-4 pt-3 md:hidden">
                 <HudChipTabs
