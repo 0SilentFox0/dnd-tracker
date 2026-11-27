@@ -373,7 +373,16 @@ export function useMapArtEditor({
             if (floorTool) {
                 const code = tool === 'floor-erase' ? 0 : materials.floor;
 
-                commit(paintFloor(base, cells, code, size, floorTool));
+                const painted = paintFloor(base, cells, code, size, floorTool);
+
+                const keys = cells.map(cellKey);
+
+                // blocked is derived from the scene on save, so erasing must drop it here
+                commit(
+                    tool === 'floor-erase' && keys.some((k) => k in painted.blocked)
+                        ? { ...painted, blocked: withoutKeys(painted.blocked, keys) }
+                        : painted
+                );
 
                 return;
             }

@@ -142,6 +142,19 @@ describe('useMapArtEditor', () => {
         expect(countFloor(sceneOf(result.current).floors)).toBe(7);
     });
 
+    it('floor erase also removes a scene-blocked cell', () => {
+        const { result } = setup();
+
+        act(() => result.current.start());
+        act(() => result.current.setTool('blocked'));
+        act(() => result.current.onCellStroke([{ x: 4, y: 4 }]));
+        expect(Object.keys(sceneOf(result.current).blocked)).toEqual(['4:4']);
+
+        act(() => result.current.setTool('floor-erase'));
+        act(() => result.current.onCellStroke([{ x: 4, y: 4 }]));
+        expect(sceneOf(result.current).blocked).toEqual({});
+    });
+
     it('coalesces consecutive moves of one light into a single undo step', () => {
         const { result } = setup();
 
