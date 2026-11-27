@@ -86,6 +86,14 @@ export function CharacterCombatParams({
             <LabeledInput
                 id="initiative"
                 label={tc('initiative')}
+                description={
+                    initiativeRange
+                        ? t('initiativeHint', {
+                              min: initiativeRange.heroMin,
+                              max: initiativeRange.heroMax,
+                          })
+                        : undefined
+                }
                 labelClassName="text-xs leading-tight"
                 type="number"
                 min={initiativeRange?.heroMin}
@@ -118,6 +126,7 @@ export function CharacterCombatParams({
             <LabeledInput
                 id="minTargets"
                 label={t('minTargets')}
+                description={t('targetsHint')}
                 labelClassName="text-xs leading-tight"
                 type="number"
                 min="1"
@@ -131,6 +140,7 @@ export function CharacterCombatParams({
             <LabeledInput
                 id="maxTargets"
                 label={t('maxTargets')}
+                description={t('targetsHint')}
                 labelClassName="text-xs leading-tight"
                 type="number"
                 min="1"

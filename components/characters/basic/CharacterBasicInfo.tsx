@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { AlignmentGrid } from '@/components/characters/basic/AlignmentGrid';
 import { BasicPanel } from '@/components/characters/basic/BasicPanel';
 import { CharacterClassesField } from '@/components/characters/basic/CharacterClassesField';
+import { SubraceField } from '@/components/characters/basic/SubraceField';
 import { HudSegmented } from '@/components/hud';
 import { Label } from '@/components/ui/label';
 import { LabeledInput } from '@/components/ui/labeled-input';
@@ -185,14 +186,10 @@ export function CharacterBasicInfo({
                                     </p>
                                 )}
                             </div>
-                            <LabeledInput
-                                id="subrace"
-                                label={t('subrace')}
+                            <SubraceField
+                                race={races.find((r) => r.name === race)}
                                 value={subrace || ''}
-                                onChange={(e) => set('subrace', e.target.value)}
-                                placeholder={t('subracePlaceholder')}
-                                containerClassName="w-full min-w-0"
-                                className="w-full"
+                                onChange={(value) => set('subrace', value)}
                             />
                             {!hideAlignment && (
                                 <div className="ds-span flex flex-col gap-1.5">
