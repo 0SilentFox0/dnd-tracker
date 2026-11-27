@@ -16,6 +16,7 @@ export { ACTION_RESULT_MS, useActionResult } from './useActionResult';
 export { useAddParticipantForm } from './useAddParticipantForm';
 export { useAttackWizard } from './useAttackWizard';
 export { type AuraZoneStep, useAuraZones } from './useAuraZones';
+export { useAutoEndTurnSetting } from './useAutoEndTurnSetting';
 export { useBattleAudioHost } from './useBattleAudioHost';
 export { useBattleFxQueue } from './useBattleFxQueue';
 export { useBattleMapFog } from './useBattleMapFog';

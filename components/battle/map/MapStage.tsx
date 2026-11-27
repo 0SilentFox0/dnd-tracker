@@ -24,6 +24,8 @@ import type { MapStageProps } from './map-stage-types';
 
 import { modeUiOf } from '@/components/battle/modes';
 import {
+    cellKey,
+    cellsOf,
     gridMetrics,
     gridOf,
     showsBackground,
@@ -118,16 +120,6 @@ function MapStageImpl({
         [round, rotated, clickableBlocked, showBlocked, gridWindow, through]
     );
 
-    const cellActions = useMemo<GridCellActions>(
-        () => ({
-            onCellClick,
-            onCellHover: fogActive ? undefined : onCellHover,
-            wasDragged,
-            svgRef,
-        }),
-        [fogActive, onCellClick, onCellHover, wasDragged, svgRef]
-    );
-
     const { placed, onTokenClick, onTokenHover, movingId, from } =
         useMapStageTokens({
             map,
@@ -138,6 +130,27 @@ function MapStageImpl({
             pxPerUnit,
             wasDragged,
         });
+
+    const dragCells = useMemo(() => {
+        const mover = movingId
+            ? placed.find((x) => x.p.basicInfo.id === movingId)
+            : undefined;
+
+        return mover
+            ? new Set(cellsOf(mover.p, grid).map(cellKey))
+            : undefined;
+    }, [movingId, placed, grid]);
+
+    const cellActions = useMemo<GridCellActions>(
+        () => ({
+            onCellClick,
+            onCellHover: fogActive ? undefined : onCellHover,
+            wasDragged,
+            svgRef,
+            tokenDrag: fogActive ? undefined : dragCells,
+        }),
+        [fogActive, onCellClick, onCellHover, wasDragged, svgRef, dragCells]
+    );
 
     const trajectory = view?.trajectory ?? null;
 

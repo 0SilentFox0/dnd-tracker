@@ -13,10 +13,12 @@ import { modeUiOf } from '@/components/battle/modes';
 import { useSceneSlot } from '@/components/battle/scene/layout/SceneSlots';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { AuraZonePicker } from '@/components/battle/wizards/AuraZonePicker';
+import { HudToggleChip } from '@/components/hud';
 import { ParticipantSourceType } from '@/lib/constants/battle';
 import {
     useAttackWizard,
     useAuraZones,
+    useAutoEndTurnSetting,
     useBattleRules,
     useBattleScene,
     useBonusSpells,
@@ -121,6 +123,8 @@ export function MyTurnControls({
 
     const dockSlot = useSceneSlot('dock');
 
+    const { autoEnd, setAutoEnd } = useAutoEndTurnSetting();
+
     const bonusAbilities = usableAbilities(
         hero,
         'bonusAction',
@@ -219,7 +223,17 @@ export function MyTurnControls({
         open();
     };
 
-    const grid = (
+    const autoEndToggle = (
+        <HudToggleChip
+            active={autoEnd}
+            onClick={() => setAutoEnd(!autoEnd)}
+            title={t('autoEndHint')}
+        >
+            {t('autoEnd')}
+        </HudToggleChip>
+    );
+
+    const actionGrid = (
         <ActionGrid
             turn={turn}
             channelLabel={systemUi.ChannelLabel && <systemUi.ChannelLabel />}
@@ -258,6 +272,13 @@ export function MyTurnControls({
         />
     );
 
+    const grid = (
+        <>
+            {actionGrid}
+            <div className="mt-2 flex">{autoEndToggle}</div>
+        </>
+    );
+
     const gatePanel = turn.phase === 'gate' && systemUi.turnStart && (
         <systemUi.turnStart.Panel hero={hero} gate={turn.gate} />
     );
@@ -277,6 +298,10 @@ export function MyTurnControls({
             seconds={COUNTDOWN_SECONDS}
             onElapsed={() => void turn.actions.endTurn()}
             onStay={turn.actions.stay}
+            onDisable={() => {
+                setAutoEnd(false);
+                turn.actions.stay();
+            }}
         />
     );
 
