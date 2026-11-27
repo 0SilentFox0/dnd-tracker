@@ -31,7 +31,7 @@
 Виміри — WCAG за тим самим методом, що в `palette-contrast.test.ts`.
 
 ### 1.2 Рішення по `faint`
-**Рішення (рекомендоване, підтвердити):** значення з аудиту для Пергаменту `#7d705f` реально дає 4.06:1 на `panel` і 3.71 на `page` (аудит помилився), тож береться `#6b5f52`. Таверна `#8c8272` проходить на `panel`/`page`/`inset`, але дає 4.14 на `panel-2` → правило: текст `faint` не ставиться на `panel-2`/`ds-raised` (там `muted`). Плейсхолдери в обох темах — `--hud-muted` (на `inset` Пергаменту 4.53), не `faint`.
+**Рішення (підтверджено власником 2026-11-27):** значення з аудиту для Пергаменту `#7d705f` реально дає 4.06:1 на `panel` і 3.71 на `page` (аудит помилився), тож береться `#6b5f52`. Таверна `#8c8272` проходить на `panel`/`page`/`inset`, але дає 4.14 на `panel-2` → правило: текст `faint` не ставиться на `panel-2`/`ds-raised` (там `muted`). Плейсхолдери в обох темах — `--hud-muted` (на `inset` Пергаменту 4.53), не `faint`.
 
 **Міграція:** утиліти `border-*/divide-*/bg-*/stroke-*/fill-*/outline-*`-`hud-faint` → `hud-faint-deco` (механічний codemod); `text-hud-faint` лишається (нове значення). Шеврони `ui/disclosure.tsx:71`, `ui/accordion.tsx:45` лишаються на `faint` (несуть сенс, ≥3:1).
 
@@ -54,7 +54,7 @@
 ## 2. Типографіка (7.2, 7.3, 7.14)
 
 ### 2.1 Шкала
-**Рішення (рекомендоване, підтвердити):** окремих `--fs-*` не вводимо — шкала = перевизначені Tailwind `--text-*` у `@theme static` (`app/globals.css`), щоб 1 700+ існуючих `text-xs/sm/base/lg` уже були на шкалі. CSS-файли посилаються на `var(--text-sm)` тощо.
+**Рішення (підтверджено власником 2026-11-27):** окремих `--fs-*` не вводимо — шкала = перевизначені Tailwind `--text-*` у `@theme static` (`app/globals.css`), щоб 1 700+ існуючих `text-xs/sm/base/lg` уже були на шкалі. CSS-файли посилаються на `var(--text-sm)` тощо.
 
 | Утиліта | px | line-height | Призначення |
 |---|---|---|---|
@@ -82,7 +82,7 @@
 | числа | Oswald 500 | `--font-num` |
 | код/IP/kbd | системний `ui-monospace, SFMono-Regular, Menlo, monospace` | `--font-mono` |
 
-- Прибрати `@font-face` і файли: EB Garamond, Alegreya Sans, **Alegreya SC**, **Geist** (`font-sans` → Alegreya). **Рішення (рекомендоване, підтвердити):** Alegreya SC і Geist теж ідуть, бо інакше родин 4–5.
+- Прибрати `@font-face` і файли: EB Garamond, Alegreya Sans, **Alegreya SC**, **Geist** (`font-sans` → Alegreya). **Рішення (підтверджено власником 2026-11-27):** Alegreya SC і Geist теж ідуть, бо інакше родин 4–5.
 - EB Garamond (`.hud-book`, 7 файлів) → `--font-hud-book: var(--font-body)` (Alegreya, `font-variant-numeric: oldstyle-nums`); файли не правимо, лише змінна.
 - `scenario-book.css` (Alegreya Sans ×16) → Alegreya; дрібні службові підписи книги — `.hud-label`.
 - Лендинг і `.auth-legacy`: прибрати remap `--font-hud-sc`/`--font-hud-sans` (`landing.css:163`); `world-atlas.css:91` → Cormorant SC (≥ 14) або `.hud-label`.
@@ -100,7 +100,7 @@
 | `lg` | 48 (`h-12`, без `sm:h-[52px]`) | `text-base` | `text-lg` | `px-6` |
 | `icon-sm` / `icon` / `icon-lg` | 32 / 40 / 48 квадрат | — | — | — |
 
-- **Touch 44 — одне правило в базі cva:** `pointer-coarse:min-h-11` (+ `pointer-coarse:min-w-11` для icon-розмірів). **Рішення (рекомендоване, підтвердити):** за типом вказівника, а не за шириною вʼюпорта — планшет із пальцем теж отримує 44, desktop у вузькому вікні — ні.
+- **Touch 44 — одне правило в базі cva:** `pointer-coarse:min-h-11` (+ `pointer-coarse:min-w-11` для icon-розмірів). **Рішення (підтверджено власником 2026-11-27):** за типом вказівника, а не за шириною вʼюпорта — планшет із пальцем теж отримує 44, desktop у вузькому вікні — ні.
 - Ім'я `default` лишається (753 використання без `size`), `md` не вводимо.
 - Усі `min-h-11 sm:min-h-9`, `h-9`, `size-8`, `h-[52px]` на `<Button>` прибрати (розмір — тільки prop `size`); ratchet рахує залишок.
 - `outline` ≡ `secondary`: ключ `secondary` видаляється, використання → `outline` (codemod).
@@ -139,9 +139,9 @@
 ## 4. Сторінки: контейнер, фон, стани (7.5, 7.10, 7.11)
 
 ### 4.1 Контейнер (`HudPage`)
-- `width`: `page` (дефолт, `max-w-[75rem]` = 1200) | `narrow` (`max-w-3xl`, 768: 404, акаунт, вузькі форми) | `wide` (без max-width; лише бій і мапи). Старі `lg` → `page`, `md` → `narrow`.
+- `width`: `page` (дефолт, `max-w-[75rem]` = 1200) | `list` (бібліотеки-списки ДМ: заклинання, юніти, персонажі, раси, класи тощо — 1200, від 96rem росте до `min(90vw,160rem)`, як зараз `max-w-page`) | `narrow` (`max-w-3xl`, 768: 404, акаунт, вузькі форми) | `wide` (без max-width; лише бій і мапи). Старі `lg` → `page`, `md` → `narrow`.
 - Поля: `px-4 sm:px-6` (16/24), `py-6`.
-- `--container-page: 75rem` фіксовано; блок `@media (min-width: 96rem)` з `min(90vw,160rem)` видаляється (див. питання 4).
+- `--container-page: 75rem` фіксовано для `page` (дашборд, налаштування, rules/info тощо); ріст `min(90vw,160rem)` від 96rem лишається тільки у `width="list"` (рішення власника 2026-11-27: «ріст для списків»).
 - `HudFormPage width="wide"` (1680) → 1200, крім редакторів-«верстаків», що вже на `wide`-маршрутах мап.
 
 ### 4.2 Фон
