@@ -209,7 +209,7 @@ export async function updateSession(request: NextRequest) {
                     device: parseDevice(request.headers.get('user-agent')),
                     now,
                 })
-            )
+            ).catch(() => undefined)
         );
 
         supabaseResponse.cookies.set(SEEN_COOKIE, seenValue(user, now), {

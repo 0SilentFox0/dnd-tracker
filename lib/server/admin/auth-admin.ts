@@ -26,6 +26,30 @@ function resolveClient(deps: Deps) {
     }
 }
 
+function adminClient() {
+    try {
+        return createAdminClient();
+    } catch {
+        throw new AdminAuthUnavailableError();
+    }
+}
+
+export function assertAuthAdminAvailable(): void {
+    adminClient();
+}
+
+export async function deleteAuthUser(id: string): Promise<void> {
+    const { error } = await adminClient().auth.admin.deleteUser(id);
+
+    if (!error) return;
+
+    const e = error as { status?: number; code?: string };
+
+    if (e.status === 404 || e.code === 'user_not_found') return;
+
+    throw error;
+}
+
 async function setBanDuration(id: string, duration: string, deps: Deps) {
     const { error } = await resolveClient(deps).auth.admin.updateUserById(id, {
         ban_duration: duration,
@@ -47,9 +71,22 @@ export async function banUser(
     id: string,
     hours: 24 | 168 | 876000,
     deps: Deps = {}
-): Promise<void> {
+): Promise<{ signedOut: boolean }> {
     await setBanDuration(id, `${hours}h`, deps);
-    await signOutUser(id);
+
+    let signedOut = true;
+
+    try {
+        await signOutUser(id);
+    } catch (e) {
+        signedOut = false;
+        console.warn(
+            '[admin] sign-out after ban failed',
+            e instanceof Error ? e.name : 'unknown'
+        );
+    }
+
+    return { signedOut };
 }
 
 export async function unbanUser(id: string, deps: Deps = {}): Promise<void> {

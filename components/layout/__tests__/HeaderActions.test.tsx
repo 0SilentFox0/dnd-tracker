@@ -31,7 +31,7 @@ afterEach(cleanup);
 
 describe('HeaderActions admin link', () => {
     beforeEach(() => {
-        state.user = { email: 'a@x.com' };
+        state.user = { id: 'u1', email: 'a@x.com' };
         useIsAdmin.mockReset().mockImplementation(() => state.isAdmin);
     });
 
@@ -58,6 +58,6 @@ describe('HeaderActions admin link', () => {
 
         render(<HeaderActions />);
 
-        expect(useIsAdmin).toHaveBeenCalledWith(false);
+        expect(useIsAdmin).toHaveBeenCalledWith(undefined);
     });
 });

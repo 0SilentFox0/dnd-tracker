@@ -45,6 +45,19 @@ describe('auth-admin', () => {
         expect(m.executeRaw).toHaveBeenCalledTimes(1);
     });
 
+    it('ban survives a failed sign-out and reports it', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        m.executeRaw.mockRejectedValue(new Error('denied'));
+
+        const c = client();
+
+        await expect(
+            banUser('u1', 24, { client: c.client })
+        ).resolves.toEqual({ signedOut: false });
+        warn.mockRestore();
+    });
+
     it('unban clears the ban', async () => {
         const c = client();
 

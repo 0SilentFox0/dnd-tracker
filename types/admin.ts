@@ -138,6 +138,8 @@ export type AdminCampaignSummary = {
 
 export type AdminSecurity = {
     days: number;
+    dataSince: string | null;
+    hashConfigured: boolean;
     groups: {
         ip: string;
         country: string | null;

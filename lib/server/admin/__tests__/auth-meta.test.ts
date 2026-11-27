@@ -46,6 +46,18 @@ describe('readAuthMeta', () => {
         });
     });
 
+    it('selects banned_until only while the ban is still active', async () => {
+        queryRaw.mockResolvedValueOnce([{ ok: true }]).mockResolvedValueOnce([]);
+
+        const readAuthMeta = await load();
+
+        await readAuthMeta([UUID]);
+
+        const sql = (queryRaw.mock.calls[1][0] as string[]).join('');
+
+        expect(sql).toContain('case when banned_until > now()');
+    });
+
     it('returns an empty map when the query fails', async () => {
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 

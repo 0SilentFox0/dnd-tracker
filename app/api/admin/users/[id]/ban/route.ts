@@ -11,9 +11,9 @@ export async function POST(
     return runUserAction(
         { params, action: 'ban', request, schema: banSchema },
         async ({ id }, { hours }) => {
-            await banUser(id, hours);
+            const { signedOut } = await banUser(id, hours);
 
-            return { hours };
+            return { hours, signedOut };
         }
     );
 }

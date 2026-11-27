@@ -24,7 +24,11 @@ export async function runUserAction<B = undefined>(
         request?: Request;
         schema?: ZodType<B>;
     },
-    run: (target: Target, body: B) => Promise<Outcome>
+    run: (
+        target: Target,
+        body: B,
+        ctx: { adminUserId: string }
+    ) => Promise<Outcome>
 ): Promise<NextResponse> {
     const { params, action, request, schema } = opts;
 
@@ -55,7 +59,7 @@ export async function runUserAction<B = undefined>(
             body = parsed;
         }
 
-        const meta = await run(target, body);
+        const meta = await run(target, body, { adminUserId: auth.userId });
 
         if (meta instanceof NextResponse) return meta;
 

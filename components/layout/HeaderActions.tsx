@@ -18,7 +18,9 @@ export function HeaderActions({ mode = 'all' }: { mode?: 'all' | 'primary' | 'se
 
     const sessionUser = useSessionUser();
 
-    const isAdmin = useIsAdmin(!!sessionUser?.email);
+    const isAdmin = useIsAdmin(
+        sessionUser?.email ? sessionUser.id : undefined
+    );
 
     return (
         <>

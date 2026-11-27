@@ -11,6 +11,8 @@ const m = vi.hoisted(() => ({
     unbanUser: vi.fn(),
     signOutUser: vi.fn(),
     deleteAccount: vi.fn(),
+    deleteAuthUser: vi.fn(),
+    assertAuth: vi.fn(),
 }));
 
 vi.mock('@/lib/utils/api/require-platform-admin', () => ({
@@ -26,6 +28,8 @@ vi.mock('@/lib/server/admin/auth-admin', () => {
         banUser: m.banUser,
         unbanUser: m.unbanUser,
         signOutUser: m.signOutUser,
+        deleteAuthUser: m.deleteAuthUser,
+        assertAuthAdminAvailable: m.assertAuth,
     };
 });
 vi.mock('@/lib/server/account/delete-account', () => ({
@@ -70,6 +74,7 @@ describe('admin user actions', () => {
         Object.values(m).forEach((f) => f.mockReset());
         m.requireAdmin.mockResolvedValue({ userId: 'owner' });
         m.findUser.mockResolvedValue({ id: 'u1', email: 'u1@example.test' });
+        m.banUser.mockResolvedValue({ signedOut: true });
     });
 
     it.each(Object.keys(calls) as (keyof typeof calls)[])(
@@ -129,7 +134,7 @@ describe('admin user actions', () => {
             adminUserId: 'owner',
             action: 'ban',
             targetUserId: 'u1',
-            meta: { hours: 168 },
+            meta: { hours: 168, signedOut: true },
         });
     });
 
@@ -165,13 +170,51 @@ describe('admin user actions', () => {
         expect(m.log).not.toHaveBeenCalled();
     });
 
+    it('delete without auth env is 503 and deletes nothing', async () => {
+        m.assertAuth.mockImplementation(() => {
+            throw new AdminAuthUnavailableError();
+        });
+
+        const res = await calls.delete('u1');
+
+        expect(res.status).toBe(503);
+        expect(m.deleteAccount).not.toHaveBeenCalled();
+        expect(m.log).not.toHaveBeenCalled();
+    });
+
+    it('delete with a failed auth removal is 503 but still audited', async () => {
+        m.deleteAuthUser.mockRejectedValue(new Error('network'));
+        m.deleteAccount.mockImplementation(
+            async (
+                _id: string,
+                deps: { removeAuthUser: (id: string) => Promise<void> }
+            ) => {
+                await deps.removeAuthUser('u1');
+            }
+        );
+
+        const res = await calls.delete('u1');
+
+        expect(res.status).toBe(503);
+        expect(m.log).toHaveBeenCalledWith({
+            adminUserId: 'owner',
+            action: 'delete',
+            targetUserId: 'u1',
+            meta: { email: 'u1@example.test', authRemoved: false },
+        });
+    });
+
     it('delete runs as admin and logs the email afterwards', async () => {
         m.deleteAccount.mockResolvedValue({ deletedCampaigns: 0 });
 
         const res = await calls.delete('u1');
 
         expect(res.status).toBe(200);
-        expect(m.deleteAccount).toHaveBeenCalledWith('u1', {}, { by: 'admin' });
+        expect(m.deleteAccount).toHaveBeenCalledWith(
+            'u1',
+            { removeAuthUser: expect.any(Function) },
+            { by: 'admin' }
+        );
         expect(m.log).toHaveBeenCalledWith(
             expect.objectContaining({
                 action: 'delete',

@@ -113,14 +113,18 @@ async function reRegistrations(): Promise<AdminSecurity['reRegistrations']> {
 export async function buildSecurity(days: number): Promise<AdminSecurity> {
     const since = new Date(Date.now() - days * DAY_MS);
 
-    const [groups, reRegs, actions] = await Promise.all([
+    const [groups, reRegs, since0, actions] = await Promise.all([
         sharedGroups(since),
         reRegistrations(),
+        prisma.$queryRaw<{ since: string | null }[]>`
+            select to_char(min("firstSeen"), 'YYYY-MM-DD') as since from user_access`,
         prisma.adminAction.findMany({ orderBy: { at: 'desc' }, take: 50 }),
     ]);
 
     return {
         days,
+        dataSince: since0[0]?.since ?? null,
+        hashConfigured: !!process.env.ADMIN_HASH_SECRET,
         groups,
         reRegistrations: reRegs,
         actions: actions.map((a) => ({

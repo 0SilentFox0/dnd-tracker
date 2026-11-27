@@ -40,18 +40,28 @@ afterEach(cleanup);
 
 describe('SecurityClient', () => {
     it('shows empty states for all three sections', async () => {
-        state.data = { days: 30, groups: [], reRegistrations: [], actions: [] };
+        state.data = {
+            days: 30,
+            dataSince: '2026-11-20',
+            hashConfigured: true,
+            groups: [],
+            reRegistrations: [],
+            actions: [],
+        };
 
         await render();
 
         expect(screen.getByText(/No IP is shared/)).toBeTruthy();
         expect(screen.getByText('No re-registrations found.')).toBeTruthy();
         expect(screen.getByText('No admin actions yet.')).toBeTruthy();
+        expect(screen.getByText('Data since 2026-11-20')).toBeTruthy();
     });
 
     it('labels crowd groups and links accounts to the user card', async () => {
         state.data = {
             days: 30,
+            dataSince: null,
+            hashConfigured: true,
             groups: [
                 {
                     ip: '1.1.1.1',

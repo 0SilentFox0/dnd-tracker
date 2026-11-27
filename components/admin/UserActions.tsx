@@ -68,7 +68,18 @@ export function UserActions({
                         variant="outline"
                         className="min-h-10"
                         disabled={actions.unban.isPending}
-                        onClick={() => actions.unban.mutate()}
+                        onClick={async () => {
+                            const ok = await confirm({
+                                title: t('unbanTitle', {
+                                    name: user.displayName,
+                                }),
+                                description: t('unbanText'),
+                                confirmLabel: t('confirm'),
+                                cancelLabel: t('cancel'),
+                            });
+
+                            if (ok) actions.unban.mutate();
+                        }}
                     >
                         {t('unban')}
                     </Button>

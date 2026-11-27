@@ -49,7 +49,9 @@ export async function readAuthMeta(
                 last_sign_in_at: Date | null;
             }[]
         >`
-            select id::text, banned_until, last_sign_in_at
+            select id::text,
+                case when banned_until > now() then banned_until end as banned_until,
+                last_sign_in_at
             from auth.users where id = any(${uuids}::uuid[])`;
 
         for (const r of rows)

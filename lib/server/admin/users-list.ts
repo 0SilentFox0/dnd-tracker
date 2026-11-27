@@ -182,8 +182,10 @@ export async function listAdminUsers(query: Query): Promise<AdminUsersPage> {
 
     const q = query.q?.trim();
 
+    const like = q ? `%${q.replace(/[\\%_]/g, '\\$&')}%` : '';
+
     const search = q
-        ? Prisma.sql`and (x.email ilike ${`%${q}%`} or x."displayName" ilike ${`%${q}%`} or x.id = ${q})`
+        ? Prisma.sql`and (x.email ilike ${like} or x."displayName" ilike ${like} or x.id = ${q})`
         : Prisma.empty;
 
     const cursor = decodeCursor(query.cursor);

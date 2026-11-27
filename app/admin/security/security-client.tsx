@@ -46,6 +46,11 @@ export function SecurityClient() {
             <QueryState query={query}>
                 {(data) => (
                     <>
+                        {data.dataSince && (
+                            <p className="text-sm text-hud-muted">
+                                {t('dataSince', { date: data.dataSince })}
+                            </p>
+                        )}
                         <HudPanel className="space-y-2">
                             <h2 className="hud-sc text-sm">{t('sharedIps')}</h2>
                             <SharedIpGroups groups={data.groups} />
@@ -79,7 +84,9 @@ export function SecurityClient() {
                                 </ul>
                             ) : (
                                 <p className="text-sm text-hud-muted">
-                                    {t('reRegistrationsEmpty')}
+                                    {data.hashConfigured
+                                        ? t('reRegistrationsEmpty')
+                                        : t('hashNotConfigured')}
                                 </p>
                             )}
                         </HudPanel>

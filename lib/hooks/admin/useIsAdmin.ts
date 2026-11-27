@@ -6,11 +6,11 @@ import { adminKeys } from './keys';
 
 import { getAdminMe } from '@/lib/api/admin';
 
-export function useIsAdmin(enabled: boolean): boolean {
+export function useIsAdmin(userId: string | undefined): boolean {
     const { data } = useQuery({
-        queryKey: adminKeys.me,
+        queryKey: adminKeys.me(userId ?? ''),
         queryFn: getAdminMe,
-        enabled,
+        enabled: !!userId,
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,

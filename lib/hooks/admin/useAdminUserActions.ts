@@ -24,17 +24,22 @@ const blockedTemplateIds = (error: unknown): string[] => {
 export function useAdminUserActions(id: string) {
     const queryClient = useQueryClient();
 
+    const invalidateUsers = () =>
+        queryClient.invalidateQueries({ queryKey: adminKeys.usersAll });
+
     const onSuccess = () =>
         Promise.all([
             queryClient.invalidateQueries({ queryKey: adminKeys.user(id) }),
-            queryClient.invalidateQueries({
-                queryKey: [...adminKeys.all, 'users'],
-            }),
+            invalidateUsers(),
         ]);
 
     const remove = useMutation({
         mutationFn: (email: string) => deleteAdminUser(id, email),
-        onSuccess,
+        onSuccess: () => {
+            queryClient.removeQueries({ queryKey: adminKeys.user(id) });
+
+            return invalidateUsers();
+        },
     });
 
     return {
