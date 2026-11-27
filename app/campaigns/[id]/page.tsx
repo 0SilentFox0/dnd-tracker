@@ -351,6 +351,17 @@ export default async function CampaignDetailPage({
                     </div>
                 )}
 
+                {hasMembership && (
+                    <div className="min-w-0 lg:col-span-12">
+                        <PrefetchedQuery
+                            queryKey={onboardingKeys.campaign(id)}
+                            data={onboarding}
+                        >
+                            <OnboardingChecklist campaignId={id} />
+                        </PrefetchedQuery>
+                    </div>
+                )}
+
                 <div className="min-w-0 lg:col-span-12">
                     <DashboardGroups
                         campaignId={id}
@@ -366,15 +377,6 @@ export default async function CampaignDetailPage({
                     />
                 </div>
             </div>
-
-            {hasMembership && (
-                <PrefetchedQuery
-                    queryKey={onboardingKeys.campaign(id)}
-                    data={onboarding}
-                >
-                    <OnboardingChecklist campaignId={id} />
-                </PrefetchedQuery>
-            )}
         </HudPage>
     );
 

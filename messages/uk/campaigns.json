@@ -134,6 +134,7 @@
     "language": "Мова",
     "official": "Офіційні",
     "mine": "Мої",
+    "recommended": "Рекомендовано",
     "other": "Інше",
     "file": "Файл: {name}",
     "importFile": "Імпорт з файлу",

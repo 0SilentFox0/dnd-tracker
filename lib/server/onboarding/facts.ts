@@ -21,6 +21,7 @@ export type OnboardingSnapshot = {
 const checklistFlagSql = (campaignId: string, userId: string) =>
     Prisma.sql`(SELECT value FROM user_onboarding_flags WHERE "userId" = ${userId} AND key = ${checklistKey(campaignId)}) AS "checklistFlag"`;
 
+// races/units copied from a template carry sourceId and do not count as the DM's own work
 // one query (facts + flags) instead of several: Vercel connection_limit = 1 would run separate ones sequentially
 async function readDmRow(
     campaignId: string,
@@ -30,8 +31,8 @@ async function readDmRow(
         (DmFacts & ChecklistFlag)[]
     >(Prisma.sql`
     SELECT
-      (SELECT count(*)::int FROM races WHERE "campaignId" = ${campaignId}) AS races,
-      (SELECT count(*)::int FROM units WHERE "campaignId" = ${campaignId}) AS units,
+      (SELECT count(*)::int FROM races WHERE "campaignId" = ${campaignId} AND "sourceId" IS NULL) AS races,
+      (SELECT count(*)::int FROM units WHERE "campaignId" = ${campaignId} AND "sourceId" IS NULL) AS units,
       (SELECT count(*)::int FROM campaign_members WHERE "campaignId" = ${campaignId} AND role = ${CampaignRole.PLAYER}) AS players,
       (SELECT count(*)::int FROM characters WHERE "campaignId" = ${campaignId} AND type = ${CharacterType.PLAYER} AND status = ${CharacterStatus.ACTIVE}) AS "activePlayerCharacters",
       (SELECT count(*)::int FROM characters WHERE "campaignId" = ${campaignId} AND status = ${CharacterStatus.PENDING}) AS "pendingDrafts",

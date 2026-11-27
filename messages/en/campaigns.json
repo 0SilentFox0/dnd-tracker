@@ -134,6 +134,7 @@
     "language": "Language",
     "official": "Official",
     "mine": "Mine",
+    "recommended": "Recommended",
     "other": "Other",
     "file": "File: {name}",
     "importFile": "Import from file",
