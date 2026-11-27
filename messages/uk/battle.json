@@ -40,6 +40,7 @@
     "dieLabel": "Кубик {n} (d{sides})",
     "autoRoll": "Авто-кидок",
     "zoomAvatar": "{name}: аватар у повний розмір",
+    "openDetails": "{name}: відкрити картку",
     "effects": {
       "collapse": "Згорнути ефекти",
       "showAll": "Показати всі ефекти ({count})",
@@ -109,6 +110,7 @@
     "connected": "Підключено",
     "connecting": "Підключення",
     "toCampaign": "До кампанії",
+    "help": "Довідка з бою",
     "complete": "Завершити",
     "nextTurn": "Наступний хід",
     "nextTurnShort": "Далі",

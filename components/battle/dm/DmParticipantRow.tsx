@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 import { SideDot } from '@/components/battle/hud';
-import { HudButton } from '@/components/hud';
+import { HudIconButton } from '@/components/hud';
 import { SelectField } from '@/components/ui/select-field';
 import { CombatStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import {
@@ -172,7 +172,7 @@ export function DmParticipantRow({
                 )}
             </div>
             <div className="flex items-center gap-0.5 pl-5">
-                <HudButton
+                <HudIconButton
                     type="button"
                     className={cn(
                         ICON,
@@ -185,8 +185,8 @@ export function DmParticipantRow({
                     }}
                 >
                     <Heart className="size-3.5" />
-                </HudButton>
-                <HudButton
+                </HudIconButton>
+                <HudIconButton
                     type="button"
                     className={cn(
                         ICON,
@@ -200,9 +200,9 @@ export function DmParticipantRow({
                     }}
                 >
                     <LogIn className="size-3.5" />
-                </HudButton>
+                </HudIconButton>
                 {hasLair && onToggleLair && (
-                    <HudButton
+                    <HudIconButton
                         type="button"
                         className={cn(ICON, inLair && 'text-hud-ink')}
                         aria-label={inLair ? t('lairOff') : t('lairOn')}
@@ -211,10 +211,10 @@ export function DmParticipantRow({
                         onClick={() => onToggleLair(participant)}
                     >
                         🏰
-                    </HudButton>
+                    </HudIconButton>
                 )}
                 {(legendary || (hasLair && onLegendary)) && (
-                    <HudButton
+                    <HudIconButton
                         type="button"
                         className={cn(
                             ICON,
@@ -225,10 +225,10 @@ export function DmParticipantRow({
                         onClick={() => onLegendary?.(participant)}
                     >
                         <Crown className="size-3.5" />
-                    </HudButton>
+                    </HudIconButton>
                 )}
                 {canConditions && (
-                    <HudButton
+                    <HudIconButton
                         type="button"
                         className={cn(
                             ICON,
@@ -238,10 +238,10 @@ export function DmParticipantRow({
                         onClick={() => onConditions(participant)}
                     >
                         <ShieldAlert className="size-3.5" />
-                    </HudButton>
+                    </HudIconButton>
                 )}
                 {canKill && (
-                    <HudButton
+                    <HudIconButton
                         type="button"
                         className={cn(
                             ICON,
@@ -263,10 +263,10 @@ export function DmParticipantRow({
                         }}
                     >
                         <Skull className="size-3.5" />
-                    </HudButton>
+                    </HudIconButton>
                 )}
                 {onToReserve && (
-                    <HudButton
+                    <HudIconButton
                         type="button"
                         className={ICON}
                         title={t('toReserve')}
@@ -285,9 +285,9 @@ export function DmParticipantRow({
                         }}
                     >
                         <EyeOff className="size-3.5" />
-                    </HudButton>
+                    </HudIconButton>
                 )}
-                <HudButton
+                <HudIconButton
                     type="button"
                     className={cn(
                         ICON,
@@ -309,7 +309,7 @@ export function DmParticipantRow({
                     }}
                 >
                     <Trash2 className="size-3.5" />
-                </HudButton>
+                </HudIconButton>
             </div>
         </div>
     );

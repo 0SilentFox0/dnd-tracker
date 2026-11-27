@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ChevronsRight } from 'lucide-react';
 
 import { Portrait } from '@/components/battle/hud';
-import { HudButton } from '@/components/hud';
+import { HudButton, HudIconButton } from '@/components/hud';
 import { ROMAN_NUMERALS } from '@/lib/constants/spells';
 import { useBattleSceneData, useInitiativeDrag } from '@/lib/hooks/battle';
 import { useFlip, useReducedMotion } from '@/lib/hooks/common';
@@ -179,7 +179,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                 );
             })}
             {!onReorder && hasNext && (
-                <HudButton
+                <HudIconButton
                     type="button"
                     data-next-round-toggle=""
                     aria-pressed={showNext}
@@ -200,7 +200,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                             vertical && showNext && '-rotate-90'
                         )}
                     />
-                </HudButton>
+                </HudIconButton>
             )}
         </div>
     );

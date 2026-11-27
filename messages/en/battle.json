@@ -40,6 +40,7 @@
     "dieLabel": "Die {n} (d{sides})",
     "autoRoll": "Auto roll",
     "zoomAvatar": "{name}: full-size avatar",
+    "openDetails": "{name}: open stat card",
     "effects": {
       "collapse": "Collapse effects",
       "showAll": "Show all effects ({count})",
@@ -109,6 +110,7 @@
     "connected": "Connected",
     "connecting": "Connecting",
     "toCampaign": "To campaign",
+    "help": "Battle help",
     "complete": "Complete",
     "nextTurn": "Next turn",
     "nextTurnShort": "Next",
