@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { hasAnyValue, toChartData } from '../chart-data';
 import { formatBytes, formatCount, formatValue, splitAge } from '../format';
-import { hasAnyValue, toUplotData } from '../uplot-data';
 
 describe('format', () => {
     it('formats bytes and counts', () => {
@@ -26,9 +26,9 @@ describe('format', () => {
     });
 });
 
-describe('toUplotData', () => {
-    it('converts ms to seconds and keeps nulls', () => {
-        const data = toUplotData([
+describe('toChartData', () => {
+    it('keeps ms timestamps and nulls', () => {
+        const data = toChartData([
             [
                 { t: 1000, v: 1 },
                 { t: 2000, v: null },
@@ -39,15 +39,17 @@ describe('toUplotData', () => {
             ],
         ]);
 
-        expect(data).toEqual([
-            [1, 2],
-            [1, null],
-            [5, 6],
-        ]);
+        expect(data).toEqual({
+            times: [1000, 2000],
+            values: [
+                [1, null],
+                [5, 6],
+            ],
+        });
     });
 
     it('handles no series and detects empty data', () => {
-        expect(toUplotData([])).toEqual([[]]);
+        expect(toChartData([])).toEqual({ times: [], values: [] });
         expect(hasAnyValue([[{ t: 1, v: null }]])).toBe(false);
         expect(hasAnyValue([[{ t: 1, v: 0 }]])).toBe(true);
     });

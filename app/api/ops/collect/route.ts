@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { flushMetrics, gauge } from '@/lib/ops/metrics';
+import { pruneAdminData } from '@/lib/server/admin/prune';
 import {
     PROVIDER_ADAPTERS,
     type ProviderAdapter,
@@ -92,6 +93,11 @@ export async function POST(request: Request) {
             now.getUTCMinutes() === 0
                 ? rollupAndPrune(now).catch((err) =>
                       logger.warn('[ops] rollup failed', {}, err)
+                  )
+                : undefined,
+            now.getUTCMinutes() === 0
+                ? pruneAdminData(now).catch((err) =>
+                      logger.warn('[ops] admin prune failed', {}, err)
                   )
                 : undefined,
         ]);

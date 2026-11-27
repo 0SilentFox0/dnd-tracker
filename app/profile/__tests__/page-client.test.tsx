@@ -57,11 +57,7 @@ describe('ProfileClient', () => {
     it('shows loading without a session user', () => {
         state.user = null;
 
-        render(
-            <ProfileClient
-                profile={{ now: Date.now(), showOpsLink: false, summary }}
-            />
-        );
+        render(<ProfileClient profile={{ now: Date.now(), summary }} />);
 
         expect(screen.queryByTestId('editor')).toBeNull();
     });
@@ -69,34 +65,10 @@ describe('ProfileClient', () => {
     it('renders the editor and hint', () => {
         state.user = user;
 
-        render(
-            <ProfileClient
-                profile={{ now: Date.now(), showOpsLink: false, summary }}
-            />
-        );
+        render(<ProfileClient profile={{ now: Date.now(), summary }} />);
 
         expect(screen.getByTestId('hint-profile.avatar')).toBeTruthy();
         expect(screen.getByTestId('editor')).toBeTruthy();
-    });
-
-    it('shows the ops link only when allowed', () => {
-        state.user = user;
-
-        const { rerender } = render(
-            <ProfileClient
-                profile={{ now: Date.now(), showOpsLink: false, summary }}
-            />
-        );
-
-        expect(screen.queryByText('opsLink')).toBeNull();
-
-        rerender(
-            <ProfileClient
-                profile={{ now: Date.now(), showOpsLink: true, summary }}
-            />
-        );
-
-        expect(screen.getByText('opsLink')).toBeTruthy();
     });
 
     it('omits zero counts and a missing date from the summary', () => {
@@ -106,7 +78,6 @@ describe('ProfileClient', () => {
             <ProfileClient
                 profile={{
                     now: Date.now(),
-                    showOpsLink: false,
                     summary: { ...summary, characters: 2 },
                 }}
             />
@@ -120,11 +91,7 @@ describe('ProfileClient', () => {
     it('shows empty states with a link to campaigns', () => {
         state.user = user;
 
-        render(
-            <ProfileClient
-                profile={{ now: Date.now(), showOpsLink: false, summary }}
-            />
-        );
+        render(<ProfileClient profile={{ now: Date.now(), summary }} />);
 
         for (const link of screen.getAllByText('campaignsEmptyLink')) {
             expect(link.closest('a')?.getAttribute('href')).toBe('/campaigns');
@@ -139,7 +106,6 @@ describe('ProfileClient', () => {
             <ProfileClient
                 profile={{
                     now: Date.now(),
-                    showOpsLink: false,
                     summary: {
                         ...summary,
                         recentCampaigns: [
@@ -180,11 +146,7 @@ describe('ProfileClient', () => {
     it('signs out and switches account through the profile actions', () => {
         state.user = user;
 
-        render(
-            <ProfileClient
-                profile={{ now: Date.now(), showOpsLink: false, summary }}
-            />
-        );
+        render(<ProfileClient profile={{ now: Date.now(), summary }} />);
 
         fireEvent.click(screen.getByText('signOut'));
         fireEvent.click(screen.getByText('switchAccount'));

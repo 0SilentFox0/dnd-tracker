@@ -44,7 +44,7 @@ export function AlertList({
             <div className="space-y-2">
                 <h3 className="hud-sc text-sm">{t('active')}</h3>
                 {active.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground">
                         {t('noActive')}
                     </p>
                 ) : (
@@ -56,7 +56,10 @@ export function AlertList({
                             >
                                 <div className="min-w-0 space-y-1">
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <Badge variant={BADGE[r.status]} className="gap-1">
+                                        <Badge
+                                            variant={BADGE[r.status]}
+                                            className="gap-1"
+                                        >
                                             {r.status === 'crit' ? (
                                                 <OctagonAlert
                                                     className="size-3"
@@ -70,13 +73,13 @@ export function AlertList({
                                             )}
                                             {t(`status.${r.status}`)}
                                         </Badge>
-                                        <code className="text-xs">{r.id}</code>
+                                        <code className="text-sm">{r.id}</code>
                                     </div>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-base text-muted-foreground">
                                         {r.note}
                                     </p>
                                     {r.silencedUntil && (
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-sm text-muted-foreground">
                                             {mutedLabel(r.silencedUntil)}
                                         </p>
                                     )}
@@ -122,18 +125,18 @@ export function AlertList({
             <div className="space-y-2">
                 <h3 className="hud-sc text-sm">{t('history')}</h3>
                 {alerts.events.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground">
                         {t('noHistory')}
                     </p>
                 ) : (
-                    <ul className="divide-y divide-[var(--hud-rule)] border-y border-[var(--hud-rule)] text-sm">
+                    <ul className="divide-y divide-[var(--hud-rule)] border-y border-[var(--hud-rule)] text-base">
                         {alerts.events.map((e) => (
                             <li
                                 key={e.id}
                                 className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2"
                             >
                                 <time
-                                    className="text-xs text-muted-foreground"
+                                    className="text-sm text-muted-foreground"
                                     dateTime={e.at}
                                 >
                                     {format.dateTime(new Date(e.at), {
@@ -141,14 +144,14 @@ export function AlertList({
                                         timeStyle: 'medium',
                                     })}
                                 </time>
-                                <code className="text-xs">{e.rule}</code>
+                                <code className="text-sm">{e.rule}</code>
                                 <span>
                                     {t('transition', {
                                         from: t(`status.${e.from}`),
                                         to: t(`status.${e.to}`),
                                     })}
                                 </span>
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-sm text-muted-foreground">
                                     {e.notified ? t('notified') : t('silent')}
                                 </span>
                             </li>

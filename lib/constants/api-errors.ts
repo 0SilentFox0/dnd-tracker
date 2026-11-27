@@ -242,6 +242,8 @@ export const API_ERRORS = {
     DEMO_NOT_JOINABLE: 'errors.demoNotJoinable',
     ACCOUNT_DELETE_BLOCKED: 'errors.accountDeleteBlocked',
     ACCOUNT_EMAIL_MISMATCH: 'errors.accountEmailMismatch',
+    ADMIN_SELF_ACTION: 'errors.adminSelfAction',
+    ADMIN_AUTH_UNAVAILABLE: 'errors.adminAuthUnavailable',
     BUNDLE_INVALID: 'errors.bundleInvalid',
     BUNDLE_TOO_LARGE: 'errors.bundleTooLarge',
     AI_NOT_CONFIGURED: 'errors.aiNotConfigured',

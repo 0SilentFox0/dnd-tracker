@@ -16,6 +16,7 @@ export default function robots(): MetadataRoute.Robots {
                 '/settings/',
                 '/dev/',
                 '/ops',
+                '/admin',
             ],
         },
         sitemap: `${SITE_URL}/sitemap.xml`,

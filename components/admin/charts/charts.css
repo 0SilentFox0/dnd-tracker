@@ -1,0 +1,14 @@
+.admin-chart {
+    --c1: var(--hud-accent);
+    --c2: #4f8fe0;
+    --c3: #1fa882;
+    --c4: #e0703a;
+    --c5: #8a7be6;
+}
+
+html[data-palette='parchment'] .admin-chart {
+    --c2: #2f6fc4;
+    --c3: #12805f;
+    --c4: #c4531f;
+    --c5: #6250d6;
+}

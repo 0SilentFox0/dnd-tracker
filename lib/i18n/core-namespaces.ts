@@ -67,7 +67,7 @@ const SITE_NAMESPACES = [
 
 const DM_NAMESPACES = ['contentCopy'] as const;
 
-const OPS_NAMESPACES = ['ops'] as const;
+const OPS_NAMESPACES = ['ops', 'admin'] as const;
 
 type CoreNamespace =
     | (typeof DM_NAMESPACES)[number]

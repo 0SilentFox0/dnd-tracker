@@ -29,6 +29,8 @@ model User {
   acquaintanceNotes   AcquaintanceNote[]
   soundLibraryItems   SoundLibraryItem[]
   soundPresets        SoundPreset[]
+  access              UserAccess[]
+  activityDays        UserActivityDay[]
 
   @@map("users")
 }
@@ -1908,4 +1910,56 @@ model OpsAlertEvent {
   @@index([at])
   @@index([rule, at])
   @@map("ops_alert_events")
+}
+
+model UserAccess {
+  userId    String
+  ip        String
+  country   String?
+  device    String?
+  firstSeen DateTime @default(now())
+  lastSeen  DateTime @default(now())
+  days      Int      @default(1)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, ip])
+  @@index([ip])
+  @@index([lastSeen])
+  @@map("user_access")
+}
+
+model UserActivityDay {
+  userId String
+  day    DateTime @db.Date
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, day])
+  @@index([day])
+  @@map("user_activity_days")
+}
+
+model AccountDeletion {
+  id             String   @id @default(cuid())
+  deletedAt      DateTime @default(now())
+  by             String // 'self' | 'admin'
+  accountAgeDays Int
+  campaigns      Int
+  emailHash      String?
+
+  @@index([deletedAt])
+  @@index([emailHash])
+  @@map("account_deletions")
+}
+
+model AdminAction {
+  id           String   @id @default(cuid())
+  at           DateTime @default(now())
+  adminUserId  String
+  action       String // 'ban' | 'unban' | 'signout' | 'delete'
+  targetUserId String
+  meta         Json     @default("{}")
+
+  @@index([targetUserId, at])
+  @@index([at])
+  @@map("admin_actions")
 }

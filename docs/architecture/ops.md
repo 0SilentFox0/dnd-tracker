@@ -106,9 +106,9 @@ Findings (checked 2026-11-24 against the public docs):
 
 `sendAlert` (`lib/server/ops/notify.ts`): Telegram (`OPS_TELEGRAM_BOT_TOKEN`, `OPS_TELEGRAM_CHAT_ID`) and Resend (`RESEND_API_KEY`, `OPS_ALERT_EMAIL`, `OPS_ALERT_FROM`); a channel without env is `off`; failures never throw and secrets are never logged. `POST /api/ops/test-notify` (platform admin) returns per-channel results.
 
-## Dashboard (`/ops`)
+## Dashboard (`/admin/ops`)
 
-Owner-only page (`OPS_ADMIN_EMAILS` or `PLATFORM_ADMIN_USER_IDS`, `lib/utils/api/ops-access.ts`; the profile page shows an `/ops` link to the same set). `app/ops/layout.tsx` and `page.tsx` both call `assertOpsAdmin` (`lib/server/ops/page-guard.ts`): layouts and pages render in parallel, so the page must not rely on the layout's `notFound()` before it reads data. A non-owner gets 404; `robots.ts` disallows `/ops`, the layout sets `noindex`. Namespace `ops` (`OPS_NAMESPACES` in `lib/i18n/core-namespaces.ts`), not part of any campaign scope.
+Owner-only tab of the admin panel ([admin.md](admin.md); `/ops` redirects to `/admin/ops`). Access is `isAdmin` (`OPS_ADMIN_EMAILS` or `PLATFORM_ADMIN_USER_IDS`, `lib/utils/api/admin-access.ts`; `isOpsAdmin` is an alias; the header shows an admin link to the same set). `app/admin/layout.tsx` and the page both call `assertAdmin` (`lib/server/admin/page-guard.ts`, `assertOpsAdmin` is an alias): layouts and pages render in parallel, so the page must not rely on the layout's `notFound()` before it reads data. A non-owner gets 404; `robots.ts` disallows `/admin`, the layout sets `noindex`. Namespace `ops` (`OPS_NAMESPACES` in `lib/i18n/core-namespaces.ts`), not part of any campaign scope.
 
 Read API (all `requirePlatformAdmin`, 404 for others, `privateJson`, `force-dynamic`):
 
@@ -117,7 +117,7 @@ Read API (all `requirePlatformAdmin`, 404 for others, `privateJson`, `force-dyna
 - `GET /api/ops/alerts?limit=`: every rule with its state, plus the last transitions. `POST /api/ops/alerts/[rule]/mute` `{ minutes: 0 | 60 | 1440 }` writes `silencedUntil` (0 clears it; an unknown rule is 404).
 - `GET /api/ops/db-top`: top 10 `pg_stat_statements` by total time (query text cut to 200 chars) or `available: false`, plus open transactions longer than 5 s (duration, state and wait type only, no query text).
 
-Client: `lib/api/ops.ts` -> `lib/hooks/ops/` (`opsKeys`; summary, series, alerts poll every 15 s with `refetchIntervalInBackground: false`, so a hidden tab stops) -> `components/ops/*`. One series request per chart group (`CHART_GROUPS` in `lib/ops/chart-groups.ts`, which also holds the provider panel links). `UplotChart` is loaded with `next/dynamic` (`ssr: false`) so `uplot` and its CSS stay in the `/ops` chunk. Add a chart: a row in `CHART_GROUPS` plus `charts.items.*` / `charts.series.*` keys in `messages/{uk,en}/ops.json` (a test checks both).
+Client: `lib/api/ops.ts` -> `lib/hooks/ops/` (`opsKeys`; summary, series, alerts poll every 15 s with `refetchIntervalInBackground: false`, so a hidden tab stops) -> `components/ops/*`. One series request per chart group (`CHART_GROUPS` in `lib/ops/chart-groups.ts`, which also holds the provider panel links). Charts are Recharts via the shared `components/admin/charts` (`TimeSeriesChart`, `ChartPanel`; the Recharts view is loaded with `next/dynamic`, `ssr: false`), series colors come from `--hud-*` tokens in `charts.css`; `components/ops/TimeSeriesChart.tsx` maps a `ChartDef` onto it. Add a chart: a row in `CHART_GROUPS` plus `charts.items.*` / `charts.series.*` keys in `messages/{uk,en}/ops.json` (a test checks both).
 
 Live check data: `scripts/ops/seed-fake-metrics.ts` (local database only, refuses any other host; always wipes the ops tables first, `--clean` only wipes).
 

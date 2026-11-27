@@ -3,6 +3,7 @@ import type abilityEditor from './messages/uk/abilityEditor.json';
 import type abilityRegistry from './messages/uk/abilityRegistry.json';
 import type abilityText from './messages/uk/abilityText.json';
 import type acquaintances from './messages/uk/acquaintances.json';
+import type admin from './messages/uk/admin.json';
 import type ai from './messages/uk/ai.json';
 import type artifacts from './messages/uk/artifacts.json';
 import type assistant from './messages/uk/assistant.json';
@@ -149,6 +150,7 @@ declare module 'next-intl' {
             battleSetup: typeof battleSetup;
             battleLog: typeof battleLog;
             battleActions: typeof battleActions;
+            admin: typeof admin;
             ops: typeof ops;
         };
     }

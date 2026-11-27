@@ -102,6 +102,7 @@
     "campaignOverview": "Огляд кампанії",
     "npcHeroes": "NPC Герої",
     "myCharacter": "Мій персонаж",
+    "adminLink": "Адмін-панель",
     "profile": "Профіль",
     "help": "Довідка",
     "password": "Пароль",
@@ -271,7 +272,6 @@
       "tooLarge": "Зображення більше за 15 МБ",
       "failed": "Не вдалося оновити фото"
     },
-    "opsLink": "Дашборд Ops",
     "sections": {
       "account": "Обліковий запис"
     }

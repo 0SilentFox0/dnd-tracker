@@ -25,5 +25,6 @@ Details that used to live in `CLAUDE.md`. Read the file of the subsystem you are
 | [i18n.md](i18n.md) | Мультимовність uk/en: next-intl, потік мови, лендинг `/` і `/en`, ESLint-храповик, перенесення доменів |
 | [soundboard.md](soundboard.md) | Саундборд DM: `campaign_sounds`, вбудований реєстр `/sfx`, подія `soundboard-play` у sync-хуках, ліміти |
 | [ops.md](ops.md) | Ops: метрики й таблиці `ops_*`, буфер/flush, колектор `/api/ops/collect`, правила алертів і стани, watchdog, адаптери провайдерів, нотифікатори, env і чекліст власника |
+| [admin.md](admin.md) | Адмін-панель `/admin`: таблиці `user_access`/`user_activity_days`/`account_deletions`/`admin_actions` і ретеншн, збір активності в proxy, API, дії бан/видалення та ліміт JWT, фолбек `auth`-схеми, env `ADMIN_HASH_SECRET` |
 
 The folder-by-folder overview (in Ukrainian) is `ARCHITECTURE.md` in the repo root. When a subsystem changes, update its file here in the same branch.

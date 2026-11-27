@@ -628,5 +628,7 @@
   "battleMapHexSquareOnly": "Textures are not available on hex maps",
   "battleMapGridLocked": "The grid type of a map cannot be changed after creation",
   "accountDeleteBlocked": "Your templates are used by other people's campaigns, so the account cannot be deleted yet",
-  "accountEmailMismatch": "The email does not match your account"
+  "accountEmailMismatch": "The email does not match your account",
+  "adminSelfAction": "This action cannot be applied to your own account",
+  "adminAuthUnavailable": "The auth service is unavailable"
 }

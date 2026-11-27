@@ -5,8 +5,8 @@ const { getAuthUserOptional } = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/auth', () => ({ getAuthUserOptional }));
-vi.mock('@/lib/utils/api/ops-access', () => ({
-    isOpsAdmin: (u: { id: string }) => u.id === 'owner',
+vi.mock('@/lib/utils/api/admin-access', () => ({
+    isAdmin: (u: { id: string }) => u.id === 'owner',
 }));
 
 import { requirePlatformAdmin } from '../require-platform-admin';
