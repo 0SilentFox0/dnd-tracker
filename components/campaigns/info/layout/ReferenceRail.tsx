@@ -103,7 +103,7 @@ export function ReferenceRail({ filters, counts }: ReferenceRailProps) {
                             onClick={() => section.set(value)}
                             className={cn(
                                 HUD_CHIP_CLASS,
-                                'gap-2 xl:h-9 xl:justify-between',
+                                'gap-2 xl:h-10 xl:justify-between',
                                 active && HUD_CHIP_ACTIVE_CLASS
                             )}
                         >

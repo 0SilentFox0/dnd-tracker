@@ -140,7 +140,7 @@ export function SheetIdentityPanel({
                                     {i > 0 && (
                                         <span
                                             aria-hidden
-                                            className="px-1 text-hud-line lg:px-2"
+                                            className="px-1 text-hud-faint lg:px-2"
                                         >
                                             ·
                                         </span>
@@ -155,7 +155,7 @@ export function SheetIdentityPanel({
                                 </span>
                             ))}
                         </p>
-                        <h1 className="hud-title text-2xl leading-none text-balance [overflow-wrap:anywhere] text-hud-ink lg:text-[clamp(40px,4.4vw,60px)] lg:leading-[.95]">
+                        <h1 className="hud-title text-2xl leading-none text-balance [overflow-wrap:anywhere] text-hud-ink lg:text-[56px] lg:leading-[.95]">
                             {shown.name}
                         </h1>
                         {lead && (

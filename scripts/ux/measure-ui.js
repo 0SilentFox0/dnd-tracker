@@ -113,6 +113,8 @@
     tally(sizes, px, len);
     tally(fams, s.fontFamily.split(",")[0].replace(/["']/g, "").trim(), len);
 
+    if (el.closest('[aria-hidden="true"]')) continue;
+
     const bg = bgOf(el);
 
     if (!bg) { skippedGradient++; continue; }
@@ -151,7 +153,7 @@
 
     if (painted && s.borderRadius !== "0px" && r.width * r.height > 0) tally(radii, s.borderRadius, 1);
 
-    if (el.matches('button, [role=button], a[data-slot=button]')) tally(heights, Math.round(r.height), 1);
+    if (el.matches('button, [role=button], a[data-slot=button]') && !el.matches('[data-slot=accordion-trigger]')) tally(heights, Math.round(r.height), 1);
   }
 
   const obj = (m) => Object.fromEntries([...m].sort((a, b) => a[0] - b[0] || 0));

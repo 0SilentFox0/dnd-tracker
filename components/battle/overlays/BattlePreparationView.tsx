@@ -51,7 +51,7 @@ export function BattlePreparationView({
                         {
                             label: ts('allies'),
                             value: alliesCount,
-                            color: 'text-[#8fb0d0]',
+                            color: 'text-hud-info',
                         },
                         {
                             label: ts('enemies'),

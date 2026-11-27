@@ -36,7 +36,7 @@ interface SpellCardProps {
     'data-tour'?: string;
 }
 
-const ICON_BTN = 'size-7 shrink-0 text-hud-muted hover:text-hud-ink';
+const ICON_BTN = 'shrink-0 text-hud-muted hover:text-hud-ink';
 
 export function SpellCard({
     spell,
@@ -114,7 +114,7 @@ export function SpellCard({
                     <div className="-mt-1 -mr-1 flex shrink-0">
                         <Button
                             variant="ghost"
-                            size="icon"
+                            size="icon-sm"
                             className={ICON_BTN}
                             asChild
                         >
@@ -129,7 +129,7 @@ export function SpellCard({
                         {spell.spellGroup && (
                             <Button
                                 variant="ghost"
-                                size="icon"
+                                size="icon-sm"
                                 className={ICON_BTN}
                                 onClick={() => onRemoveFromGroup?.(spell.id)}
                                 aria-label={t('removeFromGroup')}
@@ -142,7 +142,7 @@ export function SpellCard({
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="ghost"
-                                    size="icon"
+                                    size="icon-sm"
                                     className={ICON_BTN}
                                     aria-label={t('moveToGroup')}
                                     title={t('moveToGroup')}
@@ -174,7 +174,7 @@ export function SpellCard({
                 )}
             </div>
 
-            <p className="line-clamp-2 flex-1 text-xs text-hud-muted">
+            <p className="line-clamp-2 flex-1 text-sm text-hud-muted">
                 {spell.description}
             </p>
 
@@ -184,15 +184,15 @@ export function SpellCard({
                 <GroupIcon className="size-3 shrink-0" />
                 <span className="truncate">{groupName}</span>
                 <code
-                    className="ml-auto max-w-[45%] truncate font-mono text-xs"
+                    className="ml-auto max-w-[45%] truncate text-xs"
                     title={spell.id}
                 >
                     {copied ? t('copied') : spell.id}
                 </code>
                 <Button
                     variant="ghost"
-                    size="icon"
-                    className="size-6 shrink-0 text-hud-muted"
+                    size="icon-sm"
+                    className="shrink-0 text-hud-muted"
                     onClick={handleCopyId}
                     aria-label={copied ? t('copied') : t('copyId')}
                     title={copied ? t('copied') : t('copyId')}
