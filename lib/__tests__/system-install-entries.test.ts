@@ -11,6 +11,10 @@ import {
 
 // reach lookup only through client-safe reads (undefined/false before install); no root on static pages
 const STATIC_SAFE = [
+    'app/admin/page.tsx',
+    'app/admin/security/page.tsx',
+    'app/admin/users/[id]/page.tsx',
+    'app/admin/users/page.tsx',
     'app/(auth)/forgot-password/page.tsx',
     'app/(auth)/reset-password/page.tsx',
     'app/(auth)/sign-in/[[...sign-in]]/page.tsx',
