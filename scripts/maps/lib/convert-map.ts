@@ -50,6 +50,48 @@ const sortedUnion = (a: readonly string[] | undefined, b: Iterable<string>) =>
     [...new Set([...(a ?? []), ...b])].sort((x, y) => x.localeCompare(y));
 
 function tileLayersOf(chunks: ChunkRow[]): ChunkTileLayers {
+    const tileLayers: ChunkTileLayers = {};
+
+    for (const c of chunks)
+        if (isRecord(c.tileLayers))
+            tileLayers[chunkKey(c.cx, c.cy)] = c.tileLayers;
+
+    return tileLayers;
+}
+
+/** Objects that used to block via tile derivation must block through the header once the layer is gone. */
+function objectsReport(
+    tileLayers: ChunkTileLayers,
+    header: BattleMapFull['map'],
+    existing: MapArtStamp[]
+): { report: ObjectsReport; header: Record<string, unknown> } {
+    const converted = objectsToStamps(tileLayers, header, existing);
+
+    const cells = stampCells(converted.stamps, header);
+
+    const nextBlocked = sortedUnion(header.blocked, cells.blocked);
+
+    const nextSight = sortedUnion(header.sightBlocked, cells.sight);
+
+    return {
+        report: {
+            ...converted,
+            total: countObjectCells(tileLayers),
+            newBlocked: nextBlocked.length - (header.blocked?.length ?? 0),
+        },
+        header: {
+            ...header,
+            blocked: nextBlocked,
+            ...(nextSight.length > 0 && { sightBlocked: nextSight }),
+        },
+    };
+}
+
+/** Null when the map has no ground/wallfill to convert. */
+export function buildConversion(
+    headerJson: unknown,
+    chunks: ChunkRow[]
+): Conversion | null {
     const tileLayers = tileLayersOf(chunks);
 
     if (!hasFloorLayers(tileLayers)) return null;

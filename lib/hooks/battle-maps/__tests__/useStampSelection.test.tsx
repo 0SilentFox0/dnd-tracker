@@ -165,7 +165,7 @@ describe('useStampSelection handles', () => {
         sel.onPointerDown({ x: 110, y: 110 });
         sel.onPointerMove({ x: 120, y: 110 });
 
-        const keys = api.update.mock.calls.map((c) => c[2]);
+        const keys = (api.update as unknown as Mock).mock.calls.map((c: unknown[]) => c[2]);
 
         expect(new Set(keys).size).toBe(2);
     });

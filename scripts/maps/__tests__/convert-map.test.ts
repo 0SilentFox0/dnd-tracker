@@ -42,10 +42,13 @@ const header = { cols: 10, rows: 10 };
 const edgeData = encodeEdges({ walls: ['2:2:e'] }, 10, 10)['0:0'];
 
 function makeTx(over: { count?: number; art?: unknown } = {}) {
+    const update = vi.fn();
+
     return {
         battleMapArt: {
             findUnique: vi.fn(async () => over.art ?? null),
             create: vi.fn(),
+            update,
         },
         battleMap: {
             findUniqueOrThrow: vi.fn(async () => ({ header, mapVersion: 4 })),
@@ -192,8 +195,6 @@ describe('applyObjectsTx', () => {
     it('bumps sceneVersion, strips objects and writes header mechanics', async () => {
         const tx = makeTx({ art: artRow(null) });
 
-        Object.assign(tx.battleMapArt, { update: vi.fn() });
-
         const done = await applyObjectsTx(tx as never, 'm1');
 
         expect(done?.objects.stamps).toHaveLength(1);
@@ -213,8 +214,6 @@ describe('applyObjectsTx', () => {
 
     it('skips baked art unless includeBaked', async () => {
         const tx = makeTx({ art: artRow(2) });
-
-        Object.assign(tx.battleMapArt, { update: vi.fn() });
 
         expect(await applyObjectsTx(tx as never, 'm1')).toBeNull();
         expect(tx.battleMap.updateMany).not.toHaveBeenCalled();
