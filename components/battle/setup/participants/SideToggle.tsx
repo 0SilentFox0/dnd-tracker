@@ -13,7 +13,7 @@ interface SideToggleProps {
     onChange: (side: ParticipantSide) => void;
     label: string;
     size?: 'sm' | 'md';
-    fill?: boolean;
+    layout?: 'fill' | 'compact';
 }
 
 export function SideToggle({
@@ -21,7 +21,7 @@ export function SideToggle({
     onChange,
     label,
     size = 'md',
-    fill = false,
+    layout,
 }: SideToggleProps) {
     const t = useTranslations('battleSetup.participants');
 
@@ -31,7 +31,11 @@ export function SideToggle({
         <div
             className={cn(
                 size === 'sm' && '[&_button]:h-8 [&_button]:px-2',
-                fill && 'w-full [&_button]:flex-1 [&>*]:w-full'
+                layout &&
+                    'w-full [&_button]:h-9 [&_button]:justify-center [&_button]:rounded-none [&_button]:border-0 [&_button]:shadow-none [&_button[aria-checked=true]]:bg-white/10 [&>*]:w-full [&>*]:gap-0',
+                layout === 'fill' && '[&_button]:flex-1',
+                layout === 'compact' &&
+                    'w-auto shrink-0 [&_button]:w-9 [&_button]:px-0 [&>*]:w-auto'
             )}
         >
             <HudSegmented

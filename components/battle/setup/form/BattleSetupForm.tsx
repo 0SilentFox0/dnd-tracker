@@ -10,7 +10,7 @@ import { BattleMapStep } from '../map/BattleMapStep';
 import { AutopickCard } from '../participants/AutopickCard';
 import { ParticipantCatalog } from '../participants/ParticipantCatalog';
 import { RosterBoard } from '../participants/RosterBoard';
-import { RosterPhoneBar, sideCounts } from '../participants/RosterPhoneBar';
+import { RosterPhoneBar } from '../participants/RosterPhoneBar';
 import { SetupHeader } from './SetupHeader';
 import { SetupSummary } from './SetupSummary';
 
@@ -125,7 +125,7 @@ function ParticipantsTab({
 
     return (
         <div inert={locked} className="min-w-0">
-            <div className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,1.35fr)_minmax(22rem,1fr)]">
+            <div className="grid min-w-0 gap-4 md:grid-cols-2">
                 <div className="flex min-h-[24rem] min-w-0 flex-col md:h-[calc(100dvh-18rem)]">
                     <ParticipantCatalog
                         data={data}
@@ -175,8 +175,6 @@ function BattleSetupLayout({
 
     const tActions = useTranslations('common.actions');
 
-    const tParticipants = useTranslations('battleSetup.participants');
-
     const isEdit = !!battleId;
 
     if (setup.loading) return <SetupLoading isEdit={isEdit} />;
@@ -193,13 +191,10 @@ function BattleSetupLayout({
 
     const map = mapSummary(setup);
 
-    const counts = sideCounts(participants.list);
-
     const tabs: HudTab<BattleFormTabId>[] = [
         {
             id: BATTLE_FORM_TAB.participants,
             label: t('tabs.participants'),
-            badge: tParticipants('versus', counts),
             content: (
                 <ParticipantsTab
                     setup={setup}

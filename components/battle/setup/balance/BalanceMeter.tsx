@@ -55,8 +55,7 @@ function FairMeter({ fair }: { fair: FairBalance | null }) {
 
     const verdict = fair?.scaling.verdict;
 
-    if (!fair || !verdict || verdict === 'empty')
-        return <p className="text-sm text-hud-muted">{t('empty')}</p>;
+    if (!fair || !verdict || verdict === 'empty') return null;
 
     const even = verdict === 'even';
 
@@ -107,7 +106,7 @@ function XpMeter({ xp }: { xp: XpBudgetResult | null }) {
 
     const tDifficulty = useTranslations('battleTerms.encounterDifficulty');
 
-    if (!xp) return <p className="text-sm text-hud-muted">{t('empty')}</p>;
+    if (!xp) return null;
 
     return (
         <div className="min-w-0 flex-1 space-y-0.5 text-xs">
@@ -132,6 +131,15 @@ function XpMeter({ xp }: { xp: XpBudgetResult | null }) {
 
 export function BalanceMeter({ kind, fair, xp, units }: BalanceMeterProps) {
     const t = useTranslations('battleSetup.balance');
+
+    const empty =
+        kind === 'xp'
+            ? !xp
+            : !fair ||
+              !fair.scaling.verdict ||
+              fair.scaling.verdict === 'empty';
+
+    if (empty) return null;
 
     return (
         <div

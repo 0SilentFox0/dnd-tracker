@@ -82,7 +82,7 @@ function SideColumn({
                     )}
                 </p>
             ) : (
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-1.5">
+                <div className="grid grid-cols-[repeat(auto-fill,8.5rem)] items-start gap-3">
                     {rows.map(({ member, entity }) => (
                         <SetupParticipantRow
                             key={member.id}

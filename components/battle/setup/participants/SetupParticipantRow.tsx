@@ -36,35 +36,31 @@ export function SetupParticipantRow({
     return (
         <div
             className={cn(
-                'relative flex min-w-0 flex-col items-center gap-1.5 rounded-lg bg-hud-panel-2 p-2',
+                'relative flex min-w-0 flex-col overflow-hidden rounded-xl border bg-hud-panel-2 transition-opacity',
+                isAlly
+                    ? 'border-hud-accent shadow-[0_0_0_1px_var(--hud-accent)]'
+                    : 'border-hud-crimson shadow-[0_0_0_1px_var(--hud-crimson)]',
                 reserved > 0 && 'opacity-60'
             )}
         >
-            <span
-                aria-hidden
-                className={cn(
-                    'absolute inset-x-3 top-0 h-[3px] rounded-full',
-                    isAlly ? 'bg-hud-accent' : 'bg-hud-crimson'
-                )}
-            />
-            <div className="flex w-full min-w-0 flex-col items-center gap-1">
+            <div className="flex w-full min-w-0 flex-col items-center gap-2 px-2.5 pt-2.5 pb-2">
                 <EntityIcon
                     src={avatar}
                     name={name}
                     alt=""
                     size={160}
-                    className="aspect-square h-auto w-full rounded-lg"
+                    className="aspect-square h-auto w-full rounded-lg bg-black/30 ring-1 ring-hud-rule"
                 />
-                <span className="w-full truncate text-center text-sm font-medium">
+                <span className="w-full truncate text-center text-sm font-semibold">
                     {name}
                     {quantity != null && quantity > 1 && (
-                        <span className="ml-1 text-xs text-muted-foreground">
+                        <span className="ml-1 text-xs font-normal text-muted-foreground">
                             ×{quantity}
                         </span>
                     )}
                 </span>
             </div>
-            <div className="flex w-full items-center gap-1">
+            <div className="flex w-full items-center gap-1 border-t border-hud-rule p-1.5">
                 {reserved > 0 && (quantity ?? 1) > 1 && (
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Button

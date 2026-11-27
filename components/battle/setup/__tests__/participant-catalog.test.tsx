@@ -50,7 +50,7 @@ describe('CatalogRow', () => {
         ]);
     });
 
-    it('клік по рядку: герой -> союзники, істота -> вороги, повторний -> remove', () => {
+    it('клік по рядку: герой -> союзники, істота -> вороги, повторний клік нічого не видаляє', () => {
         const hero = rowActions();
 
         const { rerender } = render(
@@ -90,10 +90,11 @@ describe('CatalogRow', () => {
             />
         );
         fireEvent.click(screen.getByRole('button', { name: /^С Скелет$/ }));
-        expect(unit.remove).toHaveBeenCalledTimes(1);
+        expect(unit.remove).not.toHaveBeenCalled();
+        expect(unit.add).toHaveBeenCalledTimes(1);
     });
 
-    it('обраний: сегмент змінює сторону, степер кількість, ✕ прибирає', () => {
+    it('обраний: сегмент змінює сторону, степер кількість, без ✕, повторний клік по активній стороні видаляє', () => {
         const actions = rowActions();
 
         render(
@@ -115,7 +116,13 @@ describe('CatalogRow', () => {
         fireEvent.click(screen.getByLabelText(/participants\.quantityLess/));
         expect(actions.setQuantity.mock.calls).toEqual([[4], [2]]);
 
-        fireEvent.click(screen.getByLabelText(/participants\.remove/));
+        expect(screen.queryByLabelText(/participants\.remove/)).toBeNull();
+
+        fireEvent.click(
+            screen.getByRole('radio', {
+                name: 'battleSetup.participants.enemy',
+            })
+        );
         expect(actions.remove).toHaveBeenCalledTimes(1);
     });
 

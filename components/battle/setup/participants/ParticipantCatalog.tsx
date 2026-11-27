@@ -79,7 +79,7 @@ function CatalogGroup({
             triggerClassName="hud-sc min-h-9 py-1 text-[13px] tracking-[.06em] text-hud-muted"
             className="border-b-0"
         >
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-1.5 pb-2">
+            <div className="grid grid-cols-[repeat(auto-fill,8.5rem)] items-start gap-3 pb-3">
                 {children}
             </div>
         </Disclosure>
@@ -212,6 +212,7 @@ export function ParticipantCatalog({
             {tab === 'units' && chips.length > 1 && (
                 <HudChipTabs
                     ariaLabel={t('raceFilter')}
+                    wrap
                     items={chips.map((chip) => ({
                         key: chip.key,
                         active: chip.active,
